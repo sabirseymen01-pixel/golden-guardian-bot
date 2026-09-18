@@ -1,7 +1,10 @@
 import logging
 from datetime import timedelta
 import sqlite3
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -10,6 +13,18 @@ from telegram.ext import (
     CallbackQueryHandler,
     filters,
 )
+
+# --- RENDER WEB SERVİS İÇİN MİNİ HTTP SUNUCUSU (Çökmesini Önler) ---
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Golden Guardian Bot is active and running!")
+
+def start_dummy_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
+    server.serve_forever()
 
 # --- BOT TOKEN VE YAPILANDIRMA ---
 TOKEN = "8841883539:AAF3FHH_Ibdk4ypEcOusRaLwOyTEq6rpwUw"
@@ -25,7 +40,6 @@ async def mesaj_temizle_gorevi(context: ContextTypes.DEFAULT_TYPE):
         pass
 
 def bot_mesajini_sil_planla(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int, saniye: float = 10.0):
-    """Botun gönderdiği her mesajı 10 saniye sonra silmek üzere kuyruğa ekler"""
     context.job_queue.run_once(
         mesaj_temizle_gorevi,
         saniye,
@@ -109,18 +123,16 @@ async def yonetici_mi(update: Update, user_id: int) -> bool:
     except Exception:
         return False
 
-# --- KÖPRÜ MİMARİSİ: HEDEF KULLANICI ÇÖZÜMLEME ---
+# --- HEDEF KULLANICI ÇÖZÜMLEME ---
 async def hedef_kullanici_bul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     hedef_id = None
     aciklama = ""
 
-    # 1. Mesaja yanıt (reply) verilmiş mi?
     if update.message.reply_to_message:
         hedef_user = update.message.reply_to_message.from_user
         return hedef_user.id, f"Yanıtlanan kullanıcı ({hedef_user.full_name} - {hedef_user.id})"
 
-    # 2. Komut yanında argüman (ID veya @etiket) verilmiş mi?
     if context.args:
         girdi = context.args[0]
         aciklama = girdi
@@ -274,21 +286,18 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
 
-# --- KOMUT: /defol (Banlama Komutu) ---
+# --- KOMUTLAR ---
 async def defol_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
         await update.message.delete()
     except Exception:
         pass
-
     if not await yonetici_mi(update, update.message.from_user.id):
         return
-
     hedef_id, aciklama = await hedef_kullanici_bul(update, context)
     if not hedef_id:
         return
-
     try:
         await chat.ban_member(hedef_id)
         log_kaydet("BANLAMA (/defol)", f"Hedef ID: {hedef_id} ({aciklama}) gruptan banlandı.")
@@ -297,21 +306,17 @@ async def defol_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         log_kaydet("HATA", f"Banlama hatası: {e}")
 
-# --- KOMUT: /itaat (Mute / Susturma Komutu) ---
 async def itaat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
         await update.message.delete()
     except Exception:
         pass
-
     if not await yonetici_mi(update, update.message.from_user.id):
         return
-
     hedef_id, aciklama = await hedef_kullanici_bul(update, context)
     if not hedef_id:
         return
-
     try:
         await chat.restrict_member(
             hedef_id,
@@ -320,80 +325,63 @@ async def itaat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         uyari_arttir(hedef_id)
         log_kaydet("SUSTURMA (/itaat)", f"Hedef ID: {hedef_id} ({aciklama}) 10 dakika susturuldu.")
-        
         msj = await context.bot.send_message(chat.id, f"🤐 İtaat sağlandı! Hedef kullanıcı 10 dakika süreyle susturuldu (`{aciklama}`).", parse_mode="Markdown")
         bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
     except Exception as e:
         log_kaydet("HATA", f"Susturma hatası: {e}")
 
-# --- KOMUT: /kralice (Mute Kaldırma - Kesin Çözüm: unban_chat_member ile Kısıtlamaları Sıfırlama) ---
 async def kralice_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
         await update.message.delete()
     except Exception:
         pass
-
     if not await yonetici_mi(update, update.message.from_user.id):
         return
-
     hedef_id, aciklama = await hedef_kullanici_bul(update, context)
     if not hedef_id:
         return
-
     try:
-        # Telegram gruplarında susturmayı kaldırmanın en kesin ve kusursuz yolu unban_chat_member metotudur.
-        # Bu yöntem kullanıcıyı banlamaz, gruptaki tüm geçici susturma ve kısıtlamalarını anında sıfırlar.
         await chat.unban_member(hedef_id, only_if_banned=False)
         uyari_sifirla(hedef_id)
         log_kaydet("MUTE KALDIRMA (/kralice)", f"Hedef ID: {hedef_id} ({aciklama}) mutesi kaldırıldı.")
-        
         msj = await context.bot.send_message(chat.id, f"✨ Kraliçenin fermanıyla hedefin susturulması kaldırıldı (`{aciklama}`).", parse_mode="Markdown")
         bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
     except Exception as e:
         log_kaydet("HATA", f"Mute kaldırma hatası: {e}")
 
-# --- KOMUT: /biat (Ban Kaldırma) ---
 async def biat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
         await update.message.delete()
     except Exception:
         pass
-
     if not await yonetici_mi(update, update.message.from_user.id):
         return
-
     hedef_id, aciklama = await hedef_kullanici_bul(update, context)
     if not hedef_id:
         return
-
     try:
         await chat.unban_member(hedef_id)
         log_kaydet("BAN KALDIRMA (/biat)", f"Hedef ID: {hedef_id} ({aciklama}) banı kaldırıldı.")
-        
         msj = await context.bot.send_message(chat.id, f"🕊️ Biat kabul edildi! Hedef kullanıcının yasağı başarıyla kaldırıldı (`{aciklama}`).", parse_mode="Markdown")
         bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
     except Exception as e:
         log_kaydet("HATA", f"Ban kaldırma hatası: {e}")
 
-# --- KOMUT: /istatistik ---
 async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
         await update.message.delete()
     except Exception:
         pass
-
     conn = sqlite3.connect("guardian_pro.db")
     cursor = conn.cursor()
     cursor.execute("SELECT SUM(uyari_sayisi), COUNT(user_id) FROM uyarilar")
     res = cursor.fetchone()
     conn.close()
-
     toplam_ihlal = res[0] if res and res[0] else 0
     toplam_cezali = res[1] if res and res[1] else 0
-
     metin = (
         "📊 **Golden Guardian - İstatistik Raporu**\n\n"
         f"• Toplam Cezalı/Uyarılı Üye: `{toplam_cezali}`\n"
@@ -405,9 +393,12 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # --- ANA UYGULAMA BAŞLATICI ---
 def main():
+    # Mini web sunucusunu arka planda başlat (Render'ı kandırmak için)
+    server_thread = threading.Thread(target=start_dummy_server, daemon=True)
+    server_thread.start()
+
     app = ApplicationBuilder().token(TOKEN).build()
 
-    # Komut ve Mesaj Handler'ları
     app.add_handler(CommandHandler("start", start_komutu))
     app.add_handler(CommandHandler("defol", defol_komutu))
     app.add_handler(CommandHandler("itaat", itaat_komutu))
@@ -415,13 +406,10 @@ def main():
     app.add_handler(CommandHandler("biat", biat_komutu))
     app.add_handler(CommandHandler("istatistik", istatistik_komutu))
     
-    # Buton tıklama yönetimi
     app.add_handler(CallbackQueryHandler(buton_yoneticisi))
-    
-    # Metin mesajları denetimi (Küfür, reklam filtresi)
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), mesaj_denetimi))
 
-    log_kaydet("SİSTEM", "Golden Guardian botu başarıyla başlatıldı ve çalışmaya hazır.")
+    log_kaydet("SİSTEM", "Golden Guardian botu web sunucusu eşliğinde başarıyla başlatıldı.")
     app.run_polling()
 
 if __name__ == "__main__":
