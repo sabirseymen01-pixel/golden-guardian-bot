@@ -26,8 +26,8 @@ def start_dummy_server():
     server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
     server.serve_forever()
 
-# --- BOT TOKEN VE YAPILANDIRMA ---
-TOKEN = "8841883539:AAF3FHH_Ibdk4ypEcOusRaLwOyTEq6rpwUw"
+# --- YENİ BOT TOKEN ---
+TOKEN = "8841883539:AAHErFMAotwTam_wV6ZFQiQnFjqygkt80zw"
 
 # --- OTOMATİK MESAJ TEMİZLEME FONKSİYONU (10 Saniye Garanti) ---
 async def mesaj_temizle_gorevi(context: ContextTypes.DEFAULT_TYPE):
@@ -393,7 +393,7 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # --- ANA UYGULAMA BAŞLATICI ---
 def main():
-    # Mini web sunucusunu arka planda başlat (Render'ı kandırmak için)
+    # Mini web sunucusunu arka planda başlat (Render port kontrolü için)
     server_thread = threading.Thread(target=start_dummy_server, daemon=True)
     server_thread.start()
 
@@ -409,7 +409,7 @@ def main():
     app.add_handler(CallbackQueryHandler(buton_yoneticisi))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), mesaj_denetimi))
 
-    log_kaydet("SİSTEM", "Golden Guardian botu web sunucusu eşliğinde başarıyla başlatıldı.")
+    log_kaydet("SİSTEM", "Golden Guardian botu yeni token ve web sunucusu eşliğinde başarıyla başlatıldı.")
     app.run_polling()
 
 if __name__ == "__main__":
