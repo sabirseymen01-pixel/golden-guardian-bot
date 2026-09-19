@@ -3,7 +3,6 @@ from datetime import timedelta
 import sqlite3
 import os
 import threading
-import requests
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
 from telegram.ext import (
@@ -15,7 +14,7 @@ from telegram.ext import (
     filters,
 )
 
-# --- RENDER PORT VE SAĞLIK KONTROL SUNUCUSU (Restart Döngüsünü Önler) ---
+# --- RENDER PORT VE SAĞLIK KONTROL SUNUCUSU (Harici modül gerektirmez) ---
 PORT = int(os.environ.get("PORT", 10000))
 
 class HealthCheckHandler(BaseHTTPRequestHandler):
@@ -34,17 +33,6 @@ def start_dummy_server():
         pass
 
 TOKEN = os.environ.get("BOT_TOKEN")
-
-# --- TELEGRAM SUNUCUSUNDAKİ ESKİ OTURUM KİLİDİNİ ZORLA KIRAN FONKSİYON ---
-def telegram_kilit_kirici(token):
-    if not token:
-        return
-    try:
-        # Webhook varsa sil ve takılı kalmış getUpdates kuyruğunu zorla temizle
-        requests.get(f"https://api.telegram.org/bot{token}/deleteWebhook?drop_pending_updates=true", timeout=10)
-        logging.info("Telegram sunucusundaki eski oturum kilidi başarıyla kırıldı.")
-    except Exception as e:
-        logging.error(f"Kilit kırma sırasında hata: {e}")
 
 # --- OTOMATİK MESAJ TEMİZLEME ---
 async def mesaj_temizle_gorevi(context: ContextTypes.DEFAULT_TYPE):
@@ -565,22 +553,20 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msj = await context.bot.send_message(chat.id, metin, parse_mode="Markdown")
     bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
 
-# --- ANA UYGULAMA VE KİLİT KIRICI BAŞLATICI ---
+# --- TEK ÖRNEK (SINGLETON) VE ÇAKIŞMASIZ BAŞLATICI ---
 def main():
     if not TOKEN:
         logger.error("HATA: BOT_TOKEN çevresel değişkeni bulunamadı! Render panelinde BOT_TOKEN ekleyin.")
         return
 
-    # 1. Render için HTTP Sağlık Kontrol Sunucusunu Başlat
+    # Render web servis port kısıtını karşılayan yerleşik mini HTTP sunucusu
     server_thread = threading.Thread(target=start_dummy_server, daemon=True)
     server_thread.start()
 
-    # 2. Telegram sunucusundaki eski oturum kilidini ve webhook çakışmasını zorla temizle
-    telegram_kilit_kirici(TOKEN)
-
-    # 3. Botu İnşa Et ve Başlat
+    # Telegram uygulamasını tek örnek olarak inşa et
     app = ApplicationBuilder().token(TOKEN).build()
 
+    # Handler Tanımlamaları
     app.add_handler(CommandHandler("start", start_komutu))
     app.add_handler(CommandHandler("defol", defol_komutu))
     app.add_handler(CommandHandler("itaat", itaat_komutu))
@@ -593,9 +579,9 @@ def main():
     app.add_handler(CallbackQueryHandler(buton_yoneticisi))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), mesaj_denetimi))
 
-    log_kaydet("SİSTEM", "Golden Guardian Pro kilit kırılarak başarıyla başlatıldı.")
+    log_kaydet("SİSTEM", "Golden Guardian Pro tek örnek (singleton) modunda başlatılıyor.")
     
-    # drop_pending_updates=True ile tertemiz polling başlat
+    # drop_pending_updates=True ile eski oturumlar otomatik çöpe atılır ve çakışma önlenir.
     app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
