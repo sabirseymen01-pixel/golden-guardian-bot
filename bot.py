@@ -234,7 +234,6 @@ async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         pass
 
-    # Grubu federasyon listesine otomatik kaydet
     grup_linki = f"t.me/{chat.username}" if chat.username else f"https://t.me/c/{str(chat.id).replace('-100','')}/1"
     conn = sqlite3.connect("guardian_pro.db")
     cursor = conn.cursor()
@@ -573,7 +572,9 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), mesaj_denetimi))
 
     log_kaydet("SİSTEM", "Golden Guardian Pro & Federasyon sistemi başarıyla başlatıldı.")
-    app.run_polling()
+    
+    # drop_pending_updates=True sayesinde arkada takılı kalmış eski Telegram bağlantıları temizlenir ve çakışma önlenir.
+    app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
     main()
