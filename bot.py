@@ -26,7 +26,8 @@ def start_dummy_server():
     server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
     server.serve_forever()
 
-TOKEN = os.environ.get("BOT_TOKEN")
+# --- GÜVENLİ VE HATASIZ TOKEN OKUMA (Render Environment Variables Uyumlu) ---
+TOKEN = os.environ.get("BOT_TOKEN") or os.environ.get("TOKEN")
 
 # --- OTOMATİK MESAJ TEMİZLEME FONKSİYONU (10 Saniye) ---
 async def mesaj_temizle_gorevi(context: ContextTypes.DEFAULT_TYPE):
@@ -70,14 +71,12 @@ def db_kur():
             detay TEXT
         )
     """)
-    # Federasyon Küresel Ban Tablosu
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS fed_banlar (
             user_id INTEGER PRIMARY KEY,
             sebep TEXT
         )
     """)
-    # Gruplar Arası Geçiş ve Bağlantı Tablosu
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS federasyon_gruplar (
             chat_id INTEGER PRIMARY KEY,
@@ -85,7 +84,6 @@ def db_kur():
             grup_linki TEXT
         )
     """)
-    # Zamanlanmış Medya / Metin Paylaşım Tablosu
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS zamanli_icerikler (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -180,7 +178,6 @@ async def mesaj_denetimi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     chat = update.effective_chat
 
-    # Federasyon Küresel Ban Kontrolü (İdam edilmiş kullanıcı)
     conn = sqlite3.connect("guardian_pro.db")
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM fed_banlar WHERE user_id = ?", (user.id,))
@@ -226,7 +223,7 @@ async def mesaj_denetimi(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 log_kaydet("HATA", f"Mesaj denetim hatası: {e}")
             break
 
-# --- ANA MENÜ VE YENİ ÖZELLİKLER (ARAYÜZ) ---
+# --- ANA MENÜ VE ARAYÜZ ---
 async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     chat = update.effective_chat
@@ -237,7 +234,6 @@ async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         pass
 
-    # Grubu federasyon listesine otomatik kaydet
     conn = sqlite3.connect("guardian_pro.db")
     cursor = conn.cursor()
     cursor.execute("INSERT OR REPLACE INTO federasyon_gruplar (chat_id, grup_adi, grup_linki) VALUES (?, ?, ?)", 
@@ -321,9 +317,7 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "menu_zamanlayici":
         metin = (
             "⏱️ **Zamanlı Medya ve Metin Yönetimi**\n\n"
-            "Botun belirli aralıklarla grup içine otomatik duyuru veya medya göndermesini sağlamak için:\n"
-            "• Veritabanı altyapısı hazırdır.\n"
-            "• Eklemek istediğiniz metinleri panelden ayarlayabilirsiniz."
+            "Botun belirli aralıklarla grup içine otomatik duyuru veya medya göndermesini sağlamak için veritabanı altyapısı hazırdır."
         )
         keyboard = [[InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")]]
         await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
@@ -441,7 +435,6 @@ async def kralice_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not hedef_id:
         return
     try:
-        # Sadece susturma kısıtlamalarını kaldırır, gruptan atma veya banlama yapmaz
         await chat.restrict_member(
             hedef_id,
             permissions=ChatPermissions(
@@ -478,7 +471,7 @@ async def biat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         log_kaydet("HATA", f"Ban kaldırma hatası: {e}")
 
-# --- FEDERASYON: /idam (Küresel Genel Ban) ---
+# --- FEDERASYON: /idam ---
 async def idam_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
@@ -505,7 +498,7 @@ async def idam_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         log_kaydet("HATA", f"İdam hatası: {e}")
 
-# --- FEDERASYON: /genelaf (Küresel Ban Kaldırma) ---
+# --- FEDERASYON: /genelaf ---
 async def genelaf_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
@@ -557,7 +550,7 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- ANA UYGULAMA BAŞLATICI ---
 def main():
     if not TOKEN:
-        logger.error("HATA: BOT_TOKEN çevresel değişkeni bulunamadı!")
+        logger.error("HATA: BOT_TOKEN (veya TOKEN) çevresel değişkeni bulunamadı! Lütfen Render panelinden Environment Variables ekleyin.")
         return
 
     server_thread = threading.Thread(target=start_dummy_server, daemon=True)
@@ -565,7 +558,6 @@ def main():
 
     app = ApplicationBuilder().token(TOKEN).build()
 
-    # Komut Kayıtları
     app.add_handler(CommandHandler("start", start_komutu))
     app.add_handler(CommandHandler("defol", defol_komutu))
     app.add_handler(CommandHandler("itaat", itaat_komutu))
