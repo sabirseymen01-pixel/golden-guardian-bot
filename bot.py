@@ -2,8 +2,6 @@ import logging
 from datetime import timedelta
 import sqlite3
 import os
-import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
 from telegram.ext import (
     ApplicationBuilder,
@@ -13,24 +11,6 @@ from telegram.ext import (
     CallbackQueryHandler,
     filters,
 )
-
-# --- RENDER PORT VE SAĞLIK KONTROL SUNUCUSU ---
-PORT = int(os.environ.get("PORT", 10000))
-
-class HealthCheckHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(b"Golden Guardian Pro Bot is running smoothly!")
-    def log_message(self, format, *args):
-        pass # Log kirliliğini önlemek için http loglarını susturuyoruz
-
-def start_dummy_server():
-    try:
-        server = HTTPServer(("0.0.0.0", PORT), HealthCheckHandler)
-        server.serve_forever()
-    except Exception:
-        pass
 
 TOKEN = os.environ.get("BOT_TOKEN")
 
@@ -553,20 +533,14 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msj = await context.bot.send_message(chat.id, metin, parse_mode="Markdown")
     bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
 
-# --- ANA UYGULAMA VE ÇAKIŞMASIZ POLLING BAŞLATICISI ---
+# --- SAF POLLING BAŞLATICISI (WEBHOOK YOK) ---
 def main():
     if not TOKEN:
-        logger.error("HATA: BOT_TOKEN çevresel değişkeni bulunamadı! Lütfen Render panelinde Environment Variables kısmına BOT_TOKEN ekleyin.")
+        logger.error("HATA: BOT_TOKEN çevresel değişkeni bulunamadı! Render panelinde Environment Variables kısmına BOT_TOKEN ekleyin.")
         return
 
-    # Web servis portunu karşılamak için dummy HTTP sunucusunu başlat
-    server_thread = threading.Thread(target=start_dummy_server, daemon=True)
-    server_thread.start()
-
-    # Telegram Uygulama İnşası
     app = ApplicationBuilder().token(TOKEN).build()
 
-    # Handler Tanımlamaları
     app.add_handler(CommandHandler("start", start_komutu))
     app.add_handler(CommandHandler("defol", defol_komutu))
     app.add_handler(CommandHandler("itaat", itaat_komutu))
@@ -579,9 +553,9 @@ def main():
     app.add_handler(CallbackQueryHandler(buton_yoneticisi))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), mesaj_denetimi))
 
-    log_kaydet("SİSTEM", "Golden Guardian Pro başlatılıyor...")
-
-    # drop_pending_updates=True ile Telegram tarafındaki eski/askıda kalmış tüm getUpdates çakışmaları sıfırlanır.
+    log_kaydet("SİSTEM", "Golden Guardian Pro saf polling modunda başlatıldı.")
+    
+    # drop_pending_updates=True sayesinde arkada kalan eski getUpdates çakışmaları tamamen sıfırlanır.
     app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
