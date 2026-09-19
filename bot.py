@@ -2,6 +2,9 @@ import logging
 from datetime import timedelta
 import sqlite3
 import os
+import threading
+import requests
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
 from telegram.ext import (
     ApplicationBuilder,
@@ -12,7 +15,36 @@ from telegram.ext import (
     filters,
 )
 
+# --- RENDER PORT VE SAĞLIK KONTROL SUNUCUSU (Restart Döngüsünü Önler) ---
+PORT = int(os.environ.get("PORT", 10000))
+
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Golden Guardian Pro Bot is running smoothly!")
+    def log_message(self, format, *args):
+        pass
+
+def start_dummy_server():
+    try:
+        server = HTTPServer(("0.0.0.0", PORT), HealthCheckHandler)
+        server.serve_forever()
+    except Exception:
+        pass
+
 TOKEN = os.environ.get("BOT_TOKEN")
+
+# --- TELEGRAM SUNUCUSUNDAKİ ESKİ OTURUM KİLİDİNİ ZORLA KIRAN FONKSİYON ---
+def telegram_kilit_kirici(token):
+    if not token:
+        return
+    try:
+        # Webhook varsa sil ve takılı kalmış getUpdates kuyruğunu zorla temizle
+        requests.get(f"https://api.telegram.org/bot{token}/deleteWebhook?drop_pending_updates=true", timeout=10)
+        logging.info("Telegram sunucusundaki eski oturum kilidi başarıyla kırıldı.")
+    except Exception as e:
+        logging.error(f"Kilit kırma sırasında hata: {e}")
 
 # --- OTOMATİK MESAJ TEMİZLEME ---
 async def mesaj_temizle_gorevi(context: ContextTypes.DEFAULT_TYPE):
@@ -533,12 +565,20 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msj = await context.bot.send_message(chat.id, metin, parse_mode="Markdown")
     bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
 
-# --- SAF POLLING BAŞLATICISI (WEBHOOK YOK) ---
+# --- ANA UYGULAMA VE KİLİT KIRICI BAŞLATICI ---
 def main():
     if not TOKEN:
-        logger.error("HATA: BOT_TOKEN çevresel değişkeni bulunamadı! Render panelinde Environment Variables kısmına BOT_TOKEN ekleyin.")
+        logger.error("HATA: BOT_TOKEN çevresel değişkeni bulunamadı! Render panelinde BOT_TOKEN ekleyin.")
         return
 
+    # 1. Render için HTTP Sağlık Kontrol Sunucusunu Başlat
+    server_thread = threading.Thread(target=start_dummy_server, daemon=True)
+    server_thread.start()
+
+    # 2. Telegram sunucusundaki eski oturum kilidini ve webhook çakışmasını zorla temizle
+    telegram_kilit_kirici(TOKEN)
+
+    # 3. Botu İnşa Et ve Başlat
     app = ApplicationBuilder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start_komutu))
@@ -553,9 +593,9 @@ def main():
     app.add_handler(CallbackQueryHandler(buton_yoneticisi))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), mesaj_denetimi))
 
-    log_kaydet("SİSTEM", "Golden Guardian Pro saf polling modunda başlatıldı.")
+    log_kaydet("SİSTEM", "Golden Guardian Pro kilit kırılarak başarıyla başlatıldı.")
     
-    # drop_pending_updates=True sayesinde arkada kalan eski getUpdates çakışmaları tamamen sıfırlanır.
+    # drop_pending_updates=True ile tertemiz polling başlat
     app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
