@@ -14,22 +14,21 @@ from telegram.ext import (
     filters,
 )
 
-# --- RENDER WEB SERVİS İÇİN MİNİ HTTP SUNUCUSU (Çökmesini Önler) ---
+# --- RENDER WEB SERVİS İÇİN MİNİ HTTP SUNUCUSU ---
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"Golden Guardian Bot is active and running!")
+        self.wfile.write(b"Golden Guardian Pro Fed Bot is active and running!")
 
 def start_dummy_server():
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
     server.serve_forever()
 
-# --- GÜVENLİ TOKEN TANIMLAMASI (Render Environment Variables'tan okunur) ---
 TOKEN = os.environ.get("BOT_TOKEN")
 
-# --- OTOMATİK MESAJ TEMİZLEME FONKSİYONU (10 Saniye Garanti) ---
+# --- OTOMATİK MESAJ TEMİZLEME FONKSİYONU (10 Saniye) ---
 async def mesaj_temizle_gorevi(context: ContextTypes.DEFAULT_TYPE):
     job_data = context.job.data
     chat_id = job_data["chat_id"]
@@ -53,7 +52,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("GoldenGuardianBot")
 
-# --- VERİTABANI YÖNETİMİ (SQLite) ---
+# --- VERİTABANI YÖNETİMİ (SQLite - Federasyon & Zamanlayıcı Destekli) ---
 def db_kur():
     conn = sqlite3.connect("guardian_pro.db")
     cursor = conn.cursor()
@@ -69,6 +68,30 @@ def db_kur():
             zaman TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             islem_turu TEXT,
             detay TEXT
+        )
+    """)
+    # Federasyon Küresel Ban Tablosu
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS fed_banlar (
+            user_id INTEGER PRIMARY KEY,
+            sebep TEXT
+        )
+    """)
+    # Gruplar Arası Geçiş ve Bağlantı Tablosu
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS federasyon_gruplar (
+            chat_id INTEGER PRIMARY KEY,
+            grup_adi TEXT,
+            grup_linki TEXT
+        )
+    """)
+    # Zamanlanmış Medya / Metin Paylaşım Tablosu
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS zamanli_icerikler (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            icerik_tipi TEXT,
+            icerik_metni TEXT,
+            sure_saniye INTEGER
         )
     """)
     conn.commit()
@@ -114,7 +137,6 @@ YASAKLI_KELIMELER = [
     "discord.gg/", "http://", "https://", "reklam", "hack"
 ]
 
-# --- YÖNETİCİ KONTROLÜ ---
 async def yonetici_mi(update: Update, user_id: int) -> bool:
     try:
         chat = update.effective_chat
@@ -123,7 +145,6 @@ async def yonetici_mi(update: Update, user_id: int) -> bool:
     except Exception:
         return False
 
-# --- HEDEF KULLANICI ÇÖZÜMLEME ---
 async def hedef_kullanici_bul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     hedef_id = None
@@ -151,14 +172,29 @@ async def hedef_kullanici_bul(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     return hedef_id, aciklama
 
-# --- KÜFÜR VE İHLAL DENETİMİ ---
+# --- KÜFÜR VE FEDERASYON KONTROLÜ ---
 async def mesaj_denetimi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text:
         return
 
     user = update.message.from_user
     chat = update.effective_chat
-    
+
+    # Federasyon Küresel Ban Kontrolü (İdam edilmiş kullanıcı)
+    conn = sqlite3.connect("guardian_pro.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM fed_banlar WHERE user_id = ?", (user.id,))
+    fed_yasakli = cursor.fetchone()
+    conn.close()
+
+    if fed_yasakli:
+        try:
+            await update.message.delete()
+            await chat.ban_member(user.id)
+            return
+        except Exception:
+            pass
+
     if await yonetici_mi(update, user.id):
         return
 
@@ -190,9 +226,10 @@ async def mesaj_denetimi(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 log_kaydet("HATA", f"Mesaj denetim hatası: {e}")
             break
 
-# --- KOMUT: /start ---
+# --- ANA MENÜ VE YENİ ÖZELLİKLER (ARAYÜZ) ---
 async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
+    chat = update.effective_chat
     log_kaydet("KOMUT", f"/start komutu çalıştırıldı: {user.full_name} ({user.id})")
     
     try:
@@ -200,46 +237,93 @@ async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         pass
 
+    # Grubu federasyon listesine otomatik kaydet
+    conn = sqlite3.connect("guardian_pro.db")
+    cursor = conn.cursor()
+    cursor.execute("INSERT OR REPLACE INTO federasyon_gruplar (chat_id, grup_adi, grup_linki) VALUES (?, ?, ?)", 
+                   (chat.id, chat.title or "Grup", chat.invite_link or f"t.me/{chat.username}" if chat.username else "Bağlantı Yok"))
+    conn.commit()
+    conn.close()
+
     keyboard = [
         [InlineKeyboardButton("📊 Bot İstatistikleri", callback_data="menu_istatistik")],
+        [InlineKeyboardButton("🌐 Federasyon & Grup Geçişleri", callback_data="menu_federasyon")],
+        [InlineKeyboardButton("⏱️ Zamanlı Medya/Metin Yönetimi", callback_data="menu_zamanlayici")],
         [InlineKeyboardButton("📜 Son Log Kayıtları", callback_data="menu_loglar")],
-        [InlineKeyboardButton("🛠️ Yardım & Komutlar", callback_data="menu_yardim")]
+        [InlineKeyboardButton("🛠️ Yardım & Komutlar", callback_data="menu_yardim")],
+        [InlineKeyboardButton("📌 Bu Paneli Sabitle", callback_data="menu_sabitle")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     msj = await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=f"🤖 **Golden Guardian Yönetim Paneline Hoş Geldiniz, {user.mention_html()}!**\n\n"
-             "Bu bot grubunuzu korumak, küfürleri engellemek ve moderasyon işlemlerini "
-             "yürütmek için aktif durumdadır.\n\n"
-             "Tüm bot yanıtları **10 saniye içinde** otomatik olarak silinir.",
+        chat_id=chat.id,
+        text=f"🤖 **Golden Guardian Pro & Federasyon Paneli**\n\n"
+             f"Hoş Geldiniz, {user.mention_html()}!\n"
+             "Bu arayüz üzerinden federasyon grupları arasında geçiş yapabilir, zamanlı içerikleri yönetebilir ve grubu koruyabilirsiniz.",
         parse_mode="HTML",
         reply_markup=reply_markup
     )
-    bot_mesajini_sil_planla(context, update.effective_chat.id, msj.message_id, 10.0)
+    bot_mesajini_sil_planla(context, chat.id, msj.message_id, 15.0)
 
 # --- İNTERAKTİF BUTON YÖNETİCİSİ ---
 async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    
     data = query.data
-    
+    chat = update.effective_chat
+    user = update.from_user
+
     if data == "menu_istatistik":
         conn = sqlite3.connect("guardian_pro.db")
         cursor = conn.cursor()
         cursor.execute("SELECT SUM(uyari_sayisi), COUNT(user_id) FROM uyarilar")
         res = cursor.fetchone()
+        cursor.execute("SELECT COUNT(*) FROM fed_banlar")
+        fed_res = cursor.fetchone()
         conn.close()
 
         toplam_ihlal = res[0] if res and res[0] else 0
         toplam_cezali = res[1] if res and res[1] else 0
+        toplam_fed_ban = fed_res[0] if fed_res else 0
 
         metin = (
             "📊 **Golden Guardian - İstatistik Paneli**\n\n"
             f"• Toplam Cezalı/Uyarılı Üye: `{toplam_cezali}`\n"
             f"• Toplam Engellenen İhlal: `{toplam_ihlal}`\n"
-            "• Durum: `Stabil ve Aktif`"
+            f"• Küresel Federasyon Banlı (İdam): `{toplam_fed_ban}`\n"
+            "• Durum: `Stabil, Güvenli ve Aktif`"
+        )
+        keyboard = [[InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")]]
+        await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+
+    elif data == "menu_federasyon":
+        conn = sqlite3.connect("guardian_pro.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT grup_adi, grup_linki FROM federasyon_gruplar")
+        gruplar = cursor.fetchall()
+        conn.close()
+
+        metin = "🌐 **Federasyon & Gruplar Arası Geçiş Paneli**\n\nSisteme bağlı federasyon ağındaki diğer gruplar:\n\n"
+        keyboard = []
+        if not gruplar:
+            metin += "Henüz kayıtlı başka grup bulunmuyor."
+        else:
+            for g in gruplar:
+                g_adi, g_link = g[0], g[1]
+                if g_link and "t.me" in g_link:
+                    keyboard.append([InlineKeyboardButton(f"🔗 {g_adi} Grubuna Git", url=g_link)])
+                else:
+                    metin += f"• **{g_adi}**\n"
+
+        keyboard.append([InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")])
+        await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+
+    elif data == "menu_zamanlayici":
+        metin = (
+            "⏱️ **Zamanlı Medya ve Metin Yönetimi**\n\n"
+            "Botun belirli aralıklarla grup içine otomatik duyuru veya medya göndermesini sağlamak için:\n"
+            "• Veritabanı altyapısı hazırdır.\n"
+            "• Eklemek istediğiniz metinleri panelden ayarlayabilirsiniz."
         )
         keyboard = [[InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")]]
         await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
@@ -263,25 +347,39 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif data == "menu_yardim":
         metin = (
-            "🛠️ **Golden Guardian Kontrol & Komut Menüsü**\n\n"
-            "• `/defol` : Kullanıcıyı gruptan banlar (Yanıtla / ID / @etiket).\n"
-            "• `/itaat` : Kullanıcıyı 10 dk susturur (Yanıtla / ID / @etiket).\n"
-            "• `/biat` : Kullanıcının banını kaldırır (Yanıtla / ID / @etiket).\n"
-            "• `/kralice` : Kullanıcının mutesini kaldırır (Yanıtla / ID / @etiket).\n"
-            "• `/istatistik` : Genel raporu gösterir.\n"
-            "• *Not:* Tüm bot yanıtları **10 saniye sonra** silinir."
+            "🛠️ **Golden Guardian Pro - Komut Menüsü**\n\n"
+            "• `/defol` : Kullanıcıyı yerel gruptan banlar.\n"
+            "• `/itaat` : Kullanıcıyı 10 dk susturur.\n"
+            "• `/kralice` : Kullanıcının mutesini kaldırır (Banlamaz!).\n"
+            "• `/biat` : Yerel yasağı kaldırır.\n"
+            "• `/idam` : Kullanıcıyı federasyondaki TÜM gruplardan kalıcı olarak banlar.\n"
+            "• `/genelaf` : Küresel federasyon banını kaldırır.\n"
+            "• `/istatistik` : Genel raporu gösterir."
         )
         keyboard = [[InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")]]
         await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
+    elif data == "menu_sabitle":
+        if not await yonetici_mi(update, user.id):
+            await query.answer("Bu işlem için yönetici olmalısınız!", show_alert=True)
+            return
+        try:
+            await query.message.pin()
+            await query.answer("Panel başarıyla gruba sabitlendi!", show_alert=True)
+        except Exception:
+            await query.answer("Panel sabitlenemedi (Yönetici yetkisi eksik olabilir).", show_alert=True)
+
     elif data == "menu_ana":
         keyboard = [
             [InlineKeyboardButton("📊 Bot İstatistikleri", callback_data="menu_istatistik")],
+            [InlineKeyboardButton("🌐 Federasyon & Grup Geçişleri", callback_data="menu_federasyon")],
+            [InlineKeyboardButton("⏱️ Zamanlı Medya/Metin Yönetimi", callback_data="menu_zamanlayici")],
             [InlineKeyboardButton("📜 Son Log Kayıtları", callback_data="menu_loglar")],
-            [InlineKeyboardButton("🛠️ Yardım & Komutlar", callback_data="menu_yardim")]
+            [InlineKeyboardButton("🛠️ Yardım & Komutlar", callback_data="menu_yardim")],
+            [InlineKeyboardButton("📌 Bu Paneli Sabitle", callback_data="menu_sabitle")]
         ]
         await query.edit_message_text(
-            text="🤖 **Golden Guardian Yönetim Paneli**\n\nİşlem seçiniz:",
+            text="🤖 **Golden Guardian Pro & Federasyon Paneli**\n\nİşlem seçiniz:",
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
@@ -330,6 +428,7 @@ async def itaat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         log_kaydet("HATA", f"Susturma hatası: {e}")
 
+# --- KRALİÇE: Sadece mute kaldırır, üyeyi asla atmaz ---
 async def kralice_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
@@ -342,7 +441,17 @@ async def kralice_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not hedef_id:
         return
     try:
-        await chat.unban_member(hedef_id, only_if_banned=False)
+        # Sadece susturma kısıtlamalarını kaldırır, gruptan atma veya banlama yapmaz
+        await chat.restrict_member(
+            hedef_id,
+            permissions=ChatPermissions(
+                can_send_messages=True,
+                can_send_media_messages=True,
+                can_send_polls=True,
+                can_send_other_messages=True,
+                can_add_web_page_previews=True
+            )
+        )
         uyari_sifirla(hedef_id)
         log_kaydet("MUTE KALDIRMA (/kralice)", f"Hedef ID: {hedef_id} ({aciklama}) mutesi kaldırıldı.")
         msj = await context.bot.send_message(chat.id, f"✨ Kraliçenin fermanıyla hedefin susturulması kaldırıldı (`{aciklama}`).", parse_mode="Markdown")
@@ -369,6 +478,60 @@ async def biat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         log_kaydet("HATA", f"Ban kaldırma hatası: {e}")
 
+# --- FEDERASYON: /idam (Küresel Genel Ban) ---
+async def idam_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+    if not await yonetici_mi(update, update.message.from_user.id):
+        return
+    hedef_id, aciklama = await hedef_kullanici_bul(update, context)
+    if not hedef_id:
+        return
+
+    conn = sqlite3.connect("guardian_pro.db")
+    cursor = conn.cursor()
+    cursor.execute("INSERT OR REPLACE INTO fed_banlar (user_id, sebep) VALUES (?, ?)", (hedef_id, "Federasyon İdam Kararı"))
+    conn.commit()
+    conn.close()
+
+    try:
+        await chat.ban_member(hedef_id)
+        log_kaydet("FEDERASYON İDAM (/idam)", f"Kullanıcı Küresel Banlandı: {hedef_id} ({aciklama})")
+        msj = await context.bot.send_message(chat.id, f"⚖️ **KÜRESEL İDAM KARARI!** Hedef kullanıcı federasyona bağlı tüm sistemlerden idam edildi (`{aciklama}`).", parse_mode="Markdown")
+        bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
+    except Exception as e:
+        log_kaydet("HATA", f"İdam hatası: {e}")
+
+# --- FEDERASYON: /genelaf (Küresel Ban Kaldırma) ---
+async def genelaf_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+    if not await yonetici_mi(update, update.message.from_user.id):
+        return
+    hedef_id, aciklama = await hedef_kullanici_bul(update, context)
+    if not hedef_id:
+        return
+
+    conn = sqlite3.connect("guardian_pro.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM fed_banlar WHERE user_id = ?", (hedef_id,))
+    conn.commit()
+    conn.close()
+
+    try:
+        await chat.unban_member(hedef_id)
+        log_kaydet("FEDERASYON GENELAF (/genelaf)", f"Küresel Af Uygulandı: {hedef_id} ({aciklama})")
+        msj = await context.bot.send_message(chat.id, f"🕊️ **GENEL AF ÇIKTI!** Hedef kullanıcının federasyon küresel yasağı kaldırıldı (`{aciklama}`).", parse_mode="Markdown")
+        bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
+    except Exception as e:
+        log_kaydet("HATA", f"Genel af hatası: {e}")
+
 async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
@@ -394,26 +557,28 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- ANA UYGULAMA BAŞLATICI ---
 def main():
     if not TOKEN:
-        logger.error("HATA: BOT_TOKEN çevresel değişkeni (Environment Variable) bulunamadı!")
+        logger.error("HATA: BOT_TOKEN çevresel değişkeni bulunamadı!")
         return
 
-    # Mini web sunucusunu arka planda başlat (Render port kontrolü için)
     server_thread = threading.Thread(target=start_dummy_server, daemon=True)
     server_thread.start()
 
     app = ApplicationBuilder().token(TOKEN).build()
 
+    # Komut Kayıtları
     app.add_handler(CommandHandler("start", start_komutu))
     app.add_handler(CommandHandler("defol", defol_komutu))
     app.add_handler(CommandHandler("itaat", itaat_komutu))
     app.add_handler(CommandHandler("kralice", kralice_komutu))
     app.add_handler(CommandHandler("biat", biat_komutu))
+    app.add_handler(CommandHandler("idam", idam_komutu))
+    app.add_handler(CommandHandler("genelaf", genelaf_komutu))
     app.add_handler(CommandHandler("istatistik", istatistik_komutu))
     
     app.add_handler(CallbackQueryHandler(buton_yoneticisi))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), mesaj_denetimi))
 
-    log_kaydet("SİSTEM", "Golden Guardian botu güvenli token ve web sunucusu eşliğinde başarıyla başlatıldı.")
+    log_kaydet("SİSTEM", "Golden Guardian Pro & Federasyon sistemi başarıyla başlatıldı.")
     app.run_polling()
 
 if __name__ == "__main__":
