@@ -3,10 +3,8 @@ from datetime import timedelta
 import sqlite3
 import os
 import threading
-import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
-from telegram.request import HTTPXRequest
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -16,27 +14,31 @@ from telegram.ext import (
     filters,
 )
 
-# --- RENDER WEB SERVİS İÇİN MİNİ HTTP SUNUCUSU ---
+# --- RENDER PORT VE SAĞLIK KONTROL SUNUCUSU ---
+PORT = int(os.environ.get("PORT", 10000))
+
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"Golden Guardian Pro Fed Bot is active and running!")
+        self.wfile.write(b"Golden Guardian Pro Bot is running smoothly!")
+    def log_message(self, format, *args):
+        pass # Log kirliliğini önlemek için http loglarını susturuyoruz
 
 def start_dummy_server():
-    port = int(os.environ.get("PORT", 10000))
-    server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
-    server.serve_forever()
+    try:
+        server = HTTPServer(("0.0.0.0", PORT), HealthCheckHandler)
+        server.serve_forever()
+    except Exception:
+        pass
 
 TOKEN = os.environ.get("BOT_TOKEN")
 
-# --- OTOMATİK MESAJ TEMİZLEME FONKSİYONU ---
+# --- OTOMATİK MESAJ TEMİZLEME ---
 async def mesaj_temizle_gorevi(context: ContextTypes.DEFAULT_TYPE):
     job_data = context.job.data
-    chat_id = job_data["chat_id"]
-    message_id = job_data["message_id"]
     try:
-        await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+        await context.bot.delete_message(chat_id=job_data["chat_id"], message_id=job_data["message_id"])
     except Exception:
         pass
 
@@ -47,16 +49,16 @@ def bot_mesajini_sil_planla(context: ContextTypes.DEFAULT_TYPE, chat_id: int, me
         data={"chat_id": chat_id, "message_id": message_id}
     )
 
-# --- LOGLAMA YAPILANDIRMASI ---
+# --- LOGLAMA ---
 logging.basicConfig(
     format="%(asctime)s - [%(levelname)s] - %(name)s - %(message)s",
     level=logging.INFO
 )
 logger = logging.getLogger("GoldenGuardianBot")
 
-# --- VERİTABANI YÖNETİMİ (SQLite) ---
+# --- VERİTABANI YÖNETİMİ ---
 def db_kur():
-    conn = sqlite3.connect("guardian_pro.db")
+    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS uyarilar (
@@ -99,15 +101,18 @@ def db_kur():
 db_kur()
 
 def log_kaydet(islem_turu, detay):
-    conn = sqlite3.connect("guardian_pro.db")
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO bot_loglar (islem_turu, detay) VALUES (?, ?)", (islem_turu, detay))
-    conn.commit()
-    conn.close()
+    try:
+        conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO bot_loglar (islem_turu, detay) VALUES (?, ?)", (islem_turu, detay))
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
     logger.info(f"[{islem_turu}] {detay}")
 
 def uyari_arttir(user_id):
-    conn = sqlite3.connect("guardian_pro.db")
+    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute("SELECT uyari_sayisi FROM uyarilar WHERE user_id = ?", (user_id,))
     res = cursor.fetchone()
@@ -122,7 +127,7 @@ def uyari_arttir(user_id):
     return yeni_sayi
 
 def uyari_sifirla(user_id):
-    conn = sqlite3.connect("guardian_pro.db")
+    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM uyarilar WHERE user_id = ?", (user_id,))
     conn.commit()
@@ -178,7 +183,7 @@ async def mesaj_denetimi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     chat = update.effective_chat
 
-    conn = sqlite3.connect("guardian_pro.db")
+    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM fed_banlar WHERE user_id = ?", (user.id,))
     fed_yasakli = cursor.fetchone()
@@ -235,7 +240,7 @@ async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         pass
 
     grup_linki = f"t.me/{chat.username}" if chat.username else f"https://t.me/c/{str(chat.id).replace('-100','')}/1"
-    conn = sqlite3.connect("guardian_pro.db")
+    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute("INSERT OR REPLACE INTO federasyon_gruplar (chat_id, grup_adi, grup_linki) VALUES (?, ?, ?)", 
                    (chat.id, chat.title or "Federasyon Grubu", grup_linki))
@@ -271,7 +276,7 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.from_user
 
     if data == "menu_istatistik":
-        conn = sqlite3.connect("guardian_pro.db")
+        conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
         cursor = conn.cursor()
         cursor.execute("SELECT SUM(uyari_sayisi), COUNT(user_id) FROM uyarilar")
         res = cursor.fetchone()
@@ -294,7 +299,7 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "menu_federasyon":
-        conn = sqlite3.connect("guardian_pro.db")
+        conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
         cursor = conn.cursor()
         cursor.execute("SELECT grup_adi, grup_linki FROM federasyon_gruplar")
         gruplar = cursor.fetchall()
@@ -324,7 +329,7 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "menu_loglar":
-        conn = sqlite3.connect("guardian_pro.db")
+        conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
         cursor = conn.cursor()
         cursor.execute("SELECT zaman, islem_turu, detay FROM bot_loglar ORDER BY id DESC LIMIT 5")
         kayitlar = cursor.fetchall()
@@ -485,7 +490,7 @@ async def idam_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not hedef_id:
         return
 
-    conn = sqlite3.connect("guardian_pro.db")
+    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute("INSERT OR REPLACE INTO fed_banlar (user_id, sebep) VALUES (?, ?)", (hedef_id, "Federasyon İdam Kararı"))
     conn.commit()
@@ -512,7 +517,7 @@ async def genelaf_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not hedef_id:
         return
 
-    conn = sqlite3.connect("guardian_pro.db")
+    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM fed_banlar WHERE user_id = ?", (hedef_id,))
     conn.commit()
@@ -532,7 +537,7 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.delete()
     except Exception:
         pass
-    conn = sqlite3.connect("guardian_pro.db")
+    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute("SELECT SUM(uyari_sayisi), COUNT(user_id) FROM uyarilar")
     res = cursor.fetchone()
@@ -548,25 +553,20 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msj = await context.bot.send_message(chat.id, metin, parse_mode="Markdown")
     bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
 
-# --- ANA UYGULAMA BAŞLATICI (POLLING OPTİMİZE) ---
+# --- ANA UYGULAMA VE ÇAKIŞMASIZ POLLING BAŞLATICISI ---
 def main():
     if not TOKEN:
-        logger.error("HATA: BOT_TOKEN çevresel değişkeni bulunamadı! Render panelinde Environment Variables kısmına BOT_TOKEN eklediğinizden emin olun.")
+        logger.error("HATA: BOT_TOKEN çevresel değişkeni bulunamadı! Lütfen Render panelinde Environment Variables kısmına BOT_TOKEN ekleyin.")
         return
 
-    # Sağlık kontrolü mini sunucusunu başlat
+    # Web servis portunu karşılamak için dummy HTTP sunucusunu başlat
     server_thread = threading.Thread(target=start_dummy_server, daemon=True)
     server_thread.start()
 
-    # Render ortamında çakışmaları ve zaman aşımını önlemek için özel HTTPX Request ayarları
-    request = HTTPXRequest(
-        connection_pool_size=8,
-        connect_timeout=30.0,
-        read_timeout=30.0
-    )
+    # Telegram Uygulama İnşası
+    app = ApplicationBuilder().token(TOKEN).build()
 
-    app = ApplicationBuilder().token(TOKEN).request(request).build()
-
+    # Handler Tanımlamaları
     app.add_handler(CommandHandler("start", start_komutu))
     app.add_handler(CommandHandler("defol", defol_komutu))
     app.add_handler(CommandHandler("itaat", itaat_komutu))
@@ -579,9 +579,9 @@ def main():
     app.add_handler(CallbackQueryHandler(buton_yoneticisi))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), mesaj_denetimi))
 
-    log_kaydet("SİSTEM", "Golden Guardian Pro & Federasyon Polling sistemi başlatılıyor...")
-    
-    # Eski kuyruktaki bekleyen çakışma isteklerini temizle ve güvenli başlat
+    log_kaydet("SİSTEM", "Golden Guardian Pro başlatılıyor...")
+
+    # drop_pending_updates=True ile Telegram tarafındaki eski/askıda kalmış tüm getUpdates çakışmaları sıfırlanır.
     app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
