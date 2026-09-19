@@ -26,8 +26,8 @@ def start_dummy_server():
     server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
     server.serve_forever()
 
-# --- GÜVENLİ VE HATASIZ TOKEN OKUMA (Render Environment Variables Uyumlu) ---
-TOKEN = os.environ.get("BOT_TOKEN") or os.environ.get("TOKEN")
+# --- GÜVENLİ TOKEN OKUMA (Render Environment Variables: BOT_TOKEN) ---
+TOKEN = os.environ.get("BOT_TOKEN")
 
 # --- OTOMATİK MESAJ TEMİZLEME FONKSİYONU (10 Saniye) ---
 async def mesaj_temizle_gorevi(context: ContextTypes.DEFAULT_TYPE):
@@ -234,10 +234,12 @@ async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         pass
 
+    # Grubu federasyon listesine otomatik kaydet
+    grup_linki = f"t.me/{chat.username}" if chat.username else f"https://t.me/c/{str(chat.id).replace('-100','')}/1"
     conn = sqlite3.connect("guardian_pro.db")
     cursor = conn.cursor()
     cursor.execute("INSERT OR REPLACE INTO federasyon_gruplar (chat_id, grup_adi, grup_linki) VALUES (?, ?, ?)", 
-                   (chat.id, chat.title or "Grup", chat.invite_link or f"t.me/{chat.username}" if chat.username else "Bağlantı Yok"))
+                   (chat.id, chat.title or "Federasyon Grubu", grup_linki))
     conn.commit()
     conn.close()
 
@@ -306,8 +308,8 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             for g in gruplar:
                 g_adi, g_link = g[0], g[1]
-                if g_link and "t.me" in g_link:
-                    keyboard.append([InlineKeyboardButton(f"🔗 {g_adi} Grubuna Git", url=g_link)])
+                if g_link and ("t.me" in g_link or "http" in g_link):
+                    keyboard.append([InlineKeyboardButton(f"🔗 {g_adi}", url=g_link)])
                 else:
                     metin += f"• **{g_adi}**\n"
 
@@ -344,9 +346,9 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "🛠️ **Golden Guardian Pro - Komut Menüsü**\n\n"
             "• `/defol` : Kullanıcıyı yerel gruptan banlar.\n"
             "• `/itaat` : Kullanıcıyı 10 dk susturur.\n"
-            "• `/kralice` : Kullanıcının mutesini kaldırır (Banlamaz!).\n"
+            "• `/kralice` : Kullanıcının mutesini kaldırır (Asla banlamaz/atmaz!).\n"
             "• `/biat` : Yerel yasağı kaldırır.\n"
-            "• `/idam` : Kullanıcıyı federasyondaki TÜM gruplardan kalıcı olarak banlar.\n"
+            "• `/idam` : Kullanıcıyı federasyondaki TÜM gruplardan küresel olarak banlar.\n"
             "• `/genelaf` : Küresel federasyon banını kaldırır.\n"
             "• `/istatistik` : Genel raporu gösterir."
         )
@@ -422,7 +424,7 @@ async def itaat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         log_kaydet("HATA", f"Susturma hatası: {e}")
 
-# --- KRALİÇE: Sadece mute kaldırır, üyeyi asla atmaz ---
+# --- KRALİÇE: Yalnızca mute (susturma) kaldırır, asla atmaz ---
 async def kralice_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
@@ -471,7 +473,7 @@ async def biat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         log_kaydet("HATA", f"Ban kaldırma hatası: {e}")
 
-# --- FEDERASYON: /idam ---
+# --- FEDERASYON: /idam (Küresel Genel Ban) ---
 async def idam_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
@@ -498,7 +500,7 @@ async def idam_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         log_kaydet("HATA", f"İdam hatası: {e}")
 
-# --- FEDERASYON: /genelaf ---
+# --- FEDERASYON: /genelaf (Küresel Ban Kaldırma) ---
 async def genelaf_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
@@ -550,7 +552,7 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- ANA UYGULAMA BAŞLATICI ---
 def main():
     if not TOKEN:
-        logger.error("HATA: BOT_TOKEN (veya TOKEN) çevresel değişkeni bulunamadı! Lütfen Render panelinden Environment Variables ekleyin.")
+        logger.error("HATA: BOT_TOKEN çevresel değişkeni bulunamadı! Render panelinde Environment Variables kısmına BOT_TOKEN eklediğinizden emin olun.")
         return
 
     server_thread = threading.Thread(target=start_dummy_server, daemon=True)
