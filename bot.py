@@ -3,8 +3,10 @@ from datetime import timedelta
 import sqlite3
 import os
 import threading
+import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions
+from telegram.request import HTTPXRequest
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -26,10 +28,9 @@ def start_dummy_server():
     server = HTTPServer(("0.0.0.0", port), HealthCheckHandler)
     server.serve_forever()
 
-# --- GÜVENLİ TOKEN OKUMA (Render Environment Variables: BOT_TOKEN) ---
 TOKEN = os.environ.get("BOT_TOKEN")
 
-# --- OTOMATİK MESAJ TEMİZLEME FONKSİYONU (10 Saniye) ---
+# --- OTOMATİK MESAJ TEMİZLEME FONKSİYONU ---
 async def mesaj_temizle_gorevi(context: ContextTypes.DEFAULT_TYPE):
     job_data = context.job.data
     chat_id = job_data["chat_id"]
@@ -53,7 +54,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("GoldenGuardianBot")
 
-# --- VERİTABANI YÖNETİMİ (SQLite - Federasyon & Zamanlayıcı Destekli) ---
+# --- VERİTABANI YÖNETİMİ (SQLite) ---
 def db_kur():
     conn = sqlite3.connect("guardian_pro.db")
     cursor = conn.cursor()
@@ -127,7 +128,6 @@ def uyari_sifirla(user_id):
     conn.commit()
     conn.close()
 
-# --- YASAKLI KELİME LİSTESİ ---
 YASAKLI_KELIMELER = [
     "amina", "orospu", "o.ç", "piç", "sik", "sikerim",
     "sikik", "got", "götveren", "amse", "kahpe", "karshane",
@@ -548,16 +548,24 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msj = await context.bot.send_message(chat.id, metin, parse_mode="Markdown")
     bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
 
-# --- ANA UYGULAMA BAŞLATICI ---
+# --- ANA UYGULAMA BAŞLATICI (POLLING OPTİMİZE) ---
 def main():
     if not TOKEN:
         logger.error("HATA: BOT_TOKEN çevresel değişkeni bulunamadı! Render panelinde Environment Variables kısmına BOT_TOKEN eklediğinizden emin olun.")
         return
 
+    # Sağlık kontrolü mini sunucusunu başlat
     server_thread = threading.Thread(target=start_dummy_server, daemon=True)
     server_thread.start()
 
-    app = ApplicationBuilder().token(TOKEN).build()
+    # Render ortamında çakışmaları ve zaman aşımını önlemek için özel HTTPX Request ayarları
+    request = HTTPXRequest(
+        connection_pool_size=8,
+        connect_timeout=30.0,
+        read_timeout=30.0
+    )
+
+    app = ApplicationBuilder().token(TOKEN).request(request).build()
 
     app.add_handler(CommandHandler("start", start_komutu))
     app.add_handler(CommandHandler("defol", defol_komutu))
@@ -571,10 +579,10 @@ def main():
     app.add_handler(CallbackQueryHandler(buton_yoneticisi))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), mesaj_denetimi))
 
-    log_kaydet("SİSTEM", "Golden Guardian Pro & Federasyon sistemi başarıyla başlatıldı.")
+    log_kaydet("SİSTEM", "Golden Guardian Pro & Federasyon Polling sistemi başlatılıyor...")
     
-    # drop_pending_updates=True sayesinde arkada takılı kalmış eski Telegram bağlantıları temizlenir ve çakışma önlenir.
-    app.run_polling(drop_pending_updates=True)
+    # Eski kuyruktaki bekleyen çakışma isteklerini temizle ve güvenli başlat
+    app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
     main()
