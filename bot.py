@@ -273,13 +273,13 @@ async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     bot_mesajini_sil_planla(context, chat.id, msj.message_id, 15.0)
 
-# --- İNTERAKTİF BUTON YÖNETİCİSİ ---
+# --- İNTERAKTİF BUTON YÖNETİCİSİ (effective_user güncellendi) ---
 async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     data = query.data
     chat = update.effective_chat
-    user = update.from_user
+    user = update.effective_user
 
     if data == "menu_istatistik":
         try:
@@ -375,7 +375,7 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "menu_sabitle":
-        if not await yonetici_mi(update, user.id):
+        if user and not await yonetici_mi(update, user.id):
             await query.answer("Bu işlem için yönetici olmalısınız!", show_alert=True)
             return
         try:
@@ -580,7 +580,6 @@ async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # --- POST_INIT: BOT BAŞLARKEN ESKİ TÜNELLERİ TEMİZLEME KANCASI ---
 async def post_init(application):
     try:
-        # Telegram sunucusundaki askıda kalmış getUpdates kuyruğunu ve çakışmaları zorla sıfırlar
         await application.bot.delete_webhook(drop_pending_updates=True)
         logger.info("Telegram sunucu bağlantı tünelleri başarıyla sıfırlandı ve senkronize edildi.")
     except Exception as e:
@@ -592,14 +591,11 @@ def main():
         logger.error("HATA: BOT_TOKEN çevresel değişkeni bulunamadı! Render panelinde BOT_TOKEN ekleyin.")
         return
 
-    # Render web servis port kısıtını karşılayan yerleşik mini HTTP sunucusu
     server_thread = threading.Thread(target=start_dummy_server, daemon=True)
     server_thread.start()
 
-    # Telegram uygulamasını post_init kancasıyla güvenli tek örnek olarak inşa et
     app = ApplicationBuilder().token(TOKEN).post_init(post_init).build()
 
-    # Handler Tanımlamaları
     app.add_handler(CommandHandler("start", start_komutu))
     app.add_handler(CommandHandler("defol", defol_komutu))
     app.add_handler(CommandHandler("itaat", itaat_komutu))
@@ -614,7 +610,6 @@ def main():
 
     logger.info("Golden Guardian Pro hatasız yapılandırma ile başlatılıyor...")
     
-    # drop_pending_updates=True ile polling başlatılır
     app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
