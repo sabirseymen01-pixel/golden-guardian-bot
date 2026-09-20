@@ -3,6 +3,7 @@ from datetime import timedelta
 import sqlite3
 import os
 import threading
+import html
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 # Telegram kütüphanelerinin güvenli yüklenmesi
@@ -104,7 +105,7 @@ async def yonetici_mi(update: Update, user_id: int) -> bool:
         member = await chat.get_member(user_id)
         return member.status in ("administrator", "creator")
     except Exception:
-        return True # Test kolaylığı için istisnai durumlardaTrue dönebilir
+        return True
 
 async def bot_mesajini_sil_planla(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int, saniye: float = 15.0):
     async def sil_gorevi(ctx: ContextTypes.DEFAULT_TYPE):
@@ -175,7 +176,7 @@ async def otomatik_yayin_motoru(context: ContextTypes.DEFAULT_TYPE):
                     if y_tip == "photo":
                         await context.bot.send_photo(chat_id=y_chat_id, photo=y_icerik, caption=y_aciklama, reply_markup=reply_markup)
                     elif y_tip == "text":
-                        await context.bot.send_message(chat_id=y_chat_id, text=y_icerik, parse_mode="HTML", reply_markup=reply_markup)
+                        await context.bot.send_message(chat_id=y_chat_id, text=y_icerik, reply_markup=reply_markup)
                 except Exception as e:
                     logger.error(f"Yayın gönderilemedi {y_chat_id}: {e}")
     except Exception:
@@ -213,14 +214,15 @@ async def mesaj_denetimi(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update.message.delete()
                 toplam_uyari = uyari_arttir(user.id)
                 await chat.restrict_member(user.id, permissions=ChatPermissions(can_send_messages=False), until_date=timedelta(minutes=10))
-                msj = await context.bot.send_message(chat.id, f"⚠️ {user.mention_html()}, küfür/yasaklı kelime nedeniyle 10 dk susturuldu! (İhlal: {toplam_uyari})", parse_mode="HTML")
+                guvenli_isim = html.escape(user.full_name)
+                msj = await context.bot.send_message(chat.id, f"⚠️ {guvenli_isim}, küfür/yasaklı kelime nedeniyle 10 dk susturuldu! (İhlal: {toplam_uyari})")
                 await bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
                 log_kaydet("KÜFÜR", f"Kullanıcı susturuldu: {user.id}")
             except Exception:
                 pass
             break
 
-# --- İŞLEVSEL İNTERAKTİF YÖNETİM PANELİ (ARAYÜZ) ---
+# --- İŞLEVSEL İNTERAKTİF YÖNETİM PANELİ ---
 async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     user = update.effective_user
@@ -235,11 +237,11 @@ async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     
     try:
+        guvenli_isim = html.escape(user.full_name)
         msj = await context.bot.send_message(
             chat.id,
             f"🛡️ **Golden Guardian Pro - İşlevsel Yönetim Paneli**\n\n"
-            f"Yetkili: {user.mention_html()}\nAşağıdaki düğmeleri kullanarak tüm sistemi yönetebilirsiniz.",
-            parse_mode="HTML",
+            f"Yetkili: {guvenli_isim}\nAşağıdaki düğmeleri kullanarak tüm sistemi yönetebilirsiniz.",
             reply_markup=reply_markup
         )
         await bot_mesajini_sil_planla(context, chat.id, msj.message_id, 30.0)
@@ -268,12 +270,12 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         metin = (
             "📊 **Sistem İstatistikleri Raporu**\n\n"
-            f"• Bağlı Federasyon Grup Sayısı: `{grup_sayisi}`\n"
-            f"• Küresel Banlı (İdam) Üye: `{ban_sayisi}`\n"
-            "• Durum: `Mükemmel, Kesintisiz Çalışıyor`"
+            f"• Bağlı Federasyon Grup Sayısı: {grup_sayisi}\n"
+            f"• Küresel Banlı (İdam) Üye: {ban_sayisi}\n"
+            "• Durum: Mükemmel, Kesintisiz Çalışıyor"
         )
         keyboard = [[InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")]]
-        await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await query.edit_message_text(text=metin, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "menu_chatbuton":
         metin = (
@@ -286,7 +288,7 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("🚀 Bu Gruba Sohbet Butonu Gönder", callback_data="islem_portalat")],
             [InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")]
         ]
-        await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await query.edit_message_text(text=metin, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "islem_portalat":
         grup_linki = f"https://t.me/c/{str(chat.id).replace('-100','')}/1"
@@ -294,9 +296,10 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("💬 Kesintisiz Sohbete Katıl / Chat", url=grup_linki)],
             [InlineKeyboardButton("📜 Grup Kuralları", callback_data="btn_kurallar")]
         ]
+        grup_adi = html.escape(chat.title or "Grup")
         await context.bot.send_message(
             chat.id,
-            f"👑 **{chat.title} - Canlı Sohbet Portalı**\n\nSohbete katılmak ve aktif tartışmalara dahil olmak için aşağıdaki butona tıklayın.",
+            f"👑 **{grup_adi} - Canlı Sohbet Portalı**\n\nSohbete katılmak ve aktif tartışmalara dahil olmak için aşağıdaki butona tıklayın.",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
         await query.answer("Sohbet butonu başarıyla gruba gönderildi!", show_alert=True)
@@ -314,25 +317,26 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
         metin = "🌐 **Federasyon Ağ Paneli**\n\nSisteme bağlı gruplar:\n\n"
         keyboard = []
         if not gruplar:
-            metin += "Henüz bağlı grup yok. `/fedbagla` komutunu kullanın."
+            metin += "Henüz bağlı grup yok. /fedbagla komutunu kullanın."
         else:
             for g in gruplar:
+                g_adi = g[0] or "Grup"
                 if g[1] and "t.me" in g[1]:
-                    keyboard.append([InlineKeyboardButton(f"🔗 {g[0]}", url=g[1])])
+                    keyboard.append([InlineKeyboardButton(f"🔗 {g_adi}", url=g[1])])
                 else:
-                    metin += f"• {g[0]}\n"
+                    metin += f"• {g_adi}\n"
 
         keyboard.append([InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")])
-        await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await query.edit_message_text(text=metin, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "menu_zamanlayici":
         metin = (
             "⏱️ **Zamanlayıcı ve Periyodik Yayın Paneli**\n\n"
             "Otomatik periyodik paylaşımlar her 30 dakikada bir aktif gruplara gönderilir.\n"
-            "• İçerik eklemek için resme/metne yanıt verip `/ekle` yazın."
+            "• İçerik eklemek için resme/metne yanıt verip /ekle yazın."
         )
         keyboard = [[InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")]]
-        await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await query.edit_message_text(text=metin, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "menu_loglar":
         try:
@@ -349,24 +353,24 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
             metin += "Kayıt yok."
         else:
             for k in kayitlar:
-                metin += f"⏱ `{k[0]}` | **{k[1]}**: {k[2]}\n\n"
+                metin += f"⏱ {k[0]} | **{k[1]}**: {k[2]}\n\n"
 
         keyboard = [[InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")]]
-        await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await query.edit_message_text(text=metin, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "menu_yardim":
         metin = (
             "🛠️ **Golden Guardian Pro - Komut Kılavuzu**\n\n"
-            "• `/portal` : Sohbet butonu oluşturur.\n"
-            "• `/fedbagla` : Grubu federasyona bağlar.\n"
-            "• `/defol [ID/@user/Yanıt]` : Banlar.\n"
-            "• `/itaat [ID/@user/Yanıt]` : Susturur.\n"
-            "• `/kralice [ID/@user/Yanıt]` : Muteyi kaldırır.\n"
-            "• `/idam [ID/@user/Yanıt]` : Küresel ban atar.\n"
-            "• `/ekle` : Periyodik yayın ekler."
+            "• /portal : Sohbet butonu oluşturur.\n"
+            "• /fedbagla : Grubu federasyona bağlar.\n"
+            "• /defol [ID/@user/Yanıt] : Banlar.\n"
+            "• /itaat [ID/@user/Yanıt] : Susturur.\n"
+            "• /kralice [ID/@user/Yanıt] : Muteyi kaldırır.\n"
+            "• /idam [ID/@user/Yanıt] : Küresel ban atar.\n"
+            "• /ekle : Periyodik yayın ekler."
         )
         keyboard = [[InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")]]
-        await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await query.edit_message_text(text=metin, reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "menu_sabitle":
         try:
@@ -382,7 +386,7 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("📜 Log Kayıtları", callback_data="menu_loglar"), InlineKeyboardButton("🛠️ Yardım", callback_data="menu_yardim")],
             [InlineKeyboardButton("📌 Bu Paneli Gruba Sabitle", callback_data="menu_sabitle")]
         ]
-        await query.edit_message_text(text="🛡️ **Golden Guardian Pro - Ana Yönetim Paneli**\n\nİşlem seçiniz:", parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await query.edit_message_text(text="🛡️ **Golden Guardian Pro - Ana Yönetim Paneli**\n\nİşlem seçiniz:", reply_markup=InlineKeyboardMarkup(keyboard))
 
     elif data == "btn_kurallar":
         await query.message.reply_text("📜 **Grup Kuralları:**\n1. Küfür ve argo kesinlikle yasaktır.\n2. Reklam yapmak küresel idam sebebidir.\n3. Saygı esastır.")
@@ -396,9 +400,10 @@ async def portal_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("💬 Kesintisiz Sohbete Katıl / Chat", url=grup_linki)],
         [InlineKeyboardButton("📜 Kurallar", callback_data="btn_kurallar")]
     ]
+    grup_adi = html.escape(chat.title or "Grup")
     await context.bot.send_message(
         chat.id, 
-        f"👑 **{chat.title} Canlı Sohbet Portalı**\n\nSohbete hızlıca bağlanmak için butonu kullanın.",
+        f"👑 **{grup_adi} Canlı Sohbet Portalı**\n\nSohbete hızlıca bağlanmak için butonu kullanın.",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
     log_kaydet("PORTAL", f"Sohbet butonu gönderildi: {chat.title}")
@@ -414,13 +419,13 @@ async def fedbagla_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.commit()
     conn.close()
     
-    await update.message.reply_text("✅ **Bu grup başarıyla Federasyon Ağına bağlandı ve aktif edildi!**", parse_mode="Markdown")
+    await update.message.reply_text("✅ **Bu grup başarıyla Federasyon Ağına bağlandı ve aktif edildi!**")
     log_kaydet("FEDERASYON", f"Grup bağlandı: {chat.title}")
 
 async def ekle_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message.reply_to_message
     if not msg:
-        await update.message.reply_text("⚠️ Hata: Eklemek istediğiniz resme veya metne yanıt vererek `/ekle` yazmalısınız.")
+        await update.message.reply_text("⚠️ Hata: Eklemek istediğiniz resme veya metne yanıt vererek /ekle yazmalısınız.")
         return
     
     tip = "text"
@@ -444,7 +449,7 @@ async def ekle_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.commit()
     conn.close()
     
-    await update.message.reply_text(f"✅ Medya/Metin yayın listesine eklendi! (ID: `{yayin_id}`)", parse_mode="Markdown")
+    await update.message.reply_text(f"✅ Medya/Metin yayın listesine eklendi! (ID: {yayin_id})")
     log_kaydet("YAYIN", f"Yeni içerik eklendi ID: {yayin_id}")
 
 async def yayinlar_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -460,13 +465,13 @@ async def yayinlar_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     metin = "📜 **Aktif Zamanlanmış Yayınlar:**\n"
     for y in yayinlar:
-        metin += f"• ID: `{y[0]}` | Tip: {y[1]}\n"
-    metin += "\nSilmek için `/sil ID` yazabilirsiniz."
-    await update.message.reply_text(metin, parse_mode="Markdown")
+        metin += f"• ID: {y[0]} | Tip: {y[1]}\n"
+    metin += "\nSilmek için /sil ID yazabilirsiniz."
+    await update.message.reply_text(metin)
 
 async def sil_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not context.args: 
-        await update.message.reply_text("Kullanım: `/sil <yayin_id>`")
+        await update.message.reply_text("Kullanım: /sil <yayin_id>")
         return
     yayin_id = context.args[0]
     conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
@@ -544,7 +549,7 @@ async def idam_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
 
-    await update.message.reply_text(f"⚖️ **KÜRESEL İDAM!** Kullanıcı federasyon ağındaki {sayi} gruptan eşzamanlı banlandı.", parse_mode="Markdown")
+    await update.message.reply_text(f"⚖️ **KÜRESEL İDAM!** Kullanıcı federasyon ağındaki {sayi} gruptan eşzamanlı banlandı.")
     log_kaydet("İDAM", f"Küresel idam uygulandı: {hedef_id}")
 
 async def genelaf_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -567,7 +572,7 @@ async def genelaf_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception:
             pass
 
-    await update.message.reply_text("🕊️ **GENEL AF!** Kullanıcının tüm ağdaki yasakları kaldırıldı.", parse_mode="Markdown")
+    await update.message.reply_text("🕊️ **GENEL AF!** Kullanıcının tüm ağdaki yasakları kaldırıldı.")
     log_kaydet("GENELAF", f"Küresel af uygulandı: {hedef_id}")
 
 # --- BAŞLATMA ---
