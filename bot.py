@@ -112,7 +112,8 @@ async def bot_mesajini_sil_planla(context: ContextTypes.DEFAULT_TYPE, chat_id: i
         except Exception:
             pass
     try:
-        context.job_queue.run_once(sil_gorevi, saniye, data={"chat_id": chat_id, "message_id": message_id})
+        if context.job_queue:
+            context.job_queue.run_once(sil_gorevi, saniye, data={"chat_id": chat_id, "message_id": message_id})
     except Exception:
         pass
 
@@ -236,7 +237,7 @@ async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode="HTML",
             reply_markup=reply_markup
         )
-        bot_mesajini_sil_planla(context, chat.id, msj.message_id, 30.0)
+        await bot_mesajini_sil_planla(context, chat.id, msj.message_id, 30.0)
     except Exception:
         pass
 
@@ -493,11 +494,12 @@ async def genelaf_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         pass
 
-# --- BAŞLATMA ---
+# --- BAŞLATMA (Güvenli JobQueue Entegrasyonu) ---
 async def post_init(application):
     try:
         await application.bot.delete_webhook(drop_pending_updates=True)
-        application.job_queue.run_repeating(otomatik_yayin_motoru, interval=1800, first=10)
+        if application.job_queue:
+            application.job_queue.run_repeating(otomatik_yayin_motoru, interval=1800, first=10)
         logger.info("Bot başarıyla başlatıldı ve görev kuyruğu aktif!")
     except Exception as e:
         logger.error(f"Post_init hatası: {e}")
