@@ -4,15 +4,21 @@ import sqlite3
 import os
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions, MessageEntity
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    ContextTypes,
-    MessageHandler,
-    CallbackQueryHandler,
-    filters,
-)
+
+# Telegram kütüphanelerinin eksiksiz ve güvenli yüklenmesi
+try:
+    from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ChatPermissions, MessageEntity
+    from telegram.ext import (
+        ApplicationBuilder,
+        CommandHandler,
+        ContextTypes,
+        MessageHandler,
+        CallbackQueryHandler,
+        filters,
+    )
+except ImportError as e:
+    print(f"KRİTİK İMPORT HATASI: python-telegram-bot kütüphanesi yüklenemedi! Detay: {e}")
+    exit(1)
 
 # --- RENDER PORT VE SAĞLIK KONTROL SUNUCUSU ---
 PORT = int(os.environ.get("PORT", 10000))
@@ -21,7 +27,7 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b"Golden Guardian Pro Elite Ultra Bot is active and running!")
+        self.wfile.write(b"Golden Guardian Pro Ultimate Bot is active and running!")
     def log_message(self, format, *args):
         pass
 
@@ -29,8 +35,8 @@ def start_dummy_server():
     try:
         server = HTTPServer(("0.0.0.0", PORT), HealthCheckHandler)
         server.serve_forever()
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"Sağlık sunucusu başlatılamadı: {e}")
 
 TOKEN = os.environ.get("BOT_TOKEN")
 
@@ -105,13 +111,19 @@ async def bot_mesajini_sil_planla(context: ContextTypes.DEFAULT_TYPE, chat_id: i
             await ctx.bot.delete_message(chat_id=ctx.job.data["chat_id"], message_id=ctx.job.data["message_id"])
         except Exception:
             pass
-    context.job_queue.run_once(sil_gorevi, saniye, data={"chat_id": chat_id, "message_id": message_id})
+    try:
+        context.job_queue.run_once(sil_gorevi, saniye, data={"chat_id": chat_id, "message_id": message_id})
+    except Exception:
+        pass
 
-# --- GÜÇLENDİRİLMİŞ HEDEF BULUCU (ID, Mention Entity, Reply) ---
+# --- HEDEF BULUCU ---
 async def hedef_kullanici_bul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     hedef_id = None
     aciklama = ""
     msg = update.message
+    
+    if not msg:
+        return None, ""
     
     if msg.reply_to_message:
         return msg.reply_to_message.from_user.id, f"Yanıtlanan {msg.reply_to_message.from_user.full_name}"
@@ -135,7 +147,6 @@ async def hedef_kullanici_bul(update: Update, context: ContextTypes.DEFAULT_TYPE
             else:
                 hedef_id = int(girdi)
         except Exception as e:
-            logger.error(f"Hedef bulma hatası: {e}")
             hedef_id = None
 
     return hedef_id, aciklama
@@ -165,10 +176,10 @@ async def otomatik_yayin_motoru(context: ContextTypes.DEFAULT_TYPE):
                         await context.bot.send_message(chat_id=y_chat_id, text=y_icerik, parse_mode="HTML", reply_markup=reply_markup)
                 except Exception as e:
                     logger.error(f"Yayın gönderilemedi {y_chat_id}: {e}")
-    except Exception as e:
+    except Exception:
         pass
 
-# --- KÜFÜR VE KÜRESEL FEDERASYON BAN KONTROLÜ ---
+# --- KÜFÜR VE KÜRESEL BAN KONTROLÜ ---
 async def mesaj_denetimi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text:
         return
@@ -203,7 +214,7 @@ async def mesaj_denetimi(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 pass
             break
 
-# --- İNTERAKTİF YÖNETİM PANELİ (ARAYÜZ) ---
+# --- İNTERAKTİF YÖNETİM PANELİ ---
 async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     user = update.effective_user
@@ -234,21 +245,22 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     data = query.data
     chat = update.effective_chat
-    user = update.effective_user
 
     if data == "menu_chatbuton":
         metin = (
             "💬 **Sohbete Atıl / Chat Butonu Yönetimi**\n\n"
             "Bu özellik, grubunuzda üyelerin doğrudan sohbete katılması veya ilgili kanala bağlanması için şık bir portal butonu oluşturmanızı sağlar.\n\n"
             "• **Nasıl Kullanılır?**\n"
-            "Gruba `/portal` veya `/chatbutonu` yazarak anında butonu gönderebilirsiniz.\n"
-            "• Otomatik yayınlarda da bu buton mesaja otomatik eklenir."
+            "Gruba `/portal` veya `/chatbutonu` yazarak anında butonu gönderebilirsiniz."
         )
         keyboard = [
             [InlineKeyboardButton("🚀 Bu Gruba Sohbet Butonu Gönder", callback_data="islem_portalat")],
             [InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")]
         ]
-        await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        try:
+            await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        except Exception:
+            pass
 
     elif data == "islem_portalat":
         grup_linki = f"https://t.me/c/{str(chat.id).replace('-100','')}/1"
@@ -256,12 +268,15 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("💬 Kesintisiz Sohbete Katıl / Chat", url=grup_linki)],
             [InlineKeyboardButton("📜 Grup Kuralları", callback_data="btn_kurallar")]
         ]
-        await context.bot.send_message(
-            chat.id,
-            f"👑 **{chat.title} - Canlı Sohbet Portalı**\n\nSohbete katılmak ve aktif tartışmalara dahil olmak için aşağıdaki butona tıklayın.",
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
-        await query.answer("Sohbet butonu başarıyla gruba gönderildi!", show_alert=True)
+        try:
+            await context.bot.send_message(
+                chat.id,
+                f"👑 **{chat.title} - Canlı Sohbet Portalı**\n\nSohbete katılmak ve aktif tartışmalara dahil olmak için aşağıdaki butona tıklayın.",
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
+            await query.answer("Sohbet butonu başarıyla gruba gönderildi!", show_alert=True)
+        except Exception:
+            pass
 
     elif data == "menu_ana":
         keyboard = [
@@ -270,10 +285,16 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("📜 Log Kayıtları", callback_data="menu_loglar"), InlineKeyboardButton("🛠️ Yardım", callback_data="menu_yardim")],
             [InlineKeyboardButton("📌 Bu Paneli Gruba Sabitle", callback_data="menu_sabitle")]
         ]
-        await query.edit_message_text(text="🛡️ **Golden Guardian Pro - Ana Yönetim Paneli**\n\nİşlem seçiniz:", parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        try:
+            await query.edit_message_text(text="🛡️ **Golden Guardian Pro - Ana Yönetim Paneli**\n\nİşlem seçiniz:", parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        except Exception:
+            pass
 
     elif data == "btn_kurallar":
-        await query.message.reply_text("📜 **Grup Kuralları:**\n1. Küfür ve argo kesinlikle yasaktır.\n2. Reklam yapmak küresel idam sebebidir.\n3. Saygı esastır.")
+        try:
+            await query.message.reply_text("📜 **Grup Kuralları:**\n1. Küfür ve argo kesinlikle yasaktır.\n2. Reklam yapmak küresel idam sebebidir.\n3. Saygı esastır.")
+        except Exception:
+            pass
 
 # --- KOMUTLAR ---
 
@@ -285,25 +306,30 @@ async def portal_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("💬 Kesintisiz Sohbete Katıl / Chat", url=grup_linki)],
         [InlineKeyboardButton("📜 Kurallar", callback_data="btn_kurallar")]
     ]
-    await context.bot.send_message(
-        chat.id, 
-        f"👑 **{chat.title} Canlı Sohbet Portalı**\n\nSohbete hızlıca bağlanmak için butonu kullanın.",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    try:
+        await context.bot.send_message(
+            chat.id, 
+            f"👑 **{chat.title} Canlı Sohbet Portalı**\n\nSohbete hızlıca bağlanmak için butonu kullanın.",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+    except Exception:
+        pass
 
 async def fedbagla_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     if not await yonetici_mi(update, update.message.from_user.id): return
     grup_linki = f"https://t.me/{chat.username}" if chat.username else f"https://t.me/c/{str(chat.id).replace('-100','')}/1"
     
-    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
-    cursor = conn.cursor()
-    cursor.execute("INSERT OR REPLACE INTO federasyon_gruplar (chat_id, grup_adi, grup_linki) VALUES (?, ?, ?)", (chat.id, chat.title, grup_linki))
-    cursor.execute("INSERT OR REPLACE INTO zamanli_ayar (chat_id, sure_dakika, aktif_durum) VALUES (?, 30, 'AKTİF')", (chat.id,))
-    conn.commit()
-    conn.close()
-    
-    await update.message.reply_text("✅ **Bu grup başarıyla Federasyon Ağına bağlandı!**", parse_mode="Markdown")
+    try:
+        conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute("INSERT OR REPLACE INTO federasyon_gruplar (chat_id, grup_adi, grup_linki) VALUES (?, ?, ?)", (chat.id, chat.title, grup_linki))
+        cursor.execute("INSERT OR REPLACE INTO zamanli_ayar (chat_id, sure_dakika, aktif_durum) VALUES (?, 30, 'AKTİF')", (chat.id,))
+        conn.commit()
+        conn.close()
+        await update.message.reply_text("✅ **Bu grup başarıyla Federasyon Ağına bağlandı!**", parse_mode="Markdown")
+    except Exception:
+        pass
 
 async def ekle_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await yonetici_mi(update, update.message.from_user.id): return
@@ -326,43 +352,51 @@ async def ekle_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         return
 
-    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO yayin_listesi (chat_id, tip, icerik, aciklama) VALUES (?, ?, ?, ?)", (update.effective_chat.id, tip, icerik, aciklama))
-    yayin_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
-    
-    await update.message.reply_text(f"✅ Medya/Metin yayın listesine eklendi! (ID: `{yayin_id}`)", parse_mode="Markdown")
+    try:
+        conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO yayin_listesi (chat_id, tip, icerik, aciklama) VALUES (?, ?, ?, ?)", (update.effective_chat.id, tip, icerik, aciklama))
+        yayin_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+        await update.message.reply_text(f"✅ Medya/Metin yayın listesine eklendi! (ID: `{yayin_id}`)", parse_mode="Markdown")
+    except Exception:
+        pass
 
 async def yayinlar_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await yonetici_mi(update, update.message.from_user.id): return
-    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, tip FROM yayin_listesi WHERE chat_id = ?", (update.effective_chat.id,))
-    yayinlar = cursor.fetchall()
-    conn.close()
-    
-    if not yayinlar:
-        await update.message.reply_text("Bu grupta aktif bir periyodik yayın yok.")
-        return
-    
-    metin = "📜 **Aktif Zamanlanmış Yayınlar:**\n"
-    for y in yayinlar:
-        metin += f"• ID: `{y[0]}` | Tip: {y[1]}\n"
-    metin += "\nSilmek için `/sil ID` yazabilirsiniz."
-    await update.message.reply_text(metin, parse_mode="Markdown")
+    try:
+        conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, tip FROM yayin_listesi WHERE chat_id = ?", (update.effective_chat.id,))
+        yayinlar = cursor.fetchall()
+        conn.close()
+        
+        if not yayinlar:
+            await update.message.reply_text("Bu grupta aktif bir periyodik yayın yok.")
+            return
+        
+        metin = "📜 **Aktif Zamanlanmış Yayınlar:**\n"
+        for y in yayinlar:
+            metin += f"• ID: `{y[0]}` | Tip: {y[1]}\n"
+        metin += "\nSilmek için `/sil ID` yazabilirsiniz."
+        await update.message.reply_text(metin, parse_mode="Markdown")
+    except Exception:
+        pass
 
 async def sil_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await yonetici_mi(update, update.message.from_user.id): return
     if not context.args: return
     yayin_id = context.args[0]
-    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM yayin_listesi WHERE id = ? AND chat_id = ?", (yayin_id, update.effective_chat.id))
-    conn.commit()
-    conn.close()
-    await update.message.reply_text(f"✅ Yayın {yayin_id} silindi.")
+    try:
+        conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM yayin_listesi WHERE id = ? AND chat_id = ?", (yayin_id, update.effective_chat.id))
+        conn.commit()
+        conn.close()
+        await update.message.reply_text(f"✅ Yayın {yayin_id} silindi.")
+    except Exception:
+        pass
 
 # Mod Komutları
 async def defol_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -370,16 +404,22 @@ async def defol_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await yonetici_mi(update, user_id): return
     hedef_id, _ = await hedef_kullanici_bul(update, context)
     if not hedef_id: return
-    await chat.ban_member(hedef_id)
-    await update.message.reply_text("🔨 Kullanıcı gruptan defedildi!")
+    try:
+        await chat.ban_member(hedef_id)
+        await update.message.reply_text("🔨 Kullanıcı gruptan defedildi!")
+    except Exception:
+        pass
 
 async def itaat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat, user_id = update.effective_chat, update.message.from_user.id
     if not await yonetici_mi(update, user_id): return
     hedef_id, _ = await hedef_kullanici_bul(update, context)
     if not hedef_id: return
-    await chat.restrict_member(hedef_id, permissions=ChatPermissions(can_send_messages=False), until_date=timedelta(minutes=10))
-    await update.message.reply_text("🤐 Kullanıcı 10 dakika susturuldu.")
+    try:
+        await chat.restrict_member(hedef_id, permissions=ChatPermissions(can_send_messages=False), until_date=timedelta(minutes=10))
+        await update.message.reply_text("🤐 Kullanıcı 10 dakika susturuldu.")
+    except Exception:
+        pass
 
 async def kralice_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat, user_id = update.effective_chat, update.message.from_user.id
@@ -408,53 +448,65 @@ async def idam_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     hedef_id, _ = await hedef_kullanici_bul(update, context)
     if not hedef_id: return
 
-    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
-    cursor = conn.cursor()
-    cursor.execute("INSERT OR REPLACE INTO fed_banlar (user_id, sebep) VALUES (?, ?)", (hedef_id, "Küresel İdam"))
-    cursor.execute("SELECT chat_id FROM federasyon_gruplar")
-    gruplar = cursor.fetchall()
-    conn.commit()
-    conn.close()
+    try:
+        conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute("INSERT OR REPLACE INTO fed_banlar (user_id, sebep) VALUES (?, ?)", (hedef_id, "Küresel İdam"))
+        cursor.execute("SELECT chat_id FROM federasyon_gruplar")
+        gruplar = cursor.fetchall()
+        conn.commit()
+        conn.close()
 
-    sayi = 0
-    for g in gruplar:
-        try:
-            await context.bot.ban_member(chat_id=g[0], user_id=hedef_id)
-            sayi += 1
-        except Exception:
-            pass
+        sayi = 0
+        for g in gruplar:
+            try:
+                await context.bot.ban_member(chat_id=g[0], user_id=hedef_id)
+                sayi += 1
+            except Exception:
+                pass
 
-    await update.message.reply_text(f"⚖️ **KÜRESEL İDAM!** Kullanıcı federasyon ağındaki {sayi} gruptan eşzamanlı banlandı.", parse_mode="Markdown")
+        await update.message.reply_text(f"⚖️ **KÜRESEL İDAM!** Kullanıcı federasyon ağındaki {sayi} gruptan eşzamanlı banlandı.", parse_mode="Markdown")
+    except Exception:
+        pass
 
 async def genelaf_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await yonetici_mi(update, update.message.from_user.id): return
     hedef_id, _ = await hedef_kullanici_bul(update, context)
     if not hedef_id: return
 
-    conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM fed_banlar WHERE user_id = ?", (hedef_id,))
-    cursor.execute("SELECT chat_id FROM federasyon_gruplar")
-    gruplar = cursor.fetchall()
-    conn.commit()
-    conn.close()
+    try:
+        conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM fed_banlar WHERE user_id = ?", (hedef_id,))
+        cursor.execute("SELECT chat_id FROM federasyon_gruplar")
+        gruplar = cursor.fetchall()
+        conn.commit()
+        conn.close()
 
-    for g in gruplar:
-        try:
-            await context.bot.unban_member(chat_id=g[0], user_id=hedef_id)
-        except Exception:
-            pass
+        for g in gruplar:
+            try:
+                await context.bot.unban_member(chat_id=g[0], user_id=hedef_id)
+            except Exception:
+                pass
 
-    await update.message.reply_text("🕊️ **GENEL AF!** Kullanıcının tüm ağdaki yasakları kaldırıldı.", parse_mode="Markdown")
+        await update.message.reply_text("🕊️ **GENEL AF!** Kullanıcının tüm ağdaki yasakları kaldırıldı.", parse_mode="Markdown")
+    except Exception:
+        pass
 
 # --- BAŞLATMA ---
 async def post_init(application):
-    await application.bot.delete_webhook(drop_pending_updates=True)
-    application.job_queue.run_repeating(otomatik_yayin_motoru, interval=1800, first=10)
-    logger.info("Bot başarıyla başlatıldı ve görev kuyruğu aktif!")
+    try:
+        await application.bot.delete_webhook(drop_pending_updates=True)
+        application.job_queue.run_repeating(otomatik_yayin_motoru, interval=1800, first=10)
+        logger.info("Bot başarıyla başlatıldı ve görev kuyruğu aktif!")
+    except Exception as e:
+        logger.error(f"Post_init hatası: {e}")
 
 def main():
-    if not TOKEN: return
+    if not TOKEN:
+        print("KRİTİK HATA: BOT_TOKEN ortam değişkeni bulunamadı!")
+        return
+
     threading.Thread(target=start_dummy_server, daemon=True).start()
 
     app = ApplicationBuilder().token(TOKEN).post_init(post_init).build()
