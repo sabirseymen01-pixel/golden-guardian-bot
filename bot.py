@@ -1,7 +1,9 @@
 import os
 import logging
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, ContextTypes
 
 # Loglama ayarları
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -10,6 +12,20 @@ logger = logging.getLogger(__name__)
 # Örnek Bellek / Veritabanı Yapısı (Federasyon ve Süreli Mesajlar için)
 federation_links = {}  # {chat_id: target_chat_id}
 timed_messages = {}     # {chat_id: duration_in_minutes}
+
+# --- RENDER PORT BINDING İÇİN SAĞLIK KONTROLÜ SUNUCUSU ---
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is alive and running!")
+
+def run_health_server():
+    port = int(os.environ.get("PORT", 10000))
+    server_address = ('0.0.0.0', port)
+    httpd = HTTPServer(server_address, HealthCheckHandler)
+    logger.info(f"Sağlık kontrolü sunucusu {port} portunda başlatılıyor...")
+    httpd.serve_forever()
 
 # --- YÖNETİCİ VE YETKİ KONTROLÜ ---
 async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
@@ -100,7 +116,6 @@ async def handle_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # 1. Yöntem: Mesajı yanıtlayarak (Reply) kullanım
     if update.message.reply_to_message:
         target_user = update.message.reply_to_message.from_user.username or update.message.reply_to_message.from_user.first_name
-        target_id = update.message.reply_to_message.from_user.id
     # 2. Yöntem: Argüman ile (ID veya @KullanıcıAdı) kullanım
     elif context.args:
         target_input = context.args[0]
@@ -116,6 +131,11 @@ def main():
     # Render ortam değişkeninden veya doğrudan token tanımı
     TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "BURAYA_BOT_TOKEN_Gelecek")
     
+    # 1. Adım: Render'ın port taramasını geçmek için arka planda HTTP sunucusunu başlat
+    server_thread = threading.Thread(target=run_health_server, daemon=True)
+    server_thread.start()
+
+    # 2. Adım: Telegram Bot uygulamasını başlat
     application = Application.builder().token(TOKEN).build()
 
     # Komut Tanımlamaları
@@ -129,7 +149,7 @@ def main():
     application.add_handler(CommandHandler("kralice", handle_target_user))
 
     # Botu Başlatma
-    print("Bot çalıştırılıyor...")
+    logger.info("Bot çalıştırılıyor...")
     application.run_polling()
 
 if __name__ == "__main__":
