@@ -5,15 +5,14 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-# Loglama ayarları
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+# Loglama ayarlarını detaylı (DEBUG) moda alalım
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Örnek Bellek / Veritabanı Yapısı (Federasyon ve Süreli Mesajlar için)
-federation_links = {}  # {chat_id: target_chat_id}
-timed_messages = {}     # {chat_id: duration_in_minutes}
+# Bellek Yapısı
+federation_links = {}  
+timed_messages = {}     
 
-# --- RENDER PORT BINDING İÇİN SAĞLIK KONTROLÜ SUNUCUSU ---
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -27,9 +26,7 @@ def run_health_server():
     logger.info(f"Sağlık kontrolü sunucusu {port} portunda başlatılıyor...")
     httpd.serve_forever()
 
-# --- YÖNETİCİ VE YETKİ KONTROLÜ ---
 async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
-    """Kullanıcının grupta yönetici veya yetkili olup olmadığını kontrol eder."""
     user = update.effective_user
     chat = update.effective_chat
     if chat.type == "private":
@@ -37,9 +34,7 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> b
     member = await chat.get_member(user.id)
     return member.status in ["creator", "administrator"]
 
-# --- FEDERASYON VE GRUP BAĞLAMA KOMUTLARI ---
 async def bind_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Arayüz veya komut üzerinden iki grubu birbirine bağlar."""
     if not await is_user_admin(update, context):
         await update.message.reply_text("Bu komutu kullanmak için yetkiniz yok.")
         return
@@ -51,10 +46,8 @@ async def bind_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     current_chat_id = update.effective_chat.id
     target_group = args[0]
-    
     federation_links[current_chat_id] = target_group
     
-    # Butonlu ve sabitlenecek mesaj yapısı (Arayüz / Sabitleme Özelliği)
     keyboard = [
         [
             InlineKeyboardButton("💬 Chat Grubuna Git", url=f"https://t.me/{str(current_chat_id).replace('-100', '')}"),
@@ -74,7 +67,6 @@ async def bind_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Mesaj sabitleme hatası: {e}")
 
 async def unbind_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Federasyon bağlantısını koparır ve gruptan ayırır."""
     if not await is_user_admin(update, context):
         await update.message.reply_text("Bu komutu kullanmak için yetkiniz yok.")
         return
@@ -86,9 +78,7 @@ async def unbind_group(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("⚠️ Bu gruba tanımlı aktif bir federasyon bulunamadı.")
 
-# --- METİN / PARAGRAF VE SÜRELİ İŞLEMLER ---
 async def set_duration(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Metin veya paragraflar için dakika bazlı süre belirleme."""
     if not await is_user_admin(update, context):
         await update.message.reply_text("Yetkiniz yok.")
         return
@@ -104,19 +94,14 @@ async def set_duration(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.message.reply_text(f"⏱️ Bu grup için yayın ve metin süresi {duration} dakika olarak ayarlandı.")
 
-# --- İTAAT, KRALİÇE VE DİĞER KOMUTLAR (Hatasız ve Esnek Hedefleme) ---
 async def handle_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Yanıtla, ID veya kullanıcı adı ile hedef belirleyerek komut çalıştırma (İtaat, Kraliçe vb.)."""
     if not await is_user_admin(update, context):
         await update.message.reply_text("Bu komutu kullanmak için yetkiniz yok.")
         return
 
     target_user = None
-    
-    # 1. Yöntem: Mesajı yanıtlayarak (Reply) kullanım
     if update.message.reply_to_message:
         target_user = update.message.reply_to_message.from_user.username or update.message.reply_to_message.from_user.first_name
-    # 2. Yöntem: Argüman ile (ID veya @KullanıcıAdı) kullanım
     elif context.args:
         target_input = context.args[0]
         target_user = target_input
@@ -128,29 +113,25 @@ async def handle_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await update.message.reply_text(f"👑 '{command_name}' komutu başarıyla uygulandı!\nHedef: {target_user}")
 
 def main():
-    # Render ortam değişkeninden veya doğrudan token tanımı
     TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "BURAYA_BOT_TOKEN_Gelecek")
     
-    # 1. Adım: Render'ın port taramasını geçmek için arka planda HTTP sunucusunu başlat
+    # Sağlık sunucusunu başlat
     server_thread = threading.Thread(target=run_health_server, daemon=True)
     server_thread.start()
 
-    # 2. Adım: Telegram Bot uygulamasını başlat
     application = Application.builder().token(TOKEN).build()
 
-    # Komut Tanımlamaları
+    # Komutlar
     application.add_handler(CommandHandler("bagla", bind_group))
     application.add_handler(CommandHandler("ayir", unbind_group))
     application.add_handler(CommandHandler("sure", set_duration))
-    
-    # Esnek Hedeflemeli Komutlar (İtaat, Kraliçe vb.)
     application.add_handler(CommandHandler("itaat", handle_target_user))
     application.add_handler(CommandHandler("krallice", handle_target_user))
     application.add_handler(CommandHandler("kralice", handle_target_user))
 
-    # Botu Başlatma
-    logger.info("Bot çalıştırılıyor...")
-    application.run_polling()
+    logger.info("Bot poling başlatılıyor...")
+    # drop_pending_updates=True ile birikmiş eski takılı kalmış istekleri temizliyoruz
+    application.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
     main()
