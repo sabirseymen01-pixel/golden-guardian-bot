@@ -151,15 +151,18 @@ async def yonetici_mi(update: Update, user_id: int) -> bool:
     except Exception:
         return False
 
+# --- EVRENSEL HEDEF BULMA (ID, Username ve Yanıt Destekli) ---
 async def hedef_kullanici_bul(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     hedef_id = None
     aciklama = ""
 
-    if update.message.reply_to_message:
+    # 1. Yöntem: Mesaja yanıt (reply) verilmiş mi?
+    if update.message and update.message.reply_to_message:
         hedef_user = update.message.reply_to_message.from_user
         return hedef_user.id, f"Yanıtlanan kullanıcı ({hedef_user.full_name} - {hedef_user.id})"
 
+    # 2. Yöntem: Komuttan sonra argüman girilmiş mi? (@username veya ID)
     if context.args:
         girdi = context.args[0]
         aciklama = girdi
@@ -242,7 +245,7 @@ async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         pass
 
-    grup_linki = f"t.me/{chat.username}" if chat.username else f"https://t.me/c/{str(chat.id).replace('-100','')}/1"
+    grup_linki = f"https://t.me/{chat.username}" if chat.username else f"https://t.me/c/{str(chat.id).replace('-100','')}/1"
     try:
         conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
         cursor = conn.cursor()
@@ -273,7 +276,7 @@ async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     bot_mesajini_sil_planla(context, chat.id, msj.message_id, 15.0)
 
-# --- İNTERAKTİF BUTON YÖNETİCİSİ (effective_user güncellendi) ---
+# --- İNTERAKTİF BUTON YÖNETİCİSİ ---
 async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -335,7 +338,7 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "menu_zamanlayici":
         metin = (
             "⏱️ **Zamanlı Medya ve Metin Yönetimi**\n\n"
-            "Botun belirli aralıklarla grup içine otomatik duyuru veya medya göndermesini sağlamak için veritabanı altyapısı hazırdır."
+            "Botun belirli aralıklarla grup içine otomatik duyuru veya medya göndermesini sağlayan altyapı aktif durumdadır. `/duyuru <metin>` komutu ile gruba katıl butonlu özel duyurular oluşturabilirsiniz."
         )
         keyboard = [[InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")]]
         await query.edit_message_text(text=metin, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
@@ -363,12 +366,14 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif data == "menu_yardim":
         metin = (
             "🛠️ **Golden Guardian Pro - Komut Menüsü**\n\n"
-            "• `/defol` : Kullanıcıyı yerel gruptan banlar.\n"
-            "• `/itaat` : Kullanıcıyı 10 dk susturur.\n"
-            "• `/kralice` : Kullanıcının mutesini kaldırır (Asla banlamaz/atmaz!).\n"
-            "• `/biat` : Yerel yasağı kaldırır.\n"
-            "• `/idam` : Kullanıcıyı federasyondaki TÜM gruplardan küresel olarak banlar.\n"
-            "• `/genelaf` : Küresel federasyon banını kaldırır.\n"
+            "• `/defol [ID/@user/Yanıt]` : Gruptan banlar.\n"
+            "• `/itaat [ID/@user/Yanıt]` : 10 dk susturur.\n"
+            "• `/kralice [ID/@user/Yanıt]` : Kesin mute kaldırır.\n"
+            "• `/biat [ID/@user/Yanıt]` : Yerel yasağı kaldırır.\n"
+            "• `/idam [ID/@user/Yanıt]` : Küresel federasyon banı atar.\n"
+            "• `/genelaf [ID/@user/Yanıt]` : Küresel af çıkarır.\n"
+            "• `/cik` : Grubu federasyon ağından çıkarır.\n"
+            "• `/duyuru <metin>` : Katıl butonlu duyuru atar.\n"
             "• `/istatistik` : Genel raporu gösterir."
         )
         keyboard = [[InlineKeyboardButton("🔙 Ana Menüye Dön", callback_data="menu_ana")]]
@@ -399,7 +404,7 @@ async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
 
-# --- KOMUTLAR ---
+# --- YÖNETİM KOMUTLARI (ID, @username ve Yanıt Destekli) ---
 async def defol_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
@@ -410,6 +415,8 @@ async def defol_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     hedef_id, aciklama = await hedef_kullanici_bul(update, context)
     if not hedef_id:
+        msj = await context.bot.send_message(chat.id, "⚠️ Geçerli bir kullanıcı belirtilmedi! (ID, @kullaniciadi girin veya mesaja yanıt verin)")
+        bot_mesajini_sil_planla(context, chat.id, msj.message_id, 7.0)
         return
     try:
         await chat.ban_member(hedef_id)
@@ -429,6 +436,8 @@ async def itaat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     hedef_id, aciklama = await hedef_kullanici_bul(update, context)
     if not hedef_id:
+        msj = await context.bot.send_message(chat.id, "⚠️ Geçerli bir kullanıcı belirtilmedi!")
+        bot_mesajini_sil_planla(context, chat.id, msj.message_id, 7.0)
         return
     try:
         await chat.restrict_member(
@@ -443,7 +452,7 @@ async def itaat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         log_kaydet("HATA", f"Susturma hatası: {e}")
 
-# --- KRALİÇE: Yalnızca mute (susturma) kaldırır, asla atmaz ---
+# --- KRALİÇE: Sorunsuz Mute Kaldırma ---
 async def kralice_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try:
@@ -454,6 +463,8 @@ async def kralice_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     hedef_id, aciklama = await hedef_kullanici_bul(update, context)
     if not hedef_id:
+        msj = await context.bot.send_message(chat.id, "⚠️ Geçerli bir kullanıcı belirtilmedi!")
+        bot_mesajini_sil_planla(context, chat.id, msj.message_id, 7.0)
         return
     try:
         await chat.restrict_member(
@@ -468,7 +479,7 @@ async def kralice_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         uyari_sifirla(hedef_id)
         log_kaydet("MUTE KALDIRMA (/kralice)", f"Hedef ID: {hedef_id} ({aciklama}) mutesi kaldırıldı.")
-        msj = await context.bot.send_message(chat.id, f"✨ Kraliçenin fermanıyla hedefin susturulması kaldırıldı (`{aciklama}`).", parse_mode="Markdown")
+        msj = await context.bot.send_message(chat.id, f"✨ Kraliçenin fermanıyla hedefin susturulması ve kısıtlamaları tamamen kaldırıldı (`{aciklama}`).", parse_mode="Markdown")
         bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
     except Exception as e:
         log_kaydet("HATA", f"Mute kaldırma hatası: {e}")
@@ -483,6 +494,8 @@ async def biat_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     hedef_id, aciklama = await hedef_kullanici_bul(update, context)
     if not hedef_id:
+        msj = await context.bot.send_message(chat.id, "⚠️ Geçerli bir kullanıcı belirtilmedi!")
+        bot_mesajini_sil_planla(context, chat.id, msj.message_id, 7.0)
         return
     try:
         await chat.unban_member(hedef_id)
@@ -503,6 +516,8 @@ async def idam_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     hedef_id, aciklama = await hedef_kullanici_bul(update, context)
     if not hedef_id:
+        msj = await context.bot.send_message(chat.id, "⚠️ Geçerli bir kullanıcı belirtilmedi!")
+        bot_mesajini_sil_planla(context, chat.id, msj.message_id, 7.0)
         return
 
     try:
@@ -533,6 +548,8 @@ async def genelaf_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     hedef_id, aciklama = await hedef_kullanici_bul(update, context)
     if not hedef_id:
+        msj = await context.bot.send_message(chat.id, "⚠️ Geçerli bir kullanıcı belirtilmedi!")
+        bot_mesajini_sil_planla(context, chat.id, msj.message_id, 7.0)
         return
 
     try:
@@ -551,6 +568,65 @@ async def genelaf_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
         bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
     except Exception as e:
         log_kaydet("HATA", f"Genel af hatası: {e}")
+
+# --- FEDERASYON GRUP ÇIKARMA (/cik) ---
+async def cik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+    if not await yonetici_mi(update, update.message.from_user.id):
+        return
+    try:
+        conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM federasyon_gruplar WHERE chat_id = ?", (chat.id,))
+        conn.commit()
+        conn.close()
+        log_kaydet("FEDERASYON ÇIKIŞ", f"Grup federasyondan çıkarıldı: {chat.title} ({chat.id})")
+        msj = await context.bot.send_message(chat.id, "🚪 Bu grup federasyon ağından başarıyla çıkarıldı.")
+        bot_mesajini_sil_planla(context, chat.id, msj.message_id, 10.0)
+    except Exception as e:
+        log_kaydet("HATA", f"Grup çıkış hatası: {e}")
+
+# --- ÖZEL DUYURU VE "GRUBA KATIL" BUTONLU FONKSİYON ---
+async def duyuru_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+    if not await yonetici_mi(update, update.message.from_user.id):
+        return
+    
+    metin = " ".join(context.args) if context.args else "📢 **Federasyon Resmi Duyurusu**\n\nBirlik ve beraberlik içinde gücümüze güç katıyoruz!"
+    
+    grup_linki = f"https://t.me/{chat.username}" if chat.username else f"https://t.me/c/{str(chat.id).replace('-100','')}/1"
+    
+    keyboard = [[InlineKeyboardButton("🚀 Gruba Hemen Katıl", url=grup_linki)]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    try:
+        if update.message.reply_to_message and update.message.reply_to_message.photo:
+            photo_file_id = update.message.reply_to_message.photo[-1].file_id
+            await context.bot.send_photo(
+                chat_id=chat.id,
+                photo=photo_file_id,
+                caption=metin,
+                parse_mode="Markdown",
+                reply_markup=reply_markup
+            )
+        else:
+            await context.bot.send_message(
+                chat_id=chat.id,
+                text=metin,
+                parse_mode="Markdown",
+                reply_markup=reply_markup
+            )
+        log_kaydet("DUYURU", f"Gruba butonlu duyuru gönderildi: {chat.title}")
+    except Exception as e:
+        log_kaydet("HATA", f"Duyuru gönderme hatası: {e}")
 
 async def istatistik_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
@@ -596,6 +672,7 @@ def main():
 
     app = ApplicationBuilder().token(TOKEN).post_init(post_init).build()
 
+    # Komut Kayıtları
     app.add_handler(CommandHandler("start", start_komutu))
     app.add_handler(CommandHandler("defol", defol_komutu))
     app.add_handler(CommandHandler("itaat", itaat_komutu))
@@ -603,12 +680,14 @@ def main():
     app.add_handler(CommandHandler("biat", biat_komutu))
     app.add_handler(CommandHandler("idam", idam_komutu))
     app.add_handler(CommandHandler("genelaf", genelaf_komutu))
+    app.add_handler(CommandHandler("cik", cik_komutu))
+    app.add_handler(CommandHandler("duyuru", duyuru_komutu))
     app.add_handler(CommandHandler("istatistik", istatistik_komutu))
     
     app.add_handler(CallbackQueryHandler(buton_yoneticisi))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), mesaj_denetimi))
 
-    logger.info("Golden Guardian Pro hatasız yapılandırma ile başlatılıyor...")
+    logger.info("Golden Guardian Pro eksiksiz ve yetkili modda başlatılıyor...")
     
     app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
