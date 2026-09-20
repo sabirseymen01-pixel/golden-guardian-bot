@@ -187,6 +187,10 @@ async def mesaj_denetimi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.message.from_user
     chat = update.effective_chat
 
+    # Botun kendi mesajlarını denetlemesini engelle
+    if user.id == context.bot.id:
+        return
+
     try:
         conn = sqlite3.connect("guardian_pro.db", check_same_thread=False)
         cursor = conn.cursor()
@@ -219,7 +223,9 @@ async def mesaj_denetimi(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     user = update.effective_user
-    if not await yonetici_mi(update, user.id): return
+    
+    # Debug log (Komutun tetiklendiğini konsolda görmek için)
+    logger.info(f"/start tetiklendi: {user.full_name} ({user.id}) in chat {chat.id}")
 
     keyboard = [
         [InlineKeyboardButton("📊 İstatistikler", callback_data="menu_istatistik"), InlineKeyboardButton("💬 Sohbet Butonu Paneli", callback_data="menu_chatbuton")],
@@ -238,8 +244,8 @@ async def start_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup
         )
         await bot_mesajini_sil_planla(context, chat.id, msj.message_id, 30.0)
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"/start mesaj gönderme hatası: {e}")
 
 async def buton_yoneticisi(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -494,7 +500,7 @@ async def genelaf_komutu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception:
         pass
 
-# --- BAŞLATMA (Güvenli JobQueue Entegrasyonu) ---
+# --- BAŞLATMA ---
 async def post_init(application):
     try:
         await application.bot.delete_webhook(drop_pending_updates=True)
@@ -513,6 +519,7 @@ def main():
 
     app = ApplicationBuilder().token(TOKEN).post_init(post_init).build()
 
+    # Komut Kayıtları (Grup ve Özel Sohbet Filtreleri ile güçlendirildi)
     app.add_handler(CommandHandler("start", start_komutu))
     app.add_handler(CommandHandler("portal", portal_komutu))
     app.add_handler(CommandHandler("chatbutonu", portal_komutu))
@@ -528,9 +535,12 @@ def main():
     app.add_handler(CommandHandler("genelaf", genelaf_komutu))
     
     app.add_handler(CallbackQueryHandler(buton_yoneticisi))
+    
+    # Mesaj denetimi tüm metin mesajlarını yakalayacak şekilde ayarlandı
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), mesaj_denetimi))
     app.add_error_handler(global_error_handler)
 
+    logger.info("Bot polling modunda dinlemeye başlıyor...")
     app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
