@@ -1,8 +1,18 @@
 import os
+import sys
+import asyncio
 import logging
 import threading
-from datetime import datetime
-from flask import Flask, request, redirect, url_for, render_template_string, jsonify
+from datetime import datetime, timedelta
+from functools import wraps
+
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    redirect,
+    render_template_string,
+)
 
 from sqlalchemy import (
     create_engine,
@@ -29,27 +39,61 @@ from telegram.ext import (
 
 
 # ============================================================
-# AYARLAR
+# ROSEFED
+# Telegram Federation + Web Panel
+# Render Webhook Architecture
 # ============================================================
-
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-PANEL_KEY = os.getenv("PANEL_KEY", "rosefed")
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///rosefed.db")
-PUBLIC_URL = os.getenv("PUBLIC_URL", "")
-
-PORT = int(os.getenv("PORT", "10000"))
 
 
 # ============================================================
-# LOG
+# LOGGING
 # ============================================================
 
 logging.basicConfig(
-    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
     level=logging.INFO,
+    format=(
+        "%(asctime)s | "
+        "%(levelname)s | "
+        "%(name)s | "
+        "%(message)s"
+    ),
 )
 
 logger = logging.getLogger("RoseFed")
+
+
+# ============================================================
+# ENV
+# ============================================================
+
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+
+PANEL_KEY = os.getenv(
+    "PANEL_KEY",
+    "change-this-panel-key",
+).strip()
+
+PUBLIC_URL = os.getenv(
+    "PUBLIC_URL",
+    "",
+).strip().rstrip("/")
+
+WEBHOOK_SECRET = os.getenv(
+    "WEBHOOK_SECRET",
+    "",
+).strip()
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "sqlite:///rosefed.db",
+).strip()
+
+PORT = int(
+    os.getenv(
+        "PORT",
+        "10000",
+    )
+)
 
 
 # ============================================================
@@ -63,16 +107,16 @@ app = Flask(__name__)
 # DATABASE
 # ============================================================
 
-connect_args = {}
+db_connect_args = {}
 
 if DATABASE_URL.startswith("sqlite"):
-    connect_args = {
+    db_connect_args = {
         "check_same_thread": False
     }
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args=connect_args,
+    connect_args=db_connect_args,
     pool_pre_ping=True,
 )
 
@@ -85,23 +129,86 @@ SessionLocal = sessionmaker(
 
 
 class Federation(Base):
+
     __tablename__ = "federations"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+    )
 
-    chat_id = Column(BigInteger, unique=True, nullable=False)
+    chat_id = Column(
+        BigInteger,
+        unique=True,
+        nullable=False,
+        index=True,
+    )
 
-    chat_title = Column(String(255), default="Bilinmeyen Grup")
+    chat_title = Column(
+        String(255),
+        default="Grup",
+    )
 
-    chat_username = Column(String(255), nullable=True)
+    chat_username = Column(
+        String(255),
+        nullable=True,
+    )
 
-    portal_username = Column(String(255), nullable=True)
+    portal_username = Column(
+        String(255),
+        nullable=True,
+    )
 
-    duration_minutes = Column(Integer, default=0)
+    duration_minutes = Column(
+        Integer,
+        default=0,
+    )
 
-    active = Column(Boolean, default=True)
+    active = Column(
+        Boolean,
+        default=True,
+    )
 
-    portal_message_id = Column(Integer, nullable=True)
+    portal_message_id = Column(
+        Integer,
+        nullable=True,
+    )
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow,
+    )
+
+
+class ModerationLog(Base):
+
+    __tablename__ = "moderation_logs"
+
+    id = Column(
+        Integer,
+        primary_key=True,
+    )
+
+    chat_id = Column(
+        BigInteger,
+        nullable=False,
+        index=True,
+    )
+
+    user_id = Column(
+        BigInteger,
+        nullable=False,
+    )
+
+    action = Column(
+        String(50),
+        nullable=False,
+    )
+
+    moderator_id = Column(
+        BigInteger,
+        nullable=True,
+    )
 
     created_at = Column(
         DateTime,
@@ -113,24 +220,37 @@ Base.metadata.create_all(engine)
 
 
 # ============================================================
-# GEÇİCİ VERİLER
+# TELEGRAM APPLICATION
 # ============================================================
 
-timed_automations = {}
+telegram_app = None
+
+telegram_loop = None
+
+telegram_ready = threading.Event()
+
+telegram_start_error = None
 
 telegram_thread = None
+
 telegram_lock = threading.Lock()
 
 
 # ============================================================
-# YARDIMCI FONKSİYONLAR
+# DATABASE HELPERS
 # ============================================================
 
-def get_db():
+def db_session():
     return SessionLocal()
 
 
-def is_admin(update: Update) -> bool:
+# ============================================================
+# TELEGRAM HELPERS
+# ============================================================
+
+async def is_group_admin(
+    update: Update,
+) -> bool:
 
     if not update.effective_chat:
         return False
@@ -140,7 +260,7 @@ def is_admin(update: Update) -> bool:
 
     try:
 
-        member = update.effective_chat.get_member(
+        member = await update.effective_chat.get_member(
             update.effective_user.id
         )
 
@@ -149,153 +269,212 @@ def is_admin(update: Update) -> bool:
             "creator",
         )
 
-    except Exception as e:
+    except Exception as exc:
 
-        logger.error(
+        logger.exception(
             "Admin kontrolü başarısız: %s",
-            e
+            exc,
         )
 
         return False
 
 
-async def require_admin(update: Update):
+async def admin_required(
+    update: Update,
+) -> bool:
 
-    if not is_admin(update):
+    if await is_group_admin(update):
+        return True
 
-        if update.message:
+    if update.effective_message:
 
-            await update.message.reply_text(
-                "❌ Bu komutu yalnızca grup yöneticileri kullanabilir."
+        await update.effective_message.reply_text(
+            "❌ Bu komutu yalnızca grup yöneticileri kullanabilir."
+        )
+
+    return False
+
+
+def get_target_user(update: Update):
+
+    if not update.effective_message:
+        return None
+
+    replied = (
+        update.effective_message.reply_to_message
+    )
+
+    if not replied:
+        return None
+
+    return replied.from_user
+
+
+async def save_log(
+    chat_id,
+    user_id,
+    action,
+    moderator_id=None,
+):
+
+    db = db_session()
+
+    try:
+
+        db.add(
+            ModerationLog(
+                chat_id=chat_id,
+                user_id=user_id,
+                action=action,
+                moderator_id=moderator_id,
             )
+        )
 
-        return False
+        db.commit()
 
-    return True
+    except Exception:
+
+        db.rollback()
+
+        logger.exception(
+            "Moderasyon logu kaydedilemedi."
+        )
+
+    finally:
+
+        db.close()
 
 
 # ============================================================
-# /START
+# START
 # ============================================================
 
 async def start_command(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    text = """
-🌹 <b>RoseFed Bot</b>
+    if not update.effective_message:
+        return
 
-Federasyon ve grup yönetim sistemine hoş geldin.
+    await update.effective_message.reply_text(
+        """
+🌹 RoseFed Bot
 
-<b>Temel komutlar:</b>
+Federasyon ve grup yönetim sistemi.
+
+🔗 FEDERASYON
 
 /bagla @portal
 /ayir
 /sure 60
 
-<b>Moderasyon:</b>
+🔨 MODERASYON
 
 /ban
 /unban
 /mute
 /unmute
 
-<b>Diğer:</b>
+👑 DİĞER
 
 /itaat
 /kralice
 /yardim
 
-🌹 RoseFed
+🌹 RoseFed aktif.
 """
-
-    await update.message.reply_text(
-        text,
-        parse_mode="HTML"
     )
 
 
 # ============================================================
-# /YARDIM
+# HELP
 # ============================================================
 
 async def help_command(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    text = """
-🌹 <b>RoseFed Komut Merkezi</b>
+    if not update.effective_message:
+        return
+
+    await update.effective_message.reply_text(
+        """
+🌹 ROSEFED KOMUTLARI
 
 ━━━━━━━━━━━━━━━━━━
 
-🔗 <b>FEDERASYON</b>
+🔗 FEDERASYON
 
 /bagla @portal
-Portal grubunu bağlar.
 
-/ayir
+Grubu federasyona bağlar.
+
+ /ayir
+
 Federasyon bağlantısını kaldırır.
 
 /sure 60
-Federasyon süresini ayarlar.
+
+Federasyon süresini dakika olarak ayarlar.
 
 ━━━━━━━━━━━━━━━━━━
 
-🔨 <b>MODERASYON</b>
+🔨 MODERASYON
 
 /ban
+
 Yanıt verilen kullanıcıyı yasaklar.
 
 /unban
-Kullanıcının yasağını kaldırır.
+
+Yanıt verilen kullanıcının yasağını kaldırır.
 
 /mute
-Kullanıcıyı susturur.
+
+Yanıt verilen kullanıcıyı susturur.
 
 /unmute
+
 Susturmayı kaldırır.
 
 ━━━━━━━━━━━━━━━━━━
 
-👑 <b>ÖZEL</b>
+👑 ÖZEL
 
 /itaat
-/kraliçe
 /kralice
 
 ━━━━━━━━━━━━━━━━━━
 
 🌹 RoseFed
 """
-
-    await update.message.reply_text(
-        text,
-        parse_mode="HTML"
     )
 
 
 # ============================================================
-# /BAGLA
+# BAGLA
 # ============================================================
 
 async def bagla_command(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    if not await require_admin(update):
+    if not await admin_required(update):
         return
 
     if not update.effective_chat:
         return
 
+    if not update.effective_message:
+        return
+
     if not context.args:
 
-        await update.message.reply_text(
-            "❌ Kullanım:\n\n"
-            "/bagla @portalgrup"
+        await update.effective_message.reply_text(
+            "❌ Kullanım:\n\n/bagla @portal"
         )
 
         return
@@ -303,12 +482,11 @@ async def bagla_command(
     portal = context.args[0].strip()
 
     if not portal.startswith("@"):
-
         portal = "@" + portal
 
     chat = update.effective_chat
 
-    db = get_db()
+    db = db_session()
 
     try:
 
@@ -322,6 +500,18 @@ async def bagla_command(
 
         if federation:
 
+            federation.chat_title = (
+                chat.title or "Grup"
+            )
+
+            federation.chat_username = (
+                getattr(
+                    chat,
+                    "username",
+                    None,
+                )
+            )
+
             federation.portal_username = portal
             federation.active = True
 
@@ -330,10 +520,10 @@ async def bagla_command(
             federation = Federation(
                 chat_id=chat.id,
                 chat_title=chat.title or "Grup",
-                chat_username=(
-                    chat.username
-                    if hasattr(chat, "username")
-                    else None
+                chat_username=getattr(
+                    chat,
+                    "username",
+                    None,
                 ),
                 portal_username=portal,
                 active=True,
@@ -343,58 +533,69 @@ async def bagla_command(
 
         db.commit()
 
-        buttons = [
-            [
-                InlineKeyboardButton(
-                    "🌹 Gruba Git",
-                    url=(
-                        f"https://t.me/"
-                        f"{chat.username}"
-                        if getattr(
-                            chat,
-                            "username",
-                            None
-                        )
-                        else "https://t.me/"
-                        + portal.replace("@", "")
-                    ),
-                )
-            ],
+        buttons = []
+
+        if getattr(
+            chat,
+            "username",
+            None,
+        ):
+
+            buttons.append(
+                [
+                    InlineKeyboardButton(
+                        "🌹 Gruba Git",
+                        url=(
+                            "https://t.me/"
+                            + chat.username
+                        ),
+                    )
+                ]
+            )
+
+        buttons.append(
             [
                 InlineKeyboardButton(
                     "🔗 Portal",
                     url=(
                         "https://t.me/"
-                        + portal.replace("@", "")
+                        + portal.lstrip("@")
                     ),
                 )
-            ],
-        ]
+            ]
+        )
 
-        keyboard = InlineKeyboardMarkup(buttons)
+        keyboard = InlineKeyboardMarkup(
+            buttons
+        )
 
-        message = await update.message.reply_text(
+        message = await update.effective_message.reply_text(
             f"""
-🌹 <b>FEDERASYON BAĞLANDI</b>
+🌹 FEDERASYON BAĞLANDI
 
 ━━━━━━━━━━━━━━━━━━
 
 📌 Grup:
-<b>{chat.title}</b>
+{chat.title}
 
 🔗 Portal:
-<b>{portal}</b>
+{portal}
 
 🟢 Durum:
-<b>AKTİF</b>
+AKTİF
 
 ━━━━━━━━━━━━━━━━━━
 
 RoseFed federasyon sistemi aktif.
 """,
-            parse_mode="HTML",
             reply_markup=keyboard,
         )
+
+        federation.portal_message_id = (
+            message.message_id
+        )
+
+        db.commit()
 
         try:
 
@@ -402,19 +603,24 @@ RoseFed federasyon sistemi aktif.
                 disable_notification=True
             )
 
-        except Exception:
-            pass
+        except Exception as exc:
 
-    except Exception as e:
+            logger.info(
+                "Mesaj sabitlenemedi: %s",
+                exc,
+            )
+
+    except Exception as exc:
 
         db.rollback()
 
         logger.exception(
-            "Federasyon bağlama hatası"
+            "Bagla hatası: %s",
+            exc,
         )
 
-        await update.message.reply_text(
-            f"❌ Hata oluştu:\n{e}"
+        await update.effective_message.reply_text(
+            "❌ Federasyon bağlanırken bir hata oluştu."
         )
 
     finally:
@@ -423,35 +629,40 @@ RoseFed federasyon sistemi aktif.
 
 
 # ============================================================
-# /AYIR
+# AYIR
 # ============================================================
 
 async def ayir_command(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    if not await require_admin(update):
+    if not await admin_required(update):
         return
 
-    chat = update.effective_chat
+    if not update.effective_chat:
+        return
 
-    db = get_db()
+    if not update.effective_message:
+        return
+
+    db = db_session()
 
     try:
 
         federation = (
             db.query(Federation)
             .filter(
-                Federation.chat_id == chat.id
+                Federation.chat_id
+                == update.effective_chat.id
             )
             .first()
         )
 
         if not federation:
 
-            await update.message.reply_text(
-                "ℹ️ Bu grup herhangi bir federasyona bağlı değil."
+            await update.effective_message.reply_text(
+                "ℹ️ Bu grup bir federasyona bağlı değil."
             )
 
             return
@@ -460,16 +671,21 @@ async def ayir_command(
 
         db.commit()
 
-        await update.message.reply_text(
+        await update.effective_message.reply_text(
             "🔓 Federasyon bağlantısı kaldırıldı."
         )
 
-    except Exception as e:
+    except Exception as exc:
 
         db.rollback()
 
-        await update.message.reply_text(
-            f"❌ Hata: {e}"
+        logger.exception(
+            "Ayır hatası: %s",
+            exc,
+        )
+
+        await update.effective_message.reply_text(
+            "❌ Federasyon ayrılırken hata oluştu."
         )
 
     finally:
@@ -478,51 +694,57 @@ async def ayir_command(
 
 
 # ============================================================
-# /SURE
+# SURE
 # ============================================================
 
 async def sure_command(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    if not await require_admin(update):
+    if not await admin_required(update):
+        return
+
+    if not update.effective_chat:
+        return
+
+    if not update.effective_message:
         return
 
     if not context.args:
 
-        await update.message.reply_text(
-            "❌ Kullanım:\n\n"
-            "/sure 60"
+        await update.effective_message.reply_text(
+            "❌ Kullanım:\n\n/sure 60"
         )
 
         return
 
     try:
 
-        minutes = int(context.args[0])
+        minutes = int(
+            context.args[0]
+        )
 
         if minutes < 0:
             raise ValueError
 
     except ValueError:
 
-        await update.message.reply_text(
-            "❌ Süre dakika olarak sayı olmalıdır."
+        await update.effective_message.reply_text(
+            "❌ Süre pozitif bir sayı olmalıdır."
         )
 
         return
 
-    chat = update.effective_chat
-
-    db = get_db()
+    db = db_session()
 
     try:
 
         federation = (
             db.query(Federation)
             .filter(
-                Federation.chat_id == chat.id
+                Federation.chat_id
+                == update.effective_chat.id
             )
             .first()
         )
@@ -530,9 +752,13 @@ async def sure_command(
         if not federation:
 
             federation = Federation(
-                chat_id=chat.id,
-                chat_title=chat.title or "Grup",
+                chat_id=update.effective_chat.id,
+                chat_title=(
+                    update.effective_chat.title
+                    or "Grup"
+                ),
                 duration_minutes=minutes,
+                active=True,
             )
 
             db.add(federation)
@@ -543,18 +769,23 @@ async def sure_command(
 
         db.commit()
 
-        await update.message.reply_text(
-            f"⏱️ Federasyon süresi:\n\n"
-            f"<b>{minutes} dakika</b>",
-            parse_mode="HTML"
+        await update.effective_message.reply_text(
+            f"⏱️ Federasyon süresi "
+            f"<b>{minutes} dakika</b> olarak ayarlandı.",
+            parse_mode="HTML",
         )
 
-    except Exception as e:
+    except Exception as exc:
 
         db.rollback()
 
-        await update.message.reply_text(
-            f"❌ Hata: {e}"
+        logger.exception(
+            "Sure hatası: %s",
+            exc,
+        )
+
+        await update.effective_message.reply_text(
+            "❌ Süre ayarlanamadı."
         )
 
     finally:
@@ -563,108 +794,149 @@ async def sure_command(
 
 
 # ============================================================
-# /BAN
+# BAN
 # ============================================================
 
 async def ban_command(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    if not await require_admin(update):
+    if not await admin_required(update):
         return
 
-    if not update.message.reply_to_message:
+    if not update.effective_chat:
+        return
 
-        await update.message.reply_text(
-            "❌ Yasaklamak istediğin kullanıcıya "
+    if not update.effective_message:
+        return
+
+    target = get_target_user(update)
+
+    if not target:
+
+        await update.effective_message.reply_text(
+            "❌ Yasaklamak istediğin kişiye "
             "yanıt vererek /ban yaz."
         )
 
         return
 
-    user = update.message.reply_to_message.from_user
-
     try:
 
         await update.effective_chat.ban_member(
-            user.id
+            target.id
         )
 
-        await update.message.reply_text(
-            f"🔨 <b>{user.first_name}</b> yasaklandı.",
-            parse_mode="HTML"
+        await save_log(
+            update.effective_chat.id,
+            target.id,
+            "ban",
+            update.effective_user.id,
         )
 
-    except Exception as e:
+        await update.effective_message.reply_text(
+            f"🔨 {target.first_name} yasaklandı."
+        )
 
-        await update.message.reply_text(
-            f"❌ Ban işlemi başarısız:\n{e}"
+    except Exception as exc:
+
+        logger.exception(
+            "Ban hatası: %s",
+            exc,
+        )
+
+        await update.effective_message.reply_text(
+            f"❌ Ban işlemi başarısız.\n\n{exc}"
         )
 
 
 # ============================================================
-# /UNBAN
+# UNBAN
 # ============================================================
 
 async def unban_command(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    if not await require_admin(update):
+    if not await admin_required(update):
         return
 
-    if not update.message.reply_to_message:
+    if not update.effective_chat:
+        return
 
-        await update.message.reply_text(
-            "❌ Kullanıcı mesajına yanıt ver."
+    if not update.effective_message:
+        return
+
+    target = get_target_user(update)
+
+    if not target:
+
+        await update.effective_message.reply_text(
+            "❌ Yasağı kaldırmak istediğin kişiye "
+            "yanıt vererek /unban yaz."
         )
 
         return
-
-    user = update.message.reply_to_message.from_user
 
     try:
 
         await update.effective_chat.unban_member(
-            user.id
+            target.id
         )
 
-        await update.message.reply_text(
-            f"🔓 <b>{user.first_name}</b> yasağı kaldırıldı.",
-            parse_mode="HTML"
+        await save_log(
+            update.effective_chat.id,
+            target.id,
+            "unban",
+            update.effective_user.id,
         )
 
-    except Exception as e:
+        await update.effective_message.reply_text(
+            f"🔓 {target.first_name} yasağı kaldırıldı."
+        )
 
-        await update.message.reply_text(
-            f"❌ Unban başarısız:\n{e}"
+    except Exception as exc:
+
+        logger.exception(
+            "Unban hatası: %s",
+            exc,
+        )
+
+        await update.effective_message.reply_text(
+            f"❌ Unban başarısız.\n\n{exc}"
         )
 
 
 # ============================================================
-# /MUTE
+# MUTE
 # ============================================================
 
 async def mute_command(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    if not await require_admin(update):
+    if not await admin_required(update):
         return
 
-    if not update.message.reply_to_message:
+    if not update.effective_chat:
+        return
 
-        await update.message.reply_text(
-            "❌ Susturmak istediğin kullanıcıya "
-            "yanıt ver."
+    if not update.effective_message:
+        return
+
+    target = get_target_user(update)
+
+    if not target:
+
+        await update.effective_message.reply_text(
+            "❌ Susturmak istediğin kişiye "
+            "yanıt vererek /mute yaz."
         )
 
         return
-
-    user = update.message.reply_to_message.from_user
 
     try:
 
@@ -673,43 +945,61 @@ async def mute_command(
         )
 
         await update.effective_chat.restrict_member(
-            user.id,
-            permissions=permissions
+            target.id,
+            permissions=permissions,
         )
 
-        await update.message.reply_text(
-            f"🔇 <b>{user.first_name}</b> susturuldu.",
-            parse_mode="HTML"
+        await save_log(
+            update.effective_chat.id,
+            target.id,
+            "mute",
+            update.effective_user.id,
         )
 
-    except Exception as e:
+        await update.effective_message.reply_text(
+            f"🔇 {target.first_name} susturuldu."
+        )
 
-        await update.message.reply_text(
-            f"❌ Mute başarısız:\n{e}"
+    except Exception as exc:
+
+        logger.exception(
+            "Mute hatası: %s",
+            exc,
+        )
+
+        await update.effective_message.reply_text(
+            f"❌ Mute başarısız.\n\n{exc}"
         )
 
 
 # ============================================================
-# /UNMUTE
+# UNMUTE
 # ============================================================
 
 async def unmute_command(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    if not await require_admin(update):
+    if not await admin_required(update):
         return
 
-    if not update.message.reply_to_message:
+    if not update.effective_chat:
+        return
 
-        await update.message.reply_text(
-            "❌ Kullanıcı mesajına yanıt ver."
+    if not update.effective_message:
+        return
+
+    target = get_target_user(update)
+
+    if not target:
+
+        await update.effective_message.reply_text(
+            "❌ Susturmasını kaldırmak istediğin "
+            "kişiye yanıt vererek /unmute yaz."
         )
 
         return
-
-    user = update.message.reply_to_message.from_user
 
     try:
 
@@ -727,85 +1017,484 @@ async def unmute_command(
         )
 
         await update.effective_chat.restrict_member(
-            user.id,
-            permissions=permissions
+            target.id,
+            permissions=permissions,
         )
 
-        await update.message.reply_text(
-            f"🔊 <b>{user.first_name}</b> susturması kaldırıldı.",
-            parse_mode="HTML"
+        await save_log(
+            update.effective_chat.id,
+            target.id,
+            "unmute",
+            update.effective_user.id,
         )
 
-    except Exception as e:
+        await update.effective_message.reply_text(
+            f"🔊 {target.first_name} artık konuşabilir."
+        )
 
-        await update.message.reply_text(
-            f"❌ Unmute başarısız:\n{e}"
+    except Exception as exc:
+
+        logger.exception(
+            "Unmute hatası: %s",
+            exc,
+        )
+
+        await update.effective_message.reply_text(
+            f"❌ Unmute başarısız.\n\n{exc}"
         )
 
 
 # ============================================================
-# /İTAAT
+# İTAAT
 # ============================================================
 
 async def itaat_command(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    await update.message.reply_text(
-        "👑 İtaat sistemi aktif.\n\n"
-        "🌹 RoseFed"
+    if not update.effective_message:
+        return
+
+    user = update.effective_user
+
+    name = (
+        user.first_name
+        if user
+        else "Kullanıcı"
+    )
+
+    await update.effective_message.reply_text(
+        f"👑 {name}, RoseFed emri aldı."
     )
 
 
 # ============================================================
-# /KRALİÇE
+# KRALİÇE
 # ============================================================
 
 async def kralice_command(
     update: Update,
-    context: ContextTypes.DEFAULT_TYPE
+    context: ContextTypes.DEFAULT_TYPE,
 ):
 
-    await update.message.reply_text(
-        "👑 Kraliçe modu aktif.\n\n"
-        "🌹 RoseFed"
+    if not update.effective_message:
+        return
+
+    await update.effective_message.reply_text(
+        "👑 Kraliçe modu aktif.\n\n🌹 RoseFed"
     )
 
 
 # ============================================================
-# FEDERASYON İSTATİSTİKLERİ
+# BOT OLUŞTUR
 # ============================================================
 
-def get_stats():
+def create_telegram_application():
 
-    db = get_db()
+    global telegram_app
+
+    if not TOKEN:
+
+        raise RuntimeError(
+            "TELEGRAM_BOT_TOKEN bulunamadı."
+        )
+
+    telegram_app = (
+        Application.builder()
+        .token(TOKEN)
+        .build()
+    )
+
+    telegram_app.add_handler(
+        CommandHandler(
+            "start",
+            start_command,
+        )
+    )
+
+    telegram_app.add_handler(
+        CommandHandler(
+            ["yardim", "help"],
+            help_command,
+        )
+    )
+
+    telegram_app.add_handler(
+        CommandHandler(
+            "bagla",
+            bagla_command,
+        )
+    )
+
+    telegram_app.add_handler(
+        CommandHandler(
+            "ayir",
+            ayir_command,
+        )
+    )
+
+    telegram_app.add_handler(
+        CommandHandler(
+            "sure",
+            sure_command,
+        )
+    )
+
+    telegram_app.add_handler(
+        CommandHandler(
+            "ban",
+            ban_command,
+        )
+    )
+
+    telegram_app.add_handler(
+        CommandHandler(
+            "unban",
+            unban_command,
+        )
+    )
+
+    telegram_app.add_handler(
+        CommandHandler(
+            "mute",
+            mute_command,
+        )
+    )
+
+    telegram_app.add_handler(
+        CommandHandler(
+            "unmute",
+            unmute_command,
+        )
+    )
+
+    telegram_app.add_handler(
+        CommandHandler(
+            "itaat",
+            itaat_command,
+        )
+    )
+
+    telegram_app.add_handler(
+        CommandHandler(
+            ["kralice", "krallice"],
+            kralice_command,
+        )
+    )
+
+    return telegram_app
+
+
+# ============================================================
+# TELEGRAM ASYNC LOOP
+# ============================================================
+
+async def telegram_worker():
+
+    global telegram_start_error
 
     try:
 
-        total = db.query(Federation).count()
-
-        active = (
-            db.query(Federation)
-            .filter(
-                Federation.active == True
-            )
-            .count()
+        logger.info(
+            "Telegram Application hazırlanıyor..."
         )
 
-        return total, active
+        application = (
+            create_telegram_application()
+        )
+
+        await application.initialize()
+
+        await application.start()
+
+        webhook_url = (
+            PUBLIC_URL
+            + "/telegram/webhook"
+        )
+
+        if not PUBLIC_URL:
+
+            raise RuntimeError(
+                "PUBLIC_URL ayarlanmamış. "
+                "Örnek: https://rosefed-bot.onrender.com"
+            )
+
+        webhook_kwargs = {
+            "url": webhook_url,
+            "allowed_updates": Update.ALL_TYPES,
+            "drop_pending_updates": True,
+        }
+
+        if WEBHOOK_SECRET:
+
+            webhook_kwargs[
+                "secret_token"
+            ] = WEBHOOK_SECRET
+
+        await application.bot.set_webhook(
+            **webhook_kwargs
+        )
+
+        logger.info(
+            "Telegram webhook aktif: %s",
+            webhook_url,
+        )
+
+        telegram_ready.set()
+
+        # Event loop'u canlı tut.
+        await asyncio.Event().wait()
+
+    except Exception as exc:
+
+        telegram_start_error = str(exc)
+
+        logger.exception(
+            "Telegram başlatılamadı: %s",
+            exc,
+        )
+
+        telegram_ready.clear()
+
+
+def telegram_thread_target():
+
+    global telegram_loop
+
+    telegram_loop = asyncio.new_event_loop()
+
+    asyncio.set_event_loop(
+        telegram_loop
+    )
+
+    try:
+
+        telegram_loop.run_until_complete(
+            telegram_worker()
+        )
+
+    except Exception as exc:
+
+        logger.exception(
+            "Telegram event loop hatası: %s",
+            exc,
+        )
 
     finally:
 
-        db.close()
+        telegram_loop.close()
+
+
+def start_telegram():
+
+    global telegram_thread
+
+    if not TOKEN:
+
+        logger.error(
+            "TELEGRAM_BOT_TOKEN yok."
+        )
+
+        return
+
+    with telegram_lock:
+
+        if (
+            telegram_thread
+            and telegram_thread.is_alive()
+        ):
+
+            return
+
+        telegram_thread = threading.Thread(
+            target=telegram_thread_target,
+            name="RoseFedTelegram",
+            daemon=True,
+        )
+
+        telegram_thread.start()
+
+        logger.info(
+            "Telegram thread başlatıldı."
+        )
 
 
 # ============================================================
-# WEB PANEL HTML
+# TELEGRAM WEBHOOK
+# ============================================================
+
+@app.post("/telegram/webhook")
+def telegram_webhook():
+
+    if not TOKEN:
+
+        return jsonify({
+            "ok": False,
+            "error": "Bot token missing",
+        }), 503
+
+    if not telegram_ready.is_set():
+
+        return jsonify({
+            "ok": False,
+            "error": "Telegram bot not ready",
+        }), 503
+
+    if WEBHOOK_SECRET:
+
+        received_secret = request.headers.get(
+            "X-Telegram-Bot-Api-Secret-Token",
+            "",
+        )
+
+        if received_secret != WEBHOOK_SECRET:
+
+            logger.warning(
+                "Geçersiz Telegram webhook secret."
+            )
+
+            return jsonify({
+                "ok": False,
+                "error": "Unauthorized",
+            }), 403
+
+    try:
+
+        data = request.get_json(
+            silent=True
+        )
+
+        if not data:
+
+            return jsonify({
+                "ok": False,
+                "error": "Invalid JSON",
+            }), 400
+
+        update = Update.de_json(
+            data,
+            telegram_app.bot,
+        )
+
+        future = asyncio.run_coroutine_threadsafe(
+            telegram_app.update_queue.put(
+                update
+            ),
+            telegram_loop,
+        )
+
+        # Kuyruğa gönderme işleminin kabul edildiğini
+        # kontrol et.
+        future.result(
+            timeout=4
+        )
+
+        return jsonify({
+            "ok": True,
+        })
+
+    except Exception as exc:
+
+        logger.exception(
+            "Webhook işleme hatası: %s",
+            exc,
+        )
+
+        return jsonify({
+            "ok": False,
+            "error": "Webhook processing failed",
+        }), 500
+
+
+# ============================================================
+# HEALTH
+# ============================================================
+
+@app.get("/health")
+def health():
+
+    db_ok = False
+
+    try:
+
+        db = db_session()
+
+        db.execute(
+            "SELECT 1"
+        )
+
+        db.close()
+
+        db_ok = True
+
+    except Exception as exc:
+
+        logger.error(
+            "Health DB hatası: %s",
+            exc,
+        )
+
+    return jsonify({
+        "status": "ok",
+        "service": "RoseFed",
+        "web": True,
+        "database": db_ok,
+        "telegram_configured": bool(TOKEN),
+        "telegram_ready": (
+            telegram_ready.is_set()
+        ),
+        "webhook": bool(
+            PUBLIC_URL
+        ),
+    }), 200
+
+
+# ============================================================
+# PANEL AUTH
+# ============================================================
+
+def panel_required(func):
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        key = request.args.get(
+            "key",
+            "",
+        )
+
+        if key != PANEL_KEY:
+
+            return (
+                """
+                <!DOCTYPE html>
+                <html>
+                <body style="
+                    background:#08080d;
+                    color:white;
+                    font-family:Arial;
+                    text-align:center;
+                    padding:100px;
+                ">
+                <h1>🌹 RoseFed</h1>
+                <p>Yetkisiz erişim.</p>
+                </body>
+                </html>
+                """,
+                401,
+            )
+
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+# ============================================================
+# PANEL
 # ============================================================
 
 PANEL_HTML = """
-
 <!DOCTYPE html>
 
 <html lang="tr">
@@ -814,218 +1503,209 @@ PANEL_HTML = """
 
 <meta charset="UTF-8">
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+>
 
-<title>RoseFed Panel</title>
+<title>RoseFed Control Panel</title>
 
 <style>
 
 * {
-    box-sizing: border-box;
+    box-sizing:border-box;
 }
 
 body {
 
-    margin: 0;
+    margin:0;
+
+    background:#07070b;
+
+    color:#fff;
 
     font-family:
         Arial,
         Helvetica,
         sans-serif;
-
-    background:
-        #08080d;
-
-    color: #fff;
-
 }
 
 .container {
 
-    max-width: 1200px;
+    max-width:1200px;
 
-    margin: auto;
+    margin:auto;
 
-    padding: 30px;
-
+    padding:30px;
 }
 
 .header {
 
-    display: flex;
+    display:flex;
 
-    justify-content:
-        space-between;
+    justify-content:space-between;
 
-    align-items:
-        center;
+    align-items:center;
 
-    margin-bottom: 30px;
-
+    margin-bottom:30px;
 }
 
 .logo {
 
-    font-size: 30px;
+    font-size:32px;
 
-    font-weight: bold;
-
+    font-weight:800;
 }
 
 .logo span {
 
-    color: #ff4fa3;
+    color:#ff4fa3;
+}
+
+.status {
+
+    padding:8px 14px;
+
+    background:#123a24;
+
+    color:#63ff9b;
+
+    border-radius:999px;
 
 }
 
 .cards {
 
-    display: grid;
+    display:grid;
 
     grid-template-columns:
         repeat(
             auto-fit,
-            minmax(200px, 1fr)
+            minmax(200px,1fr)
         );
 
-    gap: 20px;
+    gap:20px;
 
-    margin-bottom: 30px;
-
+    margin-bottom:25px;
 }
 
 .card {
 
-    background: #13131b;
+    background:#12121a;
 
     border:
-        1px solid #292936;
+        1px solid #272733;
 
-    border-radius: 18px;
+    border-radius:18px;
 
-    padding: 25px;
-
+    padding:25px;
 }
 
-.card h3 {
+.card-title {
 
-    margin-top: 0;
+    color:#92929f;
 
-    color: #aaa;
-
+    margin-bottom:10px;
 }
 
 .number {
 
-    font-size: 36px;
+    font-size:36px;
 
-    font-weight: bold;
+    font-weight:bold;
 
-    color: #ff4fa3;
-
+    color:#ff4fa3;
 }
 
 .panel {
 
-    background: #13131b;
+    background:#12121a;
 
     border:
-        1px solid #292936;
+        1px solid #272733;
 
-    border-radius: 18px;
+    border-radius:18px;
 
-    padding: 25px;
+    padding:25px;
 
+    overflow:auto;
 }
 
 table {
 
-    width: 100%;
+    width:100%;
 
-    border-collapse:
-        collapse;
-
+    border-collapse:collapse;
 }
 
 th,
 td {
 
-    text-align:
-        left;
+    text-align:left;
 
-    padding: 15px;
+    padding:14px;
 
     border-bottom:
-        1px solid #292936;
-
+        1px solid #272733;
 }
 
 th {
 
-    color: #aaa;
-
+    color:#888895;
 }
 
 .badge {
 
-    display:
-        inline-block;
+    padding:6px 11px;
 
-    padding:
-        6px 12px;
+    border-radius:999px;
 
-    border-radius:
-        999px;
+    background:#123a24;
 
-    background:
-        #183c27;
+    color:#63ff9b;
+}
 
-    color:
-        #5dff9a;
+.badge.off {
 
+    background:#3b2028;
+
+    color:#ff718b;
 }
 
 .btn {
 
-    display:
-        inline-block;
+    display:inline-block;
 
-    padding:
-        8px 13px;
+    padding:8px 12px;
 
-    border-radius:
-        9px;
+    border-radius:9px;
 
-    text-decoration:
-        none;
+    background:#ff4fa3;
 
-    background:
-        #ff4fa3;
+    color:#fff;
 
-    color:
-        white;
-
+    text-decoration:none;
 }
 
-.btn.danger {
+.btn-danger {
 
-    background:
-        #b72c4d;
-
+    background:#a52f4d;
 }
 
 .empty {
 
-    color:
-        #888;
+    color:#777;
 
-    padding:
-        30px;
+    padding:30px;
 
-    text-align:
-        center;
+    text-align:center;
+}
 
+.small {
+
+    color:#888;
+
+    font-size:13px;
 }
 
 </style>
@@ -1042,8 +1722,8 @@ th {
 🌹 Rose<span>Fed</span>
 </div>
 
-<div>
-Federation Control Panel
+<div class="status">
+🟢 WEB ONLINE
 </div>
 
 </div>
@@ -1053,7 +1733,9 @@ Federation Control Panel
 
 <div class="card">
 
-<h3>Toplam Federasyon</h3>
+<div class="card-title">
+Toplam Federasyon
+</div>
 
 <div class="number">
 {{ total }}
@@ -1064,7 +1746,9 @@ Federation Control Panel
 
 <div class="card">
 
-<h3>Aktif Federasyon</h3>
+<div class="card-title">
+Aktif Federasyon
+</div>
 
 <div class="number">
 {{ active }}
@@ -1075,10 +1759,25 @@ Federation Control Panel
 
 <div class="card">
 
-<h3>Bot Durumu</h3>
+<div class="card-title">
+Telegram
+</div>
 
 <div class="number">
-🟢
+{{ telegram }}
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+Database
+</div>
+
+<div class="number">
+{{ database }}
 </div>
 
 </div>
@@ -1088,7 +1787,9 @@ Federation Control Panel
 
 <div class="panel">
 
-<h2>Federasyonlar</h2>
+<h2>
+Federasyonlar
+</h2>
 
 {% if federations %}
 
@@ -1100,7 +1801,11 @@ Federation Control Panel
 
 <th>Grup</th>
 
+<th>Chat ID</th>
+
 <th>Portal</th>
+
+<th>Süre</th>
 
 <th>Durum</th>
 
@@ -1117,11 +1822,29 @@ Federation Control Panel
 <tr>
 
 <td>
+
+<strong>
 {{ fed.chat_title }}
+</strong>
+
+<br>
+
+<span class="small">
+{{ fed.chat_username or "username yok" }}
+</span>
+
+</td>
+
+<td>
+{{ fed.chat_id }}
 </td>
 
 <td>
 {{ fed.portal_username or "-" }}
+</td>
+
+<td>
+{{ fed.duration_minutes }} dk
 </td>
 
 <td>
@@ -1134,7 +1857,9 @@ AKTİF
 
 {% else %}
 
-Pasif
+<span class="badge off">
+PASİF
+</span>
 
 {% endif %}
 
@@ -1143,7 +1868,7 @@ Pasif
 <td>
 
 <a
-class="btn danger"
+class="btn btn-danger"
 href="/federation/delete/{{ fed.chat_id }}?key={{ key }}"
 onclick="return confirm('Federasyonu silmek istediğine emin misin?')"
 >
@@ -1177,49 +1902,14 @@ Henüz federasyon bulunmuyor.
 </body>
 
 </html>
-
 """
 
 
-# ============================================================
-# WEB PANEL AUTH
-# ============================================================
-
-def panel_authorized():
-
-    key = request.args.get("key")
-
-    return key == PANEL_KEY
-
-
-# ============================================================
-# ANA PANEL
-# ============================================================
-
-@app.route("/")
+@app.get("/")
+@panel_required
 def dashboard():
 
-    if not panel_authorized():
-
-        return """
-        <html>
-        <body style="
-            background:#08080d;
-            color:white;
-            font-family:Arial;
-            text-align:center;
-            padding:100px;
-        ">
-
-        <h1>🌹 RoseFed</h1>
-
-        <p>Panel anahtarı gerekli.</p>
-
-        </body>
-        </html>
-        """, 401
-
-    db = get_db()
+    db = db_session()
 
     try:
 
@@ -1231,13 +1921,34 @@ def dashboard():
             .all()
         )
 
-        total, active = get_stats()
+        total = (
+            db.query(Federation)
+            .count()
+        )
+
+        active = (
+            db.query(Federation)
+            .filter(
+                Federation.active.is_(True)
+            )
+            .count()
+        )
+
+        database_status = "🟢"
+
+        telegram_status = (
+            "🟢"
+            if telegram_ready.is_set()
+            else "🔴"
+        )
 
         return render_template_string(
             PANEL_HTML,
             federations=federations,
             total=total,
             active=active,
+            telegram=telegram_status,
+            database=database_status,
             key=PANEL_KEY,
         )
 
@@ -1247,19 +1958,16 @@ def dashboard():
 
 
 # ============================================================
-# FEDERASYON SİL
+# FEDERATION DELETE
 # ============================================================
 
-@app.route(
+@app.get(
     "/federation/delete/<int:chat_id>"
 )
-def delete_federation(chat_id):
+@panel_required
+def federation_delete(chat_id):
 
-    if not panel_authorized():
-
-        return "Unauthorized", 401
-
-    db = get_db()
+    db = db_session()
 
     try:
 
@@ -1278,10 +1986,22 @@ def delete_federation(chat_id):
             db.commit()
 
         return redirect(
-            url_for(
-                "dashboard",
-                key=PANEL_KEY
-            )
+            "/?key="
+            + PANEL_KEY
+        )
+
+    except Exception as exc:
+
+        db.rollback()
+
+        logger.exception(
+            "Federasyon silme hatası: %s",
+            exc,
+        )
+
+        return (
+            "Federasyon silinemedi.",
+            500,
         )
 
     finally:
@@ -1293,20 +2013,15 @@ def delete_federation(chat_id):
 # API
 # ============================================================
 
-@app.route("/api/federations")
+@app.get("/api/federations")
+@panel_required
 def api_federations():
 
-    if not panel_authorized():
-
-        return jsonify({
-            "error": "Unauthorized"
-        }), 401
-
-    db = get_db()
+    db = db_session()
 
     try:
 
-        federations = (
+        rows = (
             db.query(Federation)
             .order_by(
                 Federation.created_at.desc()
@@ -1316,20 +2031,25 @@ def api_federations():
 
         return jsonify([
             {
-                "id": fed.id,
-                "chat_id": fed.chat_id,
-                "chat_title": fed.chat_title,
-                "chat_username": fed.chat_username,
-                "portal_username": fed.portal_username,
+                "id": row.id,
+                "chat_id": row.chat_id,
+                "chat_title": row.chat_title,
+                "chat_username":
+                    row.chat_username,
+                "portal_username":
+                    row.portal_username,
                 "duration_minutes":
-                    fed.duration_minutes,
-                "active": fed.active,
+                    row.duration_minutes,
+                "active":
+                    row.active,
                 "created_at":
-                    fed.created_at.isoformat()
-                    if fed.created_at
-                    else None,
+                    (
+                        row.created_at.isoformat()
+                        if row.created_at
+                        else None
+                    ),
             }
-            for fed in federations
+            for row in rows
         ])
 
     finally:
@@ -1338,200 +2058,98 @@ def api_federations():
 
 
 # ============================================================
-# HEALTH CHECK
+# WEBHOOK STATUS
 # ============================================================
 
-@app.route("/health")
-def health():
+@app.get("/telegram/status")
+@panel_required
+def telegram_status():
 
     return jsonify({
-        "status": "ok",
-        "service": "RoseFed",
-        "telegram": bool(TOKEN),
-        "database": True,
+        "configured": bool(TOKEN),
+        "ready": telegram_ready.is_set(),
+        "public_url": PUBLIC_URL,
+        "webhook_url": (
+            PUBLIC_URL
+            + "/telegram/webhook"
+            if PUBLIC_URL
+            else None
+        ),
+        "error": telegram_start_error,
     })
 
 
 # ============================================================
-# TELEGRAM BOT
+# ERROR HANDLERS
 # ============================================================
 
-def build_bot():
+@app.errorhandler(404)
+def not_found(error):
+
+    return jsonify({
+        "ok": False,
+        "error": "Not found",
+    }), 404
+
+
+@app.errorhandler(500)
+def server_error(error):
+
+    logger.exception(
+        "Flask 500 hatası"
+    )
+
+    return jsonify({
+        "ok": False,
+        "error": "Internal server error",
+    }), 500
+
+
+# ============================================================
+# STARTUP
+# ============================================================
+
+def startup():
 
     if not TOKEN:
 
-        raise RuntimeError(
-            "TELEGRAM_BOT_TOKEN ayarlanmamış."
+        logger.error(
+            "================================================"
         )
 
-    bot = (
-        Application.builder()
-        .token(TOKEN)
-        .build()
-    )
-
-    bot.add_handler(
-        CommandHandler(
-            "start",
-            start_command
+        logger.error(
+            "TELEGRAM_BOT_TOKEN AYARLANMAMIŞ!"
         )
-    )
 
-    bot.add_handler(
-        CommandHandler(
-            ["yardim", "help"],
-            help_command
+        logger.error(
+            "Telegram botu başlatılmayacak."
         )
-    )
 
-    bot.add_handler(
-        CommandHandler(
-            "bagla",
-            bagla_command
+        logger.error(
+            "================================================"
         )
-    )
 
-    bot.add_handler(
-        CommandHandler(
-            "ayir",
-            ayir_command
-        )
-    )
+        return
 
-    bot.add_handler(
-        CommandHandler(
-            "sure",
-            sure_command
-        )
-    )
+    start_telegram()
 
-    bot.add_handler(
-        CommandHandler(
-            "ban",
-            ban_command
-        )
-    )
 
-    bot.add_handler(
-        CommandHandler(
-            "unban",
-            unban_command
-        )
-    )
-
-    bot.add_handler(
-        CommandHandler(
-            "mute",
-            mute_command
-        )
-    )
-
-    bot.add_handler(
-        CommandHandler(
-            "unmute",
-            unmute_command
-        )
-    )
-
-    bot.add_handler(
-        CommandHandler(
-            "itaat",
-            itaat_command
-        )
-    )
-
-    bot.add_handler(
-        CommandHandler(
-            ["kralice", "krallice", "kraliçe"],
-            kralice_command
-        )
-    )
-
-    return bot
+startup()
 
 
 # ============================================================
-# TELEGRAM POLLING
-# ============================================================
-
-def run_telegram():
-
-    try:
-
-        logger.info(
-            "Telegram bot başlatılıyor..."
-        )
-
-        bot = build_bot()
-
-        bot.run_polling(
-            drop_pending_updates=True,
-            allowed_updates=Update.ALL_TYPES,
-        )
-
-    except Exception as e:
-
-        logger.exception(
-            "Telegram bot hatası: %s",
-            e
-        )
-
-
-# ============================================================
-# TELEGRAM THREAD
-# ============================================================
-
-def start_telegram_once():
-
-    global telegram_thread
-
-    with telegram_lock:
-
-        if (
-            telegram_thread
-            and telegram_thread.is_alive()
-        ):
-
-            return
-
-        telegram_thread = threading.Thread(
-            target=run_telegram,
-            name="RoseFedTelegram",
-            daemon=True,
-        )
-
-        telegram_thread.start()
-
-        logger.info(
-            "Telegram thread başlatıldı."
-        )
-
-
-# ============================================================
-# RENDER / GUNICORN IMPORT
-# ============================================================
-
-if TOKEN:
-
-    start_telegram_once()
-
-else:
-
-    logger.warning(
-        "TELEGRAM_BOT_TOKEN bulunamadı. "
-        "Web panel çalışacak fakat Telegram botu başlamayacak."
-    )
-
-
-# ============================================================
-# LOCAL ÇALIŞTIRMA
+# LOCAL
 # ============================================================
 
 if __name__ == "__main__":
 
     logger.info(
-        "RoseFed web paneli başlıyor: %s",
-        PORT
+        "RoseFed başlıyor..."
+    )
+
+    logger.info(
+        "PORT = %s",
+        PORT,
     )
 
     app.run(
