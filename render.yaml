@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: fedbot
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: BOT_TOKEN
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: OWNER_ID
+        sync: false
+      - key: GROUP_A_ID
+        sync: false
+      - key: GROUP_B_ID
+        sync: false
+      - key: GROUP_A_NAME
+        value: Grup A
+      - key: GROUP_B_NAME
+        value: Grup B
