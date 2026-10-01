@@ -7,15 +7,21 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 import config
 
-_client = AsyncIOMotorClient(config.MONGO_URI)
-_db = _client[config.DB_NAME]
-
-feds = _db["feds"]    # {fed_id, name, owner_id, admins: [int]}
-fbans = _db["fbans"]  # {fed_id, user_id, reason, by, date}
-chats = _db["chats"]  # {chat_id, title, fed_id}
+_client = None
+feds = None   # {fed_id, name, owner_id, admins: [int]}
+fbans = None  # {fed_id, user_id, reason, by, date}
+chats = None  # {chat_id, title, fed_id}
 
 
 async def init() -> None:
+    """İstemci, çalışan event loop içinde oluşturulur."""
+    global _client, feds, fbans, chats
+    _client = AsyncIOMotorClient(config.MONGO_URI)
+    _db = _client[config.DB_NAME]
+    feds = _db["feds"]
+    fbans = _db["fbans"]
+    chats = _db["chats"]
+
     await feds.create_index("fed_id", unique=True)
     await fbans.create_index([("fed_id", 1), ("user_id", 1)], unique=True)
     await chats.create_index("chat_id", unique=True)
