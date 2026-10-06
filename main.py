@@ -1,5 +1,7 @@
+import os
 import asyncio
 import logging
+from aiohttp import web
 from telegram import Update, ChatPermissions
 from telegram.ext import (
     ApplicationBuilder,
@@ -19,6 +21,21 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Render'ın ücretsiz Web Service kontrolü için dummy (sahte) HTTP sunucusu
+async def handle_ping(request):
+    return web.Response(text="Bot 7/24 Aktif!")
+
+async def start_web_server():
+    app = web.Application()
+    app.router.add_get("/", handle_ping)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    # Render'ın atadığı PORT değişkenini dinler, yoksa 8080 kullanır
+    port = int(os.environ.get("PORT", 8080))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    logger.info(f"Web sunucusu {port} portunda başlatıldı (Render ücretsiz plan uyumu).")
+
 # Botun kendi gönderdiği bilgilendirme mesajlarını otomatik silme fonksiyonu
 async def send_auto_delete_message(context: ContextTypes.DEFAULT_TYPE, chat_id: int, text: str, delay: int = 10):
     try:
@@ -28,7 +45,7 @@ async def send_auto_delete_message(context: ContextTypes.DEFAULT_TYPE, chat_id: 
     except Exception as e:
         logger.error(f"Otomatik mesaj silme hatası: {e}")
 
-# Hedef kullanıcıyı ID, Yanıtlama (Reply) üzerinden tespit etme
+# Hedef kullanıcıyı ID veya Reply üzerinden tespit etme
 async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.reply_to_message:
         return update.message.reply_to_message.from_user
@@ -44,7 +61,7 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 return None
     return None
 
-# /start & /help -> Temel Bot Özellikleri ve Kullanım Kılavuzu
+# /start & /help Komutu
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
         "🤖 **Grup Yönetim & Moderasyon Botu**\n\n"
@@ -55,14 +72,13 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• **Temiz Sohbet:** Botun attığı bilgilendirme mesajları 10 saniye sonra otomatik silinir.\n\n"
         "📜 **Yönetici Komutları:**\n"
         "• `/defol` - Kullanıcıyı gruptan banlar.\n"
-        "• `/undefol` - Kullanıcının engeli kaldırır.\n"
+        "• `/undefol` - Kullanıcının engelini kaldırır.\n"
         "• `/itaat` - Kullanıcıyı susturur (Mute).\n"
         "• `/unitaat` - Kullanıcının susturmasını kaldırır (Unmute).\n"
         "• `/warn` - Kullanıcıya manuel uyarı verir.\n"
         "• `/unwarn` - Kullanıcının uyarılarını sıfırlar.\n\n"
         "💡 *Komutları bir mesajı yanıtlayarak veya yanına ID yazarak kullanabilirsiniz.*"
     )
-    # Start mesajı grupta sabit bilgi kalması için otomatik silinmez
     await update.message.reply_text(welcome_text, parse_mode="Markdown")
 
 # /defol -> Banlama
@@ -140,7 +156,7 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         logger.error(f"Unmute Hatası: {e}")
         await send_auto_delete_message(context, chat_id, "❌ Susturma kaldırılırken hata oluştu.")
 
-# /warn -> Uyarı Verme (3 Uyarı = Ban)
+# /warn -> Uyarı Verme
 async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = await get_target_user(update, context)
     chat_id = update.effective_chat.id
@@ -163,7 +179,7 @@ async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await send_auto_delete_message(context, chat_id, f"⚠️ {user.full_name} uyarıldı! Toplam Uyarı: {count}/3")
 
-# /unwarn -> Uyarısını Temizleme
+# /unwarn -> Uyarı Sıfırlama
 async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = await get_target_user(update, context)
     chat_id = update.effective_chat.id
@@ -186,7 +202,6 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if custom_filters.contains_profanity(text):
         try:
-            # Kullanıcının attığı küfürlü mesajı sil
             await update.message.delete()
             logger.info(f"KÜFÜR SİLİNDİ: {user.full_name} mesajı silindi.")
             
@@ -197,15 +212,18 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 database.reset_warnings(chat_id, user.id)
                 await send_auto_delete_message(context, chat_id, f"🚫 {user.full_name} yasaklı kelime kullanımı ve 3 uyarı sınırı nedeniyle engellendi.")
             else:
-                # Botun attığı ikaz mesajı 10 saniye sonra kendisini siler
                 await send_auto_delete_message(context, chat_id, f"⚠️ {user.full_name}, yasaklı kelime kullandığınız için mesajınız silindi! Uyarı: {count}/3")
         except Exception as e:
             logger.error(f"Küfür Silme Hatası: {e}")
 
-def main():
-    app = ApplicationBuilder().token(config.BOT_TOKEN).build()
+async def post_init(application):
+    # Bot başlayınca arka planda sahte web sunucusunu açar
+    asyncio.create_task(start_web_server())
 
-    # Komut Dinleyicileri
+def main():
+    app = ApplicationBuilder().token(config.BOT_TOKEN).post_init(post_init).build()
+
+    # Komutlar
     app.add_handler(CommandHandler("start", cmd_start))
     app.add_handler(CommandHandler("help", cmd_start))
     app.add_handler(CommandHandler("defol", cmd_defol))
@@ -215,7 +233,7 @@ def main():
     app.add_handler(CommandHandler("warn", cmd_warn))
     app.add_handler(CommandHandler("unwarn", cmd_unwarn))
 
-    # Mesaj Dinleyicisi (Küfür Filtresi)
+    # Mesaj Dinleyicisi
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
 
     logger.info("Bot başlatılıyor...")
