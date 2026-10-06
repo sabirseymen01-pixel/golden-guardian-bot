@@ -21,7 +21,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Render ücretsiz plan uyumu için dummy HTTP sunucusu
+# Render ücretsiz plan port uyumu için dummy HTTP sunucusu
 async def handle_ping(request):
     return web.Response(text="Bot 7/24 Aktif!")
 
@@ -110,7 +110,6 @@ async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE)
         if member.is_bot:
             continue
         
-        # {user} parametresini katılan kişinin mention hali ile değiştirir
         custom_msg = raw_template.replace("{user}", member.mention_markdown())
         await send_auto_delete_message(context, chat_id, custom_msg, delay=15)
 
@@ -118,7 +117,7 @@ async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     if not context.args:
-        await send_auto_delete_message(context, chat_id, "⚠️️ Lütfen bir durum belirtin: `/kilit kapat` veya `/kilit ac`")
+        await send_auto_delete_message(context, chat_id, "⚠ Lütfen bir durum belirtin: `/kilit kapat` veya `/kilit ac`")
         return
 
     durum = context.args[0].lower()
@@ -248,6 +247,7 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception as e:
             logger.error(f"Küfür Silme Hatası: {e}")
 
+# Uygulama başladığında web sunucusunu arka planda ayağa kaldırır
 async def post_init(application):
     asyncio.create_task(start_web_server())
 
@@ -270,7 +270,7 @@ def main():
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
 
-    logger.info("Bot başlatılıyor...")
+    logger.info("Bot ve HTTP sunucusu başlatılıyor...")
     app.run_polling()
 
 if __name__ == "__main__":
