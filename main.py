@@ -10,6 +10,7 @@ from telegram.ext import (
     ContextTypes,
     filters
 )
+from telegram.request import HTTPXRequest
 import config
 import database
 import filters as custom_filters
@@ -252,7 +253,19 @@ async def post_init(application):
     asyncio.create_task(start_web_server())
 
 def main():
-    app = ApplicationBuilder().token(config.BOT_TOKEN).post_init(post_init).build()
+    # Telegram istekleri için zaman aşımı sürelerini genişletiyoruz
+    request_config = HTTPXRequest(
+        connect_timeout=20.0,
+        read_timeout=20.0
+    )
+
+    app = (
+        ApplicationBuilder()
+        .token(config.BOT_TOKEN)
+        .request(request_config)
+        .post_init(post_init)
+        .build()
+    )
 
     # Komutlar
     app.add_handler(CommandHandler("start", cmd_start))
@@ -271,7 +284,9 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
 
     logger.info("Bot ve HTTP sunucusu başlatılıyor...")
-    app.run_polling()
+    
+    # Polling için de zaman aşımı sınırlarını tanımlıyoruz
+    app.run_polling(read_timeout=20, connect_timeout=20)
 
 if __name__ == "__main__":
     main()
