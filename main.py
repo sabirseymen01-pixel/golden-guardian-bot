@@ -360,8 +360,7 @@ async def post_init(application):
 def main():
     request_config = HTTPXRequest(
         connect_timeout=20.0,
-        read_timeout=20.0,
-        get_updates_read_timeout=20.0
+        read_timeout=20.0
     )
 
     app = (
