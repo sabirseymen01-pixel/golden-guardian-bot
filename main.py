@@ -68,13 +68,21 @@ async def send_auto_delete_message(context: ContextTypes.DEFAULT_TYPE, chat_id: 
         await asyncio.sleep(delay)
         await context.bot.delete_message(chat_id=chat_id, message_id=sent_message.message_id)
     except Exception as e:
-        logger.error(f"Otomatik mesaj silme hatası (Markdown): {e}. Düz metin deneniyor...")
+        logger.error(f"Otomatik mesaj silme hatası ({parse_mode}): {e}. Düz metin deneniyor...")
         try:
             sent_message = await context.bot.send_message(chat_id=chat_id, text=text, parse_mode=None)
             await asyncio.sleep(delay)
             await context.bot.delete_message(chat_id=chat_id, message_id=sent_message.message_id)
         except Exception as err:
             logger.error(f"Mesaj tamamen gönderilemedi: {err}")
+
+# Mesaj silme yardımcısı (Komut mesajlarını temizlemek için)
+async def safe_delete_user_message(update: Update):
+    if update.message:
+        try:
+            await update.message.delete()
+        except Exception as e:
+            logger.debug(f"Kullanıcı mesajı silinemedi: {e}")
 
 # Admin Kontrolü
 async def is_user_admin(chat_id: int, user_id: int, context: ContextTypes.DEFAULT_TYPE) -> bool:
@@ -168,6 +176,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_set_button_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
+    await safe_delete_user_message(update)
 
     if not await is_user_admin(chat_id, user_id, context):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
@@ -188,6 +197,7 @@ async def cmd_set_button_text(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def cmd_set_button_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
+    await safe_delete_user_message(update)
 
     if not await is_user_admin(chat_id, user_id, context):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
@@ -217,6 +227,7 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
 
     if not await is_user_admin(chat_id, user_id, context):
+        await safe_delete_user_message(update)
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
         return
 
@@ -227,7 +238,6 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
     announcement_text = " ".join(context.args) if context.args else "📌 **Diğer Gruba Geçiş Yapabilirsiniz**"
 
     try:
-        # Eğer bir fotoğrafa yanıt verilerek /duyuru yazıldıysa görselli atar
         if update.message.reply_to_message and update.message.reply_to_message.photo:
             photo = update.message.reply_to_message.photo[-1].file_id
             sent_msg = await context.bot.send_photo(
@@ -245,11 +255,8 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode="Markdown"
             )
 
-        # Mesajı grupta sabitle
         await context.bot.pin_chat_message(chat_id=chat_id, message_id=sent_msg.message_id)
-        
-        # Kullanıcının attığı komut mesajını temizle
-        await update.message.delete()
+        await safe_delete_user_message(update)
     except Exception as e:
         logger.error(f"Duyuru ve sabitleme hatası: {e}")
         await send_auto_delete_message(context, chat_id, "❌ Duyuru gönderilirken veya sabitlenirken hata oluştu.", parse_mode=None)
@@ -258,6 +265,7 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_set_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
+    await safe_delete_user_message(update)
 
     if not await is_user_admin(chat_id, user_id, context):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
@@ -298,6 +306,7 @@ async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
+    await safe_delete_user_message(update)
 
     if not await is_user_admin(chat_id, user_id, context):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
@@ -339,6 +348,7 @@ async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     admin_id = update.effective_user.id
+    await safe_delete_user_message(update)
 
     if not await is_user_admin(chat_id, admin_id, context):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
@@ -355,7 +365,7 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
-        safe_name = escape_markdown(user.full_name, version=1)
+        safe_name = escape_markdown(user.full_name)
         await send_auto_delete_message(context, chat_id, f"🚫 {safe_name} gruptan engellendi.", parse_mode="Markdown")
     except Exception as e:
         logger.error(f"Ban Hatası: {e}")
@@ -365,6 +375,7 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     admin_id = update.effective_user.id
+    await safe_delete_user_message(update)
 
     if not await is_user_admin(chat_id, admin_id, context):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
@@ -377,7 +388,7 @@ async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         await context.bot.unban_chat_member(chat_id=chat_id, user_id=user.id, only_if_banned=True)
-        safe_name = escape_markdown(user.full_name, version=1)
+        safe_name = escape_markdown(user.full_name)
         await send_auto_delete_message(context, chat_id, f"✅ {safe_name} engeli kaldırıldı.", parse_mode="Markdown")
     except Exception as e:
         logger.error(f"Unban Hatası: {e}")
@@ -386,6 +397,7 @@ async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     admin_id = update.effective_user.id
+    await safe_delete_user_message(update)
 
     if not await is_user_admin(chat_id, admin_id, context):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
@@ -406,7 +418,7 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             user_id=user.id, 
             permissions=ChatPermissions(can_send_messages=False)
         )
-        safe_name = escape_markdown(user.full_name, version=1)
+        safe_name = escape_markdown(user.full_name)
         await send_auto_delete_message(context, chat_id, f"🔇 {safe_name} susturuldu.", parse_mode="Markdown")
     except Exception as e:
         logger.error(f"Mute Hatası: {e}")
@@ -415,6 +427,7 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     admin_id = update.effective_user.id
+    await safe_delete_user_message(update)
 
     if not await is_user_admin(chat_id, admin_id, context):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
@@ -439,7 +452,7 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             can_add_web_page_previews=True
         )
         await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=full_permissions)
-        safe_name = escape_markdown(user.full_name, version=1)
+        safe_name = escape_markdown(user.full_name)
         await send_auto_delete_message(context, chat_id, f"🔊 {safe_name} susturması kaldırıldı.", parse_mode="Markdown")
     except Exception as e:
         logger.error(f"Unmute Hatası: {e}")
@@ -448,6 +461,7 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     admin_id = update.effective_user.id
+    await safe_delete_user_message(update)
 
     if not await is_user_admin(chat_id, admin_id, context):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
@@ -463,7 +477,7 @@ async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     count = database.add_warning(chat_id, user.id)
-    safe_name = escape_markdown(user.full_name, version=1)
+    safe_name = escape_markdown(user.full_name)
     if count >= 3:
         try:
             await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
@@ -478,6 +492,7 @@ async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     admin_id = update.effective_user.id
+    await safe_delete_user_message(update)
 
     if not await is_user_admin(chat_id, admin_id, context):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
@@ -489,7 +504,7 @@ async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     database.reset_warnings(chat_id, user.id)
-    safe_name = escape_markdown(user.full_name, version=1)
+    safe_name = escape_markdown(user.full_name)
     await send_auto_delete_message(context, chat_id, f"✅ {safe_name} tüm uyarıları sıfırlandı.", parse_mode="Markdown")
 
 # Mesaj Dinleyicisi
@@ -516,7 +531,7 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             await update.message.delete()
             count = database.add_warning(chat_id, user.id)
-            safe_name = escape_markdown(user.full_name, version=1)
+            safe_name = escape_markdown(user.full_name)
             if count >= 3:
                 await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
                 database.reset_warnings(chat_id, user.id)
