@@ -590,11 +590,8 @@ def main():
     # Tüm Mesaj Tipleri İçin Önbellek ve Küfür Filtresi
     app.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, handle_messages))
 
-    app.run_polling(
-        get_updates_read_timeout=30,
-        get_updates_connect_timeout=30,
-        get_updates_pool_timeout=30
-    )
+    # Polling başlatma (Geçersiz parametreler kaldırıldı, varsayılan temiz polling kullanılıyor)
+    app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
     main()
