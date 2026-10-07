@@ -23,6 +23,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Geçici Kullanıcı Önbelleği (Username -> User Objesi eşleşmesi için)
+USER_CACHE = {}
+
 # Render için Dummy HTTP Sunucusu
 async def handle_ping(request):
     return web.Response(text="Bot 7/24 Aktif!")
@@ -44,7 +47,6 @@ async def send_auto_delete_message(context: ContextTypes.DEFAULT_TYPE, chat_id: 
         await asyncio.sleep(delay)
         await context.bot.delete_message(chat_id=chat_id, message_id=sent_message.message_id)
     except Exception as e:
-        # Markdown ayrıştırma hatası alınırsa mesajı düz metin olarak göndermeyi dener
         logger.error(f"Otomatik mesaj silme hatası (Markdown): {e}. Düz metin deneniyor...")
         try:
             sent_message = await context.bot.send_message(chat_id=chat_id, text=text, parse_mode=None)
@@ -68,7 +70,7 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message and update.message.reply_to_message:
         return update.message.reply_to_message.from_user
 
-    # 2. YÖNTEM: Telegram Metin Etiketlemesi (Entity Mention)
+    # 2. YÖNTEM: Telegram Metin Etiketlemesi (Entity Mention / Açılır listeden seçme)
     if update.message and update.message.entities:
         for entity in update.message.entities:
             if entity.type == "text_mention":
@@ -87,17 +89,22 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception:
                 return None
 
-        # @kullanici_adi girildiyse
-        elif arg.startswith("@"):
-            username = arg[1:].lower()
+        # @kullanici_adi veya doğrudan kullanici_adi girildiyse
+        elif arg.startswith("@") or not arg.isdigit():
+            username = arg.lstrip("@").lower()
+
+            # Önce gruptaki yöneticilerde ara
             try:
                 administrators = await context.bot.get_chat_administrators(update.effective_chat.id)
                 for admin in administrators:
                     if admin.user.username and admin.user.username.lower() == username:
                         return admin.user
             except Exception as e:
-                logger.error(f"Kullanıcı adı arama hatası: {e}")
-                return None
+                logger.error(f"Yönetici arama hatası: {e}")
+
+            # Önbellekte (USER_CACHE) kaydı var mı kontrol et
+            if username in USER_CACHE:
+                return USER_CACHE[username]
 
     return None
 
@@ -116,12 +123,12 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/welcome <mesaj>` - Hoş geldin mesajını değiştirir. (`{user}` etiketini kullanabilirsiniz)\n"
         "• `/kilit kapat` - Gruba mesaj yazmayı kapatır.\n"
         "• `/kilit ac` - Gruba mesaj yazmayı açar.\n"
-        "• `/defol` - Kullanıcıyı banlar.\n"
-        "• `/undefol` - Kullanıcının engeli kaldırır.\n"
-        "• `/itaat` - Kullanıcıyı susturur (Mute).\n"
-        "• `/unitaat` - Kullanıcının susturmasını kaldırır.\n"
-        "• `/warn` - Kullanıcıya manuel uyarı verir.\n"
-        "• `/unwarn` - Kullanıcının uyarılarını sıfırlar."
+        "• `/defol <@kullanici|ID|yanıt>` - Kullanıcıyı banlar.\n"
+        "• `/undefol <ID|yanıt>` - Kullanıcının engelini kaldırır.\n"
+        "• `/itaat <@kullanici|ID|yanıt>` - Kullanıcıyı susturur (Mute).\n"
+        "• `/unitaat <@kullanici|ID|yanıt>` - Kullanıcının susturmasını kaldırır.\n"
+        "• `/warn <@kullanici|ID|yanıt>` - Kullanıcıya manuel uyarı verir.\n"
+        "• `/unwarn <@kullanici|ID|yanıt>` - Kullanıcının uyarılarını sıfırlar."
     )
     await update.message.reply_text(welcome_text, parse_mode="Markdown")
 
@@ -157,11 +164,14 @@ async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE)
         if member.is_bot:
             continue
         
+        if member.username:
+            USER_CACHE[member.username.lower()] = member
+            
         user_mention = member.mention_markdown()
         custom_msg = raw_template.replace("{user}", user_mention)
         await send_auto_delete_message(context, chat_id, custom_msg, delay=15, parse_mode="Markdown")
 
-# /kilit -> Sohbet Kilitleme / Açma
+# /kilit -> Sohbet Kilitleme / Açma (v20+ Uyumlu)
 async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -182,9 +192,16 @@ async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.set_chat_permissions(chat_id=chat_id, permissions=permissions)
             await send_auto_delete_message(context, chat_id, "🔒 Sohbet kilitlendi.", parse_mode=None)
         elif durum in ["ac", "aç", "unlock", "acik"]:
+            # python-telegram-bot v20+ Uyumlu ChatPermissions
             permissions = ChatPermissions(
                 can_send_messages=True,
-                can_send_media_messages=True,
+                can_send_audios=True,
+                can_send_documents=True,
+                can_send_photos=True,
+                can_send_videos=True,
+                can_send_video_notes=True,
+                can_send_voice_notes=True,
+                can_send_polls=True,
                 can_send_other_messages=True,
                 can_add_web_page_previews=True
             )
@@ -207,11 +224,11 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın, ID veya @kullanici_adi belirtin.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcı bulunamadı. Lütfen yanıtlayın, ID yazın veya @kullanici_adi kullanın.", parse_mode=None)
         return
 
     if await is_user_admin(chat_id, user.id, context):
-        await send_auto_delete_message(context, chat_id, "⚠️ Başka bir yöneticiyi gruptan engelleyemezsiniz.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "⚠️️ Başka bir yöneticiyi gruptan engelleyemezsiniz.", parse_mode=None)
         return
 
     try:
@@ -233,7 +250,7 @@ async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcı ID'si, @kullanici_adi girin veya mesajını yanıtlayın.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcı bulunamadı. Lütfen ID girin veya yanıtlayarak yazın.", parse_mode=None)
         return
 
     try:
@@ -254,11 +271,11 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın, ID veya @kullanici_adi belirtin.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcı bulunamadı. Lütfen yanıtlayın, ID yazın veya @kullanici_adi kullanın.", parse_mode=None)
         return
 
     if await is_user_admin(chat_id, user.id, context):
-        await send_auto_delete_message(context, chat_id, "⚠️ Başka bir yöneticiyi susturamazsınız.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "⚠️️ Başka bir yöneticiyi susturamazsınız.", parse_mode=None)
         return
 
     try:
@@ -272,7 +289,7 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"Mute Hatası: {e}")
 
-# /unitaat -> Unmute
+# /unitaat -> Unmute (v20+ Uyumlu)
 async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     admin_id = update.effective_user.id
@@ -283,13 +300,20 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın, ID veya @kullanici_adi belirtin.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcı bulunamadı. Lütfen yanıtlayın, ID yazın veya @kullanici_adi kullanın.", parse_mode=None)
         return
 
     try:
+        # python-telegram-bot v20+ Uyumlu ChatPermissions
         full_permissions = ChatPermissions(
             can_send_messages=True, 
-            can_send_media_messages=True, 
+            can_send_audios=True,
+            can_send_documents=True,
+            can_send_photos=True,
+            can_send_videos=True,
+            can_send_video_notes=True,
+            can_send_voice_notes=True,
+            can_send_polls=True,
             can_send_other_messages=True, 
             can_add_web_page_previews=True
         )
@@ -310,7 +334,7 @@ async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın, ID veya @kullanici_adi belirtin.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcı bulunamadı. Lütfen yanıtlayın, ID yazın veya @kullanici_adi kullanın.", parse_mode=None)
         return
 
     if await is_user_admin(chat_id, user.id, context):
@@ -340,14 +364,14 @@ async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın, ID veya @kullanici_adi belirtin.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcı bulunamadı. Lütfen yanıtlayın, ID yazın veya @kullanici_adi kullanın.", parse_mode=None)
         return
 
     database.reset_warnings(chat_id, user.id)
     safe_name = escape_markdown(user.full_name, version=1)
     await send_auto_delete_message(context, chat_id, f"✅ {safe_name} tüm uyarıları sıfırlandı.", parse_mode="Markdown")
 
-# Mesaj Dinleyicisi (Küfür Filtresi)
+# Mesaj Dinleyicisi (Küfür Filtresi & Kullanıcı Önbellekleme)
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text:
         return
@@ -355,6 +379,10 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     chat_id = update.effective_chat.id
     user = update.effective_user
+
+    # Grupta mesaj yazan kullanıcıları önbelleğe kaydet (Username ile ceza vermek için)
+    if user and user.username:
+        USER_CACHE[user.username.lower()] = user
 
     # Yöneticileri küfür filtresinden muaf tut
     if await is_user_admin(chat_id, user.id, context):
