@@ -67,6 +67,8 @@ async def is_user_admin(chat_id: int, user_id: int, context: ContextTypes.DEFAUL
 
 # Hedef kullanıcıyı bulma (Reply, Mention, @username veya ID)
 async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+
     # 1. YÖNTEM: Mesaj yanıtlanmışsa (Reply)
     if update.message and update.message.reply_to_message:
         return update.message.reply_to_message.from_user
@@ -85,7 +87,7 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if arg.isdigit():
             user_id = int(arg)
             try:
-                chat_member = await context.bot.get_chat_member(update.effective_chat.id, user_id)
+                chat_member = await context.bot.get_chat_member(chat_id, user_id)
                 return chat_member.user
             except Exception:
                 return None
@@ -94,16 +96,26 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif arg.startswith("@") or not arg.isdigit():
             username = arg.lstrip("@").lower()
 
-            # Önce gruptaki yöneticilerde ara
+            # A) Önce Veritabanından Kullanıcı ID'sini sorgula
+            db_user_id = database.get_user_id_by_username(chat_id, username)
+            if db_user_id:
+                try:
+                    chat_member = await context.bot.get_chat_member(chat_id, db_user_id)
+                    return chat_member.user
+                except Exception as e:
+                    logger.error(f"Veritabanından bulunan kullanıcı verisi çekilemedi: {e}")
+
+            # B) Veritabanında yoksa gruptaki yöneticilerde ara
             try:
-                administrators = await context.bot.get_chat_administrators(update.effective_chat.id)
+                administrators = await context.bot.get_chat_administrators(chat_id)
                 for admin in administrators:
                     if admin.user.username and admin.user.username.lower() == username:
+                        database.save_user(chat_id, admin.user.id, admin.user.username)
                         return admin.user
             except Exception as e:
                 logger.error(f"Yönetici arama hatası: {e}")
 
-            # Önbellekte (USER_CACHE) kaydı var mı kontrol et
+            # C) Önbellekte (USER_CACHE) kaydı var mı kontrol et
             if username in USER_CACHE:
                 return USER_CACHE[username]
 
@@ -174,6 +186,7 @@ async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE)
         
         if member.username:
             USER_CACHE[member.username.lower()] = member
+            database.save_user(chat_id, member.id, member.username)
             
         user_mention = member.mention_markdown()
         custom_msg = raw_template.replace("{user}", user_mention)
@@ -377,7 +390,7 @@ async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     safe_name = escape_markdown(user.full_name, version=1)
     await send_auto_delete_message(context, chat_id, f"✅ {safe_name} tüm uyarıları sıfırlandı.", parse_mode="Markdown")
 
-# Mesaj Dinleyicisi (Küfür Filtresi & Kullanıcı Önbellekleme)
+# Mesaj Dinleyicisi (Küfür Filtresi & Kullanıcı Kaydetme)
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
         return
@@ -385,9 +398,10 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     chat_id = update.effective_chat.id
 
-    # Grupta işlem yapan HER kullanıcıyı önbelleğe kaydet
+    # Grupta işlem yapan HER kullanıcıyı hem veritabanına hem önbelleğe kaydet
     if user and user.username:
         USER_CACHE[user.username.lower()] = user
+        database.save_user(chat_id, user.id, user.username)
 
     if not update.message.text:
         return
