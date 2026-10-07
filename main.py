@@ -1,8 +1,9 @@
 import os
+import json
 import asyncio
 import logging
 from aiohttp import web
-from telegram import Update, ChatPermissions
+from telegram import Update, ChatPermissions, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.helpers import escape_markdown
 from telegram.ext import (
     ApplicationBuilder,
@@ -24,8 +25,27 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Geçici Kullanıcı Önbelleği (Username -> User Objesi eşleşmesi için)
+# Geçici Kullanıcı Önbelleği
 USER_CACHE = {}
+
+# --- BUTON VE AYAR YÖNETİMİ (config.json) ---
+CONFIG_FILE = "config.json"
+
+def get_button_config():
+    try:
+        if os.path.exists(CONFIG_FILE):
+            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+    except Exception as e:
+        logger.error(f"Config okuma hatası: {e}")
+    return {"metin": "Diğer Gruba Geç 🚀", "url": "https://t.me/"}
+
+def save_button_config(data):
+    try:
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+    except Exception as e:
+        logger.error(f"Config kaydetme hatası: {e}")
 
 # Render için Dummy HTTP Sunucusu
 async def handle_ping(request):
@@ -41,7 +61,7 @@ async def start_web_server():
     await site.start()
     logger.info(f"Web sunucusu {port} portunda başlatıldı.")
 
-# Otomatik silinen mesaj fonksiyonu (10 saniye delay, Markdown çökme korumalı)
+# Otomatik silinen mesaj fonksiyonu
 async def send_auto_delete_message(context: ContextTypes.DEFAULT_TYPE, chat_id: int, text: str, delay: int = 10, parse_mode: str = "Markdown"):
     try:
         sent_message = await context.bot.send_message(chat_id=chat_id, text=text, parse_mode=parse_mode)
@@ -56,7 +76,7 @@ async def send_auto_delete_message(context: ContextTypes.DEFAULT_TYPE, chat_id: 
         except Exception as err:
             logger.error(f"Mesaj tamamen gönderilemedi: {err}")
 
-# Kullanıcının Admin olup olmadığını kontrol eden yardımcı fonksiyon
+# Admin Kontrolü
 async def is_user_admin(chat_id: int, user_id: int, context: ContextTypes.DEFAULT_TYPE) -> bool:
     try:
         member = await context.bot.get_chat_member(chat_id, user_id)
@@ -65,25 +85,20 @@ async def is_user_admin(chat_id: int, user_id: int, context: ContextTypes.DEFAUL
         logger.error(f"Admin kontrol hatası: {e}")
         return False
 
-# Hedef kullanıcıyı bulma (Reply, Mention, @username veya ID)
+# Hedef kullanıcıyı bulma
 async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
-    # 1. YÖNTEM: Mesaj yanıtlanmışsa (Reply)
     if update.message and update.message.reply_to_message:
         return update.message.reply_to_message.from_user
 
-    # 2. YÖNTEM: Telegram Metin Etiketlemesi (Entity Mention / Açılır listeden seçme)
     if update.message and update.message.entities:
         for entity in update.message.entities:
             if entity.type == "text_mention":
                 return entity.user
 
-    # 3. YÖNTEM: Komutun yanında parametre varsa (@username veya ID)
     if context.args:
         arg = context.args[0].strip()
-
-        # Sayısal ID girildiyse
         if arg.isdigit():
             user_id = int(arg)
             try:
@@ -91,21 +106,16 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 return chat_member.user
             except Exception:
                 return None
-
-        # @kullanici_adi veya doğrudan kullanici_adi girildiyse
         elif arg.startswith("@") or not arg.isdigit():
             username = arg.lstrip("@").lower()
-
-            # A) Önce Veritabanından Kullanıcı ID'sini sorgula
             db_user_id = database.get_user_id_by_username(chat_id, username)
             if db_user_id:
                 try:
                     chat_member = await context.bot.get_chat_member(chat_id, db_user_id)
                     return chat_member.user
                 except Exception as e:
-                    logger.error(f"Veritabanından bulunan kullanıcı verisi çekilemedi: {e}")
+                    logger.error(f"Veritabanından kullanıcı çekilemedi: {e}")
 
-            # B) Veritabanında yoksa gruptaki yöneticilerde ara
             try:
                 administrators = await context.bot.get_chat_administrators(chat_id)
                 for admin in administrators:
@@ -115,16 +125,15 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception as e:
                 logger.error(f"Yönetici arama hatası: {e}")
 
-            # C) Önbellekte (USER_CACHE) kaydı var mı kontrol et
             if username in USER_CACHE:
                 return USER_CACHE[username]
 
     return None
 
-# Global Hata Yakalayıcı (Bad Gateway ve Network hataları için)
+# Global Hata Yakalayıcı
 async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     if isinstance(context.error, (NetworkError, TimedOut)):
-        logger.warning(f"Geçici ağ hatası yakalandı (Sistem çalışmaya devam ediyor): {context.error}")
+        logger.warning(f"Geçici ağ hatası yakalandı: {context.error}")
     else:
         logger.error("İşlenmeyen hata meydana geldi:", exc_info=context.error)
 
@@ -138,19 +147,112 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• *Otomatik Küfür Filtresi:* Yasaklı kelimeler anında silinir.\n"
         "• *Sohbet Kilidi:* Yönetici komutuyla grubu tamamen kapatma/açma.\n"
         "• *3 Uyarı Sistemi:* 3 uyarı alan kullanıcı gruptan otomatik engellenir.\n"
-        "• *Temiz Sohbet:* Bot mesajları 10 saniye sonra otomatik silinir.\n\n"
+        "• *Temiz Sohbet:* Bot mesajları 10 saniye sonra otomatik silinir.\n"
+        "• *Dinamik Butonlu Duyuru:* Buton metnini ve linkini komutla değiştirip mesaj sabitleme.\n\n"
         "📜 *Yönetici Komutları:*\n"
-        "• `/welcome <mesaj>` - Hoş geldin mesajını değiştirir. (`{user}` etiketini kullanabilirsiniz)\n"
-        "• `/kilit kapat` - Gruba mesaj yazmayı kapatır.\n"
-        "• `/kilit ac` - Gruba mesaj yazmayı açar.\n"
+        "• `/welcome <mesaj>` - Hoş geldin mesajını değiştirir.\n"
+        "• `/butonmetni <yazı>` - Sabitlenecek butonun üzerindeki yazıyı değiştirir.\n"
+        "• `/butonlinki <url>` - Butonun yönlendireceği davet linkini değiştirir.\n"
+        "• `/duyuru <mesaj>` - Butonlu mesaj gönderir ve gruba sabitler.\n"
+        "• `/kilit kapat / ac` - Gruba mesaj yazmayı kilitler veya açar.\n"
         "• `/defol <@kullanici|ID|yanıt>` - Kullanıcıyı banlar.\n"
-        "• `/undefol <ID|yanıt>` - Kullanıcının engelini kaldırır.\n"
-        "• `/itaat <@kullanici|ID|yanıt>` - Kullanıcıyı susturur (Mute).\n"
-        "• `/unitaat <@kullanici|ID|yanıt>` - Kullanıcının susturmasını kaldırır.\n"
-        "• `/warn <@kullanici|ID|yanıt>` - Kullanıcıya manuel uyarı verir.\n"
-        "• `/unwarn <@kullanici|ID|yanıt>` - Kullanıcının uyarılarını sıfırlar."
+        "• `/undefol <ID|yanıt>` - Engeli kaldırır.\n"
+        "• `/itaat <@kullanici|ID|yanıt>` - Kullanıcıyı susturur.\n"
+        "• `/unitaat <@kullanici|ID|yanıt>` - Susturmayı kaldırır.\n"
+        "• `/warn <@kullanici|ID|yanıt>` - Kullanıcıya uyarı verir.\n"
+        "• `/unwarn <@kullanici|ID|yanıt>` - Uyarıları sıfırlar."
     )
     await update.message.reply_text(welcome_text, parse_mode="Markdown")
+
+# /butonmetni -> Buton Üzerindeki Yazıyı Arayüzden Değiştirme
+async def cmd_set_button_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+
+    if not await is_user_admin(chat_id, user_id, context):
+        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
+        return
+
+    if not context.args:
+        cfg = get_button_config()
+        await send_auto_delete_message(context, chat_id, f"⚠️ Kullanım: /butonmetni <yeni yazı>\nMevcut Metin: {cfg['metin']}", parse_mode=None)
+        return
+
+    new_text = " ".join(context.args)
+    cfg = get_button_config()
+    cfg["metin"] = new_text
+    save_button_config(cfg)
+    await send_auto_delete_message(context, chat_id, f"✅ Buton metni güncellendi:\n👉 **{new_text}**", parse_mode="Markdown")
+
+# /butonlinki -> Buton Linkini Arayüzden Değiştirme
+async def cmd_set_button_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+
+    if not await is_user_admin(chat_id, user_id, context):
+        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
+        return
+
+    if not context.args:
+        cfg = get_button_config()
+        await send_auto_delete_message(context, chat_id, f"⚠️ Kullanım: /butonlinki <https://t.me/...>\nMevcut Link: {cfg['url']}", parse_mode=None)
+        return
+
+    new_url = context.args[0].strip()
+    if not (new_url.startswith("http://") or new_url.startswith("https://") or new_url.startswith("t.me/")):
+        await send_auto_delete_message(context, chat_id, "❌ Lütfen geçerli bir URL veya Telegram linki girin.", parse_mode=None)
+        return
+
+    if new_url.startswith("t.me/"):
+        new_url = "https://" + new_url
+
+    cfg = get_button_config()
+    cfg["url"] = new_url
+    save_button_config(cfg)
+    await send_auto_delete_message(context, chat_id, f"✅ Buton linki güncellendi:\n👉 {new_url}", parse_mode=None)
+
+# /duyuru -> Butonlu Mesaj Gönderip Sabitleme
+async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+
+    if not await is_user_admin(chat_id, user_id, context):
+        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
+        return
+
+    cfg = get_button_config()
+    keyboard = [[InlineKeyboardButton(text=cfg["metin"], url=cfg["url"])]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    announcement_text = " ".join(context.args) if context.args else "📌 **Diğer Gruba Geçiş Yapabilirsiniz**"
+
+    try:
+        # Eğer bir fotoğrafa yanıt verilerek /duyuru yazıldıysa görselli atar
+        if update.message.reply_to_message and update.message.reply_to_message.photo:
+            photo = update.message.reply_to_message.photo[-1].file_id
+            sent_msg = await context.bot.send_photo(
+                chat_id=chat_id,
+                photo=photo,
+                caption=announcement_text,
+                reply_markup=reply_markup,
+                parse_mode="Markdown"
+            )
+        else:
+            sent_msg = await context.bot.send_message(
+                chat_id=chat_id,
+                text=announcement_text,
+                reply_markup=reply_markup,
+                parse_mode="Markdown"
+            )
+
+        # Mesajı grupta sabitle
+        await context.bot.pin_chat_message(chat_id=chat_id, message_id=sent_msg.message_id)
+        
+        # Kullanıcının attığı komut mesajını temizle
+        await update.message.delete()
+    except Exception as e:
+        logger.error(f"Duyuru ve sabitleme hatası: {e}")
+        await send_auto_delete_message(context, chat_id, "❌ Duyuru gönderilirken veya sabitlenirken hata oluştu.", parse_mode=None)
 
 # /welcome -> Hoş Geldin Mesajını Değiştirme
 async def cmd_set_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -175,7 +277,7 @@ async def cmd_set_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
     database.set_welcome_message(chat_id, new_welcome_text)
     await send_auto_delete_message(context, chat_id, "✅ Hoş geldin mesajı başarıyla güncellendi!", parse_mode=None)
 
-# Hoş Geldin Mesajı Gönderme (Yeni Üye Katılınca)
+# Hoş Geldin Mesajı Gönderme
 async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     raw_template = database.get_welcome_message(chat_id)
@@ -192,7 +294,7 @@ async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE)
         custom_msg = raw_template.replace("{user}", user_mention)
         await send_auto_delete_message(context, chat_id, custom_msg, delay=15, parse_mode="Markdown")
 
-# /kilit -> Sohbet Kilitleme / Açma (v20+ Uyumlu)
+# /kilit -> Sohbet Kilitleme / Açma
 async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -309,7 +411,7 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"Mute Hatası: {e}")
 
-# /unitaat -> Unmute (v20+ Uyumlu)
+# /unitaat -> Unmute
 async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     admin_id = update.effective_user.id
@@ -390,7 +492,7 @@ async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     safe_name = escape_markdown(user.full_name, version=1)
     await send_auto_delete_message(context, chat_id, f"✅ {safe_name} tüm uyarıları sıfırlandı.", parse_mode="Markdown")
 
-# Mesaj Dinleyicisi (Küfür Filtresi & Kullanıcı Kaydetme)
+# Mesaj Dinleyicisi
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
         return
@@ -398,7 +500,6 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     chat_id = update.effective_chat.id
 
-    # Grupta işlem yapan HER kullanıcıyı hem veritabanına hem önbelleğe kaydet
     if user and user.username:
         USER_CACHE[user.username.lower()] = user
         database.save_user(chat_id, user.id, user.username)
@@ -408,7 +509,6 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     text = update.message.text
 
-    # Yöneticileri küfür filtresinden muaf tut
     if await is_user_admin(chat_id, user.id, context):
         return
 
@@ -432,7 +532,6 @@ async def post_init(application):
     logger.info("Veritabanı kuruldu ve Web Sunucusu başlatıldı.")
 
 def main():
-    # Telegram API İstekleri için Gelişmiş Timeout Değerleri
     request_config = HTTPXRequest(
         connect_timeout=30.0,
         read_timeout=30.0,
@@ -448,12 +547,14 @@ def main():
         .build()
     )
 
-    # Global Hata İşleyici Kaydı
     app.add_error_handler(global_error_handler)
 
     # Handler Bağlantıları
     app.add_handler(CommandHandler(["start", "help"], cmd_start))
     app.add_handler(CommandHandler("welcome", cmd_set_welcome))
+    app.add_handler(CommandHandler("butonmetni", cmd_set_button_text))
+    app.add_handler(CommandHandler("butonlinki", cmd_set_button_url))
+    app.add_handler(CommandHandler("duyuru", cmd_duyuru))
     app.add_handler(CommandHandler("kilit", cmd_kilit))
     app.add_handler(CommandHandler("defol", cmd_defol))
     app.add_handler(CommandHandler("undefol", cmd_undefol))
