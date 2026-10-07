@@ -25,10 +25,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Geçici Kullanıcı Önbelleği
-USER_CACHE = {}
-
-# --- BUTON VE AYAR YÖNETİMİ (config.json) ---
 CONFIG_FILE = "config.json"
 
 def get_button_config():
@@ -47,7 +43,7 @@ def save_button_config(data):
     except Exception as e:
         logger.error(f"Config kaydetme hatası: {e}")
 
-# Render / PaaS için Web Sunucusu
+# Render / PaaS Web Sunucusu
 async def handle_ping(request):
     return web.Response(text="Bot 7/24 Aktif!")
 
@@ -112,34 +108,31 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if context.args:
         arg = context.args[0].strip()
-        if arg.isdigit():
+        
+        try:
             user_id = int(arg)
+            chat_member = await context.bot.get_chat_member(chat_id, user_id)
+            return chat_member.user
+        except (ValueError, TelegramError):
+            pass
+
+        username = arg.lstrip("@").lower()
+        db_user_id = database.get_user_id_by_username(chat_id, username)
+        if db_user_id:
             try:
-                chat_member = await context.bot.get_chat_member(chat_id, user_id)
+                chat_member = await context.bot.get_chat_member(chat_id, db_user_id)
                 return chat_member.user
-            except Exception:
-                return None
-        elif arg.startswith("@") or not arg.isdigit():
-            username = arg.lstrip("@").lower()
-            db_user_id = database.get_user_id_by_username(chat_id, username)
-            if db_user_id:
-                try:
-                    chat_member = await context.bot.get_chat_member(chat_id, db_user_id)
-                    return chat_member.user
-                except Exception as e:
-                    logger.error(f"Veritabanından kullanıcı çekilemedi: {e}")
-
-            try:
-                administrators = await context.bot.get_chat_administrators(chat_id)
-                for admin in administrators:
-                    if admin.user.username and admin.user.username.lower() == username:
-                        database.save_user(chat_id, admin.user.id, admin.user.username)
-                        return admin.user
             except Exception as e:
-                logger.error(f"Yönetici arama hatası: {e}")
+                logger.error(f"Veritabanından kullanıcı çekilemedi: {e}")
 
-            if username in USER_CACHE:
-                return USER_CACHE[username]
+        try:
+            administrators = await context.bot.get_chat_administrators(chat_id)
+            for admin in administrators:
+                if admin.user.username and admin.user.username.lower() == username:
+                    database.save_user(chat_id, admin.user.id, admin.user.username)
+                    return admin.user
+        except Exception as e:
+            logger.error(f"Yönetici arama hatası: {e}")
 
     return None
 
@@ -150,7 +143,7 @@ async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYP
     else:
         logger.error("İşlenmeyen hata meydana geldi:", exc_info=context.error)
 
-# /start & /help Kılavuz Arayüzü
+# /start & /help
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
         "🤖 *Grup Yönetim & Moderasyon Botu*\n\n"
@@ -161,13 +154,16 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• *Sohbet Kilidi:* Yönetici komutuyla grubu tamamen kapatma/açma.\n"
         "• *3 Uyarı Sistemi:* 3 uyarı alan kullanıcı gruptan otomatik engellenir.\n"
         "• *Temiz Sohbet:* Bot mesajları 10 saniye sonra otomatik silinir.\n"
-        "• *Dinamik Butonlu Duyuru:* Butonlu mesaj gönderip üst kısma sabitleme.\n\n"
+        "• *Dinamik Butonlu Duyuru:* Butonlu mesaj gönderip üst kısma sabitleme.\n"
+        "• *Süreli Otomatik Paylaşım:* Belirli aralıklarla otomatik mesaj/resim gönderme.\n\n"
         "📜 *Yönetici Komutları:*\n"
         "• `/welcome <mesaj>` - Hoş geldin mesajını değiştirir.\n"
         "• `/butonmetni <yazı>` - Varsayılan buton üzerindeki yazıyı değiştirir.\n"
         "• `/butonlinki <url>` - Varsayılan butonun yönlendireceği linki değiştirir.\n"
         "• `/duyuru <mesaj>` - Kayıtlı buton ile duyuru gönderir.\n"
         "• `/duyuru <mesaj> | <buton metni> | <link>` - Tek satırda özel butonlu duyuru gönderir.\n"
+        "• `/zamanla <dakika>` - Yanıtlanan mesajı/görseli periyodik olarak otomatik paylaşır.\n"
+        "• `/zamanladur` - Aktif otomatik paylaşımı durdurur.\n"
         "• `/kilit kapat / ac` - Gruba mesaj yazmayı kilitler veya açar.\n"
         "• `/defol <@kullanici|ID|yanıt>` - Kullanıcıyı banlar.\n"
         "• `/undefol <ID|yanıt>` - Engeli kaldırır.\n"
@@ -177,6 +173,101 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/unwarn <@kullanici|ID|yanıt>` - Uyarıları sıfırlar."
     )
     await update.message.reply_text(welcome_text, parse_mode="Markdown")
+
+# --- ZAMANLAMA / SÜRELİ PAYLAŞIM EKLENTİSİ ---
+async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+
+    if not await is_user_admin(chat_id, user_id, context):
+        await safe_delete_user_message(update)
+        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
+        return
+
+    if not update.message.reply_to_message:
+        await send_auto_delete_message(context, chat_id, "⚠️ Lütfen otomatik paylaşmak istediğiniz metne veya görsele **yanıt vererek** bu komutu kullanın.", delay=15)
+        await safe_delete_user_message(update)
+        return
+
+    if not context.args or not context.args[0].isdigit():
+        await send_auto_delete_message(context, chat_id, "⚠️ Lütfen süreyi dakika cinsinden belirtin.\nÖrnek: `/zamanla 30`", delay=15)
+        await safe_delete_user_message(update)
+        return
+
+    dakika = int(context.args[0])
+    saniye = dakika * 60
+
+    if dakika < 1:
+        await send_auto_delete_message(context, chat_id, "⚠️ Süre en az 1 dakika olmalıdır.")
+        await safe_delete_user_message(update)
+        return
+
+    target_message = update.message.reply_to_message
+
+    job_data = {
+        'chat_id': chat_id,
+        'text': target_message.caption or target_message.text or "",
+        'photo_id': target_message.photo[-1].file_id if target_message.photo else None
+    }
+
+    # Zaten aktif görev varsa durdur
+    current_jobs = context.job_queue.get_jobs_by_name(str(chat_id))
+    for job in current_jobs:
+        job.schedule_removal()
+
+    # Yeni periyodik zamanlama ekle
+    context.job_queue.run_repeating(
+        otomatik_paylasim_cb,
+        interval=saniye,
+        first=saniye,
+        chat_id=chat_id,
+        name=str(chat_id),
+        data=job_data
+    )
+
+    await safe_delete_user_message(update)
+    await send_auto_delete_message(
+        context,
+        chat_id,
+        f"✅ **Zamanlama Başlatıldı!**\n\nBu içerik her **{dakika} dakikada bir** gruba otomatik atılacak ve grupta kalacaktır.",
+        delay=15
+    )
+
+async def otomatik_paylasim_cb(context: ContextTypes.DEFAULT_TYPE):
+    job = context.job
+    data = job.data
+    chat_id = data['chat_id']
+    text = data['text']
+    photo_id = data['photo_id']
+
+    try:
+        if photo_id:
+            await context.bot.send_photo(chat_id=chat_id, photo=photo_id, caption=text, parse_mode="Markdown")
+        elif text:
+            await context.bot.send_message(chat_id=chat_id, text=text, parse_mode="Markdown")
+    except Exception as e:
+        logger.error(f"Zamanlanmış mesaj gönderme hatası: {e}")
+
+async def cmd_zamanladur(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    user_id = update.effective_user.id
+
+    if not await is_user_admin(chat_id, user_id, context):
+        await safe_delete_user_message(update)
+        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
+        return
+
+    current_jobs = context.job_queue.get_jobs_by_name(str(chat_id))
+
+    await safe_delete_user_message(update)
+    if not current_jobs:
+        await send_auto_delete_message(context, chat_id, "❌ Bu grupta aktif çalışan bir zamanlama bulunamadı.")
+        return
+
+    for job in current_jobs:
+        job.schedule_removal()
+
+    await send_auto_delete_message(context, chat_id, "🛑 Otomatik zamanlanmış paylaşımlar durduruldu.")
 
 # /butonmetni
 async def cmd_set_button_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -228,7 +319,7 @@ async def cmd_set_button_url(update: Update, context: ContextTypes.DEFAULT_TYPE)
     save_button_config(cfg)
     await send_auto_delete_message(context, chat_id, f"✅ Buton linki güncellendi:\n👉 {new_url}", parse_mode=None)
 
-# /duyuru - YENİLENMİŞ VE ONARILMIŞ BUTONLU DUYURU FONKSİYONU
+# /duyuru
 async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -241,7 +332,6 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
     raw_args = " ".join(context.args) if context.args else ""
     cfg = get_button_config()
 
-    # '|' karakteri ile özel metin/buton/link ayrımı kontrol edilir
     if "|" in raw_args:
         parts = [p.strip() for p in raw_args.split("|")]
         announcement_text = parts[0] if parts[0] else "📌 *Duyuru*"
@@ -252,18 +342,15 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
         button_text = cfg["metin"]
         button_url = cfg["url"]
 
-    # Link format kontrolü
     if button_url.startswith("t.me/"):
         button_url = "https://" + button_url
     elif not (button_url.startswith("http://") or button_url.startswith("https://")):
         button_url = "https://" + button_url
 
-    # Inline Keyboard (Buton) Oluşturma
     keyboard = [[InlineKeyboardButton(text=button_text, url=button_url)]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     try:
-        # Fotoğraflı yanıt var ise resimli butonlu duyuru paylaşır
         if update.message.reply_to_message and update.message.reply_to_message.photo:
             photo = update.message.reply_to_message.photo[-1].file_id
             sent_msg = await context.bot.send_photo(
@@ -281,7 +368,6 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode="Markdown"
             )
 
-        # Mesajı grupta başa sabitleme (pin)
         await context.bot.pin_chat_message(chat_id=chat_id, message_id=sent_msg.message_id)
         await safe_delete_user_message(update)
 
@@ -328,7 +414,6 @@ async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE)
             continue
 
         if member.username:
-            USER_CACHE[member.username.lower()] = member
             database.save_user(chat_id, member.id, member.username)
 
         user_mention = member.mention_markdown(version=1)
@@ -549,7 +634,6 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
     if user and user.username:
-        USER_CACHE[user.username.lower()] = user
         database.save_user(chat_id, user.id, user.username)
 
     if not update.message.text:
@@ -603,6 +687,8 @@ def main():
     app.add_handler(CommandHandler("butonmetni", cmd_set_button_text))
     app.add_handler(CommandHandler("butonlinki", cmd_set_button_url))
     app.add_handler(CommandHandler("duyuru", cmd_duyuru))
+    app.add_handler(CommandHandler("zamanla", cmd_zamanla))
+    app.add_handler(CommandHandler("zamanladur", cmd_zamanladur))
     app.add_handler(CommandHandler("kilit", cmd_kilit))
     app.add_handler(CommandHandler("defol", cmd_defol))
     app.add_handler(CommandHandler("undefol", cmd_undefol))
@@ -614,7 +700,7 @@ def main():
     # Yeni Katılan Üye Handler
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
 
-    # Tüm Mesaj Tipleri İçin Önbellek ve Küfür Filtresi
+    # Tüm Mesaj Tipleri İçin Küfür Filtresi
     app.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, handle_messages))
 
     # Polling başlatma
