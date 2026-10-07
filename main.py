@@ -12,6 +12,7 @@ from telegram.ext import (
     filters
 )
 from telegram.request import HTTPXRequest
+from telegram.error import NetworkError, TimedOut
 import config
 import database
 import filters as custom_filters
@@ -108,6 +109,13 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return None
 
+# Global Hata Yakalayıcı (Bad Gateway ve Network hataları için)
+async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if isinstance(context.error, (NetworkError, TimedOut)):
+        logger.warning(f"Geçici ağ hatası yakalandı (Sistem çalışmaya devam ediyor): {context.error}")
+    else:
+        logger.error("İşlenmeyen hata meydana geldi:", exc_info=context.error)
+
 # /start & /help Kılavuz Arayüzü
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
@@ -192,7 +200,6 @@ async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.set_chat_permissions(chat_id=chat_id, permissions=permissions)
             await send_auto_delete_message(context, chat_id, "🔒 Sohbet kilitlendi.", parse_mode=None)
         elif durum in ["ac", "aç", "unlock", "acik"]:
-            # python-telegram-bot v20+ Uyumlu ChatPermissions
             permissions = ChatPermissions(
                 can_send_messages=True,
                 can_send_audios=True,
@@ -228,7 +235,7 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if await is_user_admin(chat_id, user.id, context):
-        await send_auto_delete_message(context, chat_id, "⚠️️ Başka bir yöneticiyi gruptan engelleyemezsiniz.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "⚠ Başka bir yöneticiyi gruptan engelleyemezsiniz.", parse_mode=None)
         return
 
     try:
@@ -275,7 +282,7 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if await is_user_admin(chat_id, user.id, context):
-        await send_auto_delete_message(context, chat_id, "⚠️️ Başka bir yöneticiyi susturamazsınız.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "⚠ Başka bir yöneticiyi susturamazsınız.", parse_mode=None)
         return
 
     try:
@@ -304,7 +311,6 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     try:
-        # python-telegram-bot v20+ Uyumlu ChatPermissions
         full_permissions = ChatPermissions(
             can_send_messages=True, 
             can_send_audios=True,
@@ -373,16 +379,20 @@ async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # Mesaj Dinleyicisi (Küfür Filtresi & Kullanıcı Önbellekleme)
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.message or not update.message.text:
+    if not update.message:
+        return
+
+    user = update.effective_user
+    chat_id = update.effective_chat.id
+
+    # Grupta işlem yapan HER kullanıcıyı önbelleğe kaydet
+    if user and user.username:
+        USER_CACHE[user.username.lower()] = user
+
+    if not update.message.text:
         return
 
     text = update.message.text
-    chat_id = update.effective_chat.id
-    user = update.effective_user
-
-    # Grupta mesaj yazan kullanıcıları önbelleğe kaydet (Username ile ceza vermek için)
-    if user and user.username:
-        USER_CACHE[user.username.lower()] = user
 
     # Yöneticileri küfür filtresinden muaf tut
     if await is_user_admin(chat_id, user.id, context):
@@ -408,9 +418,12 @@ async def post_init(application):
     logger.info("Veritabanı kuruldu ve Web Sunucusu başlatıldı.")
 
 def main():
+    # Telegram API İstekleri için Gelişmiş Timeout Değerleri
     request_config = HTTPXRequest(
-        connect_timeout=20.0,
-        read_timeout=20.0
+        connect_timeout=30.0,
+        read_timeout=30.0,
+        write_timeout=30.0,
+        pool_timeout=30.0
     )
 
     app = (
@@ -420,6 +433,9 @@ def main():
         .post_init(post_init)
         .build()
     )
+
+    # Global Hata İşleyici Kaydı
+    app.add_error_handler(global_error_handler)
 
     # Handler Bağlantıları
     app.add_handler(CommandHandler(["start", "help"], cmd_start))
@@ -435,8 +451,8 @@ def main():
     # Yeni Katılan Üye Handler
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
 
-    # Küfür Filtresi & Genel Mesaj Handler
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
+    # Tüm Mesaj Tipleri İçin Önbellek ve Küfür Filtresi
+    app.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, handle_messages))
 
     app.run_polling()
 
