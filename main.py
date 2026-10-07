@@ -54,13 +54,17 @@ async def is_user_admin(chat_id: int, user_id: int, context: ContextTypes.DEFAUL
         logger.error(f"Admin kontrol hatası: {e}")
         return False
 
-# Hedef kullanıcıyı bulma (Reply veya ID)
+# Hedef kullanıcıyı bulma (Reply, ID veya @username)
 async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # 1. Mesaj yanıtlanmışsa
     if update.message.reply_to_message:
         return update.message.reply_to_message.from_user
 
+    # 2. Komut yanına ID veya @kullanici_adi girilmişse
     if context.args:
-        arg = context.args[0]
+        arg = context.args[0].strip()
+        
+        # Sayısal ID girildiyse
         if arg.isdigit():
             user_id = int(arg)
             try:
@@ -68,6 +72,19 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 return chat_member.user
             except Exception:
                 return None
+        
+        # @kullanici_adi girildiyse
+        elif arg.startswith("@"):
+            username = arg[1:].lower()
+            try:
+                administrators = await context.bot.get_chat_administrators(update.effective_chat.id)
+                for admin in administrators:
+                    if admin.user.username and admin.user.username.lower() == username:
+                        return admin.user
+            except Exception as e:
+                logger.error(f"Kullanıcı adı arama hatası: {e}")
+                return None
+
     return None
 
 # /start & /help Kılavuz Arayüzü
@@ -175,7 +192,7 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın veya ID belirtin.")
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın, ID veya @kullanici_adi belirtin.")
         return
 
     if await is_user_admin(chat_id, user.id, context):
@@ -200,7 +217,7 @@ async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcı ID'si girin veya mesajını yanıtlayın.")
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcı ID'si, @kullanici_adi girin veya mesajını yanıtlayın.")
         return
 
     try:
@@ -220,11 +237,11 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın veya ID belirtin.")
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın, ID veya @kullanici_adi belirtin.")
         return
 
     if await is_user_admin(chat_id, user.id, context):
-        await send_auto_delete_message(context, chat_id, "⚠️ Başka bir yöneticiyi susturamazsınız.")
+        await send_auto_delete_message(context, chat_id, "⚠️️ Başka bir yöneticiyi susturamazsınız.")
         return
 
     try:
@@ -244,83 +261,9 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın veya ID belirtin.")
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın, ID veya @kullanici_adi belirtin.")
         return
 
     try:
         full_permissions = ChatPermissions(can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
-        await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=full_permissions)
-        await send_auto_delete_message(context, chat_id, f"🔊 {user.full_name} susturması kaldırıldı.")
-    except Exception as e:
-        logger.error(f"Unmute Hatası: {e}")
-
-# /warn -> Uyarı
-async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
-    admin_id = update.effective_user.id
-
-    if not await is_user_admin(chat_id, admin_id, context):
-        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.")
-        return
-
-    user = await get_target_user(update, context)
-    if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın veya ID belirtin.")
-        return
-
-    if await is_user_admin(chat_id, user.id, context):
-        await send_auto_delete_message(context, chat_id, "⚠️ Yöneticiye uyarı verilemez.")
-        return
-
-    count = database.add_warning(chat_id, user.id)
-    if count >= 3:
-        try:
-            await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
-            database.reset_warnings(chat_id, user.id)
-            await send_auto_delete_message(context, chat_id, f"🚫 {user.full_name} 3 uyarıya ulaştığı için engellendi!")
-        except Exception as e:
-            logger.error(f"Warn-Ban Hatası: {e}")
-    else:
-        await send_auto_delete_message(context, chat_id, f"⚠️ {user.full_name} uyarıldı! Uyarı: {count}/3")
-
-# /unwarn -> Uyarı Sıfırlama
-async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
-    admin_id = update.effective_user.id
-
-    if not await is_user_admin(chat_id, admin_id, context):
-        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.")
-        return
-
-    user = await get_target_user(update, context)
-    if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın veya ID belirtin.")
-        return
-
-    database.reset_warnings(chat_id, user.id)
-    await send_auto_delete_message(context, chat_id, f"✅ {user.full_name} tüm uyarıları sıfırlandı.")
-
-# Mesaj Dinleyicisi (Küfür Filtresi)
-async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.message or not update.message.text:
-        return
-
-    text = update.message.text
-    chat_id = update.effective_chat.id
-    user = update.effective_user
-
-    # Yöneticileri küfür filtresinden muaf tut
-    if await is_user_admin(chat_id, user.id, context):
-        return
-
-    if custom_filters.contains_profanity(text):
-        try:
-            await update.message.delete()
-            count = database.add_warning(chat_id, user.id)
-            if count >= 3:
-                await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
-                database.reset_warnings(chat_id, user.id)
-                await send_auto_delete_message(context, chat_id, f"🚫 {user.full_name} 3 uyarı sınırından engellendi.")
-            else:
-                await send_auto_delete_message(context, chat_id, f"⚠️ {user.full_name}, yasaklı kelime kullandınız! Uyarı: {count}/3")
-        except Exception as e:
+        await context.bot.restrict_chat_member(chat_id=chat_id
