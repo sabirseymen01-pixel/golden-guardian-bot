@@ -141,7 +141,7 @@ async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYP
     if isinstance(context.error, (NetworkError, TimedOut)):
         logger.warning(f"Geçici ağ hatası yakalandı: {context.error}")
     else:
-        logger.error("İşlenmeyen hata meydana geldi:", exc_info=context.error)
+        logger.error(f"İşlenmeyen hata meydana geldi: {context.error}", exc_info=context.error)
 
 # /start & /help
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -174,7 +174,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(welcome_text, parse_mode="Markdown")
 
-# --- ZAMANLAMA / SÜRELİ PAYLAŞIM EKLENTİSİ ---
+# --- ZAMANLAMA / SÜRELİ PAYLAŞIM EKLENTİSİ (ONARILMIŞ) ---
 async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -184,24 +184,30 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
         return
 
-    if not update.message.reply_to_message:
+    if not update.message or not update.message.reply_to_message:
         await send_auto_delete_message(context, chat_id, "⚠️ Lütfen otomatik paylaşmak istediğiniz metne veya görsele **yanıt vererek** bu komutu kullanın.", delay=15)
         await safe_delete_user_message(update)
         return
 
-    if not context.args or not context.args[0].isdigit():
-        await send_auto_delete_message(context, chat_id, "⚠️ Lütfen süreyi dakika cinsinden belirtin.\nÖrnek: `/zamanla 30`", delay=15)
+    # Dakika parametresinin kontrolü ve algılanması
+    if not context.args or len(context.args) == 0:
+        await send_auto_delete_message(context, chat_id, "⚠️ Lütfen süreyi dakika cinsinden belirtin.\nKullanım: `/zamanla 30`", delay=15)
         await safe_delete_user_message(update)
         return
 
-    dakika = int(context.args[0])
-    saniye = dakika * 60
+    try:
+        dakika = int(context.args[0])
+    except ValueError:
+        await send_auto_delete_message(context, chat_id, "❌ Geçersiz süre! Lütfen sadece sayı girin (Örn: `/zamanla 15`).", delay=15)
+        await safe_delete_user_message(update)
+        return
 
     if dakika < 1:
         await send_auto_delete_message(context, chat_id, "⚠️ Süre en az 1 dakika olmalıdır.")
         await safe_delete_user_message(update)
         return
 
+    saniye = dakika * 60
     target_message = update.message.reply_to_message
 
     job_data = {
@@ -209,6 +215,13 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
         'text': target_message.caption or target_message.text or "",
         'photo_id': target_message.photo[-1].file_id if target_message.photo else None
     }
+
+    # JobQueue kullanılabilirliği kontrol ediliyor
+    if context.job_queue is None:
+        logger.error("JobQueue aktif değil! 'python-telegram-bot[job-queue]' paketi yüklü mü?")
+        await send_auto_delete_message(context, chat_id, "❌ Sistem zamanlama altyapısı hazır değil. Sunucu yöneticisine başvurun.", delay=15)
+        await safe_delete_user_message(update)
+        return
 
     # Zaten aktif görev varsa durdur
     current_jobs = context.job_queue.get_jobs_by_name(str(chat_id))
@@ -255,6 +268,11 @@ async def cmd_zamanladur(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(chat_id, user_id, context):
         await safe_delete_user_message(update)
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
+        return
+
+    if context.job_queue is None:
+        await send_auto_delete_message(context, chat_id, "❌ Zamanlayıcı altyapısı aktif değil.")
+        await safe_delete_user_message(update)
         return
 
     current_jobs = context.job_queue.get_jobs_by_name(str(chat_id))
