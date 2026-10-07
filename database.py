@@ -1,5 +1,38 @@
-# Basit bellek içi (In-Memory) uyarı veritabanı
-# Üretim ortamında kalıcılık için SQLite veya PostgreSQL önerilir.
+
+import sqlite3
+
+DB_NAME = "bot_database.db"
+
+def get_connection():
+    return sqlite3.connect(DB_NAME)
+
+# Veritabanı tablolarını başlatma
+def init_db():
+    conn = get_connection()
+    cursor = conn.cursor()
+    # Ayarlar tablosu
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS settings (
+            chat_id INTEGER PRIMARY KEY,
+            welcome_message TEXT
+        )
+    ''')
+    # Kullanıcı veritabanı (Username -> User ID eşleşmesi için)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            chat_id INTEGER,
+            user_id INTEGER,
+            username TEXT,
+            PRIMARY KEY (chat_id, user_id)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+# Uygulama açılışında tabloları hazırla
+init_db()
+
+# Bellek içi (In-Memory) uyarı sistemi
 user_warnings = {}
 
 def add_warning(chat_id: int, user_id: int) -> int:
@@ -15,16 +48,10 @@ def reset_warnings(chat_id: int, user_id: int):
 def get_warnings(chat_id: int, user_id: int) -> int:
     return user_warnings.get((chat_id, user_id), 0)
 
-# Hoş geldin mesajını kaydetme ve alma fonksiyonları
+# Hoş geldin mesajı fonksiyonları
 def set_welcome_message(chat_id: int, message: str):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS settings (
-            chat_id INTEGER PRIMARY KEY,
-            welcome_message TEXT
-        )
-    ''')
     cursor.execute('''
         INSERT INTO settings (chat_id, welcome_message)
         VALUES (?, ?)
@@ -36,11 +63,33 @@ def set_welcome_message(chat_id: int, message: str):
 def get_welcome_message(chat_id: int) -> str:
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('CREATE TABLE IF NOT EXISTS settings (chat_id INTEGER PRIMARY KEY, welcome_message TEXT)')
     cursor.execute('SELECT welcome_message FROM settings WHERE chat_id = ?', (chat_id,))
     row = cursor.fetchone()
     conn.close()
     if row and row[0]:
         return row[0]
-    # Varsayılan mesaj
     return "👋 Hoş geldin {user}!\n\nGrup kurallarına uymayı ve saygılı bir sohbet ortamı sürdürmeyi unutma."
+
+# Kullanıcı adı (@username) kaydetme ve sorgulama fonksiyonları
+def save_user(chat_id: int, user_id: int, username: str):
+    if not username:
+        return
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT INTO users (chat_id, user_id, username)
+        VALUES (?, ?, ?)
+        ON CONFLICT(chat_id, user_id) DO UPDATE SET username=excluded.username
+    ''', (chat_id, user_id, username.lower()))
+    conn.commit()
+    conn.close()
+
+def get_user_id_by_username(chat_id: int, username: str):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT user_id FROM users WHERE chat_id = ? AND LOWER(username) = ?
+    ''', (chat_id, username.lower()))
+    row = cursor.fetchone()
+    conn.close()
+    return row[0] if row else None
