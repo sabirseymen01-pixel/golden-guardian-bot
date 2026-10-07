@@ -299,11 +299,11 @@ async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE)
     for member in update.message.new_chat_members:
         if member.is_bot:
             continue
-        
+
         if member.username:
             USER_CACHE[member.username.lower()] = member
             database.save_user(chat_id, member.id, member.username)
-            
+
         user_mention = member.mention_markdown(version=1)
         custom_msg = raw_template.replace("{user}", user_mention)
         await send_auto_delete_message(context, chat_id, custom_msg, delay=15, parse_mode="Markdown")
@@ -590,7 +590,7 @@ def main():
     # Tüm Mesaj Tipleri İçin Önbellek ve Küfür Filtresi
     app.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, handle_messages))
 
-    # Polling başlatma (Geçersiz parametreler kaldırıldı, varsayılan temiz polling kullanılıyor)
+    # Polling başlatma
     app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
