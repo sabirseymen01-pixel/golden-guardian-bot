@@ -1,4 +1,3 @@
-
 import sqlite3
 
 DB_NAME = "bot_database.db"
@@ -74,22 +73,38 @@ def get_welcome_message(chat_id: int) -> str:
 def save_user(chat_id: int, user_id: int, username: str):
     if not username:
         return
+    clean_username = username.lstrip("@").lower()
     conn = get_connection()
     cursor = conn.cursor()
+    
+    # Kullanıcı kullanıcı adını değiştirdiyse eski kaydı aynı chat içinde güncelle veya çakışmaları engelle
     cursor.execute('''
         INSERT INTO users (chat_id, user_id, username)
         VALUES (?, ?, ?)
         ON CONFLICT(chat_id, user_id) DO UPDATE SET username=excluded.username
-    ''', (chat_id, user_id, username.lower()))
+    ''', (chat_id, user_id, clean_username))
     conn.commit()
     conn.close()
 
 def get_user_id_by_username(chat_id: int, username: str):
+    if not username:
+        return None
+    clean_username = username.lstrip("@").lower()
     conn = get_connection()
     cursor = conn.cursor()
+    
+    # Öncelikli olarak aynı sohbet grubundaki kayda bak
     cursor.execute('''
         SELECT user_id FROM users WHERE chat_id = ? AND LOWER(username) = ?
-    ''', (chat_id, username.lower()))
+    ''', (chat_id, clean_username))
     row = cursor.fetchone()
+    
+    # Grup verisinde yoksa genel kayıt verisinden ID yakala
+    if not row:
+        cursor.execute('''
+            SELECT user_id FROM users WHERE LOWER(username) = ?
+        ''', (clean_username,))
+        row = cursor.fetchone()
+        
     conn.close()
     return row[0] if row else None
