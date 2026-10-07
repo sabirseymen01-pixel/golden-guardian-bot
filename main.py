@@ -61,13 +61,13 @@ async def start_web_server(app_context):
     await site.start()
     logger.info(f"Web sunucusu {port} portunda başlatıldı.")
 
-# Otomatik silinen mesaj fonksiyonu (Arka planda çalışacak şekilde)
+# Otomatik silinen mesaj fonksiyonu
 async def _delete_after_delay(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int, delay: int):
     await asyncio.sleep(delay)
     try:
         await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
     except Exception as e:
-        logger.debug(f"Mesaj silinemedi (zaten silinmiş olabilir): {e}")
+        logger.debug(f"Mesaj silinemedi: {e}")
 
 async def send_auto_delete_message(context: ContextTypes.DEFAULT_TYPE, chat_id: int, text: str, delay: int = 10, parse_mode: str = "Markdown"):
     try:
@@ -161,12 +161,13 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• *Sohbet Kilidi:* Yönetici komutuyla grubu tamamen kapatma/açma.\n"
         "• *3 Uyarı Sistemi:* 3 uyarı alan kullanıcı gruptan otomatik engellenir.\n"
         "• *Temiz Sohbet:* Bot mesajları 10 saniye sonra otomatik silinir.\n"
-        "• *Dinamik Butonlu Duyuru:* Buton metnini ve linkini komutla değiştirip mesaj sabitleme.\n\n"
+        "• *Dinamik Butonlu Duyuru:* Butonlu mesaj gönderip üst kısma sabitleme.\n\n"
         "📜 *Yönetici Komutları:*\n"
         "• `/welcome <mesaj>` - Hoş geldin mesajını değiştirir.\n"
-        "• `/butonmetni <yazı>` - Sabitlenecek butonun üzerindeki yazıyı değiştirir.\n"
-        "• `/butonlinki <url>` - Butonun yönlendireceği davet linkini değiştirir.\n"
-        "• `/duyuru <mesaj>` - Butonlu mesaj gönderir ve gruba sabitler.\n"
+        "• `/butonmetni <yazı>` - Varsayılan buton üzerindeki yazıyı değiştirir.\n"
+        "• `/butonlinki <url>` - Varsayılan butonun yönlendireceği linki değiştirir.\n"
+        "• `/duyuru <mesaj>` - Kayıtlı buton ile duyuru gönderir.\n"
+        "• `/duyuru <mesaj> | <buton metni> | <link>` - Tek satırda özel butonlu duyuru gönderir.\n"
         "• `/kilit kapat / ac` - Gruba mesaj yazmayı kilitler veya açar.\n"
         "• `/defol <@kullanici|ID|yanıt>` - Kullanıcıyı banlar.\n"
         "• `/undefol <ID|yanıt>` - Engeli kaldırır.\n"
@@ -227,7 +228,7 @@ async def cmd_set_button_url(update: Update, context: ContextTypes.DEFAULT_TYPE)
     save_button_config(cfg)
     await send_auto_delete_message(context, chat_id, f"✅ Buton linki güncellendi:\n👉 {new_url}", parse_mode=None)
 
-# /duyuru
+# /duyuru - YENİLENMİŞ VE ONARILMIŞ BUTONLU DUYURU FONKSİYONU
 async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -237,13 +238,32 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
         return
 
+    raw_args = " ".join(context.args) if context.args else ""
     cfg = get_button_config()
-    keyboard = [[InlineKeyboardButton(text=cfg["metin"], url=cfg["url"])]]
+
+    # '|' karakteri ile özel metin/buton/link ayrımı kontrol edilir
+    if "|" in raw_args:
+        parts = [p.strip() for p in raw_args.split("|")]
+        announcement_text = parts[0] if parts[0] else "📌 *Duyuru*"
+        button_text = parts[1] if len(parts) > 1 and parts[1] else cfg["metin"]
+        button_url = parts[2] if len(parts) > 2 and parts[2] else cfg["url"]
+    else:
+        announcement_text = raw_args if raw_args else "📌 *Diğer Gruba Geçiş Yapabilirsiniz*"
+        button_text = cfg["metin"]
+        button_url = cfg["url"]
+
+    # Link format kontrolü
+    if button_url.startswith("t.me/"):
+        button_url = "https://" + button_url
+    elif not (button_url.startswith("http://") or button_url.startswith("https://")):
+        button_url = "https://" + button_url
+
+    # Inline Keyboard (Buton) Oluşturma
+    keyboard = [[InlineKeyboardButton(text=button_text, url=button_url)]]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    announcement_text = " ".join(context.args) if context.args else "📌 *Diğer Gruba Geçiş Yapabilirsiniz*"
-
     try:
+        # Fotoğraflı yanıt var ise resimli butonlu duyuru paylaşır
         if update.message.reply_to_message and update.message.reply_to_message.photo:
             photo = update.message.reply_to_message.photo[-1].file_id
             sent_msg = await context.bot.send_photo(
@@ -261,11 +281,18 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 parse_mode="Markdown"
             )
 
+        # Mesajı grupta başa sabitleme (pin)
         await context.bot.pin_chat_message(chat_id=chat_id, message_id=sent_msg.message_id)
         await safe_delete_user_message(update)
+
     except Exception as e:
         logger.error(f"Duyuru ve sabitleme hatası: {e}")
-        await send_auto_delete_message(context, chat_id, "❌ Duyuru gönderilirken veya sabitlenirken hata oluştu.", parse_mode=None)
+        await send_auto_delete_message(
+            context, 
+            chat_id, 
+            "❌ Duyuru gönderilirken hata oluştu. Linkin geçerli bir URL (http:// veya https://) olduğundan emin olun.", 
+            parse_mode=None
+        )
 
 # /welcome
 async def cmd_set_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
