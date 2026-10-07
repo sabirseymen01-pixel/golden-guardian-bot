@@ -57,7 +57,7 @@ async def is_user_admin(chat_id: int, user_id: int, context: ContextTypes.DEFAUL
 # Hedef kullanıcıyı bulma (Reply, ID veya @username)
 async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # 1. Mesaj yanıtlanmışsa
-    if update.message.reply_to_message:
+    if update.message and update.message.reply_to_message:
         return update.message.reply_to_message.from_user
 
     # 2. Komut yanına ID veya @kullanici_adi girilmişse
@@ -241,11 +241,15 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if await is_user_admin(chat_id, user.id, context):
-        await send_auto_delete_message(context, chat_id, "⚠️️ Başka bir yöneticiyi susturamazsınız.")
+        await send_auto_delete_message(context, chat_id, "⚠️ Başka bir yöneticiyi susturamazsınız.")
         return
 
     try:
-        await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=ChatPermissions(can_send_messages=False))
+        await context.bot.restrict_chat_member(
+            chat_id=chat_id, 
+            user_id=user.id, 
+            permissions=ChatPermissions(can_send_messages=False)
+        )
         await send_auto_delete_message(context, chat_id, f"🔇 {user.full_name} susturuldu.")
     except Exception as e:
         logger.error(f"Mute Hatası: {e}")
@@ -265,5 +269,127 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     try:
-        full_permissions = ChatPermissions(can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
-        await context.bot.restrict_chat_member(chat_id=chat_id
+        full_permissions = ChatPermissions(
+            can_send_messages=True, 
+            can_send_media_messages=True, 
+            can_send_other_messages=True, 
+            can_add_web_page_previews=True
+        )
+        await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=full_permissions)
+        await send_auto_delete_message(context, chat_id, f"🔊 {user.full_name} susturması kaldırıldı.")
+    except Exception as e:
+        logger.error(f"Unmute Hatası: {e}")
+
+# /warn -> Uyarı
+async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    admin_id = update.effective_user.id
+
+    if not await is_user_admin(chat_id, admin_id, context):
+        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.")
+        return
+
+    user = await get_target_user(update, context)
+    if not user:
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın, ID veya @kullanici_adi belirtin.")
+        return
+
+    if await is_user_admin(chat_id, user.id, context):
+        await send_auto_delete_message(context, chat_id, "⚠️ Yöneticiye uyarı verilemez.")
+        return
+
+    count = database.add_warning(chat_id, user.id)
+    if count >= 3:
+        try:
+            await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+            database.reset_warnings(chat_id, user.id)
+            await send_auto_delete_message(context, chat_id, f"🚫 {user.full_name} 3 uyarıya ulaştığı için engellendi!")
+        except Exception as e:
+            logger.error(f"Warn-Ban Hatası: {e}")
+    else:
+        await send_auto_delete_message(context, chat_id, f"⚠️ {user.full_name} uyarıldı! Uyarı: {count}/3")
+
+# /unwarn -> Uyarı Sıfırlama
+async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    admin_id = update.effective_user.id
+
+    if not await is_user_admin(chat_id, admin_id, context):
+        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.")
+        return
+
+    user = await get_target_user(update, context)
+    if not user:
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcıyı yanıtlayın, ID veya @kullanici_adi belirtin.")
+        return
+
+    database.reset_warnings(chat_id, user.id)
+    await send_auto_delete_message(context, chat_id, f"✅ {user.full_name} tüm uyarıları sıfırlandı.")
+
+# Mesaj Dinleyicisi (Küfür Filtresi)
+async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message or not update.message.text:
+        return
+
+    text = update.message.text
+    chat_id = update.effective_chat.id
+    user = update.effective_user
+
+    # Yöneticileri küfür filtresinden muaf tut
+    if await is_user_admin(chat_id, user.id, context):
+        return
+
+    if custom_filters.contains_profanity(text):
+        try:
+            await update.message.delete()
+            count = database.add_warning(chat_id, user.id)
+            if count >= 3:
+                await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+                database.reset_warnings(chat_id, user.id)
+                await send_auto_delete_message(context, chat_id, f"🚫 {user.full_name} 3 uyarı sınırından engellendi.")
+            else:
+                await send_auto_delete_message(context, chat_id, f"⚠️ {user.full_name}, yasaklı kelime kullandınız! Uyarı: {count}/3")
+        except Exception as e:
+            logger.error(f"Küfür filtresi hatası: {e}")
+
+async def post_init(application):
+    database.init_db()
+    asyncio.create_task(start_web_server())
+    logger.info("Veritabanı kuruldu ve Web Sunucusu başlatıldı.")
+
+def main():
+    request_config = HTTPXRequest(
+        connect_timeout=20.0,
+        read_timeout=20.0,
+        get_updates_read_timeout=20.0
+    )
+
+    app = (
+        ApplicationBuilder()
+        .token(config.BOT_TOKEN)
+        .request(request_config)
+        .post_init(post_init)
+        .build()
+    )
+
+    # Handler Bağlantıları
+    app.add_handler(CommandHandler(["start", "help"], cmd_start))
+    app.add_handler(CommandHandler("welcome", cmd_set_welcome))
+    app.add_handler(CommandHandler("kilit", cmd_kilit))
+    app.add_handler(CommandHandler("defol", cmd_defol))
+    app.add_handler(CommandHandler("undefol", cmd_undefol))
+    app.add_handler(CommandHandler("itaat", cmd_itaat))
+    app.add_handler(CommandHandler("unitaat", cmd_unitaat))
+    app.add_handler(CommandHandler("warn", cmd_warn))
+    app.add_handler(CommandHandler("unwarn", cmd_unwarn))
+
+    # Yeni Katılan Üye Handler
+    app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
+
+    # Küfür Filtresi & Genel Mesaj Handler
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_messages))
+
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
