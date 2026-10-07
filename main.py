@@ -174,7 +174,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     await update.message.reply_text(welcome_text, parse_mode="Markdown")
 
-# --- ZAMANLAMA / SÜRELİ PAYLAŞIM EKLENTİSİ (ONARILMIŞ) ---
+# --- ZAMANLAMA / SÜRELİ PAYLAŞIM EKLENTİSİ ---
 async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user_id = update.effective_user.id
@@ -189,7 +189,6 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await safe_delete_user_message(update)
         return
 
-    # Dakika parametresinin kontrolü ve algılanması
     if not context.args or len(context.args) == 0:
         await send_auto_delete_message(context, chat_id, "⚠️ Lütfen süreyi dakika cinsinden belirtin.\nKullanım: `/zamanla 30`", delay=15)
         await safe_delete_user_message(update)
@@ -216,19 +215,16 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
         'photo_id': target_message.photo[-1].file_id if target_message.photo else None
     }
 
-    # JobQueue kullanılabilirliği kontrol ediliyor
     if context.job_queue is None:
         logger.error("JobQueue aktif değil! 'python-telegram-bot[job-queue]' paketi yüklü mü?")
         await send_auto_delete_message(context, chat_id, "❌ Sistem zamanlama altyapısı hazır değil. Sunucu yöneticisine başvurun.", delay=15)
         await safe_delete_user_message(update)
         return
 
-    # Zaten aktif görev varsa durdur
     current_jobs = context.job_queue.get_jobs_by_name(str(chat_id))
     for job in current_jobs:
         job.schedule_removal()
 
-    # Yeni periyodik zamanlama ekle
     context.job_queue.run_repeating(
         otomatik_paylasim_cb,
         interval=saniye,
@@ -422,7 +418,7 @@ async def cmd_set_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
     database.set_welcome_message(chat_id, new_welcome_text)
     await send_auto_delete_message(context, chat_id, "✅ Hoş geldin mesajı başarıyla güncellendi!", parse_mode=None)
 
-# Hoş Geldin Mesajı
+# Hoş Geldin Mesajı (GÜNCELLENDİ: mention_markdown hatası giderildi)
 async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     raw_template = database.get_welcome_message(chat_id)
@@ -434,7 +430,7 @@ async def welcome_new_member(update: Update, context: ContextTypes.DEFAULT_TYPE)
         if member.username:
             database.save_user(chat_id, member.id, member.username)
 
-        user_mention = member.mention_markdown(version=1)
+        user_mention = member.mention_markdown()
         custom_msg = raw_template.replace("{user}", user_mention)
         await send_auto_delete_message(context, chat_id, custom_msg, delay=15, parse_mode="Markdown")
 
