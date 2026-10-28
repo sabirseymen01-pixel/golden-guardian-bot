@@ -91,6 +91,13 @@ async def api_post_chat_message(request):
         if not message:
             return web.json_response({"success": False, "error": "Boş mesaj olamaz"}, status=400)
 
+        # Kurucu kontrolü dışındakiler için susturma/yazma kontrolü
+        founder_id = os.environ.get("FOUNDER_ID")
+        if not founder_id or str(user_id) != str(founder_id).strip():
+            perms = database.get_staff_permissions(user_id)
+            if perms["can_write"] == 0 or perms["is_muted"] == 1:
+                return web.json_response({"success": False, "error": "Kurucu tarafından mesaj yazmanız engellendi!"}, status=403)
+
         database.save_chat_message(user_id, username, full_name, message, msg_type)
         return web.json_response({"success": True})
     except Exception as e:
@@ -127,7 +134,8 @@ async def api_verify_admin(request):
             return web.json_response({"authorized": True, "is_founder": True})
 
         if database.is_authorized_staff(user_id):
-            return web.json_response({"authorized": True, "is_founder": False})
+            perms = database.get_staff_permissions(user_id)
+            return web.json_response({"authorized": True, "is_founder": False, "permissions": perms})
 
         return web.json_response({"authorized": False})
     except Exception as e:
@@ -143,23 +151,25 @@ async def api_get_staff_list(request):
             return web.json_response({"error": "Yetkisiz"}, status=403)
 
         staffs = database.get_all_staff()
-        result = [{"user_id": s[0], "username": s[1], "full_name": s[2], "can_ban": s[3]} for s in staffs]
+        result = [{"user_id": s[0], "username": s[1], "full_name": s[2], "can_ban": s[3], "can_speak": s[4], "can_write": s[5], "is_muted": s[6]} for s in staffs]
         return web.json_response(result)
     except Exception as e:
         return web.json_response({"error": str(e)}, status=500)
 
-async def api_toggle_staff_ban(request):
+# --- KURUCU YETKİ VE SES ODASI KONTROL API'LERİ ---
+async def api_set_staff_permission(request):
     try:
         data = await request.json()
         user_id = int(data.get("user_id", 0))
         target_id = int(data.get("target_id", 0))
-        new_status = int(data.get("status", 1))
+        perm_type = data.get("perm_type") # 'can_speak', 'can_write', 'is_muted', 'can_ban'
+        status = int(data.get("status", 0))
 
         founder_id = os.environ.get("FOUNDER_ID")
         if not founder_id or str(user_id) != str(founder_id).strip():
-            return web.json_response({"success": False, "error": "Yetkisiz"}, status=403)
+            return web.json_response({"success": False, "error": "Yetkisiz işlem!"}, status=403)
 
-        database.set_staff_ban_permission(target_id, new_status)
+        database.set_staff_permission(target_id, perm_type, status)
         return web.json_response({"success": True})
     except Exception as e:
         return web.json_response({"success": False, "error": str(e)}, status=500)
@@ -227,7 +237,7 @@ async def start_web_server(app_context):
     app.router.add_post("/api/toggle-lockdown", api_toggle_lockdown)
     app.router.add_post("/api/verify-admin", api_verify_admin)
     app.router.add_post("/api/staff/list", api_get_staff_list)
-    app.router.add_post("/api/staff/toggle", api_toggle_staff_ban)
+    app.router.add_post("/api/staff/permission", api_set_staff_permission)
     app.router.add_post("/api/staff/add", api_add_staff)
     app.router.add_post("/api/staff/remove", api_remove_staff)
     
@@ -274,7 +284,8 @@ async def is_user_admin(chat_id: int, user_id: int, context: ContextTypes.DEFAUL
     if founder_id and str(user_id) == str(founder_id).strip():
         return True
 
-    if not database.is_authorized_staff(user_id) or not database.get_staff_ban_permission(user_id):
+    perms = database.get_staff_permissions(user_id)
+    if not database.is_authorized_staff(user_id) or perms["can_ban"] == 0:
         return False
 
     try:
@@ -303,7 +314,7 @@ async def check_admin_rate_limit(chat_id: int, user_id: int, context: ContextTyp
     ADMIN_ACTION_LIMITS[key] = [t for t in ADMIN_ACTION_LIMITS[key] if now - t < 60]
 
     if len(ADMIN_ACTION_LIMITS[key]) >= MAX_ACTIONS_PER_MINUTE:
-        database.set_staff_ban_permission(user_id, 0)
+        database.set_staff_permission(user_id, 'can_ban', 0)
         logger.warning(f"🚨 GÜVENLİK ALARMI: Yönetici {user_id} flood yaptı! Ban yetkisi otomatik kapatıldı.")
         
         if founder_id:
