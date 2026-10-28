@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Golden Staff | Yönetim Paneli</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f1115;
+            --card-bg: rgba(25, 29, 38, 0.75);
+            --border-color: rgba(212, 175, 55, 0.2);
+            --accent-gold: #d4af37;
+            --text-main: #f0f2f5;
+            --text-muted: #9aa0a6;
+            --danger: #ff4d4d;
+            --success: #2ecc71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 16px;
+            padding-bottom: 40px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo-area h1 {
+            font-size: 20px;
+            color: var(--accent-gold);
+            font-weight: 700;
+        }
+
+        .logo-area p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .admin-badge {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--accent-gold);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid var(--border-color);
+        }
+
+        /* İstatistik Kartları */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* Bölüm Başlıkları */
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--accent-gold);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Log Tablosu / Listesi */
+        .logs-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .log-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: transform 0.1s ease;
+        }
+
+        .log-item:active {
+            transform: scale(0.98);
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .log-type {
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        .type-ban, .type-security_ban { background: rgba(255, 77, 77, 0.2); color: var(--danger); }
+        .type-admin_report { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
+        .type-warn { background: rgba(230, 126, 34, 0.2); color: #e67e22; }
+        .type-default { background: rgba(46, 204, 113, 0.2); color: var(--success); }
+
+        .log-time {
+            color: var(--text-muted);
+        }
+
+        .log-details {
+            font-size: 13px;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        .log-user {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo-area">
+            <h1>Golden Staff</h1>
+            <p>Gelişmiş Moderasyon & Log Paneli</p>
+        </div>
+        <div class="admin-badge" id="userRole">Yönetici 🛡️</div>
+    </div>
+
+    <!-- İstatistikler -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-title">Toplam Olay</div>
+            <div class="stat-value" id="totalActions">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Güvenlik Banı</div>
+            <div class="stat-value" id="totalBans">-</div>
+        </div>
+    </div>
+
+    <!-- Canlı Loglar -->
+    <div class="section-title">📊 Canlı Sistem Logları</div>
+    <div class="logs-container" id="logsList">
+        <div class="loading">Loglar yükleniyor...</div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Mini App'i tam ekran yap
+
+        // Kullanıcı bilgisini Telegram'dan al ve unvanı ayarla
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+            document.getElementById('userRole').innerText = user.first_name + " 🛡️";
+        }
+
+        async function fetchData() {
+            try {
+                // İstatistikleri Çek
+                const statsRes = await fetch('/api/stats');
+                const stats = await statsRes.json();
+                
+                document.getElementById('totalActions').innerText = stats.total_actions || 0;
+                
+                const breakdown = stats.action_breakdown || {};
+                const banCount = (breakdown['BAN'] || 0) + (breakdown['SECURITY_BAN'] || 0) + (breakdown['WARN_BAN'] || 0);
+                document.getElementById('totalBans').innerText = banCount;
+
+                // Logları Çek
+                const logsRes = await fetch('/api/logs');
+                const logs = await logsRes.json();
+
+                const logsContainer = document.getElementById('logsList');
+                if (logs.length === 0) {
+                    logsContainer.innerHTML = '<div class="loading">Henüz kaydedilmiş bir hareket yok.</div>';
+                    return;
+                }
+
+                logsContainer.innerHTML = '';
+                logs.forEach(log => {
+                    let typeClass = 'type-default';
+                    if (log.action_type.includes('BAN')) typeClass = 'type-ban';
+                    else if (log.action_type === 'ADMIN_REPORT') typeClass = 'type-admin_report';
+                    else if (log.action_type.includes('WARN')) typeClass = 'type-warn';
+
+                    const item = document.createElement('div');
+                    item.className = 'log-item';
+                    item.innerHTML = `
+                        <div class="log-header">
+                            <span class="log-type ${typeClass}">${log.action_type}</span>
+                            <span class="log-time">${log.timestamp}</span>
+                        </div>
+                        <div class="log-details">${escapeHtml(log.details)}</div>
+                        <div class="log-user">Kullanıcı ID: ${log.user_id} | @${escapeHtml(log.username || 'Bilinmiyor')}</div>
+                    `;
+                    logsContainer.appendChild(item);
+                });
+
+            } catch (err) {
+                console.error("Veri çekme hatası:", err);
+                document.getElementById('logsList').innerHTML = '<div class="loading" style="color:var(--danger);">Veriler yüklenirken hata oluştu!</div>';
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // Sayfa açıldığında verileri çek ve her 5 saniyede bir canlı güncelle
+        fetchData();
+        setInterval(fetchData, 5000);
+    </script>
+</body>
+</html>
