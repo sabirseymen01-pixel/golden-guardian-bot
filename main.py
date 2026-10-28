@@ -67,7 +67,7 @@ async def start_web_server(app_context):
     app.router.add_get("/api/stats", api_get_stats)
     app.router.add_get("/api/logs", api_get_logs)
     
-    # Kök dizine girildiğinde index.html'i doğrudan HTML olarak sun (Ekranda sadece 'html' yazma sorununu çözer)
+    # Kök dizine girildiğinde index.html'i doğrudan HTML olarak sun
     async def handle_root(request):
         try:
             with open("public/index.html", "r", encoding="utf-8") as f:
@@ -113,8 +113,13 @@ async def safe_delete_user_message(update: Update):
         except Exception as e:
             logger.debug(f"Kullanıcı mesajı silinemedi: {e}")
 
-# Admin Kontrolü
+# Admin ve Kurucu Kontrolü (Founder ID Destekli)
 async def is_user_admin(chat_id: int, user_id: int, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    # Render'a eklenen kurucu (FOUNDER_ID) kontrolü
+    founder_id = os.environ.get("FOUNDER_ID")
+    if founder_id and str(user_id) == str(founder_id).strip():
+        return True
+
     try:
         member = await context.bot.get_chat_member(chat_id, user_id)
         return member.status in ["administrator", "creator"]
