@@ -7,6 +7,7 @@ def init_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     
+    # Kullanıcılar tablosu
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY,
@@ -15,6 +16,7 @@ def init_db():
         )
     ''')
     
+    # Zaman damgalı loglar tablosu
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,6 +29,7 @@ def init_db():
         )
     ''')
     
+    # Yetkili staff tablosu
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS staff (
             user_id INTEGER PRIMARY KEY,
@@ -38,6 +41,16 @@ def init_db():
             is_muted INTEGER DEFAULT 0,
             warnings INTEGER DEFAULT 0,
             added_by INTEGER
+        )
+    ''')
+
+    # Grup ayarları tablosu (Welcome mesajı ve dinamik buton ayarları)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS group_settings (
+            chat_id INTEGER PRIMARY KEY,
+            welcome_msg TEXT,
+            btn_text TEXT,
+            btn_url TEXT
         )
     ''')
     
@@ -88,6 +101,40 @@ def get_admin_performance_stats():
     rows = cursor.fetchall()
     conn.close()
     return [{"username": r[0], "count": r[1]} for r in rows]
+
+def get_data_cloud_tags():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('SELECT action_type, COUNT(*) as cnt FROM logs GROUP BY action_type ORDER BY cnt DESC')
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"tag": r[0], "count": r[1]} for r in rows]
+
+def get_group_settings(chat_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('SELECT welcome_msg, btn_text, btn_url FROM group_settings WHERE chat_id = ?', (chat_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return {"welcome_msg": row[0], "btn_text": row[1], "btn_url": row[2]}
+    return {
+        "welcome_msg": "Grup düzenini sağlamak, argo/küfür ve yasaklı içerikleri engellemek için aktifim.",
+        "btn_text": "🛡️ Golden Staff Paneli",
+        "btn_url": "https://golden-guardian-bot.onrender.com/"
+    }
+
+def update_group_setting(chat_id, field, value):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    settings = get_group_settings(chat_id)
+    settings[field] = value
+    cursor.execute('''
+        INSERT OR REPLACE INTO group_settings (chat_id, welcome_msg, btn_text, btn_url)
+        VALUES (?, ?, ?, ?)
+    ''', (chat_id, settings["welcome_msg"], settings["btn_text"], settings["btn_url"]))
+    conn.commit()
+    conn.close()
 
 def is_authorized_staff(user_id):
     conn = sqlite3.connect(DB_NAME)
@@ -147,6 +194,14 @@ def remove_staff_member(user_id):
     cursor = conn.cursor()
     cursor.execute('DELETE FROM staff WHERE user_id = ?', (user_id,))
     conn.commit()
+    conn.close()
+
+def set_staff_permission(user_id, perm_type, status):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    if perm_type in ['can_ban', 'can_speak', 'can_write', 'is_muted']:
+        cursor.execute(f'UPDATE staff SET {perm_type} = ? WHERE user_id = ?', (status, user_id))
+        conn.commit()
     conn.close()
 
 def get_user_id_by_username(chat_id, username):
