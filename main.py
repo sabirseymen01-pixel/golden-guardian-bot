@@ -28,6 +28,9 @@ EMERGENCY_LOCKDOWN = False
 BAD_WORDS = ["küfür1", "küfür2", "argo1"]
 SCHEDULED_TASKS = {}
 
+async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.error(f"Telegram Bot Hatası: {context.error}")
+
 # --- API ROTALARI ---
 async def api_get_stats(request):
     return web.json_response(database.get_bot_statistics())
@@ -176,19 +179,26 @@ async def check_admin_rate_limit(chat_id, user_id, context):
     ADMIN_ACTION_LIMITS[key].append(now)
     return True
 
-async def get_target_user(update, context):
+async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     if update.message and update.message.reply_to_message:
         return update.message.reply_to_message.from_user
     if context.args:
         arg = context.args[0].strip()
-        try:
-            user_id = int(arg)
-            member = await context.bot.get_chat_member(chat_id, user_id)
-            return member.user
-        except Exception:
-            pass
-        db_user_id = database.get_user_id_by_username(chat_id, arg.lstrip("@").lower())
+        if arg.isdigit() or (arg.startswith("-") and arg[1:].isdigit()):
+            try:
+                user_id = int(arg)
+                member = await context.bot.get_chat_member(chat_id, user_id)
+                return member.user
+            except Exception:
+                class TempUser:
+                    def __init__(self, uid):
+                        self.id = uid
+                        self.full_name = f"Kullanıcı_{uid}"
+                        self.username = f"id_{uid}"
+                return TempUser(int(arg))
+        clean_username = arg.lstrip("@").lower()
+        db_user_id = database.get_user_id_by_username(chat_id, clean_username)
         if db_user_id:
             try:
                 member = await context.bot.get_chat_member(chat_id, db_user_id)
@@ -319,12 +329,12 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(chat_id, admin_id, context): return
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "❌ Kullanıcı bulunamadı (Yanıt verin, ID veya @kullanici yazın).")
+        await send_auto_delete_message(context, chat_id, "❌ Kullanıcı bulunamadı. Lütfen kullanıcıya yanıt verin veya ID yazın.")
         return
     try:
         await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
-        await send_auto_delete_message(context, chat_id, f"🚫 *{escape_markdown(user.full_name, version=1)}* gruptan banlandı.")
-        database.log_action(chat_id, "BAN", user.id, user.username or str(user.id), "Admin tarafından banlandı.")
+        await send_auto_delete_message(context, chat_id, f"🚫 *{escape_markdown(getattr(user, 'full_name', 'Kullanıcı'), version=1)}* gruptan banlandı.")
+        database.log_action(chat_id, "BAN", user.id, getattr(user, 'username', str(user.id)), "Admin tarafından banlandı.")
     except Exception as e:
         logger.error(f"Ban hatası: {e}")
 
@@ -336,8 +346,8 @@ async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not user: return
     try:
         await context.bot.unban_chat_member(chat_id=chat_id, user_id=user.id, only_if_banned=True)
-        await send_auto_delete_message(context, chat_id, f"✅ *{escape_markdown(user.full_name, version=1)}* engeli kaldırıldı.")
-        database.log_action(chat_id, "UNBAN", user.id, user.username or str(user.id), "Engeli kaldırıldı.")
+        await send_auto_delete_message(context, chat_id, f"✅ *{escape_markdown(getattr(user, 'full_name', 'Kullanıcı'), version=1)}* engeli kaldırıldı.")
+        database.log_action(chat_id, "UNBAN", user.id, getattr(user, 'username', str(user.id)), "Engeli kaldırıldı.")
     except Exception as e:
         logger.error(f"Unban hatası: {e}")
 
@@ -349,8 +359,8 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not user: return
     try:
         await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=ChatPermissions(can_send_messages=False))
-        await send_auto_delete_message(context, chat_id, f"🔇 *{escape_markdown(user.full_name, version=1)}* susturuldu.")
-        database.log_action(chat_id, "MUTE", user.id, user.username or str(user.id), "Susturuldu.")
+        await send_auto_delete_message(context, chat_id, f"🔇 *{escape_markdown(getattr(user, 'full_name', 'Kullanıcı'), version=1)}* susturuldu.")
+        database.log_action(chat_id, "MUTE", user.id, getattr(user, 'username', str(user.id)), "Susturuldu.")
     except Exception as e:
         logger.error(f"Mute hatası: {e}")
 
@@ -362,8 +372,8 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not user: return
     try:
         await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=ChatPermissions(can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True))
-        await send_auto_delete_message(context, chat_id, f"🔊 *{escape_markdown(user.full_name, version=1)}* susturması kaldırıldı.")
-        database.log_action(chat_id, "UNMUTE", user.id, user.username or str(user.id), "Susturması kaldırıldı.")
+        await send_auto_delete_message(context, chat_id, f"🔊 *{escape_markdown(getattr(user, 'full_name', 'Kullanıcı'), version=1)}* susturması kaldırıldı.")
+        database.log_action(chat_id, "UNMUTE", user.id, getattr(user, 'username', str(user.id)), "Susturması kaldırıldı.")
     except Exception as e:
         logger.error(f"Unmute hatası: {e}")
 
@@ -374,13 +384,13 @@ async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = await get_target_user(update, context)
     if not user: return
     current_warns = database.add_warning(user.id)
-    database.log_action(chat_id, "WARN", user.id, user.username or str(user.id), f"Uyarı: {current_warns}/3")
+    database.log_action(chat_id, "WARN", user.id, getattr(user, 'username', str(user.id)), f"Uyarı: {current_warns}/3")
     if current_warns >= 3:
         await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
-        database.log_action(chat_id, "AUTO_BAN_WARN", user.id, user.username or str(user.id), "3 uyarı sınırından banlandı.")
-        await send_auto_delete_message(context, chat_id, f"⚠️ *{escape_markdown(user.full_name, version=1)}* 3 uyarı sınırına ulaştığı için banlandı!")
+        database.log_action(chat_id, "AUTO_BAN_WARN", user.id, getattr(user, 'username', str(user.id)), "3 uyarı sınırından banlandı.")
+        await send_auto_delete_message(context, chat_id, f"⚠️ *{escape_markdown(getattr(user, 'full_name', 'Kullanıcı'), version=1)}* 3 uyarı sınırına ulaştığı için banlandı!")
     else:
-        await send_auto_delete_message(context, chat_id, f"⚠️ *{escape_markdown(user.full_name, version=1)}* uyarıldı ({current_warns}/3).")
+        await send_auto_delete_message(context, chat_id, f"⚠️ *{escape_markdown(getattr(user, 'full_name', 'Kullanıcı'), version=1)}* uyarıldı ({current_warns}/3).")
 
 async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
@@ -389,8 +399,8 @@ async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user = await get_target_user(update, context)
     if not user: return
     database.reset_warnings(user.id)
-    database.log_action(chat_id, "UNWARN", user.id, user.username or str(user.id), "Uyarılar sıfırlandı.")
-    await send_auto_delete_message(context, chat_id, f"♻️ *{escape_markdown(user.full_name, version=1)}* uyarıları sıfırlandı.")
+    database.log_action(chat_id, "UNWARN", user.id, getattr(user, 'username', str(user.id)), "Uyarılar sıfırlandı.")
+    await send_auto_delete_message(context, chat_id, f"♻️ *{escape_markdown(getattr(user, 'full_name', 'Kullanıcı'), version=1)}* uyarıları sıfırlandı.")
 
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message or not update.message.text: return
