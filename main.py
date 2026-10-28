@@ -3,7 +3,7 @@ import json
 import asyncio
 import logging
 from aiohttp import web
-from telegram import Update, ChatPermissions, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, ChatPermissions, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.helpers import escape_markdown
 from telegram.ext import (
     ApplicationBuilder,
@@ -167,27 +167,23 @@ async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYP
     else:
         logger.error(f"İşlenmeyen hata meydana geldi: {context.error}", exc_info=context.error)
 
-# /start & /help
+# /start & /help (Golden Staff Mini App Dokunmatik Butonu İle)
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
         "🤖 *Grup Yönetim & Golden Staff Güvenlik Botu*\n\n"
         "Grup düzenini sağlamak, argo/küfür, dış linkler ve yasaklı içerikleri otomatik engellemek için aktifim.\n\n"
-        "📜 *Yönetici Komutları:*\n"
-        "• `/welcome <mesaj>` - Hoş geldin mesajını değiştirir.\n"
-        "• `/butonmetni <yazı>` - Varsayılan buton üzerindeki yazıyı değiştirir.\n"
-        "• `/butonlinki <url>` - Varsayılan butonun yönlendireceği linki değiştirir.\n"
-        "• `/duyuru <mesaj>` - Kayıtlı buton ile duyuru gönderir.\n"
-        "• `/zamanla <dakika>` - Yanıtlanan mesajı/görseli periyodik olarak otomatik paylaşır.\n"
-        "• `/zamanladur` - Aktif otomatik paylaşımı durdurur.\n"
-        "• `/kilit kapat / ac` - Gruba mesaj yazmayı kilitler veya açar.\n"
-        "• `/defol <@kullanici|ID|yanıt>` - Kullanıcıyı banlar.\n"
-        "• `/undefol <ID|yanıt>` - Engeli kaldırır.\n"
-        "• `/itaat <@kullanici|ID|yanıt>` - Kullanıcıyı susturur.\n"
-        "• `/unitaat <@kullanici|ID|yanıt>` - Susturmayı kaldırır.\n"
-        "• `/warn <@kullanici|ID|yanıt>` - Kullanıcıya uyarı verir.\n"
-        "• `/unwarn <@kullanici|ID|yanıt>` - Uyarıları sıfırlar."
+        "Yönetim paneline ve canlı loglara erişmek için aşağıdaki dokunmatik butonu kullanabilirsin! 👇"
     )
-    await update.message.reply_text(welcome_text, parse_mode="Markdown")
+
+    # Render üzerindeki canlı web servisinin adresi (kendi Render linkinle değiştir)
+    web_app_url = "https://golden-guardian-bot.onrender.com/"
+    
+    keyboard = [
+        [InlineKeyboardButton(text="🛡️ Golden Staff Paneli", web_app=WebAppInfo(url=web_app_url))]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text(welcome_text, reply_markup=reply_markup, parse_mode="Markdown")
 
 # --- ZAMANLAMA / SÜRELİ PAYLAŞIM EKLENTİSİ ---
 async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -470,7 +466,7 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
         safe_name = escape_markdown(user.full_name, version=1)
         await send_auto_delete_message(context, chat_id, f"🚫 *{safe_name}* engellendi.", parse_mode="Markdown")
-        database.log_action(chat_id, "BAN", user.id, user.username, f"Admin tarafından banlandı (Admin ID: {admin_id})")
+        database.log_action(chat_id, "BAN", user.id, user.username, f"Admin tarafından banlandı.")
     except Exception as e:
         logger.error(f"Ban Hatası: {e}")
 
@@ -595,7 +591,7 @@ async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_auto_delete_message(context, chat_id, f"✅ *{safe_name}* uyarıları sıfırlandı.", parse_mode="Markdown")
     database.log_action(chat_id, "UNWARN", user.id, user.username, "Uyarıları sıfırlandı.")
 
-# --- @ADMIN BİLDİRİ VE ŞİKAYET SİSTEMİ ---
+# --- @ADMIN BİLDİRİ VE ŞİKAYET SİSTEMİ (Grup İçi %100 Gizli & PM/Mini App Raporlu) ---
 async def handle_admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
     if not update.message or not update.message.text:
         return False
@@ -609,51 +605,43 @@ async def handle_admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE
         reported_user = reported_msg.from_user
         chat = update.effective_chat
 
-        reporter_tag = f"@{reporter.username}" if reporter.username else f"ID:{reporter.id}"
-        reported_tag = f"@{reported_user.username}" if reported_user.username else f"ID:{reported_user.id}"
         report_content = reported_msg.text or reported_msg.caption or "[Medya / Fotoğraf / Dosya]"
 
         try:
             admins = await context.bot.get_chat_administrators(chat.id)
-            admin_mentions = []
             
-            for admin in admins:
-                if admin.user.is_bot:
-                    continue
-                mention = f"[{admin.user.full_name}](tg://user?id={admin.user.id})"
-                admin_mentions.append(mention)
-
-            admin_text_ping = " ".join(admin_mentions)
-
-            report_message = (
-                f"🚨 *YENİ YÖNETİCİ BİLDİRİMİ / ŞİKAYET* 🚨\n"
-                f"📌 *Grup:* `{chat.title}`\n\n"
-                f"👤 *Bildiren:* {reporter.full_name} (`{reporter_tag}` - ID: `{reporter.id}`)\n"
-                f"🎯 *Bildirilen:* {reported_user.full_name} (`{reported_tag}` - ID: `{reported_user.id}`)\n\n"
-                f"💬 *Şikayet Edilen Mesaj:*\n> _{report_content}_\n\n"
-                f"🔔 *Yönetici Ekip:* {admin_text_ping}"
+            # Şikayeti veritabanına logla (Sadece Golden Staff Mini App içinde görünecek)
+            database.log_action(
+                chat.id, 
+                "ADMIN_REPORT", 
+                reporter.id, 
+                reporter.username or "Gizli", 
+                f"Şikayet Edilen: {reported_user.full_name} | İçerik: {report_content[:50]}"
             )
 
-            # Kullanıcının @admin yazan mesajını temizle
+            # Kullanıcının @admin yazan mesajını gruptan tamamen temizle (Sohbet asla kirlenmez)
             await safe_delete_user_message(update)
 
-            # Gruba bildiri raporu at (15 saniye sonra silinsin)
-            await send_auto_delete_message(context, chat.id, report_message, delay=15, parse_mode="Markdown")
+            # Yöneticilere (YT'lere) özel mesajla (PM) temiz rapor gönder
+            admin_report_text = (
+                f"🚨 *YENİ YÖNETİCİ BİLDİRİMİ*\n"
+                f"📌 *Grup:* `{chat.title}`\n\n"
+                f"👤 *Bildiren:* {reporter.full_name}\n"
+                f"🎯 *Bildirilen:* {reported_user.full_name}\n\n"
+                f"💬 *Şikayet Edilen Mesaj:*\n> _{report_content}_\n\n"
+                f"✨ *Detaylar ve yönetim için Golden Staff Paneli'ni açabilirsin.*"
+            )
 
-            # Veritabanına şikayet/bildiri logu kaydet
-            database.log_action(chat.id, "ADMIN_REPORT", reporter.id, reporter.username, f"Bildirilen kullanıcı: {reported_user.id} - İçerik: {report_content[:50]}")
-
-            # Adminlerin PM'lerine (özel mesajlarına) bildirim gönderme denemesi
             for admin in admins:
                 if not admin.user.is_bot:
                     try:
                         await context.bot.send_message(
                             chat_id=admin.user.id,
-                            text=f"📌 *{chat.title}* grubunda şikayet var!\n\n{report_message}",
+                            text=admin_report_text,
                             parse_mode="Markdown"
                         )
                     except Exception:
-                        pass # Botu özelden başlatmamışsa sessizce geç
+                        pass # Botu özelden başlatmamış adminler için hata vermesini engeller
 
             return True
         except Exception as e:
@@ -691,12 +679,12 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
             
             # Veritabanına güvenlik banı logunu kaydet
-            database.log_action(chat_id, "SECURITY_BAN", user.id, user.username, f"Yasaklı içerik/link tespit edildi: {text[:50]}")
+            database.log_action(chat.id, "SECURITY_BAN", user.id, user.username, f"Yasaklı içerik/link tespit edildi.")
 
             await send_auto_delete_message(
                 context, 
                 chat_id, 
-                f"🚫 *{safe_name}*, yasaklı içerik (küfür/argo, dış link, yaş sınırı veya takas) paylaştığı için gruptan kalıcı olarak engellendi!", 
+                f"🚫 *{safe_name}*, yasaklı içerik paylaştığı için gruptan kalıcı olarak engellendi!", 
                 delay=10, 
                 parse_mode="Markdown"
             )
