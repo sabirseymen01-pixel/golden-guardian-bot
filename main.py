@@ -90,34 +90,93 @@ async def api_toggle_lockdown(request):
         return web.json_response({"success": False, "error": str(e)}, status=500)
 
 async def api_verify_admin(request):
-    """Mini App'i açan kullanıcının Telegram'da gerçekten admin/kurucu olup olmadığını doğrular."""
+    """Mini App'i açan kullanıcının veritabanında kayıtlı yetkili bir staff olup olmadığını doğrular."""
     try:
         data = await request.json()
         user_id = int(data.get("user_id", 0))
-        chat_id = int(data.get("chat_id", 0))
         
         # 1. Render kurucusu (FOUNDER_ID) her zaman yetkilidir
         founder_id = os.environ.get("FOUNDER_ID")
         if founder_id and str(user_id) == str(founder_id).strip():
-            return web.json_response({"authorized": True})
+            return web.json_response({"authorized": True, "is_founder": True})
 
-        # 2. Eğer chat_id gönderildiyse Telegram API üzerinden gerçekten admin mi kontrol et
-        if chat_id != 0:
-            try:
-                bot = request.app['bot']
-                member = await bot.get_chat_member(chat_id, user_id)
-                if member.status in ["administrator", "creator"]:
-                    return web.json_response({"authorized": True})
-            except Exception:
-                pass
+        # 2. Veritabanındaki Staff listesinde kayıtlı mı?
+        if database.is_authorized_staff(user_id):
+            return web.json_response({"authorized": True, "is_founder": False})
 
         return web.json_response({"authorized": False})
     except Exception as e:
         return web.json_response({"authorized": False}, status=500)
 
+async def api_get_staff_list(request):
+    """Kurucunun panelden tüm staff listesini görmesini sağlar."""
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        founder_id = os.environ.get("FOUNDER_ID")
+        if not founder_id or str(user_id) != str(founder_id).strip():
+            return web.json_response({"error": "Yetkisiz"}, status=403)
+
+        staffs = database.get_all_staff()
+        result = [{"user_id": s[0], "username": s[1], "full_name": s[2], "can_ban": s[3]} for s in staffs]
+        return web.json_response(result)
+    except Exception as e:
+        return web.json_response({"error": str(e)}, status=500)
+
+async def api_toggle_staff_ban(request):
+    """Kurucunun belirli bir staff'ın ban yetkisini tek tuşla açıp kapatmasını sağlar."""
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        target_id = int(data.get("target_id", 0))
+        new_status = int(data.get("status", 1)) # 1: Açık, 0: Kapalı
+
+        founder_id = os.environ.get("FOUNDER_ID")
+        if not founder_id or str(user_id) != str(founder_id).strip():
+            return web.json_response({"success": False, "error": "Yetkisiz"}, status=403)
+
+        database.set_staff_ban_permission(target_id, new_status)
+        return web.json_response({"success": True})
+    except Exception as e:
+        return web.json_response({"success": False, "error": str(e)}, status=500)
+
+async def api_add_staff(request):
+    """Kurucunun yeni bir staff eklemesini sağlar."""
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        new_staff_id = int(data.get("new_staff_id", 0))
+        username = data.get("username", "Bilinmiyor")
+        full_name = data.get("full_name", "Yetkili")
+
+        founder_id = os.environ.get("FOUNDER_ID")
+        if not founder_id or str(user_id) != str(founder_id).strip():
+            return web.json_response({"success": False, "error": "Yetkisiz"}, status=403)
+
+        database.add_staff_member(new_staff_id, username, full_name, user_id)
+        return web.json_response({"success": True})
+    except Exception as e:
+        return web.json_response({"success": False, "error": str(e)}, status=500)
+
+async def api_remove_staff(request):
+    """Kurucunun bir staff'ı silmesini sağlar."""
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        target_id = int(data.get("target_id", 0))
+
+        founder_id = os.environ.get("FOUNDER_ID")
+        if not founder_id or str(user_id) != str(founder_id).strip():
+            return web.json_response({"success": False, "error": "Yetkisiz"}, status=403)
+
+        database.remove_staff_member(target_id)
+        return web.json_response({"success": True})
+    except Exception as e:
+        return web.json_response({"success": False, "error": str(e)}, status=500)
+
 async def start_web_server(app_context):
     app = web.Application()
-    app['bot'] = app_context.bot  # Bot nesnesini app içine kaydet
+    app['bot'] = app_context.bot
     
     # API Rotaları
     app.router.add_get("/api/stats", api_get_stats)
@@ -125,8 +184,11 @@ async def start_web_server(app_context):
     app.router.add_get("/api/lock-status", api_get_lock_status)
     app.router.add_post("/api/toggle-lockdown", api_toggle_lockdown)
     app.router.add_post("/api/verify-admin", api_verify_admin)
+    app.router.add_post("/api/staff/list", api_get_staff_list)
+    app.router.add_post("/api/staff/toggle", api_toggle_staff_ban)
+    app.router.add_post("/api/staff/add", api_add_staff)
+    app.router.add_post("/api/staff/remove", api_remove_staff)
     
-    # Kök dizine girildiğinde index.html'i doğrudan HTML olarak sun
     async def handle_root(request):
         try:
             with open("public/index.html", "r", encoding="utf-8") as f:
@@ -164,7 +226,6 @@ async def send_auto_delete_message(context: ContextTypes.DEFAULT_TYPE, chat_id: 
         except Exception as err:
             logger.error(f"Mesaj tamamen gönderilemedi: {err}")
 
-# Mesaj silme yardımcısı
 async def safe_delete_user_message(update: Update):
     if update.message:
         try:
@@ -172,11 +233,15 @@ async def safe_delete_user_message(update: Update):
         except Exception as e:
             logger.debug(f"Kullanıcı mesajı silinemedi: {e}")
 
-# Admin ve Kurucu Kontrolü (Founder ID Destekli)
+# Admin ve Veritabanı Staff Kontrolü
 async def is_user_admin(chat_id: int, user_id: int, context: ContextTypes.DEFAULT_TYPE) -> bool:
     founder_id = os.environ.get("FOUNDER_ID")
     if founder_id and str(user_id) == str(founder_id).strip():
         return True
+
+    # Veritabanında staff mı ve ban yetkisi açık mı?
+    if not database.is_authorized_staff(user_id) or not database.get_staff_ban_permission(user_id):
+        return False
 
     try:
         member = await context.bot.get_chat_member(chat_id, user_id)
@@ -185,7 +250,7 @@ async def is_user_admin(chat_id: int, user_id: int, context: ContextTypes.DEFAUL
         logger.error(f"Admin kontrol hatası: {e}")
         return False
 
-# --- FLOOD / KÖTÜYE KULLANIM KONTROLÜ ---
+# --- FLOOD / KÖTÜYE KULLANIM KONTROLÜ & OTOMATİK YETKİ KISITLAMA ---
 async def check_admin_rate_limit(chat_id: int, user_id: int, context: ContextTypes.DEFAULT_TYPE) -> bool:
     global EMERGENCY_LOCKDOWN
 
@@ -197,7 +262,7 @@ async def check_admin_rate_limit(chat_id: int, user_id: int, context: ContextTyp
         try:
             await context.bot.send_message(
                 chat_id=user_id,
-                text="🚨 *ACİL DURUM KİLİDİ AKTİF!* \nGüvenlik ihlali nedeniyle botun ban mekanizmaları kurucu tarafından donduruldu."
+                text="🚨 *ACİL DURUM KİLİDİ AKTİF!* \nGüvenlik ihlali nedeniyle botun ban mekanizmaları durduruldu."
             )
         except Exception:
             pass
@@ -212,14 +277,15 @@ async def check_admin_rate_limit(chat_id: int, user_id: int, context: ContextTyp
     ADMIN_ACTION_LIMITS[key] = [t for t in ADMIN_ACTION_LIMITS[key] if now - t < 60]
 
     if len(ADMIN_ACTION_LIMITS[key]) >= MAX_ACTIONS_PER_MINUTE:
-        EMERGENCY_LOCKDOWN = True
-        logger.warning(f"🚨 GÜVENLİK ALARMI: Kullanıcı {user_id} çok fazla seri işlem yaptı. Acil Durum Kilidi devreye sokuldu!")
+        # OTOMATİK CEZA: Bu adminin ban yetkisini veritabanından kapat!
+        database.set_staff_ban_permission(user_id, 0)
+        logger.warning(f"🚨 GÜVENLİK ALARMI: Yönetici {user_id} flood yaptı! Ban yetkisi otomatik olarak kapatıldı.")
         
         if founder_id:
             try:
                 await context.bot.send_message(
                     chat_id=int(founder_id),
-                    text=f"🚨 *GÜVENLİK ALARMI!*\n\nBir yönetici kısa sürede çok fazla ban/işlem denemesi yaptı. Botun tüm ban yetkileri otomatik olarak kilitlendi!\n\nKilidi açmak için Golden Staff Paneli'ni kullanabilirsin."
+                    text=f"🚨 *OTOMATİK KORUMA ALARMI!*\n\nBir yönetici (`{user_id}`) kısa sürede çok fazla ban denemesi yaptı (Flood). Bot, o yöneticinin **ban yetkisini otomatik olarak kapattı**!\n\nYetkiyi panelden tekrar açabilirsin."
                 )
             except Exception:
                 pass
@@ -314,7 +380,7 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await is_user_admin(chat_id, user_id, context):
         await safe_delete_user_message(update)
-        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yetkili yöneticiler kullanabilir.", parse_mode=None)
         return
 
     if not update.message or not update.message.reply_to_message:
@@ -390,7 +456,7 @@ async def cmd_zamanladur(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await is_user_admin(chat_id, user_id, context):
         await safe_delete_user_message(update)
-        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yetkili yöneticiler kullanabilir.", parse_mode=None)
         return
 
     if context.job_queue is None:
@@ -565,18 +631,18 @@ async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"Kilit Hatası: {e}")
 
-# /defol (Ban) - Korumalı Hali
+# /defol (Ban)
 async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     admin_id = update.effective_user.id
     await safe_delete_user_message(update)
 
     if not await is_user_admin(chat_id, admin_id, context):
-        await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
+        await send_auto_delete_message(context, chat_id, "❌ Bu komutu veya ban yetkiniz yok.", parse_mode=None)
         return
 
     if not await check_admin_rate_limit(chat_id, admin_id, context):
-        await send_auto_delete_message(context, chat_id, "⚠️ Güvenlik Sınırı: Çok hızlı işlem yapıyorsunuz. Bot kilitlendi.", delay=10)
+        await send_auto_delete_message(context, chat_id, "⚠️ Güvenlik Sınırı: Çok hızlı işlem yaptığınız için ban yetkiniz askıya alındı.", delay=10)
         return
 
     user = await get_target_user(update, context)
@@ -619,7 +685,7 @@ async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"Unban Hatası: {e}")
 
-# /itaat (Mute) - Korumalı Hali
+# /itaat (Mute)
 async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     admin_id = update.effective_user.id
@@ -630,7 +696,7 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if not await check_admin_rate_limit(chat_id, admin_id, context):
-        await send_auto_delete_message(context, chat_id, "⚠️ Güvenlik Sınırı: Çok hızlı işlem yapıyorsunuz. Bot kilitlendi.", delay=10)
+        await send_auto_delete_message(context, chat_id, "⚠️ Güvenlik Sınırı: Çok hızlı işlem yapıyorsunuz.", delay=10)
         return
 
     user = await get_target_user(update, context)
