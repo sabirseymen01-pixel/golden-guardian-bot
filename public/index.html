@@ -275,7 +275,7 @@
         const user = tg.initDataUnsafe?.user;
         
         if (!user) {
-            showAccessDenied("Telegram oturumu bulunamadı.");
+            showAccessDenied("Telegram oturumu bulunamadı. Lütfen bot üzerinden tekrar açın.");
             throw new Error("Oturum yok.");
         }
 
@@ -296,11 +296,12 @@
                     return;
                 }
 
-                isFounder = data.is_founder;
-                document.getElementById('userRole').innerText = user.first_name + (isFounder ? " 👑" : " 🛡️");
+                isFounder = !!data.is_founder;
+                document.getElementById('userRole').innerText = (user.first_name || 'Yönetici') + (isFounder ? " 👑" : " 🛡️");
 
                 if (isFounder) {
-                    document.getElementById('founderPanel').style.display = 'block';
+                    const founderPanel = document.getElementById('founderPanel');
+                    if (founderPanel) founderPanel.style.display = 'block';
                     loadStaffList();
                 }
 
@@ -322,6 +323,7 @@
                 <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#0f1115; color:#ff4d4d; text-align:center; padding:20px; font-family:sans-serif;">
                     <h2 style="margin-bottom: 10px;">⛔ Yetkisiz Erişim!</h2>
                     <p style="color:#9aa0a6; font-size:14px;">${message}</p>
+                    <p style="color:#d4af37; font-size:12px; margin-top:15px;">Telegram ID'niz: ${user ? user.id : 'Bilinmiyor'}</p>
                 </div>
             `;
         }
