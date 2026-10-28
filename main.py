@@ -100,6 +100,7 @@ async def api_verify_admin(request):
 
         return web.json_response({"authorized": False})
     except Exception as e:
+        logger.error(f"Verify admin hatası: {e}")
         return web.json_response({"authorized": False}, status=500)
 
 async def api_get_staff_list(request):
@@ -159,7 +160,6 @@ async def api_add_staff(request):
                 target_id = found_id
                 target_username = clean_username
             else:
-                # Kullanıcı veritabanında yoksa hata vermez, benzersiz sayısal ID üretip ekler
                 target_id = int(hashlib.md5(clean_username.encode()).hexdigest()[:8], 16)
                 target_username = clean_username
 
