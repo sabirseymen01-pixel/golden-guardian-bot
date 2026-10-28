@@ -1,3 +1,4 @@
+
 import os
 import json
 import asyncio
@@ -64,6 +65,37 @@ async def api_get_logs(request):
         return web.json_response(logs)
     except Exception as e:
         return web.json_response({"error": str(e)}, status=500)
+
+async def api_get_admin_stats(request):
+    try:
+        stats = database.get_admin_performance_stats()
+        return web.json_response(stats)
+    except Exception as e:
+        return web.json_response({"error": str(e)}, status=500)
+
+async def api_get_chat_messages(request):
+    try:
+        messages = database.get_chat_messages(limit=50)
+        return web.json_response(messages)
+    except Exception as e:
+        return web.json_response({"error": str(e)}, status=500)
+
+async def api_post_chat_message(request):
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        username = data.get("username", "bilinmiyor")
+        full_name = data.get("full_name", "Admin")
+        message = data.get("message", "")
+        msg_type = data.get("msg_type", "text")
+
+        if not message:
+            return web.json_response({"success": False, "error": "Boş mesaj olamaz"}, status=400)
+
+        database.save_chat_message(user_id, username, full_name, message, msg_type)
+        return web.json_response({"success": True})
+    except Exception as e:
+        return web.json_response({"success": False, "error": str(e)}, status=500)
 
 async def api_get_lock_status(request):
     return web.json_response({"lockdown": EMERGENCY_LOCKDOWN})
@@ -189,6 +221,9 @@ async def start_web_server(app_context):
     
     app.router.add_get("/api/stats", api_get_stats)
     app.router.add_get("/api/logs", api_get_logs)
+    app.router.add_get("/api/admin-stats", api_get_admin_stats)
+    app.router.add_get("/api/chat", api_get_chat_messages)
+    app.router.add_post("/api/chat", api_post_chat_message)
     app.router.add_get("/api/lock-status", api_get_lock_status)
     app.router.add_post("/api/toggle-lockdown", api_toggle_lockdown)
     app.router.add_post("/api/verify-admin", api_verify_admin)
