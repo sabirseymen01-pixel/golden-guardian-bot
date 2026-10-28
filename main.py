@@ -65,16 +65,21 @@ async def api_get_logs(request):
 
 async def start_web_server(app_context):
     app = web.Application()
+    
+    # API Rotaları
     app.router.add_get("/", handle_ping)
     app.router.add_get("/api/stats", api_get_stats)
     app.router.add_get("/api/logs", api_get_logs)
+    
+    # Golden Staff Mini App Arayüzü (public klasörünü web üzerinden erişilebilir yapar)
+    app.router.add_static("/", path="public", name="public")
     
     runner = web.AppRunner(app)
     await runner.setup()
     port = int(os.environ.get("PORT", 8080))
     site = web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
-    logger.info(f"Web sunucusu ve API rotaları {port} portunda başlatıldı.")
+    logger.info(f"Web sunucusu, API'ler ve Golden Staff Mini App {port} portunda başlatıldı.")
 
 # Otomatik silinen mesaj fonksiyonu
 async def _delete_after_delay(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int, delay: int):
