@@ -42,6 +42,17 @@ def init_db():
         )
     ''')
     
+    # Staff / Yönetici Yönetim Tablosu
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS staff_members (
+            user_id INTEGER PRIMARY KEY,
+            username TEXT,
+            full_name TEXT,
+            can_ban INTEGER DEFAULT 1,
+            added_by INTEGER
+        )
+    ''')
+    
     conn.commit()
     conn.close()
 
@@ -123,7 +134,65 @@ def get_user_id_by_username(chat_id: int, username: str):
     conn.close()
     return row[0] if row else None
 
-# --- YENİ EKLENEN LOGLAMA VE İSTATİSTİK FONKSİYONLARI ---
+# --- STAFF / YÖNETİCİ YÖNETİM FONKSİYONLARI ---
+
+def is_authorized_staff(user_id: int) -> bool:
+    """Kullanıcının veritabanında kayıtlı aktif bir staff olup olmadığını kontrol eder."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT can_ban FROM staff_members WHERE user_id = ?', (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return row is not None
+
+def get_staff_ban_permission(user_id: int) -> bool:
+    """Staff'ın ban yetkisinin (can_ban) açık olup olmadığını kontrol eder."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT can_ban FROM staff_members WHERE user_id = ?', (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row and row[0] == 1:
+        return True
+    return False
+
+def set_staff_ban_permission(user_id: int, status: int):
+    """Belirli bir staff'ın ban yetkisini açar (1) veya kapatır (0)."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('UPDATE staff_members SET can_ban = ? WHERE user_id = ?', (status, user_id))
+    conn.commit()
+    conn.close()
+
+def add_staff_member(user_id: int, username: str, full_name: str, added_by: int):
+    """Yeni bir staff ekler."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        INSERT OR REPLACE INTO staff_members (user_id, username, full_name, can_ban, added_by)
+        VALUES (?, ?, ?, 1, ?)
+    ''', (user_id, username, full_name, added_by))
+    conn.commit()
+    conn.close()
+
+def remove_staff_member(user_id: int):
+    """Staff listesinden tamamen çıkarır."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM staff_members WHERE user_id = ?', (user_id,))
+    conn.commit()
+    conn.close()
+
+def get_all_staff():
+    """Tüm staff listesini getirir."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT user_id, username, full_name, can_ban FROM staff_members')
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+# --- LOGLAMA VE İSTATİSTİK FONKSİYONLARI ---
 
 def log_action(chat_id: int, action_type: str, user_id: int, username: str, details: str):
     """Gruptaki her olayı (küfür silme, ban, uyarı, @admin şikayeti) veritabanına kaydeder."""
@@ -165,11 +234,9 @@ def get_bot_statistics():
     conn = get_connection()
     cursor = conn.cursor()
     
-    # Toplam işlem (log) sayısı
     cursor.execute("SELECT COUNT(*) FROM logs")
     total_actions = cursor.fetchone()[0]
     
-    # İşlem türlerine göre dağılım (Ban, Küfür Silme, @admin Şikayeti vb.)
     cursor.execute("SELECT action_type, COUNT(*) FROM logs GROUP BY action_type")
     action_breakdown = {row[0]: row[1] for row in cursor.fetchall()}
     
