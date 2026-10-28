@@ -43,19 +43,38 @@ def save_button_config(data):
     except Exception as e:
         logger.error(f"Config kaydetme hatası: {e}")
 
-# Render / PaaS Web Sunucusu
+# --- GOLDEN STAFF MINI APP API ROTALARI & WEB SUNUCUSU ---
 async def handle_ping(request):
-    return web.Response(text="Bot 7/24 Aktif!")
+    return web.Response(text="Bot 7/24 Aktif ve Golden Staff Altyapısı Hazır!")
+
+async def api_get_stats(request):
+    """Mini App için gelişmiş istatistikleri JSON olarak döndürür."""
+    try:
+        stats = database.get_bot_statistics()
+        return web.json_response(stats)
+    except Exception as e:
+        return web.json_response({"error": str(e)}, status=500)
+
+async def api_get_logs(request):
+    """Mini App için son log hareketlerini JSON olarak döndürür."""
+    try:
+        logs = database.get_recent_logs(limit=50)
+        return web.json_response(logs)
+    except Exception as e:
+        return web.json_response({"error": str(e)}, status=500)
 
 async def start_web_server(app_context):
     app = web.Application()
     app.router.add_get("/", handle_ping)
+    app.router.add_get("/api/stats", api_get_stats)
+    app.router.add_get("/api/logs", api_get_logs)
+    
     runner = web.AppRunner(app)
     await runner.setup()
     port = int(os.environ.get("PORT", 8080))
     site = web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
-    logger.info(f"Web sunucusu {port} portunda başlatıldı.")
+    logger.info(f"Web sunucusu ve API rotaları {port} portunda başlatıldı.")
 
 # Otomatik silinen mesaj fonksiyonu
 async def _delete_after_delay(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int, delay: int):
@@ -146,7 +165,7 @@ async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYP
 # /start & /help
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
-        "🤖 *Grup Yönetim & Gelişmiş Güvenlik Botu*\n\n"
+        "🤖 *Grup Yönetim & Golden Staff Güvenlik Botu*\n\n"
         "Grup düzenini sağlamak, argo/küfür, dış linkler ve yasaklı içerikleri otomatik engellemek için aktifim.\n\n"
         "📜 *Yönetici Komutları:*\n"
         "• `/welcome <mesaj>` - Hoş geldin mesajını değiştirir.\n"
@@ -352,6 +371,7 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await context.bot.pin_chat_message(chat_id=chat_id, message_id=sent_msg.message_id)
         await safe_delete_user_message(update)
+        database.log_action(chat_id, "DUYURU", user_id, update.effective_user.username, "Grup duyurusu paylaşıldı ve sabitlendi.")
     except Exception as e:
         logger.error(f"Duyuru hatası: {e}")
 
@@ -408,6 +428,7 @@ async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
             permissions = ChatPermissions(can_send_messages=False)
             await context.bot.set_chat_permissions(chat_id=chat_id, permissions=permissions)
             await send_auto_delete_message(context, chat_id, "🔒 Sohbet kilitlendi.", parse_mode=None)
+            database.log_action(chat_id, "KILIT", user_id, update.effective_user.username, "Sohbet mesaj yazımına kapatıldı.")
         elif durum in ["ac", "aç", "unlock", "acik"]:
             permissions = ChatPermissions(
                 can_send_messages=True, can_send_audios=True, can_send_documents=True,
@@ -417,6 +438,7 @@ async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             await context.bot.set_chat_permissions(chat_id=chat_id, permissions=permissions)
             await send_auto_delete_message(context, chat_id, "🔓 Sohbet kilitleri açıldı.", parse_mode=None)
+            database.log_action(chat_id, "KILIT_AC", user_id, update.effective_user.username, "Sohbet kilitleri kaldırıldı.")
     except Exception as e:
         logger.error(f"Kilit Hatası: {e}")
 
@@ -443,6 +465,7 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
         safe_name = escape_markdown(user.full_name, version=1)
         await send_auto_delete_message(context, chat_id, f"🚫 *{safe_name}* engellendi.", parse_mode="Markdown")
+        database.log_action(chat_id, "BAN", user.id, user.username, f"Admin tarafından banlandı (Admin ID: {admin_id})")
     except Exception as e:
         logger.error(f"Ban Hatası: {e}")
 
@@ -465,6 +488,7 @@ async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.unban_chat_member(chat_id=chat_id, user_id=user.id, only_if_banned=True)
         safe_name = escape_markdown(user.full_name, version=1)
         await send_auto_delete_message(context, chat_id, f"✅ *{safe_name}* engeli kaldırıldı.", parse_mode="Markdown")
+        database.log_action(chat_id, "UNBAN", user.id, user.username, "Kullanıcının banı kaldırıldı.")
     except Exception as e:
         logger.error(f"Unban Hatası: {e}")
 
@@ -487,6 +511,7 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=ChatPermissions(can_send_messages=False))
         safe_name = escape_markdown(user.full_name, version=1)
         await send_auto_delete_message(context, chat_id, f"🔇 *{safe_name}* susturuldu.", parse_mode="Markdown")
+        database.log_action(chat_id, "MUTE", user.id, user.username, "Kullanıcı susturuldu.")
     except Exception as e:
         logger.error(f"Mute Hatası: {e}")
 
@@ -515,6 +540,7 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=full_permissions)
         safe_name = escape_markdown(user.full_name, version=1)
         await send_auto_delete_message(context, chat_id, f"🔊 *{safe_name}* susturması kaldırıldı.", parse_mode="Markdown")
+        database.log_action(chat_id, "UNMUTE", user.id, user.username, "Kullanıcının susturması kaldırıldı.")
     except Exception as e:
         logger.error(f"Unmute Hatası: {e}")
 
@@ -539,8 +565,10 @@ async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
         database.reset_warnings(chat_id, user.id)
         await send_auto_delete_message(context, chat_id, f"🚫 *{safe_name}* 3 uyarıya ulaştığı için engellendi!", parse_mode="Markdown")
+        database.log_action(chat_id, "WARN_BAN", user.id, user.username, "3 uyarı sınırına ulaştığı için otomatik banlandı.")
     else:
         await send_auto_delete_message(context, chat_id, f"⚠️ *{safe_name}* uyarıldı! Uyarı: {count}/3", parse_mode="Markdown")
+        database.log_action(chat_id, "WARN", user.id, user.username, f"Uyarı verildi ({count}/3)")
 
 # /unwarn
 async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -560,10 +588,81 @@ async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     database.reset_warnings(chat_id, user.id)
     safe_name = escape_markdown(user.full_name, version=1)
     await send_auto_delete_message(context, chat_id, f"✅ *{safe_name}* uyarıları sıfırlandı.", parse_mode="Markdown")
+    database.log_action(chat_id, "UNWARN", user.id, user.username, "Uyarıları sıfırlandı.")
 
-# Gelişmiş Güvenlik Dinleyicisi (Küfür, Argo, Dış Link, Yaş Sınırı ve Spam Filtresi -> Direkt Ban)
+# --- @ADMIN BİLDİRİ VE ŞİKAYET SİSTEMİ ---
+async def handle_admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    if not update.message or not update.message.text:
+        return False
+
+    text = update.message.text.lower()
+    
+    # Eğer mesajda @admin geçiyorsa ve bir mesaja yanıt verildiyse
+    if "@admin" in text and update.message.reply_to_message:
+        reporter = update.effective_user
+        reported_msg = update.message.reply_to_message
+        reported_user = reported_msg.from_user
+        chat = update.effective_chat
+
+        reporter_tag = f"@{reporter.username}" if reporter.username else f"ID:{reporter.id}"
+        reported_tag = f"@{reported_user.username}" if reported_user.username else f"ID:{reported_user.id}"
+        report_content = reported_msg.text or reported_msg.caption or "[Medya / Fotoğraf / Dosya]"
+
+        try:
+            admins = await context.bot.get_chat_administrators(chat.id)
+            admin_mentions = []
+            
+            for admin in admins:
+                if admin.user.is_bot:
+                    continue
+                mention = f"[{admin.user.full_name}](tg://user?id={admin.user.id})"
+                admin_mentions.append(mention)
+
+            admin_text_ping = " ".join(admin_mentions)
+
+            report_message = (
+                f"🚨 *YENİ YÖNETİCİ BİLDİRİMİ / ŞİKAYET* 🚨\n"
+                f"📌 *Grup:* `{chat.title}`\n\n"
+                f"👤 *Bildiren:* {reporter.full_name} (`{reporter_tag}` - ID: `{reporter.id}`)\n"
+                f"🎯 *Bildirilen:* {reported_user.full_name} (`{reported_tag}` - ID: `{reported_user.id}`)\n\n"
+                f"💬 *Şikayet Edilen Mesaj:*\n> _{report_content}_\n\n"
+                f"🔔 *Yönetici Ekip:* {admin_text_ping}"
+            )
+
+            # Kullanıcının @admin yazan mesajını temizle
+            await safe_delete_user_message(update)
+
+            # Gruba bildiri raporu at (15 saniye sonra silinsin)
+            await send_auto_delete_message(context, chat.id, report_message, delay=15, parse_mode="Markdown")
+
+            # Veritabanına şikayet/bildiri logu kaydet
+            database.log_action(chat.id, "ADMIN_REPORT", reporter.id, reporter.username, f"Bildirilen kullanıcı: {reported_user.id} - İçerik: {report_content[:50]}")
+
+            # Adminlerin PM'lerine (özel mesajlarına) bildirim gönderme denemesi
+            for admin in admins:
+                if not admin.user.is_bot:
+                    try:
+                        await context.bot.send_message(
+                            chat_id=admin.user.id,
+                            text=f"📌 *{chat.title}* grubunda şikayet var!\n\n{report_message}",
+                            parse_mode="Markdown"
+                        )
+                    except Exception:
+                        pass # Botu özelden başlatmamışsa sessizce geç
+
+            return True
+        except Exception as e:
+            logger.error(f"@admin bildiri hatası: {e}")
+            
+    return False
+
+# Gelişmiş Güvenlik ve Küfür Dinleyicisi
 async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
+        return
+
+    # Önce @admin bildiri kontrolü yap
+    if await handle_admin_report(update, context):
         return
 
     user = update.effective_user
@@ -585,6 +684,10 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.delete()
             safe_name = escape_markdown(user.full_name, version=1)
             await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+            
+            # Veritabanına güvenlik banı logunu kaydet
+            database.log_action(chat_id, "SECURITY_BAN", user.id, user.username, f"Yasaklı içerik/link tespit edildi: {text[:50]}")
+
             await send_auto_delete_message(
                 context, 
                 chat_id, 
@@ -598,7 +701,7 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def post_init(application):
     database.init_db()
     asyncio.create_task(start_web_server(application))
-    logger.info("Veritabanı kuruldu ve Web Sunucusu başlatıldı.")
+    logger.info("Veritabanı kuruldu, Web Sunucusu ve Golden Staff API rotaları başlatıldı.")
 
 def main():
     request_config = HTTPXRequest(
