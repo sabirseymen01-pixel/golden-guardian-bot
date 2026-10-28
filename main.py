@@ -3,6 +3,7 @@ import json
 import asyncio
 import logging
 import time
+import hashlib
 from aiohttp import web
 from telegram import Update, ChatPermissions, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.helpers import escape_markdown
@@ -150,7 +151,7 @@ async def api_add_staff(request):
 
         if input_value.isdigit() or (input_value.startswith("-") and input_value[1:].isdigit()):
             target_id = int(input_value)
-            target_username = "ID:" + input_value
+            target_username = "id_" + input_value
         else:
             clean_username = input_value.lstrip("@").lower()
             found_id = database.get_user_id_by_username(0, clean_username)
@@ -158,7 +159,9 @@ async def api_add_staff(request):
                 target_id = found_id
                 target_username = clean_username
             else:
-                return web.json_response({"success": False, "error": "Bu kullanıcı adı veritabanında bulunamadı! Önce botla sohbet etmeli veya ID girmelisin."}, status=400)
+                # Kullanıcı veritabanında yoksa hata vermez, benzersiz sayısal ID üretip ekler
+                target_id = int(hashlib.md5(clean_username.encode()).hexdigest()[:8], 16)
+                target_username = clean_username
 
         database.add_staff_member(target_id, target_username, full_name, user_id)
         return web.json_response({"success": True})
