@@ -165,21 +165,26 @@ def set_staff_ban_permission(user_id: int, status: int):
     conn.close()
 
 def add_staff_member(user_id: int, username: str, full_name: str, added_by: int):
-    """Yeni bir staff ekler."""
+    """Yeni bir staff ekler (ID veya username ile)."""
     conn = get_connection()
     cursor = conn.cursor()
+    clean_username = username.lstrip("@").lower() if username else ""
     cursor.execute('''
         INSERT OR REPLACE INTO staff_members (user_id, username, full_name, can_ban, added_by)
         VALUES (?, ?, ?, 1, ?)
-    ''', (user_id, username, full_name, added_by))
+    ''', (user_id, clean_username, full_name, added_by))
     conn.commit()
     conn.close()
 
-def remove_staff_member(user_id: int):
-    """Staff listesinden tamamen çıkarır."""
+def remove_staff_member(identifier):
+    """Staff'ı ID veya kullanıcı adı ile listeden tamamen çıkarır."""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('DELETE FROM staff_members WHERE user_id = ?', (user_id,))
+    if isinstance(identifier, int) or str(identifier).isdigit() or (str(identifier).startswith("-") and str(identifier)[1:].isdigit()):
+        cursor.execute('DELETE FROM staff_members WHERE user_id = ?', (int(identifier),))
+    else:
+        clean_username = str(identifier).lstrip("@").lower()
+        cursor.execute('DELETE FROM staff_members WHERE LOWER(username) = ?', (clean_username,))
     conn.commit()
     conn.close()
 
