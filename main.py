@@ -167,15 +167,29 @@ async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYP
     else:
         logger.error(f"İşlenmeyen hata meydana geldi: {context.error}", exc_info=context.error)
 
-# /start & /help (Golden Staff Mini App Dokunmatik Butonu İle)
+# /start & /help (Komut listesi ve en altta Golden Staff Dokunmatik Paneli İle)
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
         "🤖 *Grup Yönetim & Golden Staff Güvenlik Botu*\n\n"
         "Grup düzenini sağlamak, argo/küfür, dış linkler ve yasaklı içerikleri otomatik engellemek için aktifim.\n\n"
-        "Yönetim paneline ve canlı loglara erişmek için aşağıdaki dokunmatik butonu kullanabilirsin! 👇"
+        "📜 *Yönetici Komutları:*\n"
+        "• `/welcome <mesaj>` - Hoş geldin mesajını değiştirir.\n"
+        "• `/butonmetni <yazı>` - Varsayılan buton metnini değiştirir.\n"
+        "• `/butonlinki <url>` - Varsayılan buton linkini değiştirir.\n"
+        "• `/duyuru <mesaj>` - Duyuru gönderir.\n"
+        "• `/zamanla <dakika>` - Periyodik paylaşım başlatır.\n"
+        "• `/zamanladur` - Periyodik paylaşımı durdurur.\n"
+        "• `/kilit kapat / ac` - Sohbeti kilitler/açar.\n"
+        "• `/defol <kullanıcı>` - Kullanıcıyı banlar.\n"
+        "• `/undefol <kullanıcı>` - Banı kaldırır.\n"
+        "• `/itaat <kullanıcı>` - Susturur.\n"
+        "• `/unitaat <kullanıcı>` - Susturmayı kaldırır.\n"
+        "• `/warn <kullanıcı>` - Uyarı verir.\n"
+        "• `/unwarn <kullanıcı>` - Uyarıları sıfırlar.\n\n"
+        "Aşağıdaki butona dokunarak **Golden Staff Paneli**'ne giriş yapabilirsin! 👇"
     )
 
-    # Render üzerindeki canlı web servisinin adresi (kendi Render linkinle değiştir)
+    # Render üzerindeki canlı web servisinizin adresi
     web_app_url = "https://golden-guardian-bot.onrender.com/"
     
     keyboard = [
@@ -679,12 +693,12 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
             
             # Veritabanına güvenlik banı logunu kaydet
-            database.log_action(chat.id, "SECURITY_BAN", user.id, user.username, f"Yasaklı içerik/link tespit edildi.")
+            database.log_action(chat_id, "SECURITY_BAN", user.id, user.username, f"Yasaklı içerik/link tespit edildi.")
 
             await send_auto_delete_message(
                 context, 
                 chat_id, 
-                f"🚫 *{safe_name}*, yasaklı içerik paylaştığı için gruptan kalıcı olarak engellendi!", 
+                f"🚫 *{safe_name}* yasaklı içerik paylaştığı için gruptan kalıcı olarak engellendi!", 
                 delay=10, 
                 parse_mode="Markdown"
             )
