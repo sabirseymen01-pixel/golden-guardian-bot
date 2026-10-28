@@ -12,7 +12,6 @@
         :root {
             --bg-color: #07080a;
             --surface-glass: rgba(14, 16, 22, 0.96);
-            --surface-glass-bright: rgba(22, 25, 34, 0.98);
             --border-glass: rgba(212, 175, 55, 0.35);
             --accent-gold: #d4af37;
             --accent-gold-glow: rgba(212, 175, 55, 0.45);
@@ -49,7 +48,6 @@
         .stat-title { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
         .stat-value { font-size: 18px; font-weight: 800; color: var(--text-main); }
 
-        /* Match / Web Hub Tarzı İnteraktif Veri Bulutu */
         .match-cloud-box {
             position: relative;
             background: radial-gradient(circle at center, rgba(212,175,55,0.08) 0%, rgba(7,8,10,0.95) 100%);
@@ -77,7 +75,6 @@
             align-items: center;
             gap: 6px;
             box-shadow: 0 0 10px var(--accent-gold-glow);
-            transition: all 0.3s ease;
         }
         .node-counter {
             background: rgba(255,255,255,0.15);
@@ -311,7 +308,6 @@
                 const bd = stats.action_breakdown || {};
                 document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['FILTER_DELETE'] || 0);
 
-                // Match Web Hub Veri Bulutu Güncellemesi
                 const cloudRes = await fetch('/api/data-cloud');
                 const cloudTags = await cloudRes.json();
                 const cloudC = document.getElementById('matchCloudContainer');
