@@ -29,7 +29,7 @@ def init_db():
         )
     ''')
     
-    # Gelişmiş Loglar Tablosu (Tüm hareketler, silinen mesajlar, banlar, şikayetler)
+    # Gelişmiş Loglar Tablosu
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,13 +42,16 @@ def init_db():
         )
     ''')
     
-    # Staff / Yönetici Yönetim Tablosu
+    # Staff / Yönetici Yönetim Tablosu (Genişletilmiş Yetki Kolonları ile)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS staff_members (
             user_id INTEGER PRIMARY KEY,
             username TEXT,
             full_name TEXT,
             can_ban INTEGER DEFAULT 1,
+            can_speak INTEGER DEFAULT 1,
+            can_write INTEGER DEFAULT 1,
+            is_muted INTEGER DEFAULT 0,
             added_by INTEGER
         )
     ''')
@@ -147,10 +150,9 @@ def get_user_id_by_username(chat_id: int, username: str):
     conn.close()
     return row[0] if row else None
 
-# --- STAFF / YÖNETİCİ YÖNETİM FONKSİYONLARI ---
+# --- STAFF / YÖNETİCİ YÖNETİM & YETKİLENDİRME FONKSİYONLARI ---
 
 def is_authorized_staff(user_id: int) -> bool:
-    """Kullanıcının veritabanında kayıtlı aktif bir staff olup olmadığını kontrol eder."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('SELECT can_ban FROM staff_members WHERE user_id = ?', (int(user_id),))
@@ -158,39 +160,37 @@ def is_authorized_staff(user_id: int) -> bool:
     conn.close()
     return row is not None
 
-def get_staff_ban_permission(user_id: int) -> bool:
-    """Staff'ın ban yetkisinin (can_ban) açık olup olmadığını kontrol eder."""
+def get_staff_permissions(user_id: int):
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT can_ban FROM staff_members WHERE user_id = ?', (int(user_id),))
+    cursor.execute('SELECT can_ban, can_speak, can_write, is_muted FROM staff_members WHERE user_id = ?', (int(user_id),))
     row = cursor.fetchone()
     conn.close()
-    if row and row[0] == 1:
-        return True
-    return False
+    if row:
+        return {"can_ban": row[0], "can_speak": row[1], "can_write": row[2], "is_muted": row[3]}
+    return {"can_ban": 0, "can_speak": 0, "can_write": 0, "is_muted": 0}
 
-def set_staff_ban_permission(user_id: int, status: int):
-    """Belirli bir staff'ın ban yetkisini açar (1) veya kapatır (0)."""
+def set_staff_permission(user_id: int, permission_type: str, status: int):
+    """permission_type: 'can_ban', 'can_speak', 'can_write', veya 'is_muted'"""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('UPDATE staff_members SET can_ban = ? WHERE user_id = ?', (status, int(user_id)))
-    conn.commit()
+    if permission_type in ['can_ban', 'can_speak', 'can_write', 'is_muted']:
+        cursor.execute(f'UPDATE staff_members SET {permission_type} = ? WHERE user_id = ?', (status, int(user_id)))
+        conn.commit()
     conn.close()
 
 def add_staff_member(user_id: int, username: str, full_name: str, added_by: int):
-    """Yeni bir staff ekler (ID veya username ile)."""
     conn = get_connection()
     cursor = conn.cursor()
     clean_username = username.lstrip("@").lower() if username else ""
     cursor.execute('''
-        INSERT OR REPLACE INTO staff_members (user_id, username, full_name, can_ban, added_by)
-        VALUES (?, ?, ?, 1, ?)
+        INSERT OR REPLACE INTO staff_members (user_id, username, full_name, can_ban, can_speak, can_write, is_muted, added_by)
+        VALUES (?, ?, ?, 1, 1, 1, 0, ?)
     ''', (int(user_id), clean_username, full_name, added_by))
     conn.commit()
     conn.close()
 
 def remove_staff_member(identifier):
-    """Staff'ı ID veya kullanıcı adı ile listeden tamamen çıkarır."""
     conn = get_connection()
     cursor = conn.cursor()
     if isinstance(identifier, int) or str(identifier).isdigit() or (str(identifier).startswith("-") and str(identifier)[1:].isdigit()):
@@ -202,10 +202,9 @@ def remove_staff_member(identifier):
     conn.close()
 
 def get_all_staff():
-    """Tüm staff listesini getirir."""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT user_id, username, full_name, can_ban FROM staff_members')
+    cursor.execute('SELECT user_id, username, full_name, can_ban, can_speak, can_write, is_muted FROM staff_members')
     rows = cursor.fetchall()
     conn.close()
     return rows
@@ -213,7 +212,6 @@ def get_all_staff():
 # --- LOGLAMA VE İSTATİSTİK FONKSİYONLARI ---
 
 def log_action(chat_id: int, action_type: str, user_id: int, username: str, details: str):
-    """Gruptaki her olayı (küfür silme, ban, uyarı, @admin şikayeti) veritabanına kaydeder."""
     conn = get_connection()
     cursor = conn.cursor()
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -225,7 +223,6 @@ def log_action(chat_id: int, action_type: str, user_id: int, username: str, deta
     conn.close()
 
 def get_recent_logs(limit: int = 50):
-    """Mini App arayüzünde son hareketleri listelemek için logları çeker."""
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute('''
@@ -248,28 +245,21 @@ def get_recent_logs(limit: int = 50):
     return logs
 
 def get_bot_statistics():
-    """Mini App için gelişmiş istatistik verilerini hesaplar."""
     conn = get_connection()
     cursor = conn.cursor()
-    
     cursor.execute("SELECT COUNT(*) FROM logs")
     total_actions = cursor.fetchone()[0]
-    
     cursor.execute("SELECT action_type, COUNT(*) FROM logs GROUP BY action_type")
     action_breakdown = {row[0]: row[1] for row in cursor.fetchall()}
-    
     conn.close()
-    
     return {
         "total_actions": total_actions,
         "action_breakdown": action_breakdown
     }
 
 def get_admin_performance_stats():
-    """Adminlerin her işlem türüne göre (BAN, MUTE, WARN vb.) istatistiklerini hesaplar."""
     conn = get_connection()
     cursor = conn.cursor()
-    
     cursor.execute('''
         SELECT user_id, username, action_type, COUNT(*) 
         FROM logs 
@@ -284,7 +274,6 @@ def get_admin_performance_stats():
         if uid not in stats:
             stats[uid] = {"username": uname, "actions": {}}
         stats[uid]["actions"][action] = count
-        
     return stats
 
 # --- GOLDEN CHAT (HABERLEŞME PORTU) FONKSİYONLARI ---
