@@ -201,11 +201,22 @@
         const tg = window.Telegram.WebApp;
         tg.expand(); // Mini App'i tam ekran yap
 
-        // Kullanıcı bilgisini Telegram'dan al ve unvanı ayarla
+        // --- YETKİ KONTROLÜ (Üyelerin Panele Girmesini Engeller) ---
         const user = tg.initDataUnsafe?.user;
-        if (user) {
-            document.getElementById('userRole').innerText = user.first_name + " 🛡️";
+        
+        // Eğer kullanıcı bilgisi alınamazsa veya tarayıcıdan direkt açılmaya çalışılırsa
+        if (!user) {
+            document.body.innerHTML = `
+                <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#0f1115; color:#ff4d4d; text-align:center; padding:20px; font-family:sans-serif;">
+                    <h2 style="margin-bottom: 10px;">⛔ Yetkisiz Erişim!</h2>
+                    <p style="color:#9aa0a6; font-size:14px;">Bu panele yalnızca Golden Staff Yöneticileri (YT) ve Kurucu erişebilir.</p>
+                </div>
+            `;
+            throw new Error("Yetkisiz kullanıcı engellendi.");
         }
+
+        // Kullanıcı adını arayüze yaz
+        document.getElementById('userRole').innerText = user.first_name + " 🛡️";
 
         async function fetchData() {
             try {
