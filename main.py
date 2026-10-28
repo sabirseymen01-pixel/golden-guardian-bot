@@ -5,7 +5,7 @@ import logging
 import time
 import hashlib
 from aiohttp import web
-from telegram import Update, ChatPermissions, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
+from telegram import Update, BotCommand, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.helpers import escape_markdown
 from telegram.ext import (
     ApplicationBuilder,
@@ -15,10 +15,9 @@ from telegram.ext import (
     filters
 )
 from telegram.request import HTTPXRequest
-from telegram.error import NetworkError, TimedOut, TelegramError
+from telegram.error import TelegramError
 import config
 import database
-import filters as custom_filters
 
 # Loglama Konfigürasyonu
 logging.basicConfig(
@@ -31,24 +30,8 @@ CONFIG_FILE = "config.json"
 
 # --- GÜVENLİK & ACİL DURUM KİLİDİ DEĞİŞKENLERİ ---
 ADMIN_ACTION_LIMITS = {}
-MAX_ACTIONS_PER_MINUTE = 5  # 1 dakikada en fazla 5 kritik işlem
-EMERGENCY_LOCKDOWN = False  # True olduğunda kurucu hariç kimse ban/mute atamaz
-
-def get_button_config():
-    try:
-        if os.path.exists(CONFIG_FILE):
-            with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-    except Exception as e:
-        logger.error(f"Config okuma hatası: {e}")
-    return {"metin": "Diğer Gruba Geç 🚀", "url": "https://t.me/"}
-
-def save_button_config(data):
-    try:
-        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-    except Exception as e:
-        logger.error(f"Config kaydetme hatası: {e}")
+MAX_ACTIONS_PER_MINUTE = 5
+EMERGENCY_LOCKDOWN = False
 
 # --- GOLDEN STAFF MINI APP API ROTALARI & WEB SUNUCUSU ---
 async def api_get_stats(request):
@@ -91,7 +74,6 @@ async def api_post_chat_message(request):
         if not message:
             return web.json_response({"success": False, "error": "Boş mesaj olamaz"}, status=400)
 
-        # Kurucu kontrolü dışındakiler için susturma/yazma kontrolü
         founder_id = os.environ.get("FOUNDER_ID")
         if not founder_id or str(user_id) != str(founder_id).strip():
             perms = database.get_staff_permissions(user_id)
@@ -117,9 +99,6 @@ async def api_toggle_lockdown(request):
             return web.json_response({"success": False, "error": "Yetkisiz işlem!"}, status=403)
         
         EMERGENCY_LOCKDOWN = not EMERGENCY_LOCKDOWN
-        status_text = "AKTİF (Banlar Kilitlendi!)" if EMERGENCY_LOCKDOWN else "KAPALI (Bot Normal Çalışıyor)"
-        logger.warning(f"🛡️ Kurucu Mini App üzerinden Acil Durum Kilidini değiştirdi: {status_text}")
-        
         return web.json_response({"success": True, "lockdown": EMERGENCY_LOCKDOWN})
     except Exception as e:
         return web.json_response({"success": False, "error": str(e)}, status=500)
@@ -139,7 +118,6 @@ async def api_verify_admin(request):
 
         return web.json_response({"authorized": False})
     except Exception as e:
-        logger.error(f"Verify admin hatası: {e}")
         return web.json_response({"authorized": False}, status=500)
 
 async def api_get_staff_list(request):
@@ -156,13 +134,12 @@ async def api_get_staff_list(request):
     except Exception as e:
         return web.json_response({"error": str(e)}, status=500)
 
-# --- KURUCU YETKİ VE SES ODASI KONTROL API'LERİ ---
 async def api_set_staff_permission(request):
     try:
         data = await request.json()
         user_id = int(data.get("user_id", 0))
         target_id = int(data.get("target_id", 0))
-        perm_type = data.get("perm_type") # 'can_speak', 'can_write', 'is_muted', 'can_ban'
+        perm_type = data.get("perm_type")
         status = int(data.get("status", 0))
 
         founder_id = os.environ.get("FOUNDER_ID")
@@ -315,16 +292,6 @@ async def check_admin_rate_limit(chat_id: int, user_id: int, context: ContextTyp
 
     if len(ADMIN_ACTION_LIMITS[key]) >= MAX_ACTIONS_PER_MINUTE:
         database.set_staff_permission(user_id, 'can_ban', 0)
-        logger.warning(f"🚨 GÜVENLİK ALARMI: Yönetici {user_id} flood yaptı! Ban yetkisi otomatik kapatıldı.")
-        
-        if founder_id:
-            try:
-                await context.bot.send_message(
-                    chat_id=int(founder_id),
-                    text=f"🚨 *OTOMATİK KORUMA ALARMI!*\n\nBir yönetici (`{user_id}`) çok fazla ban denemesi yaptı. Bot, o yöneticinin **ban yetkisini otomatik olarak kapattı**!"
-                )
-            except Exception:
-                pass
         return False
 
     ADMIN_ACTION_LIMITS[key].append(now)
@@ -355,11 +322,36 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.error(f"Hata: {context.error}")
 
+# --- START KOMUTU VE MENÜ ---
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    welcome_text = "🤖 *Grup Yönetim & Golden Staff Güvenlik Botu*\n\nAşağıdaki butona dokunarak **Golden Staff Paneli**'ne giriş yapabilirsin! 👇"
+    welcome_text = (
+        "🤖 *Grup Yönetim & Golden Staff Güvenlik Botu*\n\n"
+        "Grup düzenini sağlamak, argo/küfür, dış linkler ve yasaklı içerikleri otomatik engellemek için aktifim.\n\n"
+        "📜 *Yönetici Komutları:*\n"
+        "- `/welcome <mesaj>` - Hoş geldin mesajını değiştirir.\n"
+        "- `/butonmetni <yazı>` - Varsayılan buton metnini değiştirir.\n"
+        "- `/butonlinki <url>` - Varsayılan buton linkini değiştirir.\n"
+        "- `/duyuru <mesaj>` - Duyuru gönderir.\n"
+        "- `/zamanla <dakika>` - Periyodik paylaşım başlatır.\n"
+        "- `/zamanladur` - Periyodik paylaşımı durdurur.\n"
+        "- `/kilit kapat / ac` - Sohbeti kilitler/açar.\n"
+        "- `/defol <kullanıcı>` - Kullanıcıyı banlar.\n"
+        "- `/undefol <kullanıcı>` - Banı kaldırır.\n"
+        "- `/itaat <kullanıcı>` - Susturur.\n"
+        "- `/unitaat <kullanıcı>` - Susturmayı kaldırır.\n"
+        "- `/warn <kullanıcı>` - Uyarı verir.\n"
+        "- `/unwarn <kullanıcı>` - Uyarıları sıfırlar.\n\n"
+        "Aşağıdaki butona dokunarak **Golden Staff Paneli**'ne giriş yapabilirsin! 👇"
+    )
+    
     web_app_url = "https://golden-guardian-bot.onrender.com/"
     keyboard = [[InlineKeyboardButton(text="🛡️ Golden Staff Paneli", web_app=WebAppInfo(url=web_app_url))]]
-    await update.message.reply_text(welcome_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
+    
+    await update.message.reply_text(
+        welcome_text, 
+        reply_markup=InlineKeyboardMarkup(keyboard), 
+        parse_mode="Markdown"
+    )
 
 async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
@@ -397,6 +389,29 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def post_init(application):
     database.init_db()
+    
+    # Telegram menü komutlarını otomatik kaydet
+    commands = [
+        ("start", "🛡️ Paneli ve Komutları Listele"),
+        ("welcome", "👋 Hoş geldin mesajını değiştir"),
+        ("butonmetni", "📝 Buton metnini değiştir"),
+        ("butonlinki", "🔗 Buton linkini değiştir"),
+        ("duyuru", "📢 Duyuru gönder"),
+        ("zamanla", "⏰ Periyodik paylaşım başlat"),
+        ("zamanladur", "⏹️ Periyodik paylaşımı durdur"),
+        ("kilit", "🔒 Sohbeti kilitle/aç"),
+        ("defol", "🚫 Kullanıcıyı banla"),
+        ("undefol", "✅ Banı kaldır"),
+        ("itaat", "🔇 Kullanıcıyı sustur"),
+        ("unitaat", "🔊 Susturmayı kaldır"),
+        ("warn", "⚠️ Uyarı ver"),
+        ("unwarn", "♻️ Uyarıları sıfırla")
+    ]
+    try:
+        await application.bot.set_my_commands([BotCommand(cmd, desc) for cmd, desc in commands])
+    except Exception as e:
+        logger.error(f"Komutlar ayarlanamadı: {e}")
+
     asyncio.create_task(start_web_server(application))
     logger.info("Veritabanı kuruldu, Web Sunucusu ve API'ler başlatıldı.")
 
