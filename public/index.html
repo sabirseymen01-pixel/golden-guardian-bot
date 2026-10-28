@@ -143,7 +143,6 @@
             gap: 8px;
         }
 
-        /* Staff Yönetim Listesi Tasarımı */
         .staff-item {
             display: flex;
             justify-content: space-between;
@@ -230,8 +229,8 @@
         <div class="section-title">👑 Kurucu Staff & Ban Yetki Yönetimi</div>
         <div class="control-card">
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                <input type="number" id="newStaffId" placeholder="Telegram User ID" style="flex: 1; background: #151922; border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
-                <input type="text" id="newStaffName" placeholder="Ad / Nick" style="width: 100px; background: #151922; border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
+                <input type="text" id="newStaffInput" placeholder="User ID veya @kullaniciadi" style="flex: 1; background: #151922; border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
+                <input type="text" id="newStaffName" placeholder="Ad / Nick" style="width: 90px; background: #151922; border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
                 <button onclick="addStaff()" style="background: var(--accent-gold); color: black; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer;">Ekle</button>
             </div>
             <div id="staffListContainer" style="display: flex; flex-direction: column; gap: 8px;">
@@ -350,7 +349,7 @@
                     item.innerHTML = `
                         <div>
                             <strong>${s.full_name || 'Staff'}</strong><br>
-                            <span style="font-size:11px; color:var(--text-muted);">ID: ${s.user_id}</span>
+                            <span style="font-size:11px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username || 'yok'}</span>
                         </div>
                         <div class="staff-actions">
                             <button class="btn-sm ${s.can_ban === 1 ? 'btn-toggle-on' : 'btn-toggle-off'}" onclick="toggleStaffBan(${s.user_id}, ${s.can_ban})">
@@ -367,10 +366,11 @@
         }
 
         async function addStaff() {
-            const newId = document.getElementById('newStaffId').value;
-            const newName = document.getElementById('newStaffName').value || 'Staff';
-            if (!newId) {
-                alert("Lütfen Telegram User ID girin!");
+            const staffInput = document.getElementById('newStaffInput').value.trim();
+            const newName = document.getElementById('newStaffName').value.trim() || 'Staff';
+            
+            if (!staffInput) {
+                alert("Lütfen Telegram User ID veya @kullanıcıadı girin!");
                 return;
             }
 
@@ -378,15 +378,15 @@
                 const res = await fetch('/api/staff/add', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id, new_staff_id: parseInt(newId), full_name: newName })
+                    body: JSON.stringify({ user_id: user.id, staff_input: staffInput, full_name: newName })
                 });
                 const result = await res.json();
                 if (result.success) {
-                    document.getElementById('newStaffId').value = '';
+                    document.getElementById('newStaffInput').value = '';
                     document.getElementById('newStaffName').value = '';
                     loadStaffList();
                 } else {
-                    alert("Ekleme başarısız!");
+                    alert("Ekleme başarısız: " + (result.error || "Bilinmeyen hata"));
                 }
             } catch (err) {
                 alert("Sunucu hatası!");
