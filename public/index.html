@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Staff | Pro Yönetim Paneli</title>
+    <title>Golden Staff | Yönetim Paneli</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-color: #0b0c10;
-            --surface-glass: rgba(18, 20, 26, 0.90);
+            --surface-glass: rgba(18, 20, 26, 0.92);
             --surface-glass-bright: rgba(28, 32, 40, 0.98);
-            --border-glass: rgba(212, 175, 55, 0.25);
+            --border-glass: rgba(212, 175, 55, 0.3);
             --accent-gold: #d4af37;
-            --accent-gold-glow: rgba(212, 175, 55, 0.4);
+            --accent-gold-glow: rgba(212, 175, 55, 0.45);
             --text-main: #f0f2f5;
             --text-muted: #9aa0a6;
             --danger: #ff4d4d;
@@ -35,7 +35,7 @@
             overflow-x: hidden;
         }
 
-        /* Header Tasarımı */
+        /* Header Tasarımı (Yazılar Temizlendi) */
         .header {
             display: flex;
             align-items: center;
@@ -46,15 +46,12 @@
         }
 
         .logo-area h1 {
-            font-size: 21px;
+            font-size: 22px;
             color: var(--accent-gold);
-            font-weight: 700;
-            letter-spacing: -0.3px;
-        }
-
-        .logo-area p {
-            font-size: 11px;
-            color: var(--text-muted);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+            text-shadow: 0 0 20px var(--accent-gold-glow);
         }
 
         .admin-badge {
@@ -63,7 +60,7 @@
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 700;
             border: 1px solid var(--border-glass);
             box-shadow: 0 0 15px var(--accent-gold-glow);
         }
@@ -71,7 +68,7 @@
         /* Kaydırmalı Port Navigasyonu */
         .port-nav {
             display: flex;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.04);
             padding: 4px;
             border-radius: 14px;
             margin-bottom: 18px;
@@ -81,7 +78,7 @@
         .port-tab {
             flex: 1;
             text-align: center;
-            padding: 9px 4px;
+            padding: 10px 4px;
             font-size: 11px;
             font-weight: 600;
             color: var(--text-muted);
@@ -92,8 +89,8 @@
 
         .port-tab.active {
             background: var(--accent-gold);
-            color: #000;
-            font-weight: 700;
+            color: #0b0c10;
+            font-weight: 800;
             box-shadow: 0 4px 15px var(--accent-gold-glow);
         }
 
@@ -111,12 +108,12 @@
             border-radius: 18px;
             padding: 16px;
             margin-bottom: 14px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
         }
 
         .section-title {
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 12px;
             color: var(--accent-gold);
             display: flex;
@@ -138,8 +135,8 @@
             padding: 14px;
         }
 
-        .stat-title { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
-        .stat-value { font-size: 20px; font-weight: 700; color: var(--text-main); }
+        .stat-title { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-value { font-size: 20px; font-weight: 800; color: var(--text-main); }
 
         .admin-list-item {
             background: rgba(255, 255, 255, 0.03);
@@ -155,7 +152,7 @@
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
             display: none; justify-content: center; align-items: center; z-index: 999;
         }
 
@@ -164,100 +161,125 @@
             border: 1px solid var(--accent-gold); border-radius: 20px; padding: 20px;
         }
 
+        /* --- ÜRETKEN VE DETAYLI LOG KARTI TASARIMI --- */
         .log-item {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-glass);
-            border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 4px;
+            background: rgba(255, 255, 255, 0.03); 
+            border: 1px solid var(--border-glass);
+            border-radius: 14px; 
+            padding: 12px 14px; 
+            margin-bottom: 10px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px;
         }
-        .log-header { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); }
-        .log-badge { font-weight: 700; padding: 2px 6px; border-radius: 4px; font-size: 9px; }
-        .badge-ban { background: rgba(255, 77, 77, 0.2); color: var(--danger); }
-        .badge-mute { background: rgba(212, 175, 55, 0.2); color: var(--accent-gold); }
-        .badge-default { background: rgba(46, 204, 113, 0.2); color: var(--success); }
+        .log-top { display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+        .log-badge { font-weight: 800; padding: 3px 8px; border-radius: 6px; font-size: 10px; letter-spacing: 0.5px; }
+        .badge-ban { background: rgba(255, 77, 77, 0.2); color: var(--danger); border: 1px solid rgba(255,77,77,0.3); }
+        .badge-mute { background: rgba(212, 175, 55, 0.2); color: var(--accent-gold); border: 1px solid rgba(212,175,55,0.3); }
+        .badge-default { background: rgba(46, 204, 113, 0.2); color: var(--success); border: 1px solid rgba(46,204,113,0.3); }
+        
+        .log-details-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        .log-row { display: flex; justify-content: space-between; color: var(--text-muted); font-size: 11px; }
+        .log-row b { color: var(--text-main); }
 
-        /* --- GOLDEN CHAT & SESLİ SOHBET (PRO TASARIM) --- */
+        /* --- GOLDEN CHAT & SESLİ KONFERANS LOUNGE (TELEGRAM KALİTESİ) --- */
         .chat-wrapper {
-            display: flex; flex-direction: column; height: 540px;
-            background: rgba(10, 11, 15, 0.98); border-radius: 20px;
+            display: flex; flex-direction: column; height: 560px;
+            background: rgba(8, 9, 12, 0.99); border-radius: 20px;
             border: 1px solid var(--border-glass); overflow: hidden;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.9);
+            box-shadow: inset 0 0 35px rgba(0,0,0,0.95), 0 10px 30px rgba(0,0,0,0.8);
         }
 
-        /* Sesli Sohbet (Voice Chat) Üst Barı */
+        /* Telegram Kalitesinde Sesli Konferans (Voice Lounge) Barı */
         .voice-lounge-bar {
-            background: linear-gradient(90deg, rgba(212,175,55,0.15), rgba(18,20,26,0.95));
+            background: linear-gradient(90deg, rgba(212,175,55,0.2), rgba(18,20,26,0.98));
             border-bottom: 1px solid var(--border-glass);
-            padding: 10px 14px;
+            padding: 12px 16px;
             display: flex; align-items: center; justify-content: space-between;
         }
-        .voice-lounge-info { display: flex; align-items: center; gap: 8px; }
+        .voice-lounge-info { display: flex; align-items: center; gap: 10px; }
         .voice-pulse {
-            width: 10px; height: 10px; background: var(--success); border-radius: 50%;
-            box-shadow: 0 0 10px var(--success); animation: pulseAnim 1.5s infinite;
+            width: 12px; height: 12px; background: var(--success); border-radius: 50%;
+            box-shadow: 0 0 12px var(--success); animation: pulseAnim 1.5s infinite;
         }
-        @keyframes pulseAnim { 0% { transform: scale(0.95); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.6; } 100% { transform: scale(0.95); opacity: 1; } }
+        @keyframes pulseAnim { 0% { transform: scale(0.95); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.5; } 100% { transform: scale(0.95); opacity: 1; } }
         
         .voice-connect-btn {
             background: var(--accent-gold); color: #0b0c10; border: none;
-            padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer;
+            padding: 7px 14px; border-radius: 12px; font-size: 11px; font-weight: 800; cursor: pointer;
+            box-shadow: 0 0 15px var(--accent-gold-glow);
         }
 
         .chat-messages {
-            flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+            flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;
         }
 
+        /* Lüks 3D Baloncuk Tasarımı (Görseldeki Kalite) */
         .chat-bubble {
-            max-width: 82%; padding: 12px 16px; border-radius: 18px; font-size: 13px; line-height: 1.4; position: relative;
+            max-width: 82%; padding: 12px 16px; border-radius: 18px; font-size: 13px; line-height: 1.45; position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         .chat-bubble.incoming {
-            background: rgba(255, 255, 255, 0.07); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.08); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.08);
         }
         .chat-bubble.outgoing {
-            background: var(--accent-gold); color: #0b0c10; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500;
+            background: linear-gradient(135deg, #d4af37, #aa8c2c); color: #0b0c10; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 600;
+            box-shadow: 0 4px 20px var(--accent-gold-glow);
         }
 
-        /* İşlevsel Telegram Tarzı Anket Kartı */
+        /* Telegram Tarzı Kurumsal Anket Kartı */
         .poll-box {
-            background: rgba(0,0,0,0.4); border: 1px solid var(--border-glass);
-            border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 240px;
+            background: rgba(0,0,0,0.45); border: 1px solid var(--border-glass);
+            border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 250px;
         }
-        .poll-question { font-weight: 700; font-size: 13px; color: var(--accent-gold); }
+        .poll-question { font-weight: 800; font-size: 13px; color: var(--accent-gold); }
         .poll-option-item {
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-            padding: 8px 12px; border-radius: 10px; font-size: 12px; cursor: pointer; position: relative; overflow: hidden;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+            padding: 9px 12px; border-radius: 10px; font-size: 12px; cursor: pointer; position: relative; overflow: hidden;
             transition: background 0.2s;
         }
-        .poll-option-item:hover { background: rgba(212,175,55,0.2); }
+        .poll-option-item:hover { background: rgba(212,175,55,0.25); }
         .poll-bar {
-            position: absolute; top: 0; left: 0; height: 100%; background: rgba(212,175,55,0.25); z-index: 1; width: 0%; transition: width 0.4s ease;
+            position: absolute; top: 0; left: 0; height: 100%; background: rgba(212,175,55,0.3); z-index: 1; width: 0%; transition: width 0.4s ease;
         }
-        .poll-text { position: relative; z-index: 2; display: flex; justify-content: space-between; }
+        .poll-text { position: relative; z-index: 2; display: flex; justify-content: space-between; font-weight: 600; }
 
-        /* Sesli Mesaj Oynatıcı */
-        .voice-player { display: flex; align-items: center; gap: 10px; min-width: 210px; }
+        /* Sesli Mesaj Oynatıcı (WhatsApp/Telegram Hibrit) */
+        .voice-player { display: flex; align-items: center; gap: 12px; min-width: 220px; }
         .voice-play-trigger {
             background: #0b0c10; color: var(--accent-gold); border: 1px solid var(--accent-gold);
-            width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px;
+            width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px;
+            box-shadow: 0 0 10px var(--accent-gold-glow);
         }
-        .voice-waves { flex: 1; height: 20px; display: flex; align-items: center; gap: 2px; }
-        .w-bar { flex: 1; background: currentColor; border-radius: 2px; opacity: 0.8; height: 60%; }
+        .voice-waves { flex: 1; height: 22px; display: flex; align-items: center; gap: 2px; }
+        .w-bar { flex: 1; background: currentColor; border-radius: 3px; opacity: 0.9; height: 70%; }
 
         /* Giriş ve Logo İkon Barı */
         .chat-input-bar {
-            display: flex; align-items: center; gap: 8px; padding: 12px 14px;
+            display: flex; align-items: center; gap: 10px; padding: 14px 16px;
             background: var(--surface-glass-bright); border-top: 1px solid var(--border-glass);
         }
         .chat-input {
             flex: 1; background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-glass);
-            padding: 10px 16px; border-radius: 22px; color: white; font-size: 13px; outline: none;
+            padding: 11px 16px; border-radius: 24px; color: white; font-size: 13px; outline: none;
         }
 
-        /* SVG Logovvari Araç Butonları */
+        /* SVG Lüks Logo Butonları */
         .tool-btn {
             background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass);
-            width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             cursor: pointer; color: var(--accent-gold); transition: all 0.2s;
         }
-        .tool-btn:hover { background: var(--accent-gold); color: #0b0c10; }
+        .tool-btn:hover { background: var(--accent-gold); color: #0b0c10; box-shadow: 0 0 15px var(--accent-gold-glow); }
         .tool-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
         .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px; }
@@ -268,7 +290,6 @@
     <div class="header">
         <div class="logo-area">
             <h1>Golden Staff</h1>
-            <p>Pro iOS v3.5 | Kurumsal İletişim</p>
         </div>
         <div class="admin-badge" id="userRole">Yönetici 🛡️</div>
     </div>
@@ -297,7 +318,7 @@
         <div class="glass-card">
             <div class="section-title">📊 Grup Aktiflik & Durum Özeti</div>
             <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;" id="groupActivityStats">
-                Sistem kararlı çalışıyor. Tüm yöneticilerin aktivite akışı ve güvenlik protokolleri aktif.
+                Sistem aktif ve tam güvenlik modunda çalışıyor. Yöneticiler izleniyor.
             </div>
         </div>
 
@@ -307,7 +328,7 @@
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
                 <input type="text" id="newStaffInput" placeholder="User ID veya @kullaniciadi" style="flex: 1; background: #0b0c10; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
                 <input type="text" id="newStaffName" placeholder="Ad / Nick" style="width: 90px; background: #0b0c10; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
-                <button onclick="addStaff()" style="background: var(--accent-gold); color: black; border: none; padding: 8px 12px; border-radius: 10px; font-weight: 700; font-size: 11px; cursor: pointer;">Ekle</button>
+                <button onclick="addStaff()" style="background: var(--accent-gold); color: black; border: none; padding: 8px 12px; border-radius: 10px; font-weight: 800; font-size: 11px; cursor: pointer;">Ekle</button>
             </div>
             <div id="staffListContainer" style="display: flex; flex-direction: column; gap: 8px;">
                 <div class="loading">Staff listesi yükleniyor...</div>
@@ -319,24 +340,24 @@
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <div class="stat-title">Genel Bot Ban Şalteri</div>
-                    <div id="lockStatusText" style="font-size: 14px; font-weight: 700; color: var(--success);">Normal (Aktif ✅)</div>
+                    <div id="lockStatusText" style="font-size: 14px; font-weight: 800; color: var(--success);">Normal (Aktif ✅)</div>
                 </div>
-                <button id="lockdownBtn" onclick="toggleLockdown()" style="background: rgba(255,77,77,0.2); color: var(--danger); border: 1px solid var(--danger); padding: 8px 14px; border-radius: 12px; font-weight: 700; font-size: 11px; cursor: pointer;">Acil Durum Kilidi 🔒</button>
+                <button id="lockdownBtn" onclick="toggleLockdown()" style="background: rgba(255,77,77,0.2); color: var(--danger); border: 1px solid var(--danger); padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 11px; cursor: pointer;">Acil Durum Kilidi 🔒</button>
             </div>
         </div>
     </div>
 
-    <!-- PORT 2: GENEL LOGLAR (Saatli) -->
+    <!-- PORT 2: GENEL LOGLAR (Tüm Detaylar Dahil) -->
     <div id="port-logs" class="portal-section">
         <div class="glass-card">
-            <div class="section-title">📜 Canlı Grup Moderasyon Akışı (Saatli)</div>
+            <div class="section-title">📜 Canlı Grup Moderasyon Akışı & Detaylar</div>
             <div class="logs-container" id="logsList">
                 <div class="loading">Loglar yükleniyor...</div>
             </div>
         </div>
     </div>
 
-    <!-- PORT 3: ADMIN LOGLARI -->
+    <!-- PORT 3: ADMIN LOGLARI (Admin ve Hedef Kullanıcı Detayları) -->
     <div id="port-admins" class="portal-section">
         <div class="glass-card">
             <div class="section-title">⭐ En Aktif & En Pasif Adminler</div>
@@ -346,22 +367,22 @@
         </div>
 
         <div class="glass-card">
-            <div class="section-title">🛡️ Admin Detay Listesi</div>
+            <div class="section-title">🛡️ Admin Detay & Yetki Logları</div>
             <div id="adminDetailedList" style="display: flex; flex-direction: column; gap: 8px;">
                 <div class="loading">Listeleniyor...</div>
             </div>
         </div>
     </div>
 
-    <!-- PORT 4: GOLDEN CHAT & SESLİ SOHBET LOUNGE -->
+    <!-- PORT 4: GOLDEN CHAT & SESLİ KONFERANS LOUNGE -->
     <div id="port-chat" class="portal-section">
         <div class="chat-wrapper">
-            <!-- Telegram Kalitesinde Sesli Sohbet (Voice Chat) Barı -->
+            <!-- Telegram Kalitesinde Sesli Konferans (Voice Chat) Barı -->
             <div class="voice-lounge-bar">
                 <div class="voice-lounge-info">
                     <div class="voice-pulse"></div>
                     <div>
-                        <div style="font-size: 12px; font-weight: 700; color: var(--accent-gold);">Golden Voice Lounge</div>
+                        <div style="font-size: 12px; font-weight: 800; color: var(--accent-gold);">Golden Voice Lounge (Konferans)</div>
                         <div style="font-size: 10px; color: var(--text-muted);" id="voiceStatusText">Canlı Sesli Oda Aktif (0 Bağlı)</div>
                     </div>
                 </div>
@@ -370,10 +391,10 @@
 
             <!-- Mesaj Akışı -->
             <div class="chat-messages" id="chatMessages">
-                <div class="chat-bubble incoming"><b>Sistem:</b> Golden Staff Kurumsal İletişim Portuna hoş geldiniz. Profesyonel anket, gerçek sesli mesaj ve medya paylaşımı aktiftir.</div>
+                <div class="chat-bubble incoming"><b>Sistem:</b> Golden Staff Kurumsal Haberleşme Kanalına hoş geldiniz. Profesyonel anket, sesli mesaj ve konferans aktiftir.</div>
             </div>
 
-            <!-- Şık Logo/İkon Araç Barı -->
+            <!-- Şık Lüks Logo Araç Barı -->
             <div class="chat-input-bar">
                 <button class="tool-btn" onclick="openPollCreator()" title="Anket Oluştur">
                     <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
@@ -514,8 +535,8 @@
                 item.onclick = () => openAdminModal(s.full_name, s.user_id, s.can_ban === 1 ? 'Yetkili' : 'Kısıtlı');
                 item.innerHTML = `
                     <div>
-                        <div style="font-weight:600; font-size:12px;">🛡️ ${s.full_name}</div>
-                        <div style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id}</div>
+                        <div style="font-weight:700; font-size:12px;">🛡️ ${s.full_name}</div>
+                        <div style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | Yetki: ${s.can_ban === 1 ? 'Tam Yetki' : 'Kısıtlı'}</div>
                     </div>
                     <div style="font-size:11px; color:var(--accent-gold);">Detay 👆</div>
                 `;
@@ -534,7 +555,7 @@
                         <span>Ban Yetkisi:</span> <b>${status}</b>
                     </div>
                 </div>
-                <button onclick="closeAdminModal()" style="width:100%; background:var(--accent-gold); color:black; border:none; padding:10px; border-radius:12px; font-weight:700; font-size:11px; cursor:pointer;">Kapat</button>
+                <button onclick="closeAdminModal()" style="width:100%; background:var(--accent-gold); color:black; border:none; padding:10px; border-radius:12px; font-weight:800; font-size:11px; cursor:pointer;">Kapat</button>
             `;
             modal.style.display = 'flex';
         }
@@ -616,6 +637,7 @@
             } catch (err) {}
         }
 
+        // --- ULTRA DETAYLI LOG GÖSTERİMİ (Admin, ID, Hedef Kullanıcı ve Yetki) ---
         async function fetchData() {
             try {
                 const statsRes = await fetch('/api/stats');
@@ -636,17 +658,20 @@
                 logs.forEach(log => {
                     let badgeClass = 'badge-default';
                     if (log.action_type.includes('BAN')) badgeClass = 'badge-ban';
-                    else if (log.action_type.includes('MUTE')) badgeClass = 'badge-mute';
+                    else if (log.action_type.includes('MUTE') || log.action_type.includes('WARN')) badgeClass = 'badge-mute';
 
                     const item = document.createElement('div');
                     item.className = 'log-item';
                     item.innerHTML = `
-                        <div class="log-header">
+                        <div class="log-top">
                             <span class="log-badge ${badgeClass}">${log.action_type}</span>
-                            <span style="color:var(--text-muted); font-weight:600;">⏰ ${log.timestamp}</span>
+                            <span style="color:var(--text-muted); font-weight:700;">⏰ ${log.timestamp}</span>
                         </div>
-                        <div style="font-size:12px;">${escapeHtml(log.details)}</div>
-                        <div style="font-size:10px; color:var(--text-muted);">Admin ID: ${log.user_id}</div>
+                        <div class="log-details-box">
+                            <div class="log-row"><span>Yapan Admin:</span> <b>@${escapeHtml(log.username || 'Bilinmiyor')}</b></div>
+                            <div class="log-row"><span>Admin ID:</span> <b>${log.user_id}</b></div>
+                            <div class="log-row"><span>İşlem Detayı:</span> <b>${escapeHtml(log.details)}</b></div>
+                        </div>
                     `;
                     logsContainer.appendChild(item);
                 });
@@ -654,7 +679,6 @@
         }
 
         // --- GOLDEN CHAT: VERİTABANI SENKRONİZASYONLU API FONKSİYONLARI ---
-
         async function fetchChatMessages() {
             try {
                 const res = await fetch('/api/chat');
@@ -674,22 +698,22 @@
                             <div class="voice-player">
                                 <button class="voice-play-trigger" onclick="const a = new Audio('${m.message}'); a.play();">▶</button>
                                 <div class="voice-waves">
-                                    <div class="w-bar" style="height:30%"></div><div class="w-bar" style="height:80%"></div><div class="w-bar" style="height:50%"></div><div class="w-bar" style="height:100%"></div><div class="w-bar" style="height:60%"></div>
+                                    <div class="w-bar" style="height:35%"></div><div class="w-bar" style="height:85%"></div><div class="w-bar" style="height:50%"></div><div class="w-bar" style="height:100%"></div><div class="w-bar" style="height:65%"></div>
                                 </div>
-                                <span style="font-size:10px;">Ses Kaydı</span>
+                                <span style="font-size:10px; font-weight:700;">Ses Kaydı</span>
                             </div>
                         `;
                     } else if (m.msg_type === 'poll') {
                         contentHtml = `<div class="poll-box"><div class="poll-question">📊 ${escapeHtml(m.message)}</div></div>`;
                     } else if (m.msg_type === 'media') {
-                        contentHtml = `<a href="${m.message}" target="_blank" style="color:inherit; text-decoration:underline; font-size:12px; font-weight:600;">📎 Medya / Dosya Bağlantısını Aç</a>`;
+                        contentHtml = `<a href="${m.message}" target="_blank" style="color:inherit; text-decoration:underline; font-size:12px; font-weight:700;">📎 Medya / Dosya Bağlantısını Aç</a>`;
                     } else {
                         contentHtml = `<b>${escapeHtml(m.full_name)}:</b> ${escapeHtml(m.message)}`;
                     }
 
                     bubble.innerHTML = `
                         ${contentHtml}
-                        <div style="font-size:9px; text-align:right; opacity:0.7; margin-top:2px;">${m.timestamp}</div>
+                        <div style="font-size:9px; text-align:right; opacity:0.8; margin-top:3px; font-weight:600;">${m.timestamp}</div>
                     `;
                     chatMessages.appendChild(bubble);
                 });
@@ -723,7 +747,6 @@
             }
         }
 
-        // 1. Gerçek Ses Kaydı (MediaRecorder API) & Backend Kaydı
         async function toggleVoiceRecording() {
             const micBtn = document.getElementById('micBtn');
             if (!mediaRecorder || mediaRecorder.state === "inactive") {
@@ -737,7 +760,6 @@
                         const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
                         const audioUrl = URL.createObjectURL(audioBlob);
                         
-                        // Backend'e kaydet
                         await fetch('/api/chat', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -765,7 +787,6 @@
             }
         }
 
-        // 2. Anket Oluşturucu & Backend Kaydı
         async function openPollCreator() {
             const question = prompt("Anket sorusunu yazın:");
             if (!question) return;
@@ -788,7 +809,6 @@
             }
         }
 
-        // 3. Medya Paylaşımı & Backend Kaydı
         async function sendMediaFile() {
             const url = prompt("Görsel veya dosya bağlantısını (URL) girin:");
             if (!url) return;
@@ -811,7 +831,6 @@
             }
         }
 
-        // 4. Telegram Tarzı Sesli Sohbet (Voice Chat) Fonksiyonu
         function toggleVoiceChat() {
             isVoiceChatActive = !isVoiceChatActive;
             const btn = document.getElementById('voiceConnBtn');
@@ -820,7 +839,7 @@
                 btn.innerText = "Ayrıl 🛑";
                 btn.style.background = "var(--danger)";
                 btn.style.color = "#fff";
-                status.innerText = "Bağlandınız (1 Konuşmacı)";
+                status.innerText = "Konferansa Bağlandınız (1 Konuşmacı)";
             } else {
                 btn.innerText = "Odaya Katıl 🎙️";
                 btn.style.background = "var(--accent-gold)";
