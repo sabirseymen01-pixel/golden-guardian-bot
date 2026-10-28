@@ -44,9 +44,6 @@ def save_button_config(data):
         logger.error(f"Config kaydetme hatası: {e}")
 
 # --- GOLDEN STAFF MINI APP API ROTALARI & WEB SUNUCUSU ---
-async def handle_ping(request):
-    return web.Response(text="Bot 7/24 Aktif ve Golden Staff Altyapısı Hazır!")
-
 async def api_get_stats(request):
     """Mini App için gelişmiş istatistikleri JSON olarak döndürür."""
     try:
@@ -70,8 +67,16 @@ async def start_web_server(app_context):
     app.router.add_get("/api/stats", api_get_stats)
     app.router.add_get("/api/logs", api_get_logs)
     
-    # Golden Staff Mini App Arayüzü (public klasörünü web üzerinden erişilebilir yapar)
-    app.router.add_static("/", path="public", name="public", show_index=True)
+    # Kök dizine girildiğinde index.html'i doğrudan HTML olarak sun (Ekranda sadece 'html' yazma sorununu çözer)
+    async def handle_root(request):
+        try:
+            with open("public/index.html", "r", encoding="utf-8") as f:
+                html_content = f.read()
+            return web.Response(text=html_content, content_type="text/html")
+        except Exception as e:
+            return web.Response(text=f"Index okunamadı: {str(e)}", status=500)
+
+    app.router.add_get("/", handle_root)
     
     runner = web.AppRunner(app)
     await runner.setup()
