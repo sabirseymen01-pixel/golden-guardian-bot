@@ -1,14 +1,16 @@
 import sqlite3
+import datetime
 
 DB_NAME = "bot_database.db"
 
 def get_connection():
     return sqlite3.connect(DB_NAME)
 
-# Veritabanı tablolarını başlatma
+# Veritabanı tablolarını başlatma ve genişletme
 def init_db():
     conn = get_connection()
     cursor = conn.cursor()
+    
     # Ayarlar tablosu
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS settings (
@@ -16,6 +18,7 @@ def init_db():
             welcome_message TEXT
         )
     ''')
+    
     # Kullanıcı veritabanı (Username -> User ID eşleşmesi için)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -25,6 +28,20 @@ def init_db():
             PRIMARY KEY (chat_id, user_id)
         )
     ''')
+    
+    # Gelişmiş Loglar Tablosu (Tüm hareketler, silinen mesajlar, banlar, şikayetler)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            chat_id INTEGER,
+            action_type TEXT,
+            user_id INTEGER,
+            username TEXT,
+            details TEXT,
+            timestamp TEXT
+        )
+    ''')
+    
     conn.commit()
     conn.close()
 
@@ -77,7 +94,6 @@ def save_user(chat_id: int, user_id: int, username: str):
     conn = get_connection()
     cursor = conn.cursor()
     
-    # Kullanıcı kullanıcı adını değiştirdiyse eski kaydı aynı chat içinde güncelle veya çakışmaları engelle
     cursor.execute('''
         INSERT INTO users (chat_id, user_id, username)
         VALUES (?, ?, ?)
@@ -93,13 +109,11 @@ def get_user_id_by_username(chat_id: int, username: str):
     conn = get_connection()
     cursor = conn.cursor()
     
-    # Öncelikli olarak aynı sohbet grubundaki kayda bak
     cursor.execute('''
         SELECT user_id FROM users WHERE chat_id = ? AND LOWER(username) = ?
     ''', (chat_id, clean_username))
     row = cursor.fetchone()
     
-    # Grup verisinde yoksa genel kayıt verisinden ID yakala
     if not row:
         cursor.execute('''
             SELECT user_id FROM users WHERE LOWER(username) = ?
@@ -108,3 +122,60 @@ def get_user_id_by_username(chat_id: int, username: str):
         
     conn.close()
     return row[0] if row else None
+
+# --- YENİ EKLENEN LOGLAMA VE İSTATİSTİK FONKSİYONLARI ---
+
+def log_action(chat_id: int, action_type: str, user_id: int, username: str, details: str):
+    """Gruptaki her olayı (küfür silme, ban, uyarı, @admin şikayeti) veritabanına kaydeder."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute('''
+        INSERT INTO logs (chat_id, action_type, user_id, username, details, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (chat_id, action_type, user_id, username or "Bilinmiyor", details, timestamp))
+    conn.commit()
+    conn.close()
+
+def get_recent_logs(limit: int = 50):
+    """Mini App arayüzünde son hareketleri listelemek için logları çeker."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT chat_id, action_type, user_id, username, details, timestamp 
+        FROM logs ORDER BY id DESC LIMIT ?
+    ''', (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    
+    logs = []
+    for r in rows:
+        logs.append({
+            "chat_id": r[0],
+            "action_type": r[1],
+            "user_id": r[2],
+            "username": r[3],
+            "details": r[4],
+            "timestamp": r[5]
+        })
+    return logs
+
+def get_bot_statistics():
+    """Mini App için gelişmiş istatistik verilerini hesaplar."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    # Toplam işlem (log) sayısı
+    cursor.execute("SELECT COUNT(*) FROM logs")
+    total_actions = cursor.fetchone()[0]
+    
+    # İşlem türlerine göre dağılım (Ban, Küfür Silme, @admin Şikayeti vb.)
+    cursor.execute("SELECT action_type, COUNT(*) FROM logs GROUP BY action_type")
+    action_breakdown = {row[0]: row[1] for row in cursor.fetchall()}
+    
+    conn.close()
+    
+    return {
+        "total_actions": total_actions,
+        "action_breakdown": action_breakdown
+    }
