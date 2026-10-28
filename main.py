@@ -463,7 +463,7 @@ def main():
     app.add_handler(CommandHandler("unwarn", cmd_unwarn))
     app.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, handle_messages))
 
-    app.run_polling(drop_pending_updates=True)
+    app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
     main()
