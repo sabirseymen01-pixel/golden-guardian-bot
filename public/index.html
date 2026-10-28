@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Staff | Lüks Yönetim Paneli</title>
+    <title>Golden Guardian | Antik Medusa & Staff Hub</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #0b0c10;
-            --surface-glass: rgba(18, 20, 26, 0.95);
-            --surface-glass-bright: rgba(26, 30, 38, 0.98);
-            --border-glass: rgba(212, 175, 55, 0.3);
+            --bg-color: #07080a;
+            --surface-glass: rgba(14, 16, 22, 0.96);
+            --surface-glass-bright: rgba(22, 25, 34, 0.98);
+            --border-glass: rgba(212, 175, 55, 0.35);
             --accent-gold: #d4af37;
-            --accent-gold-glow: rgba(212, 175, 55, 0.4);
-            --text-main: #f0f2f5;
-            --text-muted: #9aa0a6;
-            --danger: #ff4d4d;
-            --success: #2ecc71;
-            --bubble-incoming: rgba(35, 40, 50, 0.9);
-            --bubble-outgoing: linear-gradient(135deg, #d4af37, #b89728);
+            --accent-gold-glow: rgba(212, 175, 55, 0.45);
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --bubble-incoming: rgba(28, 32, 44, 0.9);
+            --bubble-outgoing: linear-gradient(135deg, #d4af37, #9a7b1c);
         }
 
         * {
@@ -32,56 +32,66 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            padding: 12px;
-            padding-bottom: 50px;
+            padding: 10px;
+            padding-bottom: 40px;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        /* Ferah Header Tasarımı */
+        /* Antik Yunan & Medusa Başlık Tasarımı */
         .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 12px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-glass);
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            background: var(--surface-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .logo-area h1 {
-            font-size: 18px;
+            font-size: 16px;
             color: var(--accent-gold);
             font-weight: 800;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.3px;
             text-transform: uppercase;
+            text-shadow: 0 0 10px var(--accent-gold-glow);
         }
 
         .admin-badge {
             background: rgba(212, 175, 55, 0.15);
             color: var(--accent-gold);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 18px;
+            font-size: 10px;
             font-weight: 700;
             border: 1px solid var(--border-glass);
-            box-shadow: 0 0 12px var(--accent-gold-glow);
+            box-shadow: 0 0 10px var(--accent-gold-glow);
         }
 
         /* Kaydırmalı Port Navigasyonu */
         .port-nav {
             display: flex;
-            background: rgba(255, 255, 255, 0.04);
-            padding: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 3px;
             border-radius: 12px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             border: 1px solid var(--border-glass);
         }
 
         .port-tab {
             flex: 1;
             text-align: center;
-            padding: 8px 4px;
+            padding: 7px 4px;
             font-size: 11px;
             font-weight: 600;
             color: var(--text-muted);
@@ -92,7 +102,7 @@
 
         .port-tab.active {
             background: var(--accent-gold);
-            color: #0b0c10;
+            color: #07080a;
             font-weight: 800;
             box-shadow: 0 4px 15px var(--accent-gold-glow);
         }
@@ -110,7 +120,7 @@
             border: 1px solid var(--border-glass);
             border-radius: 16px;
             padding: 14px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
         }
 
@@ -128,7 +138,7 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .stat-card {
@@ -152,14 +162,14 @@
             align-items: center;
         }
 
-        /* --- FERAH VE GENİŞ STAFF CHAT MİMARİSİ --- */
+        /* --- FERAH STAFF CHAT MİMARİSİ --- */
         .chat-container-pro {
             display: flex;
             flex-direction: column;
             flex: 1;
-            min-height: calc(100vh - 140px);
-            background: radial-gradient(circle at center, #14161f 0%, #08090c 100%);
-            border-radius: 20px;
+            min-height: calc(100vh - 130px);
+            background: radial-gradient(circle at center, #12141c 0%, #07080a 100%);
+            border-radius: 18px;
             border: 1px solid var(--border-glass);
             overflow: hidden;
             box-shadow: 0 15px 35px rgba(0,0,0,0.8);
@@ -176,33 +186,34 @@
 
         .chat-title-info { display: flex; align-items: center; gap: 10px; }
         .chat-avatar {
-            width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #554414);
-            display: flex; align-items: center; justify-content: center; font-weight: 800; color: #0b0c10; font-size: 13px;
-            box-shadow: 0 0 10px var(--accent-gold-glow);
+            width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #665014);
+            display: flex; align-items: center; justify-content: center; font-weight: 800; color: #07080a; font-size: 13px;
+            box-shadow: 0 0 12px var(--accent-gold-glow);
+            border: 1px solid var(--accent-gold);
         }
 
-        /* Sağ üstteki arama/ses butonu -> Ses Odasını Açar */
+        /* Sağ üstteki arama/ses butonu -> Ses Evi (Voice Lounge) Açar */
         .header-call-btn {
             background: rgba(212, 175, 55, 0.15); border: 1px solid var(--border-glass);
             width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             cursor: pointer; color: var(--accent-gold); transition: all 0.2s;
         }
-        .header-call-btn:hover { background: var(--accent-gold); color: #0b0c10; box-shadow: 0 0 15px var(--accent-gold-glow); }
+        .header-call-btn:hover { background: var(--accent-gold); color: #07080a; box-shadow: 0 0 15px var(--accent-gold-glow); }
         .header-call-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
         .chat-messages {
             flex: 1;
-            padding: 14px;
+            padding: 12px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .chat-bubble {
             max-width: 85%;
-            padding: 11px 15px;
-            border-radius: 16px;
+            padding: 11px 14px;
+            border-radius: 14px;
             font-size: 13px;
             line-height: 1.4;
             position: relative;
@@ -212,15 +223,16 @@
             background: var(--bubble-incoming); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.06);
         }
         .chat-bubble.outgoing {
-            background: var(--bubble-outgoing); color: #0b0c10; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 600;
+            background: var(--bubble-outgoing); color: #07080a; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 600;
             box-shadow: 0 4px 15px var(--accent-gold-glow);
         }
 
         /* Ses Odası Kartı (Chat İçinde) */
         .voice-room-card {
-            background: linear-gradient(135deg, rgba(212,175,55,0.18), rgba(20,22,30,0.95));
+            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(15,17,23,0.95));
             border: 1px solid var(--accent-gold);
             border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; width: 100%;
+            box-shadow: 0 0 15px rgba(212,175,55,0.2);
         }
         .room-header { display: flex; align-items: center; justify-content: space-between; }
         .room-pulse {
@@ -229,26 +241,26 @@
         }
         @keyframes pulseAnim { 0% { transform: scale(0.95); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.5; } 100% { transform: scale(0.95); opacity: 1; } }
         .room-join-btn {
-            background: var(--accent-gold); color: #0b0c10; border: none; padding: 6px 12px;
+            background: var(--accent-gold); color: #07080a; border: none; padding: 6px 12px;
             border-radius: 9px; font-size: 11px; font-weight: 800; cursor: pointer;
         }
 
         /* Anket Kartı */
         .poll-box {
-            background: rgba(0,0,0,0.5); border: 1px solid var(--border-glass);
+            background: rgba(0,0,0,0.6); border: 1px solid var(--border-glass);
             border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; width: 100%;
         }
         .poll-question { font-weight: 800; font-size: 13px; color: var(--accent-gold); }
         .poll-option-item {
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-            padding: 8px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; position: relative; overflow: hidden;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 10px; border-radius: 8px; font-size: 12px; cursor: pointer;
         }
         .poll-option-item:hover { background: rgba(212,175,55,0.2); }
 
         /* Sesli Mesaj Oynatıcı */
         .voice-player { display: flex; align-items: center; gap: 10px; }
         .voice-play-trigger {
-            background: #0b0c10; color: var(--accent-gold); border: 1px solid var(--accent-gold);
+            background: #07080a; color: var(--accent-gold); border: 1px solid var(--accent-gold);
             width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px;
         }
         .voice-waves { flex: 1; height: 18px; display: flex; align-items: center; gap: 2px; }
@@ -256,44 +268,71 @@
 
         /* Alt Giriş Barı (Geniş & Rahat) */
         .chat-input-bar {
-            display: flex; align-items: center; gap: 8px; padding: 12px 14px;
+            display: flex; align-items: center; gap: 8px; padding: 10px 14px;
             background: var(--surface-glass-bright); border-top: 1px solid var(--border-glass);
         }
         .chat-input {
-            flex: 1; background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-glass);
-            padding: 10px 14px; border-radius: 22px; color: white; font-size: 13px; outline: none;
+            flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass);
+            padding: 10px 14px; border-radius: 20px; color: white; font-size: 13px; outline: none;
         }
 
         .tool-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass);
+            background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass);
             width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
             cursor: pointer; color: var(--accent-gold); transition: all 0.2s;
         }
-        .tool-btn:hover { background: var(--accent-gold); color: #0b0c10; }
+        .tool-btn:hover { background: var(--accent-gold); color: #07080a; }
         .tool-btn svg { width: 17px; height: 17px; fill: currentColor; }
 
-        /* --- TELEGRAM TARZI KAYDIRILABİLİR SES ODASI PANELİ (MODAL) --- */
+        /* --- "SES EVİ" TARZI YUVARLAK KÜRSÜ SLOTLARI (MODAL) --- */
         .voice-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(12px);
+            background: rgba(0,0,0,0.88); backdrop-filter: blur(12px);
             display: none; flex-direction: column; justify-content: flex-end; z-index: 1000;
         }
         .voice-modal-content {
             background: var(--surface-glass-bright);
             border-top: 1px solid var(--accent-gold);
             border-top-left-radius: 24px; border-top-right-radius: 24px;
-            padding: 20px; max-height: 75vh; display: flex; flex-direction: column; gap: 14px;
+            padding: 18px; max-height: 80vh; display: flex; flex-direction: column; gap: 14px;
             box-shadow: 0 -10px 30px rgba(0,0,0,0.9); animation: slideUp 0.3s ease;
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        .voice-participants-list {
-            flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; max-height: 45vh; padding-right: 4px;
+        /* İkinci Görseldeki Yuvarlak Kürsü Grid Alanı */
+        .speakers-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            max-height: 45vh;
+            overflow-y: auto;
+            padding: 6px;
         }
-        .participant-item {
-            background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass);
-            padding: 10px 14px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;
+        .speaker-slot {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
         }
+        .speaker-slot:hover { border-color: var(--accent-gold); background: rgba(212,175,55,0.08); }
+        .speaker-avatar-wrap {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: linear-gradient(135deg, #d4af37, #554414);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; color: #07080a; font-size: 16px;
+            border: 2px solid var(--accent-gold);
+            box-shadow: 0 0 12px var(--accent-gold-glow);
+            position: relative;
+        }
+        .speaker-name { font-size: 11px; font-weight: 700; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .speaker-status-badge { font-size: 9px; padding: 2px 6px; border-radius: 6px; font-weight: 600; }
 
         .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px; }
     </style>
@@ -302,7 +341,8 @@
 
     <div class="header">
         <div class="logo-area">
-            <h1>Golden Staff</h1>
+            <span style="font-size: 18px;">⚜️</span>
+            <h1>Golden Guardian</h1>
         </div>
         <div class="admin-badge" id="userRole">Yönetici 🛡️</div>
     </div>
@@ -329,9 +369,9 @@
         </div>
 
         <div class="glass-card">
-            <div class="section-title">📊 Grup Aktiflik & Durum Özeti</div>
+            <div class="section-title">📊 Antik Güvenlik & Durum Özeti</div>
             <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;" id="groupActivityStats">
-                Sistem aktif ve tam güvenlik modunda çalışıyor. Yöneticiler izleniyor.
+                Sistem Medusa kalkanı aktif ve tam güvenlik modunda çalışıyor.
             </div>
         </div>
 
@@ -339,8 +379,8 @@
         <div id="founderPanel" class="glass-card" style="display: none;">
             <div class="section-title">👑 Kurucu Yetki & Staff Yönetimi</div>
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                <input type="text" id="newStaffInput" placeholder="User ID veya @kullaniciadi" style="flex: 1; background: #0b0c10; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
-                <input type="text" id="newStaffName" placeholder="Ad / Nick" style="width: 90px; background: #0b0c10; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
+                <input type="text" id="newStaffInput" placeholder="User ID veya @kullaniciadi" style="flex: 1; background: #07080a; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
+                <input type="text" id="newStaffName" placeholder="Ad / Nick" style="width: 80px; background: #07080a; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
                 <button onclick="addStaff()" style="background: var(--accent-gold); color: black; border: none; padding: 8px 12px; border-radius: 10px; font-weight: 800; font-size: 11px; cursor: pointer;">Ekle</button>
             </div>
             <div id="staffListContainer" style="display: flex; flex-direction: column; gap: 8px;">
@@ -354,7 +394,7 @@
                     <div class="stat-title">Genel Bot Ban Şalteri</div>
                     <div id="lockStatusText" style="font-size: 14px; font-weight: 800; color: var(--success);">Normal (Aktif ✅)</div>
                 </div>
-                <button id="lockdownBtn" onclick="toggleLockdown()" style="background: rgba(255,77,77,0.2); color: var(--danger); border: 1px solid var(--danger); padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 11px; cursor: pointer;">Acil Durum Kilidi 🔒</button>
+                <button id="lockdownBtn" onclick="toggleLockdown()" style="background: rgba(239,68,68,0.2); color: var(--danger); border: 1px solid var(--danger); padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 11px; cursor: pointer;">Acil Durum Kilidi 🔒</button>
             </div>
         </div>
     </div>
@@ -398,15 +438,15 @@
                     </div>
                 </div>
                 <div class="chat-actions-right">
-                    <!-- Sağ üstteki arama butonu -> Ses Odası Paneline Giriş -->
-                    <button class="header-call-btn" onclick="openVoiceRoomModal()" title="Ses Odasını Aç">
+                    <!-- Sağ üstteki arama butonu -> "Ses Evi" Modalını Açar -->
+                    <button class="header-call-btn" onclick="openVoiceRoomModal()" title="Ses Evi'ni Aç">
                         <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
                     </button>
                 </div>
             </div>
 
             <div class="chat-messages" id="chatMessages">
-                <div class="chat-bubble incoming"><b>Sistem:</b> Ferah Golden Staff Haberleşme Portalına hoş geldiniz. Anket, sesli mesaj ve ses odası aktiftir.</div>
+                <div class="chat-bubble incoming"><b>Sistem:</b> Antik Medusa & Golden Staff Haberleşme Portalına hoş geldiniz. Anket, sesli mesaj ve ses odası aktiftir.</div>
             </div>
 
             <div class="chat-input-bar">
@@ -422,27 +462,28 @@
                 
                 <input type="text" id="chatInputText" class="chat-input" placeholder="Mesaj yazın...">
                 
-                <button class="tool-btn" onclick="sendChatMessage()" style="background:var(--accent-gold); color:#0b0c10;" title="Gönder">
+                <button class="tool-btn" onclick="sendChatMessage()" style="background:var(--accent-gold); color:#07080a;" title="Gönder">
                     <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- TELEGRAM TARZI SES ODASI & YÖNETİCİ KONTROL PANELİ (MODAL) -->
+    <!-- "SES EVİ" TARZI YUVARLAK KÜRSÜ SLOTLARI (MODAL) -->
     <div id="voiceModal" class="voice-modal-overlay" onclick="closeVoiceModal(event)">
         <div class="voice-modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-weight: 800; color: var(--accent-gold); font-size: 15px;">🎙️ Golden Voice Lounge (Ses Odası)</div>
+                <div style="font-weight: 800; color: var(--accent-gold); font-size: 15px;">🏛️ Golden Voice Lounge (Ses Evi)</div>
                 <button onclick="document.getElementById('voiceModal').style.display='none'" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
             </div>
-            <div style="font-size: 11px; color: var(--text-muted);">Aktif ses odası katılımcıları ve yetki yönetim paneli. Kurucu olarak üyeleri susturabilir veya konuşma izni verebilirsiniz.</div>
+            <div style="font-size: 11px; color: var(--text-muted);">Antik kürsü konseptli canlı ses odası. Kurucu olarak yetkililerin profillerine dokunarak seslerini açıp kapatabilirsiniz.</div>
             
-            <div class="voice-participants-list" id="voiceParticipantsList">
-                <div class="loading">Katılımcılar yükleniyor...</div>
+            <!-- İkinci görseldeki gibi yuvarlak avatarların grid dizilimi -->
+            <div class="speakers-grid" id="voiceSpeakersGrid">
+                <div class="loading">Kürsüler yükleniyor...</div>
             </div>
 
-            <button onclick="toggleVoiceConnection()" id="voiceConnMainBtn" style="width:100%; background:var(--accent-gold); color:#0b0c10; border:none; padding:12px; border-radius:14px; font-weight:800; font-size:12px; cursor:pointer;">Odaya Katıl / Konuş</button>
+            <button onclick="toggleVoiceConnection()" id="voiceConnMainBtn" style="width:100%; background:var(--accent-gold); color:#07080a; border:none; padding:12px; border-radius:14px; font-weight:800; font-size:12px; cursor:pointer;">Odaya Katıl / Kürsüye Çık</button>
         </div>
     </div>
 
@@ -484,7 +525,7 @@
                 const data = await res.json();
                 
                 if (!data.authorized) {
-                    document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#000; color:#ff4d4d; text-align:center; padding:20px;"><h2>⛔ Yetkisiz Erişim!</h2><p style="color:#9aa0a6; font-size:13px; margin-top:8px;">ID: ${user.id}</p></div>`;
+                    document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#000; color:#ef4444; text-align:center; padding:20px;"><h2>⛔ Yetkisiz Erişim!</h2><p style="color:#9ca3af; font-size:13px; margin-top:8px;">ID: ${user.id}</p></div>`;
                     return;
                 }
 
@@ -536,8 +577,8 @@
                             <span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id}</span>
                         </div>
                         <div style="display:flex; gap:4px;">
-                            <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:${s.is_muted === 1 ? 'rgba(255,77,77,0.2)' : 'rgba(46,204,113,0.2)'}; color:${s.is_muted === 1 ? 'var(--danger)' : 'var(--success)'}; border:none; cursor:pointer;" onclick="setPermission(${s.user_id}, 'is_muted', ${s.is_muted === 1 ? 0 : 1})">
-                                ${s.is_muted === 1 ? 'Susturuldu 🔇' : 'Sesli Konuş ✅'}
+                            <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:${s.is_muted === 1 ? 'rgba(239,68,68,0.2)' : 'rgba(34,197,94,0.2)'}; color:${s.is_muted === 1 ? 'var(--danger)' : 'var(--success)'}; border:none; cursor:pointer;" onclick="setPermission(${s.user_id}, 'is_muted', ${s.is_muted === 1 ? 0 : 1})">
+                                ${s.is_muted === 1 ? 'Susturuldu 🔇' : 'Konuşabilir ✅'}
                             </button>
                             <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:rgba(255,255,255,0.1); color:#fff; border:none; cursor:pointer;" onclick="removeStaff(${s.user_id})">Sil</button>
                         </div>
@@ -556,7 +597,7 @@
                     body: JSON.stringify({ user_id: user.id, target_id: targetId, perm_type: permType, status: status })
                 });
                 loadStaffList();
-                if (isFounder) loadVoiceParticipants();
+                if (isFounder) loadVoiceSpeakers();
             } catch (err) { alert("Yetki değiştirilemedi"); }
         }
 
@@ -566,7 +607,7 @@
             if (!staffs || staffs.length === 0) return;
 
             rankContainer.innerHTML = `
-                <div style="font-size:11px; display:flex; justify-content:space-between; padding:8px; background:rgba(46,204,113,0.1); border-radius:10px; border:1px solid rgba(46,204,113,0.2);">
+                <div style="font-size:11px; display:flex; justify-content:space-between; padding:8px; background:rgba(34,197,94,0.1); border-radius:10px; border:1px solid rgba(34,197,94,0.2);">
                     <span>🥇 En Aktif: <b>${staffs[0].full_name}</b></span>
                     <span style="color:var(--success);">Aktif ⚡</span>
                 </div>
@@ -579,7 +620,7 @@
                 item.innerHTML = `
                     <div>
                         <div style="font-weight:700; font-size:12px;">🛡️ ${s.full_name}</div>
-                        <div style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | Susturulan: ${s.is_muted === 1 ? 'Evet 🔇' : 'Hayır ✅'}</div>
+                        <div style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | Durum: ${s.is_muted === 1 ? 'Susturuldu 🔇' : 'Aktif 🎙️'}</div>
                     </div>
                 `;
                 container.appendChild(item);
@@ -669,17 +710,15 @@
                     else if (log.action_type.includes('MUTE') || log.action_type.includes('WARN')) badgeClass = 'badge-mute';
 
                     const item = document.createElement('div');
-                    item.className = 'log-item';
+                    item.className = 'glass-card';
+                    item.style.padding = '10px';
+                    item.style.marginBottom = '8px';
                     item.innerHTML = `
-                        <div class="log-top">
-                            <span class="log-badge ${badgeClass}">${log.action_type}</span>
-                            <span style="color:var(--text-muted); font-weight:700;">⏰ ${log.timestamp}</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:4px;">
+                            <span style="font-weight:800; color:var(--accent-gold);">${log.action_type}</span>
+                            <span style="color:var(--text-muted); font-size:10px;">⏰ ${log.timestamp}</span>
                         </div>
-                        <div class="log-details-box">
-                            <div class="log-row"><span>Yapan Admin:</span> <b>@${escapeHtml(log.username || 'Bilinmiyor')}</b></div>
-                            <div class="log-row"><span>Admin ID:</span> <b>${log.user_id}</b></div>
-                            <div class="log-row"><span>İşlem Detayı:</span> <b>${escapeHtml(log.details)}</b></div>
-                        </div>
+                        <div style="font-size:11px; color:var(--text-muted);">Admin: @${escapeHtml(log.username)} | ${escapeHtml(log.details)}</div>
                     `;
                     logsContainer.appendChild(item);
                 });
@@ -727,11 +766,11 @@
                                 <div class="room-header">
                                     <div style="display:flex; align-items:center; gap:6px;">
                                         <div class="room-pulse"></div>
-                                        <span style="font-weight:800; font-size:12px; color:var(--accent-gold);">Golden Voice Lounge</span>
+                                        <span style="font-weight:800; font-size:12px; color:var(--accent-gold);">Golden Voice Lounge (Ses Evi)</span>
                                     </div>
                                     <button class="room-join-btn" onclick="openVoiceRoomModal()">Odaya Katıl</button>
                                 </div>
-                                <div style="font-size:11px; color:var(--text-muted);">Canlı sesli konferans odası aktif. Katılmak için dokunun.</div>
+                                <div style="font-size:11px; color:var(--text-muted);">Canlı ses evi aktif. Katılmak için dokunun.</div>
                             </div>
                         `;
                     } else if (m.msg_type === 'media') {
@@ -816,7 +855,7 @@
                 }
             } else {
                 mediaRecorder.stop();
-                micBtn.style.background = 'rgba(255,255,255,0.05)';
+                micBtn.style.background = 'rgba(255,255,255,0.04)';
                 micBtn.style.color = 'var(--accent-gold)';
             }
         }
@@ -870,12 +909,11 @@
             }
         }
 
-        // Sağ üstteki arama tuşuna basıldığında açılan Ses Odası Modalı
+        # Sağ üstteki arama tuşuna basıldığında açılan Ses Evi Modalı
         async function openVoiceRoomModal() {
             document.getElementById('voiceModal').style.display = 'flex';
-            loadVoiceParticipants();
+            loadVoiceSpeakers();
             
-            // Chata otomatik ses odası kartı düşür
             await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -883,15 +921,15 @@
                     user_id: user.id,
                     username: user.username || 'admin',
                     full_name: user.first_name || 'Admin',
-                    message: "Sesli Konferans Başlatıldı",
+                    message: "Ses Evi Konferansı Başlatıldı",
                     msg_type: 'voice_room'
                 })
             });
             fetchChatMessages();
         }
 
-        async function loadVoiceParticipants() {
-            const listEl = document.getElementById('voiceParticipantsList');
+        async function loadVoiceSpeakers() {
+            const gridEl = document.getElementById('voiceSpeakersGrid');
             try {
                 const res = await fetch('/api/staff/list', {
                     method: 'POST',
@@ -900,29 +938,37 @@
                 });
                 const staffs = await res.json();
                 if (!staffs || staffs.length === 0) {
-                    listEl.innerHTML = '<div style="font-size:12px; color:var(--text-muted); text-align:center;">Odada başka yetkili yok.</div>';
+                    gridEl.innerHTML = '<div style="font-size:12px; color:var(--text-muted); text-align:center; grid-column: span 3;">Odada kayıtlı staff yok.</div>';
                     return;
                 }
 
-                listEl.innerHTML = '';
+                gridEl.innerHTML = '';
                 staffs.forEach(s => {
-                    const item = document.createElement('div');
-                    item.className = 'participant-item';
-                    item.innerHTML = `
-                        <div>
-                            <div style="font-weight:700; font-size:12px;">🛡️ ${s.full_name}</div>
-                            <div style="font-size:10px; color:var(--text-muted);">Durum: ${s.is_muted === 1 ? 'Susturuldu 🔇' : 'Konuşabilir 🎙️'}</div>
+                    const initials = (s.full_name || 'Staff').substring(0, 2).toUpperCase();
+                    const slot = document.createElement('div');
+                    slot.className = 'speaker-slot';
+                    
+                    // Kurucu tıklayarak susturma/açma yapabilsin
+                    if (isFounder) {
+                        slot.onclick = () => {
+                            const newMute = s.is_muted === 1 ? 0 : 1;
+                            setPermission(s.user_id, 'is_muted', newMute);
+                        };
+                    }
+
+                    slot.innerHTML = `
+                        <div class="speaker-avatar-wrap" style="border-color: ${s.is_muted === 1 ? 'var(--danger)' : 'var(--success)'};">
+                            ${initials}
                         </div>
-                        ${isFounder ? `
-                            <button onclick="setPermission(${s.user_id}, 'is_muted', ${s.is_muted === 1 ? 0 : 1})" style="padding:5px 10px; font-size:10px; border-radius:8px; background:${s.is_muted === 1 ? 'rgba(46,204,113,0.2)' : 'rgba(255,77,77,0.2)'}; color:${s.is_muted === 1 ? 'var(--success)' : 'var(--danger)'}; border:none; cursor:pointer;">
-                                ${s.is_muted === 1 ? 'Sesi Aç 🔊' : 'Sustur 🔇'}
-                            </button>
-                        ` : ''}
+                        <div class="speaker-name">${escapeHtml(s.full_name)}</div>
+                        <div class="speaker-status-badge" style="background:${s.is_muted === 1 ? 'rgba(239,68,68,0.2)' : 'rgba(34,197,94,0.2)'}; color:${s.is_muted === 1 ? 'var(--danger)' : 'var(--success)'};">
+                            ${s.is_muted === 1 ? 'Susturuldu 🔇' : 'Konuşuyor 🎙️'}
+                        </div>
                     `;
-                    listEl.appendChild(item);
+                    gridEl.appendChild(slot);
                 });
             } catch(e) {
-                listEl.innerHTML = '<div style="font-size:12px; color:var(--danger); text-align:center;">Katılımcılar yüklenemedi.</div>';
+                gridEl.innerHTML = '<div style="font-size:12px; color:var(--danger); text-align:center; grid-column: span 3;">Kürsüler yüklenemedi.</div>';
             }
         }
 
@@ -931,14 +977,14 @@
             const btn = document.getElementById('voiceConnMainBtn');
             const subStatus = document.getElementById('chatSubStatus');
             if (isVoiceConnected) {
-                btn.innerText = "Odadan Ayrıl 🛑";
+                btn.innerText = "Kürsüden İn / Ayrıl 🛑";
                 btn.style.background = "var(--danger)";
                 btn.style.color = "#fff";
-                subStatus.innerText = "Ses Odasına Bağlandınız (Konuşuyorsunuz)";
+                subStatus.innerText = "Ses Evine Bağlandınız (Kürsüdesiniz)";
             } else {
-                btn.innerText = "Odaya Katıl / Konuş";
+                btn.innerText = "Odaya Katıl / Kürsüye Çık";
                 btn.style.background = "var(--accent-gold)";
-                btn.style.color = "#0b0c10";
+                btn.style.color = "#07080a";
                 subStatus.innerText = "Yönetim ve İletişim Kanalı";
             }
         }
