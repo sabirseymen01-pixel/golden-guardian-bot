@@ -6,7 +6,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Guardian | Antik Medusa & Staff Hub</title>
+    <title>Golden Staff | Antik Medusa Hub</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -20,316 +20,36 @@
             --text-muted: #9ca3af;
             --danger: #ef4444;
             --success: #22c55e;
-            --bubble-incoming: rgba(28, 32, 44, 0.9);
-            --bubble-outgoing: linear-gradient(135deg, #d4af37, #9a7b1c);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 12px; min-height: 100vh; display: flex; flex-direction: column; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding: 10px;
-            padding-bottom: 40px;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* Antik Yunan & Medusa Başlık Tasarımı */
         .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding: 8px 12px;
-            background: var(--surface-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: 14px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 12px; padding: 10px 14px; background: var(--surface-glass);
+            border: 1px solid var(--border-glass); border-radius: 14px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
         }
+        .logo-area { display: flex; align-items: center; gap: 8px; }
+        .logo-area h1 { font-size: 16px; color: var(--accent-gold); font-weight: 800; text-transform: uppercase; text-shadow: 0 0 10px var(--accent-gold-glow); }
+        .admin-badge { background: rgba(212, 175, 55, 0.15); color: var(--accent-gold); padding: 4px 10px; border-radius: 18px; font-size: 10px; font-weight: 700; border: 1px solid var(--border-glass); box-shadow: 0 0 10px var(--accent-gold-glow); }
 
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .port-nav { display: flex; background: rgba(255, 255, 255, 0.03); padding: 3px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border-glass); }
+        .port-tab { flex: 1; text-align: center; padding: 8px; font-size: 11px; font-weight: 600; color: var(--text-muted); border-radius: 9px; cursor: pointer; transition: all 0.25s; }
+        .port-tab.active { background: var(--accent-gold); color: #07080a; font-weight: 800; box-shadow: 0 4px 15px var(--accent-gold-glow); }
 
-        .logo-area h1 {
-            font-size: 16px;
-            color: var(--accent-gold);
-            font-weight: 800;
-            letter-spacing: -0.3px;
-            text-transform: uppercase;
-            text-shadow: 0 0 10px var(--accent-gold-glow);
-        }
-
-        .admin-badge {
-            background: rgba(212, 175, 55, 0.15);
-            color: var(--accent-gold);
-            padding: 4px 10px;
-            border-radius: 18px;
-            font-size: 10px;
-            font-weight: 700;
-            border: 1px solid var(--border-glass);
-            box-shadow: 0 0 10px var(--accent-gold-glow);
-        }
-
-        /* Kaydırmalı Port Navigasyonu */
-        .port-nav {
-            display: flex;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 3px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            border: 1px solid var(--border-glass);
-        }
-
-        .port-tab {
-            flex: 1;
-            text-align: center;
-            padding: 7px 4px;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
-            border-radius: 9px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-
-        .port-tab.active {
-            background: var(--accent-gold);
-            color: #07080a;
-            font-weight: 800;
-            box-shadow: 0 4px 15px var(--accent-gold-glow);
-        }
-
-        .portal-section { display: none; flex-direction: column; flex: 1; animation: fadeIn 0.3s ease; }
+        .portal-section { display: none; flex-direction: column; flex: 1; }
         .portal-section.active { display: flex; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .glass-card { background: var(--surface-glass); border: 1px solid var(--border-glass); border-radius: 16px; padding: 14px; margin-bottom: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6); }
+        .section-title { font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--accent-gold); display: flex; align-items: center; gap: 8px; }
 
-        .glass-card {
-            background: var(--surface-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 14px;
-            margin-bottom: 10px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-        }
-
-        .section-title {
-            font-size: 13px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--accent-gold);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .stat-card {
-            background: var(--surface-glass);
-            border: 1px solid var(--border-glass);
-            border-radius: 14px;
-            padding: 12px;
-        }
-
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px; }
+        .stat-card { background: var(--surface-glass); border: 1px solid var(--border-glass); border-radius: 14px; padding: 12px; }
         .stat-title { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
         .stat-value { font-size: 18px; font-weight: 800; color: var(--text-main); }
 
-        .admin-list-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-glass);
-            padding: 10px 12px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* --- FERAH STAFF CHAT MİMARİSİ --- */
-        .chat-container-pro {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-height: calc(100vh - 130px);
-            background: radial-gradient(circle at center, #12141c 0%, #07080a 100%);
-            border-radius: 18px;
-            border: 1px solid var(--border-glass);
-            overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
-        }
-
-        .chat-top-bar {
-            background: var(--surface-glass-bright);
-            border-bottom: 1px solid var(--border-glass);
-            padding: 10px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chat-title-info { display: flex; align-items: center; gap: 10px; }
-        .chat-avatar {
-            width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #665014);
-            display: flex; align-items: center; justify-content: center; font-weight: 800; color: #07080a; font-size: 13px;
-            box-shadow: 0 0 12px var(--accent-gold-glow);
-            border: 1px solid var(--accent-gold);
-        }
-
-        .header-call-btn {
-            background: rgba(212, 175, 55, 0.15); border: 1px solid var(--border-glass);
-            width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--accent-gold); transition: all 0.2s;
-        }
-        .header-call-btn:hover { background: var(--accent-gold); color: #07080a; box-shadow: 0 0 15px var(--accent-gold-glow); }
-        .header-call-btn svg { width: 18px; height: 18px; fill: currentColor; }
-
-        .chat-messages {
-            flex: 1;
-            padding: 12px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .chat-bubble {
-            max-width: 85%;
-            padding: 11px 14px;
-            border-radius: 14px;
-            font-size: 13px;
-            line-height: 1.4;
-            position: relative;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        .chat-bubble.incoming {
-            background: var(--bubble-incoming); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.06);
-        }
-        .chat-bubble.outgoing {
-            background: var(--bubble-outgoing); color: #07080a; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 600;
-            box-shadow: 0 4px 15px var(--accent-gold-glow);
-        }
-
-        .voice-room-card {
-            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(15,17,23,0.95));
-            border: 1px solid var(--accent-gold);
-            border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; width: 100%;
-            box-shadow: 0 0 15px rgba(212,175,55,0.2);
-        }
-        .room-header { display: flex; align-items: center; justify-content: space-between; }
-        .room-pulse {
-            width: 9px; height: 9px; background: var(--success); border-radius: 50%;
-            box-shadow: 0 0 10px var(--success); animation: pulseAnim 1.5s infinite;
-        }
-        @keyframes pulseAnim { 0% { transform: scale(0.95); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.5; } 100% { transform: scale(0.95); opacity: 1; } }
-        .room-join-btn {
-            background: var(--accent-gold); color: #07080a; border: none; padding: 6px 12px;
-            border-radius: 9px; font-size: 11px; font-weight: 800; cursor: pointer;
-        }
-
-        .poll-box {
-            background: rgba(0,0,0,0.6); border: 1px solid var(--border-glass);
-            border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; width: 100%;
-        }
-        .poll-question { font-weight: 800; font-size: 13px; color: var(--accent-gold); }
-        .poll-option-item {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            padding: 8px 10px; border-radius: 8px; font-size: 12px; cursor: pointer;
-        }
-        .poll-option-item:hover { background: rgba(212,175,55,0.2); }
-
-        .voice-player { display: flex; align-items: center; gap: 10px; }
-        .voice-play-trigger {
-            background: #07080a; color: var(--accent-gold); border: 1px solid var(--accent-gold);
-            width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 13px;
-        }
-        .voice-waves { flex: 1; height: 18px; display: flex; align-items: center; gap: 2px; }
-        .w-bar { flex: 1; background: currentColor; border-radius: 3px; opacity: 0.9; height: 70%; }
-
-        .chat-input-bar {
-            display: flex; align-items: center; gap: 8px; padding: 10px 14px;
-            background: var(--surface-glass-bright); border-top: 1px solid var(--border-glass);
-        }
-        .chat-input {
-            flex: 1; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-glass);
-            padding: 10px 14px; border-radius: 20px; color: white; font-size: 13px; outline: none;
-        }
-
-        .tool-btn {
-            background: rgba(255,255,255,0.04); border: 1px solid var(--border-glass);
-            width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; color: var(--accent-gold); transition: all 0.2s;
-        }
-        .tool-btn:hover { background: var(--accent-gold); color: #07080a; }
-        .tool-btn svg { width: 17px; height: 17px; fill: currentColor; }
-
-        .voice-modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.88); backdrop-filter: blur(12px);
-            display: none; flex-direction: column; justify-content: flex-end; z-index: 1000;
-        }
-        .voice-modal-content {
-            background: var(--surface-glass-bright);
-            border-top: 1px solid var(--accent-gold);
-            border-top-left-radius: 24px; border-top-right-radius: 24px;
-            padding: 18px; max-height: 80vh; display: flex; flex-direction: column; gap: 14px;
-            box-shadow: 0 -10px 30px rgba(0,0,0,0.9); animation: slideUp 0.3s ease;
-        }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-        .speakers-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            max-height: 45vh;
-            overflow-y: auto;
-            padding: 6px;
-        }
-        .speaker-slot {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 12px 8px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .speaker-slot:hover { border-color: var(--accent-gold); background: rgba(212,175,55,0.08); }
-        .speaker-avatar-wrap {
-            width: 52px; height: 52px; border-radius: 50%;
-            background: linear-gradient(135deg, #d4af37, #554414);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 800; color: #07080a; font-size: 16px;
-            border: 2px solid var(--accent-gold);
-            box-shadow: 0 0 12px var(--accent-gold-glow);
-            position: relative;
-        }
-        .speaker-name { font-size: 11px; font-weight: 700; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-        .speaker-status-badge { font-size: 9px; padding: 2px 6px; border-radius: 6px; font-weight: 600; }
-
+        .admin-list-item { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-glass); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px; }
     </style>
 </head>
@@ -338,17 +58,15 @@
     <div class="header">
         <div class="logo-area">
             <span style="font-size: 18px;">⚜️</span>
-            <h1>Golden Guardian</h1>
+            <h1>Golden Staff Hub</h1>
         </div>
         <div class="admin-badge" id="userRole">Yönetici 🛡️</div>
     </div>
 
-    <!-- Kaydırmalı Port Navigasyonu -->
     <div class="port-nav">
         <div class="port-tab active" onclick="switchPort('overview')">Genel Bakış</div>
-        <div class="port-tab" onclick="switchPort('logs')">Genel Loglar</div>
-        <div class="port-tab" onclick="switchPort('admins')">Admin Logları</div>
-        <div class="port-tab" onclick="switchPort('chat')">Staff Chat 💬</div>
+        <div class="port-tab" onclick="switchPort('logs')">Zamanlı Loglar</div>
+        <div class="port-tab" onclick="switchPort('admins')">Admin Performans</div>
     </div>
 
     <!-- PORT 1: GENEL BAKIŞ -->
@@ -359,28 +77,27 @@
                 <div class="stat-value" id="totalActions">-</div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">Toplam Ban/Mute</div>
+                <div class="stat-title">Toplam Ban/Filtre</div>
                 <div class="stat-value" id="totalBans">-</div>
             </div>
         </div>
 
         <div class="glass-card">
-            <div class="section-title">📊 Antik Güvenlik & Durum Özeti</div>
-            <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;" id="groupActivityStats">
-                Sistem Medusa kalkanı aktif ve tam güvenlik modunda çalışıyor.
+            <div class="section-title">📊 Antik Medusa Güvenlik Durumu</div>
+            <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+                Medusa kalkanı aktif, flood koruması devrede ve tüm moderasyon komutları yürütülüyor.
             </div>
         </div>
 
-        <!-- KURUCU ÖZEL KARTI & YETKİ YÖNETİMİ -->
         <div id="founderPanel" class="glass-card" style="display: none;">
             <div class="section-title">👑 Kurucu Yetki & Staff Yönetimi</div>
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                <input type="text" id="newStaffInput" placeholder="User ID veya @kullaniciadi" style="flex: 1; background: #07080a; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
-                <input type="text" id="newStaffName" placeholder="Ad / Nick" style="width: 80px; background: #07080a; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
-                <button onclick="addStaff()" style="background: var(--accent-gold); color: black; border: none; padding: 8px 12px; border-radius: 10px; font-weight: 800; font-size: 11px; cursor: pointer;">Ekle</button>
+                <input type="text" id="newStaffInput" placeholder="ID veya @kullanici" style="flex: 1; background: #07080a; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
+                <input type="text" id="newStaffName" placeholder="İsim" style="width: 80px; background: #07080a; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
+                <button onclick="addStaff()" style="background: var(--accent-gold); color: black; border: none; padding: 8px 12px; border-radius: 10px; font-weight: 800; cursor: pointer;">Ekle</button>
             </div>
             <div id="staffListContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                <div class="loading">Staff listesi yükleniyor...</div>
+                <div class="loading">Yükleniyor...</div>
             </div>
         </div>
 
@@ -395,95 +112,24 @@
         </div>
     </div>
 
-    <!-- PORT 2: GENEL LOGLAR -->
+    <!-- PORT 2: ZAMANLI LOGLAR -->
     <div id="port-logs" class="portal-section">
         <div class="glass-card">
-            <div class="section-title">📜 Canlı Grup Moderasyon Akışı & Detaylar</div>
-            <div class="logs-container" id="logsList">
+            <div class="section-title">📜 Tarih & Saat Damgalı Moderasyon Logları</div>
+            <div id="logsList">
                 <div class="loading">Loglar yükleniyor...</div>
             </div>
         </div>
     </div>
 
-    <!-- PORT 3: ADMIN LOGLARI -->
+    <!-- PORT 3: ADMIN PERFORMANS -->
     <div id="port-admins" class="portal-section">
         <div class="glass-card">
-            <div class="section-title">⭐ En Aktif & En Pasif Adminler</div>
-            <div id="adminRankingList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
+            <div class="section-title">⭐ En Aktif Yöneticiler</div>
+            <div id="adminRankingList" style="display: flex; flex-direction: column; gap: 8px;">
                 <div class="loading">Hesaplanıyor...</div>
             </div>
         </div>
-
-        <div class="glass-card">
-            <div class="section-title">🛡️ Admin Detay & Yetki Logları</div>
-            <div id="adminDetailedList" style="display: flex; flex-direction: column; gap: 8px;">
-                <div class="loading">Listeleniyor...</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- PORT 4: STAFF CHAT & FERAH ALAN -->
-    <div id="port-chat" class="portal-section">
-        <div class="chat-container-pro">
-            <div class="chat-top-bar">
-                <div class="chat-title-info">
-                    <div class="chat-avatar">GS</div>
-                    <div>
-                        <div style="font-size: 13px; font-weight: 800; color: var(--accent-gold);">Golden Staff Hub</div>
-                        <div style="font-size: 10px; color: var(--text-muted);" id="chatSubStatus">Yönetim ve İletişim Kanalı</div>
-                    </div>
-                </div>
-                <div class="chat-actions-right">
-                    <button class="header-call-btn" onclick="openVoiceRoomModal()" title="Ses Evi'ni Aç">
-                        <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-                    </button>
-                </div>
-            </div>
-
-            <div class="chat-messages" id="chatMessages">
-                <div class="chat-bubble incoming"><b>Sistem:</b> Antik Medusa & Golden Staff Haberleşme Portalına hoş geldiniz. Anket, sesli mesaj ve ses odası aktiftir.</div>
-            </div>
-
-            <div class="chat-input-bar">
-                <button class="tool-btn" onclick="openPollCreator()" title="Anket Oluştur">
-                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                </button>
-                <button class="tool-btn" id="micBtn" onclick="toggleVoiceRecording()" title="Ses Kaydı">
-                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-                </button>
-                <button class="tool-btn" onclick="sendMediaFile()" title="Medya Ekle">
-                    <svg viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.1.9 2 2 2s2-.9 2-2V5c0-2.21-1.79-4-4-4S6 2.79 6 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
-                </button>
-                
-                <input type="text" id="chatInputText" class="chat-input" placeholder="Mesaj yazın...">
-                
-                <button class="tool-btn" onclick="sendChatMessage()" style="background:var(--accent-gold); color:#07080a;" title="Gönder">
-                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- "SES EVİ" TARZI YUVARLAK KÜRSÜ SLOTLARI (MODAL) -->
-    <div id="voiceModal" class="voice-modal-overlay" onclick="closeVoiceModal(event)">
-        <div class="voice-modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-weight: 800; color: var(--accent-gold); font-size: 15px;">🏛️ Golden Voice Lounge (Ses Evi)</div>
-                <button onclick="document.getElementById('voiceModal').style.display='none'" style="background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer;">✕</button>
-            </div>
-            <div style="font-size: 11px; color: var(--text-muted);">Antik kürsü konseptli canlı ses odası. Kurucu olarak yetkililerin profillerine dokunarak seslerini açıp kapatabilirsiniz.</div>
-            
-            <div class="speakers-grid" id="voiceSpeakersGrid">
-                <div class="loading">Kürsüler yükleniyor...</div>
-            </div>
-
-            <button onclick="toggleVoiceConnection()" id="voiceConnMainBtn" style="width:100%; background:var(--accent-gold); color:#07080a; border:none; padding:12px; border-radius:14px; font-weight:800; font-size:12px; cursor:pointer;">Odaya Katıl / Kürsüye Çık</button>
-        </div>
-    </div>
-
-    <!-- Detay Penceresi (Modal) -->
-    <div id="adminModal" class="voice-modal-overlay" onclick="closeAdminModal(event)">
-        <div class="voice-modal-content" id="modalContent"></div>
     </div>
 
     <script>
@@ -497,10 +143,6 @@
         }
 
         let isFounder = false;
-        let mediaRecorder = null;
-        let audioChunks = [];
-        let isVoiceConnected = false;
-        let staffCache = [];
 
         function switchPort(portName) {
             document.querySelectorAll('.portal-section').forEach(el => el.classList.remove('active'));
@@ -519,7 +161,7 @@
                 const data = await res.json();
                 
                 if (!data.authorized) {
-                    document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#000; color:#ef4444; text-align:center; padding:20px;"><h2>⛔ Yetkisiz Erişim!</h2><p style="color:#9ca3af; font-size:13px; margin-top:8px;">ID: ${user.id}</p></div>`;
+                    document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#000; color:#ef4444; text-align:center; padding:20px;"><h2>⛔ Yetkisiz Erişim!</h2></div>`;
                     return;
                 }
 
@@ -533,16 +175,8 @@
 
                 checkLockStatus();
                 fetchData();
-                fetchChatMessages();
-                setInterval(() => { 
-                    checkLockStatus(); 
-                    fetchData(); 
-                    fetchChatMessages();
-                }, 4000);
-
-            } catch (err) {
-                console.error("Yetki doğrulama hatası:", err);
-            }
+                setInterval(() => { checkLockStatus(); fetchData(); }, 4000);
+            } catch (err) {}
         }
 
         async function loadStaffList() {
@@ -553,95 +187,46 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: user.id })
                 });
-                staffCache = await res.json();
+                const staffs = await res.json();
                 const container = document.getElementById('staffListContainer');
-
-                if (staffCache.length === 0) {
+                if (!staffs || staffs.length === 0) {
                     container.innerHTML = '<div style="font-size:12px; color:var(--text-muted); text-align:center;">Kayıtlı staff yok.</div>';
                     return;
                 }
-
                 container.innerHTML = '';
-                staffCache.forEach(s => {
+                staffs.forEach(s => {
                     const item = document.createElement('div');
                     item.className = 'admin-list-item';
                     item.innerHTML = `
                         <div>
-                            <strong style="font-size:12px;">${s.full_name || 'Staff'}</strong><br>
-                            <span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id}</span>
+                            <strong>${s.full_name}</strong><br>
+                            <span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | Uyarı: ${s.warnings}/3</span>
                         </div>
-                        <div style="display:flex; gap:4px;">
-                            <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:${s.is_muted === 1 ? 'rgba(239,68,68,0.2)' : 'rgba(34,197,94,0.2)'}; color:${s.is_muted === 1 ? 'var(--danger)' : 'var(--success)'}; border:none; cursor:pointer;" onclick="setPermission(${s.user_id}, 'is_muted', ${s.is_muted === 1 ? 0 : 1})">
-                                ${s.is_muted === 1 ? 'Susturuldu 🔇' : 'Konuşabilir ✅'}
-                            </button>
-                            <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:rgba(255,255,255,0.1); color:#fff; border:none; cursor:pointer;" onclick="removeStaff(${s.user_id})">Sil</button>
-                        </div>
+                        <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:rgba(255,255,255,0.1); color:#fff; border:none; cursor:pointer;" onclick="removeStaff(${s.user_id})">Sil</button>
                     `;
                     container.appendChild(item);
                 });
-                renderAdminDetailedList(staffCache);
-            } catch (err) { console.error("Staff listesi yüklenemedi:", err); }
-        }
-
-        async function setPermission(targetId, permType, status) {
-            try {
-                await fetch('/api/staff/permission', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id, target_id: targetId, perm_type: permType, status: status })
-                });
-                loadStaffList();
-                if (isFounder) loadVoiceSpeakers();
-            } catch (err) { alert("Yetki değiştirilemedi"); }
-        }
-
-        function renderAdminDetailedList(staffs) {
-            const container = document.getElementById('adminDetailedList');
-            const rankContainer = document.getElementById('adminRankingList');
-            if (!staffs || staffs.length === 0) return;
-
-            rankContainer.innerHTML = `
-                <div style="font-size:11px; display:flex; justify-content:space-between; padding:8px; background:rgba(34,197,94,0.1); border-radius:10px; border:1px solid rgba(34,197,94,0.2);">
-                    <span>🥇 En Aktif: <b>${staffs[0].full_name}</b></span>
-                    <span style="color:var(--success);">Aktif ⚡</span>
-                </div>
-            `;
-
-            container.innerHTML = '';
-            staffs.forEach(s => {
-                const item = document.createElement('div');
-                item.className = 'admin-list-item';
-                item.innerHTML = `
-                    <div>
-                        <div style="font-weight:700; font-size:12px;">🛡️ ${s.full_name}</div>
-                        <div style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | Durum: ${s.is_muted === 1 ? 'Susturuldu 🔇' : 'Aktif 🎙️'}</div>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
+            } catch (err) {}
         }
 
         async function addStaff() {
-            const staffInput = document.getElementById('newStaffInput').value.trim();
-            const newName = document.getElementById('newStaffName').value.trim() || 'Staff';
-            if (!staffInput) return alert("Değer girin!");
+            const input = document.getElementById('newStaffInput').value.trim();
+            const name = document.getElementById('newStaffName').value.trim() || 'Staff';
+            if (!input) return;
             try {
-                const res = await fetch('/api/staff/add', {
+                await fetch('/api/staff/add', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id, staff_input: staffInput, full_name: newName })
+                    body: JSON.stringify({ user_id: user.id, staff_input: input, full_name: name })
                 });
-                const result = await res.json();
-                if (result.success) {
-                    document.getElementById('newStaffInput').value = '';
-                    document.getElementById('newStaffName').value = '';
-                    loadStaffList();
-                } else alert("Hata: " + result.error);
-            } catch (err) { alert("Sunucu hatası"); }
+                document.getElementById('newStaffInput').value = '';
+                document.getElementById('newStaffName').value = '';
+                loadStaffList();
+            } catch (err) {}
         }
 
         async function removeStaff(targetId) {
-            if (!confirm("Silmek istediğine emin misin?")) return;
+            if (!confirm("Emin misin?")) return;
             try {
                 await fetch('/api/staff/remove', {
                     method: 'POST',
@@ -649,7 +234,7 @@
                     body: JSON.stringify({ user_id: user.id, target_id: targetId })
                 });
                 loadStaffList();
-            } catch (err) { alert("Silinemedi"); }
+            } catch (err) {}
         }
 
         async function checkLockStatus() {
@@ -686,312 +271,50 @@
                 const statsRes = await fetch('/api/stats');
                 const stats = await statsRes.json();
                 document.getElementById('totalActions').innerText = stats.total_actions || 0;
-                const breakdown = stats.action_breakdown || {};
-                document.getElementById('totalBans').innerText = (breakdown['BAN'] || 0) + (breakdown['MUTE'] || 0);
+                const bd = stats.action_breakdown || {};
+                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['FILTER_DELETE'] || 0);
 
                 const logsRes = await fetch('/api/logs');
                 const logs = await logsRes.json();
-                const logsContainer = document.getElementById('logsList');
+                const logsC = document.getElementById('logsList');
                 if (logs.length === 0) {
-                    logsContainer.innerHTML = '<div class="loading">Kayıtlı işlem yok.</div>';
+                    logsC.innerHTML = '<div class="loading">Kayıtlı işlem yok.</div>';
                     return;
                 }
 
-                logsContainer.innerHTML = '';
-                logs.forEach(log => {
+                logsC.innerHTML = '';
+                logs.forEach(l => {
                     const item = document.createElement('div');
                     item.className = 'glass-card';
                     item.style.padding = '10px';
                     item.style.marginBottom = '8px';
                     item.innerHTML = `
                         <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:4px;">
-                            <span style="font-weight:800; color:var(--accent-gold);">${log.action_type}</span>
-                            <span style="color:var(--text-muted); font-size:10px;">⏰ ${log.timestamp}</span>
+                            <span style="font-weight:800; color:var(--accent-gold);">${l.action_type}</span>
+                            <span style="color:var(--text-muted); font-size:10px;">📅 ${l.timestamp}</span>
                         </div>
-                        <div style="font-size:11px; color:var(--text-muted);">Admin: @${escapeHtml(log.username)} | ${escapeHtml(log.details)}</div>
+                        <div style="font-size:11px; color:var(--text-muted);">@${escapeHtml(l.username)} | ${escapeHtml(l.details)}</div>
                     `;
-                    logsContainer.appendChild(item);
+                    logsC.appendChild(item);
                 });
+
+                const adminRes = await fetch('/api/admin-stats');
+                const admins = await adminRes.json();
+                const rankC = document.getElementById('adminRankingList');
+                if (admins.length > 0) {
+                    rankC.innerHTML = '';
+                    admins.forEach(a => {
+                        const row = document.createElement('div');
+                        row.className = 'admin-list-item';
+                        row.innerHTML = `<span>🛡️ @${escapeHtml(a.username)}</span><b style="color:var(--accent-gold);">${a.count} İşlem</b>`;
+                        rankC.appendChild(row);
+                    });
+                }
             } catch (err) {}
         }
 
-        async function fetchChatMessages() {
-            try {
-                const res = await fetch('/api/chat');
-                const messages = await res.json();
-                const chatMessages = document.getElementById('chatMessages');
-                if (!messages || messages.length === 0) return;
-
-                chatMessages.innerHTML = '';
-                messages.forEach(m => {
-                    const isOutgoing = m.user_id === user.id;
-                    const bubble = document.createElement('div');
-                    bubble.className = `chat-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`;
-                    
-                    let contentHtml = '';
-                    if (m.msg_type === 'voice') {
-                        contentHtml = `
-                            <div class="voice-player">
-                                <button class="voice-play-trigger" onclick="const a = new Audio('${m.message}'); a.play();">▶</button>
-                                <div class="voice-waves">
-                                    <div class="w-bar" style="height:35%"></div><div class="w-bar" style="height:85%"></div><div class="w-bar" style="height:50%"></div><div class="w-bar" style="height:100%"></div><div class="w-bar" style="height:65%"></div>
-                                </div>
-                                <span style="font-size:10px; font-weight:700;">Ses Kaydı</span>
-                            </div>
-                        `;
-                    } else if (m.msg_type === 'poll') {
-                        try {
-                            const pollData = JSON.parse(m.message);
-                            let optionsHtml = '';
-                            pollData.options.forEach(opt => {
-                                optionsHtml += `<div class="poll-option-item" onclick="alert('Oylandı: ${opt}')"><span>${opt}</span></div>`;
-                            });
-                            contentHtml = `<div class="poll-box"><div class="poll-question">📊 ${escapeHtml(pollData.question)}</div><div style="display:flex; flex-direction:column; gap:6px;">${optionsHtml}</div></div>`;
-                        } catch(e) {
-                            contentHtml = `<div class="poll-box"><div class="poll-question">📊 ${escapeHtml(m.message)}</div></div>`;
-                        }
-                    } else if (m.msg_type === 'voice_room') {
-                        contentHtml = `
-                            <div class="voice-room-card">
-                                <div class="room-header">
-                                    <div style="display:flex; align-items:center; gap:6px;">
-                                        <div class="room-pulse"></div>
-                                        <span style="font-weight:800; font-size:12px; color:var(--accent-gold);">Golden Voice Lounge (Ses Evi)</span>
-                                    </div>
-                                    <button class="room-join-btn" onclick="openVoiceRoomModal()">Odaya Katıl</button>
-                                </div>
-                                <div style="font-size:11px; color:var(--text-muted);">Canlı ses evi aktif. Katılmak için dokunun.</div>
-                            </div>
-                        `;
-                    } else if (m.msg_type === 'media') {
-                        contentHtml = `<a href="${m.message}" target="_blank" style="color:inherit; text-decoration:underline; font-size:12px; font-weight:700;">📎 Medya / Dosya Bağlantısını Aç</a>`;
-                    } else {
-                        contentHtml = `<b>${escapeHtml(m.full_name)}:</b> ${escapeHtml(m.message)}`;
-                    }
-
-                    bubble.innerHTML = `
-                        ${contentHtml}
-                        <div style="font-size:9px; text-align:right; opacity:0.8; margin-top:3px; font-weight:600;">${m.timestamp}</div>
-                    `;
-                    chatMessages.appendChild(bubble);
-                });
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            } catch (err) {
-                console.error("Chat mesajları alınamadı:", err);
-            }
-        }
-
-        async function sendChatMessage() {
-            const input = document.getElementById('chatInputText');
-            const text = input.value.trim();
-            if (!text) return;
-
-            try {
-                const res = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user_id: user.id,
-                        username: user.username || 'admin',
-                        full_name: user.first_name || 'Admin',
-                        message: text,
-                        msg_type: 'text'
-                    })
-                });
-                const result = await res.json();
-                if (!result.success) {
-                    alert(result.error || "Mesaj gönderilemedi!");
-                    return;
-                }
-                input.value = '';
-                fetchChatMessages();
-            } catch (err) {
-                alert("Sunucu hatası!");
-            }
-        }
-
-        async function toggleVoiceRecording() {
-            const micBtn = document.getElementById('micBtn');
-            if (!mediaRecorder || mediaRecorder.state === "inactive") {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-
-                    mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
-                    mediaRecorder.onstop = async () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        
-                        await fetch('/api/chat', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                user_id: user.id,
-                                username: user.username || 'admin',
-                                full_name: user.first_name || 'Admin',
-                                message: audioUrl,
-                                msg_type: 'voice'
-                            })
-                        });
-                        fetchChatMessages();
-                    };
-
-                    mediaRecorder.start();
-                    micBtn.style.background = 'var(--danger)';
-                    micBtn.style.color = '#fff';
-                } catch (e) {
-                    alert("Mikrofon erişimi reddedildi.");
-                }
-            } else {
-                mediaRecorder.stop();
-                micBtn.style.background = 'rgba(255,255,255,0.04)';
-                micBtn.style.color = 'var(--accent-gold)';
-            }
-        }
-
-        async function openPollCreator() {
-            const question = prompt("Anket sorusunu yazın:");
-            if (!question) return;
-            const optionsInput = prompt("Şıkları virgülle ayırarak yazın (Örn: Kabul, Ret, Çekimser):");
-            if (!optionsInput) return;
-            const options = optionsInput.split(',').map(o => o.trim()).filter(o => o);
-
-            let pollData = { question: question, options: options };
-
-            try {
-                await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user_id: user.id,
-                        username: user.username || 'admin',
-                        full_name: user.first_name || 'Admin',
-                        message: JSON.stringify(pollData),
-                        msg_type: 'poll'
-                    })
-                });
-                fetchChatMessages();
-            } catch (err) {
-                alert("Anket oluşturulamadı.");
-            }
-        }
-
-        async function sendMediaFile() {
-            const url = prompt("Görsel veya dosya bağlantısını (URL) girin:");
-            if (!url) return;
-
-            try {
-                await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        user_id: user.id,
-                        username: user.username || 'admin',
-                        full_name: user.first_name || 'Admin',
-                        message: url,
-                        msg_type: 'media'
-                    })
-                });
-                fetchChatMessages();
-            } catch (err) {
-                alert("Medya gönderilemedi.");
-            }
-        }
-
-        async function openVoiceRoomModal() {
-            document.getElementById('voiceModal').style.display = 'flex';
-            loadVoiceSpeakers();
-            
-            await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: user.id,
-                    username: user.username || 'admin',
-                    full_name: user.first_name || 'Admin',
-                    message: "Ses Evi Konferansı Başlatıldı",
-                    msg_type: 'voice_room'
-                })
-            });
-            fetchChatMessages();
-        }
-
-        async function loadVoiceSpeakers() {
-            const gridEl = document.getElementById('voiceSpeakersGrid');
-            try {
-                const res = await fetch('/api/staff/list', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id })
-                });
-                const staffs = await res.json();
-                if (!staffs || staffs.length === 0) {
-                    gridEl.innerHTML = '<div style="font-size:12px; color:var(--text-muted); text-align:center; grid-column: span 3;">Odada kayıtlı staff yok.</div>';
-                    return;
-                }
-
-                gridEl.innerHTML = '';
-                staffs.forEach(s => {
-                    const initials = (s.full_name || 'Staff').substring(0, 2).toUpperCase();
-                    const slot = document.createElement('div');
-                    slot.className = 'speaker-slot';
-                    
-                    if (isFounder) {
-                        slot.onclick = () => {
-                            const newMute = s.is_muted === 1 ? 0 : 1;
-                            setPermission(s.user_id, 'is_muted', newMute);
-                        };
-                    }
-
-                    slot.innerHTML = `
-                        <div class="speaker-avatar-wrap" style="border-color: ${s.is_muted === 1 ? 'var(--danger)' : 'var(--success)'};">
-                            ${initials}
-                        </div>
-                        <div class="speaker-name">${escapeHtml(s.full_name)}</div>
-                        <div class="speaker-status-badge" style="background:${s.is_muted === 1 ? 'rgba(239,68,68,0.2)' : 'rgba(34,197,94,0.2)'}; color:${s.is_muted === 1 ? 'var(--danger)' : 'var(--success)'};">
-                            ${s.is_muted === 1 ? 'Susturuldu 🔇' : 'Konuşuyor 🎙️'}
-                        </div>
-                    `;
-                    gridEl.appendChild(slot);
-                });
-            } catch(e) {
-                gridEl.innerHTML = '<div style="font-size:12px; color:var(--danger); text-align:center; grid-column: span 3;">Kürsüler yüklenemedi.</div>';
-            }
-        }
-
-        function toggleVoiceConnection() {
-            isVoiceConnected = !isVoiceConnected;
-            const btn = document.getElementById('voiceConnMainBtn');
-            const subStatus = document.getElementById('chatSubStatus');
-            if (isVoiceConnected) {
-                btn.innerText = "Kürsüden İn / Ayrıl 🛑";
-                btn.style.background = "var(--danger)";
-                btn.style.color = "#fff";
-                subStatus.innerText = "Ses Evine Bağlandınız (Kürsüdesiniz)";
-            } else {
-                btn.innerText = "Odaya Katıl / Kürsüye Çık";
-                btn.style.background = "var(--accent-gold)";
-                btn.style.color = "#07080a";
-                subStatus.innerText = "Yönetim ve İletişim Kanalı";
-            }
-        }
-
-        function closeVoiceModal(event) {
-            if (!event || event.target.id === 'voiceModal') {
-                document.getElementById('voiceModal').style.display = 'none';
-            }
-        }
-
-        function closeAdminModal(event) {
-            if (!event || event.target.id === 'adminModal') {
-                document.getElementById('adminModal').style.display = 'none';
-            }
-        }
-
         function escapeHtml(text) {
-            if (!text) return '';
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
         }
 
         verifyAccess();
