@@ -62,7 +62,6 @@
             border: 1px solid var(--border-color);
         }
 
-        /* Acil Durum / Kontrol Kartı */
         .control-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -102,14 +101,8 @@
             font-weight: 700;
             font-size: 11px;
             cursor: pointer;
-            transition: 0.2s;
         }
 
-        .lock-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* İstatistik Kartları */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -140,7 +133,6 @@
             color: var(--text-main);
         }
 
-        /* Bölüm Başlıkları */
         .section-title {
             font-size: 15px;
             font-weight: 600;
@@ -151,7 +143,36 @@
             gap: 8px;
         }
 
-        /* Log Tablosu / Listesi */
+        /* Staff Yönetim Listesi Tasarımı */
+        .staff-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 17, 21, 0.6);
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 13px;
+        }
+
+        .staff-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 11px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-toggle-on { background: rgba(46, 204, 113, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .btn-toggle-off { background: rgba(255, 77, 77, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+        .btn-delete { background: rgba(150, 150, 150, 0.2); color: #aaa; }
+
         .logs-container {
             display: flex;
             flex-direction: column;
@@ -167,11 +188,6 @@
             display: flex;
             flex-direction: column;
             gap: 6px;
-            transition: transform 0.1s ease;
-        }
-
-        .log-item:active {
-            transform: scale(0.98);
         }
 
         .log-header {
@@ -193,27 +209,10 @@
         .type-warn { background: rgba(230, 126, 34, 0.2); color: #e67e22; }
         .type-default { background: rgba(46, 204, 113, 0.2); color: var(--success); }
 
-        .log-time {
-            color: var(--text-muted);
-        }
-
-        .log-details {
-            font-size: 13px;
-            color: var(--text-main);
-            word-break: break-word;
-        }
-
-        .log-user {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        .loading {
-            text-align: center;
-            color: var(--text-muted);
-            padding: 20px;
-            font-size: 13px;
-        }
+        .log-time { color: var(--text-muted); }
+        .log-details { font-size: 13px; color: var(--text-main); word-break: break-word; }
+        .log-user { font-size: 11px; color: var(--text-muted); }
+        .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -226,14 +225,29 @@
         <div class="admin-badge" id="userRole">Yönetici 🛡️</div>
     </div>
 
+    <!-- KURUCU ÖZEL: STAFF YÖNETİM PANELİ (Sadece Kurucu Görür) -->
+    <div id="founderPanel" style="display: none;">
+        <div class="section-title">👑 Kurucu Staff & Ban Yetki Yönetimi</div>
+        <div class="control-card">
+            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <input type="number" id="newStaffId" placeholder="Telegram User ID" style="flex: 1; background: #151922; border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
+                <input type="text" id="newStaffName" placeholder="Ad / Nick" style="width: 100px; background: #151922; border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
+                <button onclick="addStaff()" style="background: var(--accent-gold); color: black; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer;">Ekle</button>
+            </div>
+            <div id="staffListContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="loading">Staff listesi yükleniyor...</div>
+            </div>
+        </div>
+    </div>
+
     <!-- ACİL DURUM / BAN YETKİ KONTROL KARTI -->
     <div class="control-card">
         <div class="control-row">
             <div>
-                <div class="control-title">Bot Ban Yetkileri</div>
+                <div class="control-title">Genel Bot Ban Şalteri</div>
                 <div id="lockStatusText" class="control-status">Normal (Aktif ✅)</div>
             </div>
-            <button id="lockdownBtn" class="lock-btn" onclick="toggleLockdown()">Kilidi Aç / Kapat 🔒</button>
+            <button id="lockdownBtn" class="lock-btn" onclick="toggleLockdown()">Acil Durum Kilidi 🔒</button>
         </div>
     </div>
 
@@ -257,24 +271,162 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Mini App'i tam ekran yap
+        tg.expand();
 
-        // --- YETKİ KONTROLÜ (Üyelerin Panele Girmesini Engeller) ---
         const user = tg.initDataUnsafe?.user;
         
         if (!user) {
+            showAccessDenied("Telegram oturumu bulunamadı.");
+            throw new Error("Oturum yok.");
+        }
+
+        let isFounder = false;
+
+        async function verifyAccess() {
+            try {
+                const res = await fetch('/api/verify-admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id })
+                });
+                
+                const data = await res.json();
+                
+                if (!data.authorized) {
+                    showAccessDenied("Bu panele yalnızca Golden Staff üyeleri erişebilir.");
+                    return;
+                }
+
+                isFounder = data.is_founder;
+                document.getElementById('userRole').innerText = user.first_name + (isFounder ? " 👑" : " 🛡️");
+
+                if (isFounder) {
+                    document.getElementById('founderPanel').style.display = 'block';
+                    loadStaffList();
+                }
+
+                checkLockStatus();
+                fetchData();
+                setInterval(() => {
+                    checkLockStatus();
+                    fetchData();
+                }, 5000);
+
+            } catch (err) {
+                console.error("Yetki doğrulama hatası:", err);
+                showAccessDenied("Sunucu yetki doğrulaması yapılamadı.");
+            }
+        }
+
+        function showAccessDenied(message) {
             document.body.innerHTML = `
                 <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#0f1115; color:#ff4d4d; text-align:center; padding:20px; font-family:sans-serif;">
                     <h2 style="margin-bottom: 10px;">⛔ Yetkisiz Erişim!</h2>
-                    <p style="color:#9aa0a6; font-size:14px;">Bu panele yalnızca Golden Staff Yöneticileri (YT) ve Kurucu erişebilir.</p>
+                    <p style="color:#9aa0a6; font-size:14px;">${message}</p>
                 </div>
             `;
-            throw new Error("Yetkisiz kullanıcı engellendi.");
         }
 
-        document.getElementById('userRole').innerText = user.first_name + " 🛡️";
+        async function loadStaffList() {
+            if (!isFounder) return;
+            try {
+                const res = await fetch('/api/staff/list', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id })
+                });
+                const staffList = await res.json();
+                const container = document.getElementById('staffListContainer');
 
-        // --- ACİL DURUM KİLİDİ DURUMUNU YÖNETME ---
+                if (staffList.length === 0) {
+                    container.innerHTML = '<div style="font-size:12px; color:var(--text-muted); text-align:center;">Kayıtlı staff bulunmuyor.</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                staffList.forEach(s => {
+                    const item = document.createElement('div');
+                    item.className = 'staff-item';
+                    item.innerHTML = `
+                        <div>
+                            <strong>${s.full_name || 'Staff'}</strong><br>
+                            <span style="font-size:11px; color:var(--text-muted);">ID: ${s.user_id}</span>
+                        </div>
+                        <div class="staff-actions">
+                            <button class="btn-sm ${s.can_ban === 1 ? 'btn-toggle-on' : 'btn-toggle-off'}" onclick="toggleStaffBan(${s.user_id}, ${s.can_ban})">
+                                ${s.can_ban === 1 ? 'Ban: Açık ✅' : 'Ban: Kapalı ❌'}
+                            </button>
+                            <button class="btn-sm btn-delete" onclick="removeStaff(${s.user_id})">Sil</button>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (err) {
+                console.error("Staff listesi yüklenemedi:", err);
+            }
+        }
+
+        async function addStaff() {
+            const newId = document.getElementById('newStaffId').value;
+            const newName = document.getElementById('newStaffName').value || 'Staff';
+            if (!newId) {
+                alert("Lütfen Telegram User ID girin!");
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/staff/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, new_staff_id: parseInt(newId), full_name: newName })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    document.getElementById('newStaffId').value = '';
+                    document.getElementById('newStaffName').value = '';
+                    loadStaffList();
+                } else {
+                    alert("Ekleme başarısız!");
+                }
+            } catch (err) {
+                alert("Sunucu hatası!");
+            }
+        }
+
+        async function toggleStaffBan(targetId, currentStatus) {
+            const newStatus = currentStatus === 1 ? 0 : 1;
+            try {
+                const res = await fetch('/api/staff/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, target_id: targetId, status: newStatus })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    loadStaffList();
+                }
+            } catch (err) {
+                alert("Yetki değiştirilemedi!");
+            }
+        }
+
+        async function removeStaff(targetId) {
+            if (!confirm("Bu staff'ı listeden silmek istediğine emin misin?")) return;
+            try {
+                const res = await fetch('/api/staff/remove', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, target_id: targetId })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    loadStaffList();
+                }
+            } catch (err) {
+                alert("Silme başarısız!");
+            }
+        }
+
         async function checkLockStatus() {
             try {
                 const res = await fetch('/api/lock-status');
@@ -286,16 +438,10 @@
                     statusEl.innerText = "KİLİTLİ (Banlar Durduruldu 🛑)";
                     statusEl.style.color = "var(--danger)";
                     btnEl.innerText = "Kilidi Kaldır ✅";
-                    btnEl.style.background = "rgba(46, 204, 113, 0.2)";
-                    btnEl.style.color = "var(--success)";
-                    btnEl.style.borderColor = "var(--success)";
                 } else {
                     statusEl.innerText = "Normal (Aktif ✅)";
                     statusEl.style.color = "var(--success)";
                     btnEl.innerText = "Acil Durum Kilidi 🔒";
-                    btnEl.style.background = "rgba(255, 77, 77, 0.2)";
-                    btnEl.style.color = "var(--danger)";
-                    btnEl.style.borderColor = "var(--danger)";
                 }
             } catch (err) {
                 console.error("Kilit durumu alınamadı:", err);
@@ -303,44 +449,37 @@
         }
 
         async function toggleLockdown() {
-            if (!user) return;
-            
             try {
                 const res = await fetch('/api/toggle-lockdown', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: user.id })
                 });
-                
                 const result = await res.json();
                 if (result.success) {
                     checkLockStatus();
                 } else {
-                    alert("İşlem başarısız: " + (result.error || "Yetkiniz yok!"));
+                    alert("Yetkiniz yok!");
                 }
             } catch (err) {
-                console.error("Kilit değiştirme hatası:", err);
                 alert("Sunucuyla iletişim kurulamadı!");
             }
         }
 
         async function fetchData() {
             try {
-                // İstatistikleri Çek
                 const statsRes = await fetch('/api/stats');
                 const stats = await statsRes.json();
-                
                 document.getElementById('totalActions').innerText = stats.total_actions || 0;
                 
                 const breakdown = stats.action_breakdown || {};
                 const banCount = (breakdown['BAN'] || 0) + (breakdown['SECURITY_BAN'] || 0) + (breakdown['WARN_BAN'] || 0);
                 document.getElementById('totalBans').innerText = banCount;
 
-                // Logları Çek
                 const logsRes = await fetch('/api/logs');
                 const logs = await logsRes.json();
-
                 const logsContainer = document.getElementById('logsList');
+
                 if (logs.length === 0) {
                     logsContainer.innerHTML = '<div class="loading">Henüz kaydedilmiş bir hareket yok.</div>';
                     return;
@@ -368,7 +507,6 @@
 
             } catch (err) {
                 console.error("Veri çekme hatası:", err);
-                document.getElementById('logsList').innerHTML = '<div class="loading" style="color:var(--danger);">Veriler yüklenirken hata oluştu!</div>';
             }
         }
 
@@ -377,13 +515,7 @@
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        // Sayfa açıldığında verileri ve kilit durumunu çek, her 5 saniyede bir güncelle
-        checkLockStatus();
-        fetchData();
-        setInterval(() => {
-            checkLockStatus();
-            fetchData();
-        }, 5000);
+        verifyAccess();
     </script>
 </body>
 </html>
