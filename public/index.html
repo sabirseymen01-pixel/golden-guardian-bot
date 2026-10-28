@@ -62,6 +62,53 @@
             border: 1px solid var(--border-color);
         }
 
+        /* Acil Durum / Kontrol Kartı */
+        .control-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .control-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .control-status {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .lock-btn {
+            background: rgba(255, 77, 77, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .lock-btn:active {
+            transform: scale(0.95);
+        }
+
         /* İstatistik Kartları */
         .stats-grid {
             display: grid;
@@ -179,6 +226,17 @@
         <div class="admin-badge" id="userRole">Yönetici 🛡️</div>
     </div>
 
+    <!-- ACİL DURUM / BAN YETKİ KONTROL KARTI -->
+    <div class="control-card">
+        <div class="control-row">
+            <div>
+                <div class="control-title">Bot Ban Yetkileri</div>
+                <div id="lockStatusText" class="control-status">Normal (Aktif ✅)</div>
+            </div>
+            <button id="lockdownBtn" class="lock-btn" onclick="toggleLockdown()">Kilidi Aç / Kapat 🔒</button>
+        </div>
+    </div>
+
     <!-- İstatistikler -->
     <div class="stats-grid">
         <div class="stat-card">
@@ -204,7 +262,6 @@
         // --- YETKİ KONTROLÜ (Üyelerin Panele Girmesini Engeller) ---
         const user = tg.initDataUnsafe?.user;
         
-        // Eğer kullanıcı bilgisi alınamazsa veya tarayıcıdan direkt açılmaya çalışılırsa
         if (!user) {
             document.body.innerHTML = `
                 <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#0f1115; color:#ff4d4d; text-align:center; padding:20px; font-family:sans-serif;">
@@ -215,8 +272,57 @@
             throw new Error("Yetkisiz kullanıcı engellendi.");
         }
 
-        // Kullanıcı adını arayüze yaz
         document.getElementById('userRole').innerText = user.first_name + " 🛡️";
+
+        // --- ACİL DURUM KİLİDİ DURUMUNU YÖNETME ---
+        async function checkLockStatus() {
+            try {
+                const res = await fetch('/api/lock-status');
+                const data = await res.json();
+                const statusEl = document.getElementById('lockStatusText');
+                const btnEl = document.getElementById('lockdownBtn');
+
+                if (data.lockdown) {
+                    statusEl.innerText = "KİLİTLİ (Banlar Durduruldu 🛑)";
+                    statusEl.style.color = "var(--danger)";
+                    btnEl.innerText = "Kilidi Kaldır ✅";
+                    btnEl.style.background = "rgba(46, 204, 113, 0.2)";
+                    btnEl.style.color = "var(--success)";
+                    btnEl.style.borderColor = "var(--success)";
+                } else {
+                    statusEl.innerText = "Normal (Aktif ✅)";
+                    statusEl.style.color = "var(--success)";
+                    btnEl.innerText = "Acil Durum Kilidi 🔒";
+                    btnEl.style.background = "rgba(255, 77, 77, 0.2)";
+                    btnEl.style.color = "var(--danger)";
+                    btnEl.style.borderColor = "var(--danger)";
+                }
+            } catch (err) {
+                console.error("Kilit durumu alınamadı:", err);
+            }
+        }
+
+        async function toggleLockdown() {
+            if (!user) return;
+            
+            try {
+                const res = await fetch('/api/toggle-lockdown', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id })
+                });
+                
+                const result = await res.json();
+                if (result.success) {
+                    checkLockStatus();
+                } else {
+                    alert("İşlem başarısız: " + (result.error || "Yetkiniz yok!"));
+                }
+            } catch (err) {
+                console.error("Kilit değiştirme hatası:", err);
+                alert("Sunucuyla iletişim kurulamadı!");
+            }
+        }
 
         async function fetchData() {
             try {
@@ -271,9 +377,13 @@
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
-        // Sayfa açıldığında verileri çek ve her 5 saniyede bir canlı güncelle
+        // Sayfa açıldığında verileri ve kilit durumunu çek, her 5 saniyede bir güncelle
+        checkLockStatus();
         fetchData();
-        setInterval(fetchData, 5000);
+        setInterval(() => {
+            checkLockStatus();
+            fetchData();
+        }, 5000);
     </script>
 </body>
 </html>
