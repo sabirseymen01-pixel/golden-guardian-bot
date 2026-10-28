@@ -52,6 +52,19 @@ def init_db():
             added_by INTEGER
         )
     ''')
+
+    # Golden Chat / Haberleşme Portu Tablosu
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS chat_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            username TEXT,
+            full_name TEXT,
+            message TEXT,
+            msg_type TEXT DEFAULT 'text',
+            timestamp TEXT
+        )
+    ''')
     
     conn.commit()
     conn.close()
@@ -251,3 +264,60 @@ def get_bot_statistics():
         "total_actions": total_actions,
         "action_breakdown": action_breakdown
     }
+
+def get_admin_performance_stats():
+    """Adminlerin her işlem türüne göre (BAN, MUTE, WARN vb.) istatistiklerini hesaplar."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        SELECT user_id, username, action_type, COUNT(*) 
+        FROM logs 
+        GROUP BY user_id, action_type
+    ''')
+    rows = cursor.fetchall()
+    conn.close()
+    
+    stats = {}
+    for r in rows:
+        uid, uname, action, count = r[0], r[1], r[2], r[3]
+        if uid not in stats:
+            stats[uid] = {"username": uname, "actions": {}}
+        stats[uid]["actions"][action] = count
+        
+    return stats
+
+# --- GOLDEN CHAT (HABERLEŞME PORTU) FONKSİYONLARI ---
+
+def save_chat_message(user_id: int, username: str, full_name: str, message: str, msg_type: str = "text"):
+    conn = get_connection()
+    cursor = conn.cursor()
+    timestamp = datetime.datetime.now().strftime("%H:%M")
+    cursor.execute('''
+        INSERT INTO chat_messages (user_id, username, full_name, message, msg_type, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (user_id, username, full_name, message, msg_type, timestamp))
+    conn.commit()
+    conn.close()
+
+def get_chat_messages(limit: int = 50):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT user_id, username, full_name, message, msg_type, timestamp 
+        FROM chat_messages ORDER BY id DESC LIMIT ?
+    ''', (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    
+    messages = []
+    for r in reversed(rows):
+        messages.append({
+            "user_id": r[0],
+            "username": r[1],
+            "full_name": r[2],
+            "message": r[3],
+            "msg_type": r[4],
+            "timestamp": r[5]
+        })
+    return messages
