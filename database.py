@@ -140,7 +140,7 @@ def is_authorized_staff(user_id: int) -> bool:
     """Kullanıcının veritabanında kayıtlı aktif bir staff olup olmadığını kontrol eder."""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT can_ban FROM staff_members WHERE user_id = ?', (user_id,))
+    cursor.execute('SELECT can_ban FROM staff_members WHERE user_id = ?', (int(user_id),))
     row = cursor.fetchone()
     conn.close()
     return row is not None
@@ -149,7 +149,7 @@ def get_staff_ban_permission(user_id: int) -> bool:
     """Staff'ın ban yetkisinin (can_ban) açık olup olmadığını kontrol eder."""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT can_ban FROM staff_members WHERE user_id = ?', (user_id,))
+    cursor.execute('SELECT can_ban FROM staff_members WHERE user_id = ?', (int(user_id),))
     row = cursor.fetchone()
     conn.close()
     if row and row[0] == 1:
@@ -160,7 +160,7 @@ def set_staff_ban_permission(user_id: int, status: int):
     """Belirli bir staff'ın ban yetkisini açar (1) veya kapatır (0)."""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('UPDATE staff_members SET can_ban = ? WHERE user_id = ?', (status, user_id))
+    cursor.execute('UPDATE staff_members SET can_ban = ? WHERE user_id = ?', (status, int(user_id)))
     conn.commit()
     conn.close()
 
@@ -172,7 +172,7 @@ def add_staff_member(user_id: int, username: str, full_name: str, added_by: int)
     cursor.execute('''
         INSERT OR REPLACE INTO staff_members (user_id, username, full_name, can_ban, added_by)
         VALUES (?, ?, ?, 1, ?)
-    ''', (user_id, clean_username, full_name, added_by))
+    ''', (int(user_id), clean_username, full_name, added_by))
     conn.commit()
     conn.close()
 
