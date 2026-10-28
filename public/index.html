@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Staff | iOS Pro Yönetim</title>
+    <title>Golden Staff | Pro Yönetim Paneli</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #000000;
-            --surface-glass: rgba(28, 28, 30, 0.75);
-            --surface-glass-bright: rgba(44, 44, 46, 0.85);
-            --border-glass: rgba(255, 255, 255, 0.1);
+            --bg-color: #0b0c10;
+            --surface-glass: rgba(18, 20, 26, 0.85);
+            --surface-glass-bright: rgba(28, 32, 40, 0.95);
+            --border-glass: rgba(212, 175, 55, 0.2);
             --accent-gold: #d4af37;
-            --accent-gold-glow: rgba(212, 175, 55, 0.3);
-            --text-main: #f5f5f7;
-            --text-muted: #86868b;
-            --danger: #ff453a;
-            --success: #32d74b;
+            --accent-gold-glow: rgba(212, 175, 55, 0.35);
+            --text-main: #f0f2f5;
+            --text-muted: #9aa0a6;
+            --danger: #ff4d4d;
+            --success: #2ecc71;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -35,7 +35,7 @@
             overflow-x: hidden;
         }
 
-        /* Apple Tarzı Header */
+        /* Header Tasarımı */
         .header {
             display: flex;
             align-items: center;
@@ -46,10 +46,10 @@
         }
 
         .logo-area h1 {
-            font-size: 20px;
+            font-size: 21px;
             color: var(--accent-gold);
             font-weight: 700;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.3px;
         }
 
         .logo-area p {
@@ -64,42 +64,43 @@
             border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
-            border: 1px solid var(--accent-gold-glow);
-            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            box-shadow: 0 0 15px var(--accent-gold-glow);
         }
 
         /* Kaydırmalı Port Navigasyonu (Segmented Control) */
         .port-nav {
             display: flex;
-            background: rgba(118, 118, 128, 0.24);
-            padding: 3px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(25px);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            border-radius: 14px;
+            margin-bottom: 18px;
+            border: 1px solid var(--border-glass);
         }
 
         .port-tab {
             flex: 1;
             text-align: center;
-            padding: 8px 4px;
+            padding: 9px 4px;
             font-size: 11px;
             font-weight: 600;
             color: var(--text-muted);
-            border-radius: 9px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: all 0.25s ease;
         }
 
         .port-tab.active {
-            background: rgba(255, 255, 255, 0.12);
-            color: var(--text-main);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            background: var(--accent-gold);
+            color: #000;
+            font-weight: 700;
+            box-shadow: 0 4px 15px var(--accent-gold-glow);
         }
 
         /* Port Alanları */
         .portal-section {
             display: none;
-            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: fadeIn 0.3s ease;
         }
 
         .portal-section.active {
@@ -107,7 +108,7 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
+            from { opacity: 0; transform: translateY(4px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -115,12 +116,10 @@
         .glass-card {
             background: var(--surface-glass);
             border: 1px solid var(--border-glass);
-            border-radius: 20px;
-            padding: 18px;
-            margin-bottom: 16px;
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
         }
 
         .section-title {
@@ -131,7 +130,6 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            letter-spacing: -0.2px;
         }
 
         /* İstatistik Izgarası */
@@ -139,7 +137,7 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .stat-card {
@@ -147,7 +145,6 @@
             border: 1px solid var(--border-glass);
             border-radius: 16px;
             padding: 14px;
-            backdrop-filter: blur(20px);
         }
 
         .stat-title {
@@ -155,7 +152,6 @@
             color: var(--text-muted);
             margin-bottom: 4px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .stat-value {
@@ -164,7 +160,7 @@
             color: var(--text-main);
         }
 
-        /* Admin Liste Öğeleri & Dokunmatik Yüzey Efekti */
+        /* Admin Liste Öğeleri */
         .admin-list-item {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border-glass);
@@ -175,51 +171,40 @@
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            transition: transform 0.2s ease, background 0.2s ease;
         }
 
         .admin-list-item:active {
-            transform: scale(0.97);
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(212, 175, 55, 0.1);
         }
 
-        /* Apple Popover / Mat Başlayıp Büyüyen Balon */
+        /* Modal / Detay Penceresi */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(12px);
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 999;
         }
 
-        .apple-popover {
+        .popover-box {
             width: 85%;
             max-width: 340px;
             background: var(--surface-glass-bright);
-            border: 1px solid var(--accent-gold-glow);
-            border-radius: 24px;
+            border: 1px solid var(--accent-gold);
+            border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-            transform: scale(0.7);
-            opacity: 0.4;
-            animation: applePopoverReveal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        @keyframes applePopoverReveal {
-            0% { transform: scale(0.7); opacity: 0.4; }
-            50% { opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
+            box-shadow: 0 15px 35px rgba(0,0,0,0.9);
         }
 
         /* Log Portu Öğeleri */
         .log-item {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border-glass);
-            border-radius: 14px;
-            padding: 12px;
+            border-radius: 12px;
+            padding: 10px 12px;
             margin-bottom: 8px;
             display: flex;
             flex-direction: column;
@@ -239,58 +224,121 @@
             border-radius: 4px;
             font-size: 9px;
         }
-        .badge-ban { background: rgba(255, 69, 58, 0.2); color: var(--danger); }
+        .badge-ban { background: rgba(255, 77, 77, 0.2); color: var(--danger); }
         .badge-mute { background: rgba(212, 175, 55, 0.2); color: var(--accent-gold); }
-        .badge-default { background: rgba(50, 215, 75, 0.2); color: var(--success); }
+        .badge-default { background: rgba(46, 204, 113, 0.2); color: var(--success); }
 
-        /* Golden Chat Portu */
+        /* Genişletilmiş Profesyonel Golden Chat (WhatsApp / Telegram Hibrit) */
         .chat-container {
             display: flex;
             flex-direction: column;
-            height: 380px;
-            background: rgba(15, 15, 18, 0.6);
-            border-radius: 16px;
+            height: 480px; /* Daha geniş ve pro görünüm */
+            background: rgba(11, 12, 16, 0.95);
+            border-radius: 18px;
             border: 1px solid var(--border-glass);
             overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
         }
 
         .chat-messages {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .chat-bubble {
-            max-width: 75%;
-            padding: 10px 14px;
+            max-width: 80%;
+            padding: 12px 14px;
             border-radius: 16px;
-            font-size: 12px;
+            font-size: 13px;
             line-height: 1.4;
+            position: relative;
         }
 
         .chat-bubble.incoming {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.07);
             align-self: flex-start;
             border-bottom-left-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .chat-bubble.outgoing {
             background: var(--accent-gold);
-            color: #000;
+            color: #0b0c10;
             align-self: flex-end;
             border-bottom-right-radius: 4px;
             font-weight: 500;
         }
 
+        /* WhatsApp tarzı sesli mesaj çubuğu */
+        .voice-note-player {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0,0,0,0.2);
+            padding: 8px 12px;
+            border-radius: 12px;
+            min-width: 200px;
+        }
+
+        .voice-play-btn {
+            background: var(--accent-gold);
+            color: #0b0c10;
+            border: none;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .voice-waveform {
+            flex: 1;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .waveform-bar {
+            flex: 1;
+            background: var(--accent-gold);
+            border-radius: 2px;
+            opacity: 0.7;
+        }
+
+        /* Telegram Tarzı Anket Kartı */
+        .poll-card {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 220px;
+        }
+
+        .poll-option {
+            background: rgba(255,255,255,0.05);
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.2s;
+        }
+        .poll-option:hover { background: rgba(212,175,55,0.2); }
+
         .chat-input-bar {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 10px;
-            background: rgba(28, 28, 30, 0.9);
+            padding: 12px;
+            background: var(--surface-glass-bright);
             border-top: 1px solid var(--border-glass);
         }
 
@@ -298,10 +346,10 @@
             flex: 1;
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid var(--border-glass);
-            padding: 8px 12px;
+            padding: 10px 14px;
             border-radius: 20px;
             color: white;
-            font-size: 12px;
+            font-size: 13px;
             outline: none;
         }
 
@@ -309,9 +357,9 @@
             background: none;
             border: none;
             color: var(--accent-gold);
-            font-size: 16px;
+            font-size: 18px;
             cursor: pointer;
-            padding: 4px;
+            padding: 6px;
         }
 
         .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px; }
@@ -322,12 +370,12 @@
     <div class="header">
         <div class="logo-area">
             <h1>Golden Staff</h1>
-            <p>iOS Pro v3.0 | Güvenli & Akıcı</p>
+            <p>Pro iOS v3.2 | Güvenli & Pro</p>
         </div>
         <div class="admin-badge" id="userRole">Yönetici 🛡️</div>
     </div>
 
-    <!-- Kaydırmalı Port Navigasyonu (Segmented Control) -->
+    <!-- Kaydırmalı Port Navigasyonu -->
     <div class="port-nav">
         <div class="port-tab active" onclick="switchPort('overview')">Genel Bakış</div>
         <div class="port-tab" onclick="switchPort('logs')">Genel Loglar</div>
@@ -335,7 +383,7 @@
         <div class="port-tab" onclick="switchPort('chat')">Golden Chat 💬</div>
     </div>
 
-    <!-- PORT 1: GENEL BAKIŞ & GRUP AKTİFLİK İSTATİSTİĞİ -->
+    <!-- PORT 1: GENEL BAKIŞ & AKTİFLİK -->
     <div id="port-overview" class="portal-section active">
         <div class="stats-grid">
             <div class="stat-card">
@@ -349,18 +397,18 @@
         </div>
 
         <div class="glass-card">
-            <div class="section-title">📊 Grup Genel Aktiflik İstatistiği</div>
+            <div class="section-title">📊 Grup Aktiflik & Durum Özeti</div>
             <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;" id="groupActivityStats">
-                Grup mesaj akışı ve moderasyon yoğunluğu kararlı seviyede. Son 24 saat içinde spam koruması aktif.
+                Grup mesaj akışı stabil, anti-flood koruması devrede ve tüm yöneticiler aktif olarak izleniyor.
             </div>
         </div>
 
-        <!-- KURUCU ÖZEL: STAFF YÖNETİM & ŞALTER PANELİ -->
+        <!-- KURUCU ÖZEL KARTI -->
         <div id="founderPanel" class="glass-card" style="display: none;">
             <div class="section-title">👑 Kurucu Staff & Ban Yetki Yönetimi</div>
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                <input type="text" id="newStaffInput" placeholder="User ID veya @kullaniciadi" style="flex: 1; background: #151922; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
-                <input type="text" id="newStaffName" placeholder="Ad / Nick" style="width: 90px; background: #151922; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
+                <input type="text" id="newStaffInput" placeholder="User ID veya @kullaniciadi" style="flex: 1; background: #0b0c10; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
+                <input type="text" id="newStaffName" placeholder="Ad / Nick" style="width: 90px; background: #0b0c10; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
                 <button onclick="addStaff()" style="background: var(--accent-gold); color: black; border: none; padding: 8px 12px; border-radius: 10px; font-weight: 700; font-size: 11px; cursor: pointer;">Ekle</button>
             </div>
             <div id="staffListContainer" style="display: flex; flex-direction: column; gap: 8px;">
@@ -375,80 +423,75 @@
                     <div class="stat-title">Genel Bot Ban Şalteri</div>
                     <div id="lockStatusText" style="font-size: 14px; font-weight: 700; color: var(--success);">Normal (Aktif ✅)</div>
                 </div>
-                <button id="lockdownBtn" onclick="toggleLockdown()" style="background: rgba(255,69,58,0.2); color: var(--danger); border: 1px solid var(--danger); padding: 8px 14px; border-radius: 12px; font-weight: 700; font-size: 11px; cursor: pointer;">Acil Durum Kilidi 🔒</button>
+                <button id="lockdownBtn" onclick="toggleLockdown()" style="background: rgba(255,77,77,0.2); color: var(--danger); border: 1px solid var(--danger); padding: 8px 14px; border-radius: 12px; font-weight: 700; font-size: 11px; cursor: pointer;">Acil Durum Kilidi 🔒</button>
             </div>
         </div>
     </div>
 
-    <!-- PORT 2: GENEL LOGLAR (Banlar, Muteler, Her Şey) -->
+    <!-- PORT 2: GENEL LOGLAR (Saat ve Dakika Dahil) -->
     <div id="port-logs" class="portal-section">
         <div class="glass-card">
-            <div class="section-title">📜 Canlı Grup Moderasyon Akışı</div>
+            <div class="section-title">📜 Canlı Grup Moderasyon Akışı (Saatli)</div>
             <div class="logs-container" id="logsList">
                 <div class="loading">Loglar yükleniyor...</div>
             </div>
         </div>
     </div>
 
-    <!-- PORT 3: ADMIN LOGLARI & AKTİVİTE İSTATİSTİKLERİ -->
+    <!-- PORT 3: ADMIN LOGLARI & AKTİVİTE -->
     <div id="port-admins" class="portal-section">
         <div class="glass-card">
             <div class="section-title">⭐ En Aktif & En Pasif Adminler</div>
-            <div id="adminRankingList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+            <div id="adminRankingList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
                 <div class="loading">Admin istatistikleri hesaplanıyor...</div>
             </div>
         </div>
 
         <div class="glass-card">
-            <div class="section-title">🛡️ Admin Detay Portu (Dokunmatik Yüzey)</div>
-            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Bir adminin üstüne dokunarak Apple stili detay balonunu açabilirsiniz.</div>
+            <div class="section-title">🛡️ Admin Detay & Yetki Listesi</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Bir adminin üstüne dokunarak detaylı istatistik penceresini açabilirsiniz.</div>
             <div id="adminDetailedList" style="display: flex; flex-direction: column; gap: 8px;">
                 <div class="loading">Adminler listeleniyor...</div>
             </div>
         </div>
     </div>
 
-    <!-- PORT 4: GOLDEN CHAT (Haberleşme Portu) -->
+    <!-- PORT 4: GOLDEN CHAT (Genişletilmiş WhatsApp/Telegram Hibrit Portu) -->
     <div id="port-chat" class="portal-section">
         <div class="chat-container">
             <div class="chat-messages" id="chatMessages">
-                <div class="chat-bubble incoming"><b>Sistem:</b> Golden Staff Özel Haberleşme Portuna hoş geldiniz. Kurucu ve yetkililer buradan anket, medya ve anlık mesajlaşma yapabilir.</div>
+                <div class="chat-bubble incoming"><b>Sistem:</b> Golden Staff Özel İletişim Portuna hoş geldiniz. Buradan sesli mesaj, anket ve medya paylaşabilirsiniz.</div>
             </div>
             <div class="chat-input-bar">
-                <button class="chat-tool-btn" onclick="sendChatMedia('poll')">📊</button>
-                <button class="chat-tool-btn" onclick="sendChatMedia('voice')">🎙️</button>
-                <button class="chat-tool-btn" onclick="sendChatMedia('file')">📎</button>
-                <input type="text" id="chatInputText" class="chat-input" placeholder="Mesaj veya komut yazın...">
+                <button class="chat-tool-btn" onclick="openPollCreator()" title="Anket Oluştur">📊</button>
+                <button class="chat-tool-btn" onclick="sendVoiceMessage()" title="Sesli Mesaj Gönder">🎙️</button>
+                <button class="chat-tool-btn" onclick="sendMediaFile()" title="Medya/Dosya Ekle">📎</button>
+                <input type="text" id="chatInputText" class="chat-input" placeholder="Mesaj yazın...">
                 <button class="chat-tool-btn" onclick="sendChatMessage()" style="font-weight: bold;">➤</button>
             </div>
         </div>
     </div>
 
-    <!-- Apple Tarzı Dokunmatik Detay Balon (Modal) -->
+    <!-- Detay Penceresi (Modal) -->
     <div id="adminModal" class="modal-overlay" onclick="closeAdminModal(event)">
-        <div class="apple-popover" id="modalContent">
-            <!-- Dinamik doldurulacak -->
-        </div>
+        <div class="popover-box" id="modalContent"></div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-
         const user = tg.initDataUnsafe?.user;
         
         if (!user) {
-            document.body.innerHTML = `<div style="color:var(--danger); text-align:center; padding:40px;">Telegram oturumu bulunamadı. Lütfen bot üzerinden açın.</div>`;
+            document.body.innerHTML = `<div style="color:var(--danger); text-align:center; padding:40px;">Telegram oturumu bulunamadı.</div>`;
             throw new Error("Oturum yok.");
         }
 
         let isFounder = false;
 
-        // Port (Sekme) Değiştirme
         function switchPort(portName) {
             document.querySelectorAll('.portal-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.port-tab').forEach(el => el.classList.remove('active'));
-            
             document.getElementById('port-' + portName).classList.add('active');
             event.currentTarget.classList.add('active');
         }
@@ -460,17 +503,10 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: user.id })
                 });
-                
                 const data = await res.json();
                 
                 if (!data.authorized) {
-                    document.body.innerHTML = `
-                        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#000; color:#ff453a; text-align:center; padding:20px;">
-                            <h2 style="margin-bottom: 10px;">⛔ Yetkisiz Erişim!</h2>
-                            <p style="color:#86868b; font-size:13px;">Bu panele yalnızca Golden Staff üyeleri erişebilir.</p>
-                            <p style="color:#d4af37; font-size:11px; margin-top:15px;">Telegram ID'niz: ${user.id}</p>
-                        </div>
-                    `;
+                    document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#000; color:#ff4d4d; text-align:center; padding:20px;"><h2>⛔ Yetkisiz Erişim!</h2><p style="color:#9aa0a6; font-size:13px; margin-top:8px;">ID: ${user.id}</p></div>`;
                     return;
                 }
 
@@ -478,17 +514,13 @@
                 document.getElementById('userRole').innerText = (user.first_name || 'Yönetici') + (isFounder ? " 👑" : " 🛡️");
 
                 if (isFounder) {
-                    const founderPanel = document.getElementById('founderPanel');
-                    if (founderPanel) founderPanel.style.display = 'block';
+                    document.getElementById('founderPanel').style.display = 'block';
                     loadStaffList();
                 }
 
                 checkLockStatus();
                 fetchData();
-                setInterval(() => {
-                    checkLockStatus();
-                    fetchData();
-                }, 5000);
+                setInterval(() => { checkLockStatus(); fetchData(); }, 5000);
 
             } catch (err) {
                 console.error("Yetki doğrulama hatası:", err);
@@ -507,7 +539,7 @@
                 const container = document.getElementById('staffListContainer');
 
                 if (staffList.length === 0) {
-                    container.innerHTML = '<div style="font-size:12px; color:var(--text-muted); text-align:center;">Kayıtlı staff bulunmuyor.</div>';
+                    container.innerHTML = '<div style="font-size:12px; color:var(--text-muted); text-align:center;">Kayıtlı staff yok.</div>';
                     return;
                 }
 
@@ -521,7 +553,7 @@
                             <span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username || 'yok'}</span>
                         </div>
                         <div style="display:flex; gap:4px;">
-                            <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:${s.can_ban === 1 ? 'rgba(50,215,75,0.2)' : 'rgba(255,69,58,0.2)'}; color:${s.can_ban === 1 ? 'var(--success)' : 'var(--danger)'}; border:none; cursor:pointer;" onclick="toggleStaffBan(${s.user_id}, ${s.can_ban})">
+                            <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:${s.can_ban === 1 ? 'rgba(46,204,113,0.2)' : 'rgba(255,77,77,0.2)'}; color:${s.can_ban === 1 ? 'var(--success)' : 'var(--danger)'}; border:none; cursor:pointer;" onclick="toggleStaffBan(${s.user_id}, ${s.can_ban})">
                                 ${s.can_ban === 1 ? 'Ban: Açık ✅' : 'Ban: Kapalı ❌'}
                             </button>
                             <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:rgba(255,255,255,0.1); color:#fff; border:none; cursor:pointer;" onclick="removeStaff(${s.user_id})">Sil</button>
@@ -529,10 +561,7 @@
                     `;
                     container.appendChild(item);
                 });
-
-                // Admin Detay Listesini de Güncelle
                 renderAdminDetailedList(staffList);
-
             } catch (err) {
                 console.error("Staff listesi yüklenemedi:", err);
             }
@@ -542,20 +571,16 @@
             const container = document.getElementById('adminDetailedList');
             const rankContainer = document.getElementById('adminRankingList');
 
-            if (!staffs || staffs.length === 0) {
-                container.innerHTML = '<div style="font-size:11px; color:var(--text-muted);">Admin bulunamadı.</div>';
-                rankContainer.innerHTML = '<div style="font-size:11px; color:var(--text-muted);">Yeterli aktivite verisi yok.</div>';
-                return;
-            }
+            if (!staffs || staffs.length === 0) return;
 
-            container.innerHTML = '';
             rankContainer.innerHTML = `
-                <div style="font-size:11px; display:flex; justify-content:space-between; padding:8px; background:rgba(50,215,75,0.1); border-radius:10px;">
-                    <span>🥇 En Aktif Admin: <b>${staffs[0].full_name}</b></span>
+                <div style="font-size:11px; display:flex; justify-content:space-between; padding:8px; background:rgba(46,204,113,0.1); border-radius:10px; border:1px solid rgba(46,204,113,0.2);">
+                    <span>🥇 En Aktif: <b>${staffs[0].full_name}</b></span>
                     <span style="color:var(--success);">Aktif ⚡</span>
                 </div>
             `;
 
+            container.innerHTML = '';
             staffs.forEach(s => {
                 const item = document.createElement('div');
                 item.className = 'admin-list-item';
@@ -571,20 +596,15 @@
             });
         }
 
-        // Apple Tarzı Dokunmatik Balon Modal Açma
         function openAdminModal(name, id, status) {
             const modal = document.getElementById('adminModal');
             const content = document.getElementById('modalContent');
-            
             content.innerHTML = `
-                <h3 style="color:var(--accent-gold); font-size:16px; margin-bottom:6px;">⭐ ${name}</h3>
-                <p style="font-size:10px; color:var(--text-muted); margin-bottom:12px;">ID: ${id} | Durum: ${status}</p>
+                <h3 style="color:var(--accent-gold); font-size:15px; margin-bottom:6px;">⭐ ${name}</h3>
+                <p style="font-size:10px; color:var(--text-muted); margin-bottom:12px;">ID: ${id}</p>
                 <div style="display:flex; flex-direction:column; gap:6px; font-size:11px; margin-bottom:14px;">
                     <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;">
-                        <span>🛡️ Ban Yetkisi:</span> <b>${status}</b>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;">
-                        <span>📊 Aktivite Skoru:</span> <b style="color:var(--success);">Yüksek</b>
+                        <span>Ban Yetkisi:</span> <b>${status}</b>
                     </div>
                 </div>
                 <button onclick="closeAdminModal()" style="width:100%; background:var(--accent-gold); color:black; border:none; padding:10px; border-radius:12px; font-weight:700; font-size:11px; cursor:pointer;">Kapat</button>
@@ -601,12 +621,7 @@
         async function addStaff() {
             const staffInput = document.getElementById('newStaffInput').value.trim();
             const newName = document.getElementById('newStaffName').value.trim() || 'Staff';
-            
-            if (!staffInput) {
-                alert("Lütfen Telegram User ID veya @kullanıcıadı girin!");
-                return;
-            }
-
+            if (!staffInput) return alert("Değer girin!");
             try {
                 const res = await fetch('/api/staff/add', {
                     method: 'POST',
@@ -618,46 +633,31 @@
                     document.getElementById('newStaffInput').value = '';
                     document.getElementById('newStaffName').value = '';
                     loadStaffList();
-                } else {
-                    alert("Ekleme başarısız: " + (result.error || "Bilinmeyen hata"));
-                }
-            } catch (err) {
-                alert("Sunucu hatası!");
-            }
+                } else alert("Hata: " + result.error);
+            } catch (err) { alert("Sunucu hatası"); }
         }
 
         async function toggleStaffBan(targetId, currentStatus) {
-            const newStatus = currentStatus === 1 ? 0 : 1;
             try {
-                const res = await fetch('/api/staff/toggle', {
+                await fetch('/api/staff/toggle', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id, target_id: targetId, status: newStatus })
+                    body: JSON.stringify({ user_id: user.id, target_id: targetId, status: currentStatus === 1 ? 0 : 1 })
                 });
-                const result = await res.json();
-                if (result.success) {
-                    loadStaffList();
-                }
-            } catch (err) {
-                alert("Yetki değiştirilemedi!");
-            }
+                loadStaffList();
+            } catch (err) { alert("Yetki değiştirilemedi"); }
         }
 
         async function removeStaff(targetId) {
-            if (!confirm("Bu staff'ı listeden silmek istediğine emin misin?")) return;
+            if (!confirm("Silmek istediğine emin misin?")) return;
             try {
-                const res = await fetch('/api/staff/remove', {
+                await fetch('/api/staff/remove', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: user.id, target_id: targetId })
                 });
-                const result = await res.json();
-                if (result.success) {
-                    loadStaffList();
-                }
-            } catch (err) {
-                alert("Silme başarısız!");
-            }
+                loadStaffList();
+            } catch (err) { alert("Silinemedi"); }
         }
 
         async function checkLockStatus() {
@@ -666,9 +666,8 @@
                 const data = await res.json();
                 const statusEl = document.getElementById('lockStatusText');
                 const btnEl = document.getElementById('lockdownBtn');
-
                 if (data.lockdown) {
-                    statusEl.innerText = "KİLİTLİ (Banlar Durduruldu 🛑)";
+                    statusEl.innerText = "KİLİTLİ 🛑";
                     statusEl.style.color = "var(--danger)";
                     btnEl.innerText = "Kilidi Kaldır ✅";
                 } else {
@@ -676,27 +675,18 @@
                     statusEl.style.color = "var(--success)";
                     btnEl.innerText = "Acil Durum Kilidi 🔒";
                 }
-            } catch (err) {
-                console.error("Kilit durumu alınamadı:", err);
-            }
+            } catch (err) {}
         }
 
         async function toggleLockdown() {
             try {
-                const res = await fetch('/api/toggle-lockdown', {
+                await fetch('/api/toggle-lockdown', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: user.id })
                 });
-                const result = await res.json();
-                if (result.success) {
-                    checkLockStatus();
-                } else {
-                    alert("Yetkiniz yok!");
-                }
-            } catch (err) {
-                alert("Sunucuyla iletişim kurulamadı!");
-            }
+                checkLockStatus();
+            } catch (err) {}
         }
 
         async function fetchData() {
@@ -704,17 +694,14 @@
                 const statsRes = await fetch('/api/stats');
                 const stats = await statsRes.json();
                 document.getElementById('totalActions').innerText = stats.total_actions || 0;
-                
                 const breakdown = stats.action_breakdown || {};
-                const banCount = (breakdown['BAN'] || 0) + (breakdown['SECURITY_BAN'] || 0) + (breakdown['WARN_BAN'] || 0);
-                document.getElementById('totalBans').innerText = banCount;
+                document.getElementById('totalBans').innerText = (breakdown['BAN'] || 0) + (breakdown['MUTE'] || 0);
 
                 const logsRes = await fetch('/api/logs');
                 const logs = await logsRes.json();
                 const logsContainer = document.getElementById('logsList');
-
                 if (logs.length === 0) {
-                    logsContainer.innerHTML = '<div class="loading">Henüz kaydedilmiş bir hareket yok.</div>';
+                    logsContainer.innerHTML = '<div class="loading">Kayıtlı işlem yok.</div>';
                     return;
                 }
 
@@ -722,27 +709,24 @@
                 logs.forEach(log => {
                     let badgeClass = 'badge-default';
                     if (log.action_type.includes('BAN')) badgeClass = 'badge-ban';
-                    else if (log.action_type.includes('MUTE') || log.action_type.includes('WARN')) badgeClass = 'badge-mute';
+                    else if (log.action_type.includes('MUTE')) badgeClass = 'badge-mute';
 
                     const item = document.createElement('div');
                     item.className = 'log-item';
                     item.innerHTML = `
                         <div class="log-header">
                             <span class="log-badge ${badgeClass}">${log.action_type}</span>
-                            <span style="color:var(--text-muted);">${log.timestamp}</span>
+                            <span style="color:var(--text-muted); font-weight:600;">⏰ ${log.timestamp}</span>
                         </div>
                         <div style="font-size:12px;">${escapeHtml(log.details)}</div>
-                        <div style="font-size:10px; color:var(--text-muted);">ID: ${log.user_id} | @${escapeHtml(log.username || 'Bilinmiyor')}</div>
+                        <div style="font-size:10px; color:var(--text-muted);">Admin ID: ${log.user_id} | @${escapeHtml(log.username || 'Bilinmiyor')}</div>
                     `;
                     logsContainer.appendChild(item);
                 });
-
-            } catch (err) {
-                console.error("Veri çekme hatası:", err);
-            }
+            } catch (err) {}
         }
 
-        // Golden Chat Fonksiyonları
+        // --- Golden Chat: WhatsApp / Telegram Hibrit Fonksiyonları ---
         function sendChatMessage() {
             const input = document.getElementById('chatInputText');
             const text = input.value.trim();
@@ -751,19 +735,75 @@
             const chatMessages = document.getElementById('chatMessages');
             const bubble = document.createElement('div');
             bubble.className = 'chat-bubble outgoing';
-            bubble.innerHTML = `<b>Sen:</b> ${escapeHtml(text)}`;
+            bubble.innerHTML = `<b>Sen:</b> ${escapeHtml(text)} <div style="font-size:9px; text-align:right; opacity:0.7; margin-top:2px;">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>`;
             chatMessages.appendChild(bubble);
             input.value = '';
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        function sendChatMedia(type) {
+        function sendVoiceMessage() {
             const chatMessages = document.getElementById('chatMessages');
             const bubble = document.createElement('div');
             bubble.className = 'chat-bubble outgoing';
-            if (type === 'poll') bubble.innerHTML = `📊 <b>[Anket Gönderildi]</b>`;
-            if (type === 'voice') bubble.innerHTML = `🎙️ <b>[Sesli Mesaj - 0:12]</b>`;
-            if (type === 'file') bubble.innerHTML = `📎 <b>[Medya/Dosya Eklendi]</b>`;
+            bubble.innerHTML = `
+                <div class="voice-note-player">
+                    <button class="voice-play-btn" onclick="this.innerText = this.innerText === '▶' ? '⏸' : '▶'">▶</button>
+                    <div class="voice-waveform">
+                        <div class="waveform-bar" style="height: 40%;"></div>
+                        <div class="waveform-bar" style="height: 80%;"></div>
+                        <div class="waveform-bar" style="height: 60%;"></div>
+                        <div class="waveform-bar" style="height: 100%;"></div>
+                        <div class="waveform-bar" style="height: 50%;"></div>
+                        <div class="waveform-bar" style="height: 70%;"></div>
+                        <div class="waveform-bar" style="height: 30%;"></div>
+                    </div>
+                    <span style="font-size:10px; opacity:0.8;">0:14</span>
+                </div>
+                <div style="font-size:9px; text-align:right; opacity:0.7; margin-top:2px;">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+            `;
+            chatMessages.appendChild(bubble);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function openPollCreator() {
+            const question = prompt("Anket sorusunu girin:");
+            if (!question) return;
+            const optionsInput = prompt("Şıkları virgülle ayırarak girin (Örn: Evet,Hayır,Kararsızım):");
+            if (!optionsInput) return;
+            const options = optionsInput.split(',').map(o => o.trim());
+
+            const chatMessages = document.getElementById('chatMessages');
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble outgoing';
+            
+            let optionsHtml = '';
+            options.forEach(opt => {
+                optionsHtml += `<div class="poll-option" onclick="alert('Oy verildi: ${opt}')">🔘 ${escapeHtml(opt)}</div>`;
+            });
+
+            bubble.innerHTML = `
+                <div class="poll-card">
+                    <div style="font-weight:700; font-size:12px; color:var(--accent-gold);">📊 ${escapeHtml(question)}</div>
+                    <div style="display:flex; flex-direction:column; gap:4px;">${optionsHtml}</div>
+                </div>
+                <div style="font-size:9px; text-align:right; opacity:0.7; margin-top:2px;">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+            `;
+            chatMessages.appendChild(bubble);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMediaFile() {
+            const url = prompt("Göndermek istediğiniz görsel/dosya linkini girin:");
+            if (!url) return;
+            const chatMessages = document.getElementById('chatMessages');
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble outgoing';
+            bubble.innerHTML = `
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                    <a href="${url}" target="_blank" style="color:inherit; text-decoration:underline; font-size:12px;">📎 Medya / Dosya Bağlantısı</a>
+                    <span style="font-size:9px; opacity:0.7; text-align:right;">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                </div>
+            `;
             chatMessages.appendChild(bubble);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
