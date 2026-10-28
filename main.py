@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 CONFIG_FILE = "config.json"
 
-# --- GÜVENLİK & ACİT DURUM KİLİDİ DEĞİŞKENLERİ ---
+# --- GÜVENLİK & ACİL DURUM KİLİDİ DEĞİŞKENLERİ ---
 ADMIN_ACTION_LIMITS = {}
 MAX_ACTIONS_PER_MINUTE = 5  # 1 dakikada en fazla 5 kritik işlem
 EMERGENCY_LOCKDOWN = False  # True olduğunda kurucu hariç kimse ban/mute atamaz
@@ -77,7 +77,6 @@ async def api_toggle_lockdown(request):
         data = await request.json()
         user_id = int(data.get("user_id", 0))
         
-        # Sadece Render'daki Kurucu (FOUNDER_ID) bu tuşa basabilir!
         founder_id = os.environ.get("FOUNDER_ID")
         if not founder_id or str(user_id) != str(founder_id).strip():
             return web.json_response({"success": False, "error": "Yetkisiz işlem!"}, status=403)
@@ -90,14 +89,42 @@ async def api_toggle_lockdown(request):
     except Exception as e:
         return web.json_response({"success": False, "error": str(e)}, status=500)
 
+async def api_verify_admin(request):
+    """Mini App'i açan kullanıcının Telegram'da gerçekten admin/kurucu olup olmadığını doğrular."""
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        chat_id = int(data.get("chat_id", 0))
+        
+        # 1. Render kurucusu (FOUNDER_ID) her zaman yetkilidir
+        founder_id = os.environ.get("FOUNDER_ID")
+        if founder_id and str(user_id) == str(founder_id).strip():
+            return web.json_response({"authorized": True})
+
+        # 2. Eğer chat_id gönderildiyse Telegram API üzerinden gerçekten admin mi kontrol et
+        if chat_id != 0:
+            try:
+                bot = request.app['bot']
+                member = await bot.get_chat_member(chat_id, user_id)
+                if member.status in ["administrator", "creator"]:
+                    return web.json_response({"authorized": True})
+            except Exception:
+                pass
+
+        return web.json_response({"authorized": False})
+    except Exception as e:
+        return web.json_response({"authorized": False}, status=500)
+
 async def start_web_server(app_context):
     app = web.Application()
+    app['bot'] = app_context.bot  # Bot nesnesini app içine kaydet
     
     # API Rotaları
     app.router.add_get("/api/stats", api_get_stats)
     app.router.add_get("/api/logs", api_get_logs)
     app.router.add_get("/api/lock-status", api_get_lock_status)
     app.router.add_post("/api/toggle-lockdown", api_toggle_lockdown)
+    app.router.add_post("/api/verify-admin", api_verify_admin)
     
     # Kök dizine girildiğinde index.html'i doğrudan HTML olarak sun
     async def handle_root(request):
