@@ -176,7 +176,7 @@
 
         /* --- GOLDEN CHAT & SESLİ SOHBET (PRO TASARIM) --- */
         .chat-wrapper {
-            display: flex; flex-direction: column; height: 540px; /* Daha geniş ve pro görünüm */
+            display: flex; flex-direction: column; height: 540px;
             background: rgba(10, 11, 15, 0.98); border-radius: 20px;
             border: 1px solid var(--border-glass); overflow: hidden;
             box-shadow: inset 0 0 30px rgba(0,0,0,0.9);
@@ -375,15 +375,12 @@
 
             <!-- Şık Logo/İkon Araç Barı -->
             <div class="chat-input-bar">
-                <!-- Anket Logovari SVG Buton -->
                 <button class="tool-btn" onclick="openPollCreator()" title="Anket Oluştur">
                     <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
                 </button>
-                <!-- Mikrofon / Ses Kayıt Logovari SVG Buton -->
                 <button class="tool-btn" id="micBtn" onclick="toggleVoiceRecording()" title="Ses Kaydı">
                     <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
                 </button>
-                <!-- Medya / Dosya Logovari SVG Buton -->
                 <button class="tool-btn" onclick="sendMediaFile()" title="Medya Ekle">
                     <svg viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.1.9 2 2 2s2-.9 2-2V5c0-2.21-1.79-4-4-4S6 2.79 6 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
                 </button>
@@ -448,7 +445,12 @@
 
                 checkLockStatus();
                 fetchData();
-                setInterval(() => { checkLockStatus(); fetchData(); }, 5000);
+                fetchChatMessages();
+                setInterval(() => { 
+                    checkLockStatus(); 
+                    fetchData(); 
+                    fetchChatMessages();
+                }, 4000);
 
             } catch (err) {
                 console.error("Yetki doğrulama hatası:", err);
@@ -651,23 +653,77 @@
             } catch (err) {}
         }
 
-        // --- GOLDEN CHAT: GERÇEK İŞLEVSEL ÖZELLİKLER ---
-        
-        function sendChatMessage() {
+        // --- GOLDEN CHAT: VERİTABANI SENKRONİZASYONLU API FONKSİYONLARI ---
+
+        async function fetchChatMessages() {
+            try {
+                const res = await fetch('/api/chat');
+                const messages = await res.json();
+                const chatMessages = document.getElementById('chatMessages');
+                if (!messages || messages.length === 0) return;
+
+                chatMessages.innerHTML = '';
+                messages.forEach(m => {
+                    const isOutgoing = m.user_id === user.id;
+                    const bubble = document.createElement('div');
+                    bubble.className = `chat-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`;
+                    
+                    let contentHtml = '';
+                    if (m.msg_type === 'voice') {
+                        contentHtml = `
+                            <div class="voice-player">
+                                <button class="voice-play-trigger" onclick="const a = new Audio('${m.message}'); a.play();">▶</button>
+                                <div class="voice-waves">
+                                    <div class="w-bar" style="height:30%"></div><div class="w-bar" style="height:80%"></div><div class="w-bar" style="height:50%"></div><div class="w-bar" style="height:100%"></div><div class="w-bar" style="height:60%"></div>
+                                </div>
+                                <span style="font-size:10px;">Ses Kaydı</span>
+                            </div>
+                        `;
+                    } else if (m.msg_type === 'poll') {
+                        contentHtml = `<div class="poll-box"><div class="poll-question">📊 ${escapeHtml(m.message)}</div></div>`;
+                    } else if (m.msg_type === 'media') {
+                        contentHtml = `<a href="${m.message}" target="_blank" style="color:inherit; text-decoration:underline; font-size:12px; font-weight:600;">📎 Medya / Dosya Bağlantısını Aç</a>`;
+                    } else {
+                        contentHtml = `<b>${escapeHtml(m.full_name)}:</b> ${escapeHtml(m.message)}`;
+                    }
+
+                    bubble.innerHTML = `
+                        ${contentHtml}
+                        <div style="font-size:9px; text-align:right; opacity:0.7; margin-top:2px;">${m.timestamp}</div>
+                    `;
+                    chatMessages.appendChild(bubble);
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            } catch (err) {
+                console.error("Chat mesajları alınamadı:", err);
+            }
+        }
+
+        async function sendChatMessage() {
             const input = document.getElementById('chatInputText');
             const text = input.value.trim();
             if (!text) return;
 
-            const chatMessages = document.getElementById('chatMessages');
-            const bubble = document.createElement('div');
-            bubble.className = 'chat-bubble outgoing';
-            bubble.innerHTML = `<b>Sen:</b> ${escapeHtml(text)} <div style="font-size:9px; text-align:right; opacity:0.7; margin-top:2px;">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>`;
-            chatMessages.appendChild(bubble);
-            input.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            try {
+                await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        username: user.username || 'admin',
+                        full_name: user.first_name || 'Admin',
+                        message: text,
+                        msg_type: 'text'
+                    })
+                });
+                input.value = '';
+                fetchChatMessages();
+            } catch (err) {
+                alert("Mesaj gönderilemedi!");
+            }
         }
 
-        // 1. Gerçek Ses Kaydı (MediaRecorder API)
+        // 1. Gerçek Ses Kaydı (MediaRecorder API) & Backend Kaydı
         async function toggleVoiceRecording() {
             const micBtn = document.getElementById('micBtn');
             if (!mediaRecorder || mediaRecorder.state === "inactive") {
@@ -677,17 +733,30 @@
                     audioChunks = [];
 
                     mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
-                    mediaRecorder.onstop = () => {
+                    mediaRecorder.onstop = async () => {
                         const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
                         const audioUrl = URL.createObjectURL(audioBlob);
-                        appendVoiceMessageBubble(audioUrl);
+                        
+                        // Backend'e kaydet
+                        await fetch('/api/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                user_id: user.id,
+                                username: user.username || 'admin',
+                                full_name: user.first_name || 'Admin',
+                                message: audioUrl,
+                                msg_type: 'voice'
+                            })
+                        });
+                        fetchChatMessages();
                     };
 
                     mediaRecorder.start();
                     micBtn.style.background = 'var(--danger)';
                     micBtn.style.color = '#fff';
                 } catch (e) {
-                    alert("Mikrofon erişimi reddedildi veya desteklenmiyor.");
+                    alert("Mikrofon erişimi reddedildi.");
                 }
             } else {
                 mediaRecorder.stop();
@@ -696,95 +765,50 @@
             }
         }
 
-        function appendVoiceMessageBubble(url) {
-            const chatMessages = document.getElementById('chatMessages');
-            const bubble = document.createElement('div');
-            bubble.className = 'chat-bubble outgoing';
-            bubble.innerHTML = `
-                <div class="voice-player">
-                    <button class="voice-play-trigger" onclick="const a = new Audio('${url}'); a.play();">▶</button>
-                    <div class="voice-waves">
-                        <div class="w-bar" style="height:30%"></div><div class="w-bar" style="height:80%"></div><div class="w-bar" style="height:50%"></div><div class="w-bar" style="height:100%"></div><div class="w-bar" style="height:60%"></div>
-                    </div>
-                    <span style="font-size:10px;">Ses Kaydı</span>
-                </div>
-                <div style="font-size:9px; text-align:right; opacity:0.7; margin-top:2px;">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-            `;
-            chatMessages.appendChild(bubble);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // 2. İşlevsel Anket Sistemi (Telegram Tarzı Oy Verme ve Yüzde Barı)
-        function openPollCreator() {
+        // 2. Anket Oluşturucu & Backend Kaydı
+        async function openPollCreator() {
             const question = prompt("Anket sorusunu yazın:");
             if (!question) return;
-            const optionsInput = prompt("Şıkları virgülle ayırarak yazın (Örn: Onayla, Reddet):");
-            if (!optionsInput) return;
-            const options = optionsInput.split(',').map(o => o.trim()).filter(o => o);
 
-            const chatMessages = document.getElementById('chatMessages');
-            const bubble = document.createElement('div');
-            bubble.className = 'chat-bubble outgoing';
-
-            let pollId = 'poll_' + Date.now();
-            let htmlOptions = '';
-            options.forEach((opt, idx) => {
-                htmlOptions += `
-                    <div class="poll-option-item" onclick="votePoll('${pollId}', ${idx})">
-                        <div class="poll-bar" id="${pollId}_bar_${idx}"></div>
-                        <div class="poll-text"><span>${escapeHtml(opt)}</span><span id="${pollId}_count_${idx}">0 oy (0%)</span></div>
-                    </div>
-                `;
-            });
-
-            bubble.innerHTML = `
-                <div class="poll-box">
-                    <div class="poll-question">📊 ${escapeHtml(question)}</div>
-                    <div style="display:flex; flex-direction:column; gap:6px;" id="${pollId}_options">${htmlOptions}</div>
-                </div>
-                <div style="font-size:9px; text-align:right; opacity:0.7; margin-top:2px;">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-            `;
-            chatMessages.appendChild(bubble);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        window.pollVotes = {};
-        function votePoll(pollId, optionIndex) {
-            if (!window.pollVotes[pollId]) {
-                window.pollVotes[pollId] = { total: 0, choices: {} };
-            }
-            if (!window.pollVotes[pollId].choices[optionIndex]) {
-                window.pollVotes[pollId].choices[optionIndex] = 0;
-            }
-            window.pollVotes[pollId].choices[optionIndex]++;
-            window.pollVotes[pollId].total++;
-
-            const total = window.pollVotes[pollId].total;
-            for (let idx in window.pollVotes[pollId].choices) {
-                const count = window.pollVotes[pollId].choices[idx];
-                const percent = Math.round((count / total) * 100);
-                const bar = document.getElementById(`${pollId}_bar_${idx}`);
-                const countSpan = document.getElementById(`${pollId}_count_${idx}`);
-                if (bar) bar.style.width = percent + '%';
-                if (countSpan) countSpan.innerText = `${count} oy (${percent}%)`;
+            try {
+                await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        username: user.username || 'admin',
+                        full_name: user.first_name || 'Admin',
+                        message: question,
+                        msg_type: 'poll'
+                    })
+                });
+                fetchChatMessages();
+            } catch (err) {
+                alert("Anket oluşturulamadı.");
             }
         }
 
-        // 3. Medya ve Dosya Paylaşımı
-        function sendMediaFile() {
+        // 3. Medya Paylaşımı & Backend Kaydı
+        async function sendMediaFile() {
             const url = prompt("Görsel veya dosya bağlantısını (URL) girin:");
             if (!url) return;
-            const chatMessages = document.getElementById('chatMessages');
-            const bubble = document.createElement('div');
-            bubble.className = 'chat-bubble outgoing';
-            bubble.innerHTML = `
-                <div style="display:flex; flex-direction:column; gap:6px;">
-                    <a href="${url}" target="_blank" style="color:inherit; text-decoration:underline; font-size:12px; font-weight:600;">📎 Medya / Dosya Bağlantısını Aç</a>
-                    <span style="font-size:9px; opacity:0.7; text-align:right;">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                </div>
-            `;
-            chatMessages.appendChild(bubble);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        username: user.username || 'admin',
+                        full_name: user.first_name || 'Admin',
+                        message: url,
+                        msg_type: 'media'
+                    })
+                });
+                fetchChatMessages();
+            } catch (err) {
+                alert("Medya gönderilemedi.");
+            }
         }
 
         // 4. Telegram Tarzı Sesli Sohbet (Voice Chat) Fonksiyonu
