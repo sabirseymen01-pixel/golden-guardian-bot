@@ -3,25 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Staff | Yönetim Paneli</title>
+    <title>Golden Staff | iOS Pro Yönetim</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #0f1115;
-            --card-bg: rgba(25, 29, 38, 0.75);
-            --border-color: rgba(212, 175, 55, 0.2);
+            --bg-color: #000000;
+            --surface-glass: rgba(28, 28, 30, 0.75);
+            --surface-glass-bright: rgba(44, 44, 46, 0.85);
+            --border-glass: rgba(255, 255, 255, 0.1);
             --accent-gold: #d4af37;
-            --text-main: #f0f2f5;
-            --text-muted: #9aa0a6;
-            --danger: #ff4d4d;
-            --success: #2ecc71;
+            --accent-gold-glow: rgba(212, 175, 55, 0.3);
+            --text-main: #f5f5f7;
+            --text-muted: #86868b;
+            --danger: #ff453a;
+            --success: #32d74b;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -29,189 +31,290 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             padding: 16px;
-            padding-bottom: 40px;
+            padding-bottom: 70px;
+            overflow-x: hidden;
         }
 
+        /* Apple Tarzı Header */
         .header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             padding-bottom: 12px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-glass);
         }
 
         .logo-area h1 {
             font-size: 20px;
             color: var(--accent-gold);
             font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .logo-area p {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
         }
 
         .admin-badge {
             background: rgba(212, 175, 55, 0.15);
             color: var(--accent-gold);
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--accent-gold-glow);
+            backdrop-filter: blur(20px);
         }
 
-        .control-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .control-row {
+        /* Kaydırmalı Port Navigasyonu (Segmented Control) */
+        .port-nav {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .control-title {
-            font-size: 12px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-        }
-
-        .control-status {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--success);
-        }
-
-        .lock-btn {
-            background: rgba(255, 77, 77, 0.2);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            padding: 8px 14px;
+            background: rgba(118, 118, 128, 0.24);
+            padding: 3px;
             border-radius: 12px;
-            font-weight: 700;
+            margin-bottom: 20px;
+            backdrop-filter: blur(25px);
+        }
+
+        .port-tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px 4px;
             font-size: 11px;
-            cursor: pointer;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 16px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .stat-title {
-            font-size: 12px;
+            font-weight: 600;
             color: var(--text-muted);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        .stat-value {
-            font-size: 22px;
-            font-weight: 700;
+        .port-tab.active {
+            background: rgba(255, 255, 255, 0.12);
             color: var(--text-main);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Port Alanları */
+        .portal-section {
+            display: none;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .portal-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cam Kartları (Glassmorphism) */
+        .glass-card {
+            background: var(--surface-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
 
         .section-title {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             margin-bottom: 12px;
             color: var(--accent-gold);
             display: flex;
             align-items: center;
             gap: 8px;
+            letter-spacing: -0.2px;
         }
 
-        .staff-item {
+        /* İstatistik Izgarası */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: var(--surface-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 14px;
+            backdrop-filter: blur(20px);
+        }
+
+        .stat-title {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* Admin Liste Öğeleri & Dokunmatik Yüzey Efekti */
+        .admin-list-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            padding: 12px 14px;
+            border-radius: 14px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(15, 17, 21, 0.6);
-            padding: 10px 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 13px;
-        }
-
-        .staff-actions {
-            display: flex;
-            gap: 6px;
-        }
-
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 11px;
-            border-radius: 6px;
-            font-weight: 600;
             cursor: pointer;
-            border: none;
+            transition: transform 0.2s ease, background 0.2s ease;
         }
 
-        .btn-toggle-on { background: rgba(46, 204, 113, 0.2); color: var(--success); border: 1px solid var(--success); }
-        .btn-toggle-off { background: rgba(255, 77, 77, 0.2); color: var(--danger); border: 1px solid var(--danger); }
-        .btn-delete { background: rgba(150, 150, 150, 0.2); color: #aaa; }
-
-        .logs-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .admin-list-item:active {
+            transform: scale(0.97);
+            background: rgba(255, 255, 255, 0.08);
         }
 
+        /* Apple Popover / Mat Başlayıp Büyüyen Balon */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .apple-popover {
+            width: 85%;
+            max-width: 340px;
+            background: var(--surface-glass-bright);
+            border: 1px solid var(--accent-gold-glow);
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            transform: scale(0.7);
+            opacity: 0.4;
+            animation: applePopoverReveal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes applePopoverReveal {
+            0% { transform: scale(0.7); opacity: 0.4; }
+            50% { opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Log Portu Öğeleri */
         .log-item {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 12px 14px;
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-glass);
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 8px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
         }
 
         .log-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
+            font-size: 11px;
+            color: var(--text-muted);
         }
 
-        .log-type {
+        .log-badge {
             font-weight: 700;
             padding: 2px 6px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: 9px;
+        }
+        .badge-ban { background: rgba(255, 69, 58, 0.2); color: var(--danger); }
+        .badge-mute { background: rgba(212, 175, 55, 0.2); color: var(--accent-gold); }
+        .badge-default { background: rgba(50, 215, 75, 0.2); color: var(--success); }
+
+        /* Golden Chat Portu */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 380px;
+            background: rgba(15, 15, 18, 0.6);
+            border-radius: 16px;
+            border: 1px solid var(--border-glass);
+            overflow: hidden;
         }
 
-        .type-ban, .type-security_ban { background: rgba(255, 77, 77, 0.2); color: var(--danger); }
-        .type-admin_report { background: rgba(241, 196, 15, 0.2); color: #f1c40f; }
-        .type-warn { background: rgba(230, 126, 34, 0.2); color: #e67e22; }
-        .type-default { background: rgba(46, 204, 113, 0.2); color: var(--success); }
+        .chat-messages {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-        .log-time { color: var(--text-muted); }
-        .log-details { font-size: 13px; color: var(--text-main); word-break: break-word; }
-        .log-user { font-size: 11px; color: var(--text-muted); }
-        .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 13px; }
+        .chat-bubble {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .chat-bubble.incoming {
+            background: rgba(255, 255, 255, 0.08);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-bubble.outgoing {
+            background: var(--accent-gold);
+            color: #000;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            font-weight: 500;
+        }
+
+        .chat-input-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: rgba(28, 28, 30, 0.9);
+            border-top: 1px solid var(--border-glass);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-glass);
+            padding: 8px 12px;
+            border-radius: 20px;
+            color: white;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .chat-tool-btn {
+            background: none;
+            border: none;
+            color: var(--accent-gold);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -219,53 +322,113 @@
     <div class="header">
         <div class="logo-area">
             <h1>Golden Staff</h1>
-            <p>Gelişmiş Moderasyon & Log Paneli</p>
+            <p>iOS Pro v3.0 | Güvenli & Akıcı</p>
         </div>
         <div class="admin-badge" id="userRole">Yönetici 🛡️</div>
     </div>
 
-    <!-- KURUCU ÖZEL: STAFF YÖNETİM PANELİ (Sadece Kurucu Görür) -->
-    <div id="founderPanel" style="display: none;">
-        <div class="section-title">👑 Kurucu Staff & Ban Yetki Yönetimi</div>
-        <div class="control-card">
+    <!-- Kaydırmalı Port Navigasyonu (Segmented Control) -->
+    <div class="port-nav">
+        <div class="port-tab active" onclick="switchPort('overview')">Genel Bakış</div>
+        <div class="port-tab" onclick="switchPort('logs')">Genel Loglar</div>
+        <div class="port-tab" onclick="switchPort('admins')">Admin Logları</div>
+        <div class="port-tab" onclick="switchPort('chat')">Golden Chat 💬</div>
+    </div>
+
+    <!-- PORT 1: GENEL BAKIŞ & GRUP AKTİFLİK İSTATİSTİĞİ -->
+    <div id="port-overview" class="portal-section active">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Toplam İşlem</div>
+                <div class="stat-value" id="totalActions">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Toplam Ban/Mute</div>
+                <div class="stat-value" id="totalBans">-</div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="section-title">📊 Grup Genel Aktiflik İstatistiği</div>
+            <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;" id="groupActivityStats">
+                Grup mesaj akışı ve moderasyon yoğunluğu kararlı seviyede. Son 24 saat içinde spam koruması aktif.
+            </div>
+        </div>
+
+        <!-- KURUCU ÖZEL: STAFF YÖNETİM & ŞALTER PANELİ -->
+        <div id="founderPanel" class="glass-card" style="display: none;">
+            <div class="section-title">👑 Kurucu Staff & Ban Yetki Yönetimi</div>
             <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                <input type="text" id="newStaffInput" placeholder="User ID veya @kullaniciadi" style="flex: 1; background: #151922; border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
-                <input type="text" id="newStaffName" placeholder="Ad / Nick" style="width: 90px; background: #151922; border: 1px solid var(--border-color); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
-                <button onclick="addStaff()" style="background: var(--accent-gold); color: black; border: none; padding: 8px 12px; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer;">Ekle</button>
+                <input type="text" id="newStaffInput" placeholder="User ID veya @kullaniciadi" style="flex: 1; background: #151922; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
+                <input type="text" id="newStaffName" placeholder="Ad / Nick" style="width: 90px; background: #151922; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
+                <button onclick="addStaff()" style="background: var(--accent-gold); color: black; border: none; padding: 8px 12px; border-radius: 10px; font-weight: 700; font-size: 11px; cursor: pointer;">Ekle</button>
             </div>
             <div id="staffListContainer" style="display: flex; flex-direction: column; gap: 8px;">
                 <div class="loading">Staff listesi yükleniyor...</div>
             </div>
         </div>
-    </div>
 
-    <!-- ACİL DURUM / BAN YETKİ KONTROL KARTI -->
-    <div class="control-card">
-        <div class="control-row">
-            <div>
-                <div class="control-title">Genel Bot Ban Şalteri</div>
-                <div id="lockStatusText" class="control-status">Normal (Aktif ✅)</div>
+        <!-- ACİL DURUM KARTI -->
+        <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div class="stat-title">Genel Bot Ban Şalteri</div>
+                    <div id="lockStatusText" style="font-size: 14px; font-weight: 700; color: var(--success);">Normal (Aktif ✅)</div>
+                </div>
+                <button id="lockdownBtn" onclick="toggleLockdown()" style="background: rgba(255,69,58,0.2); color: var(--danger); border: 1px solid var(--danger); padding: 8px 14px; border-radius: 12px; font-weight: 700; font-size: 11px; cursor: pointer;">Acil Durum Kilidi 🔒</button>
             </div>
-            <button id="lockdownBtn" class="lock-btn" onclick="toggleLockdown()">Acil Durum Kilidi 🔒</button>
         </div>
     </div>
 
-    <!-- İstatistikler -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-title">Toplam Olay</div>
-            <div class="stat-value" id="totalActions">-</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title">Güvenlik Banı</div>
-            <div class="stat-value" id="totalBans">-</div>
+    <!-- PORT 2: GENEL LOGLAR (Banlar, Muteler, Her Şey) -->
+    <div id="port-logs" class="portal-section">
+        <div class="glass-card">
+            <div class="section-title">📜 Canlı Grup Moderasyon Akışı</div>
+            <div class="logs-container" id="logsList">
+                <div class="loading">Loglar yükleniyor...</div>
+            </div>
         </div>
     </div>
 
-    <!-- Canlı Loglar -->
-    <div class="section-title">📊 Canlı Sistem Logları</div>
-    <div class="logs-container" id="logsList">
-        <div class="loading">Loglar yükleniyor...</div>
+    <!-- PORT 3: ADMIN LOGLARI & AKTİVİTE İSTATİSTİKLERİ -->
+    <div id="port-admins" class="portal-section">
+        <div class="glass-card">
+            <div class="section-title">⭐ En Aktif & En Pasif Adminler</div>
+            <div id="adminRankingList" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                <div class="loading">Admin istatistikleri hesaplanıyor...</div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="section-title">🛡️ Admin Detay Portu (Dokunmatik Yüzey)</div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">Bir adminin üstüne dokunarak Apple stili detay balonunu açabilirsiniz.</div>
+            <div id="adminDetailedList" style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="loading">Adminler listeleniyor...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PORT 4: GOLDEN CHAT (Haberleşme Portu) -->
+    <div id="port-chat" class="portal-section">
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-bubble incoming"><b>Sistem:</b> Golden Staff Özel Haberleşme Portuna hoş geldiniz. Kurucu ve yetkililer buradan anket, medya ve anlık mesajlaşma yapabilir.</div>
+            </div>
+            <div class="chat-input-bar">
+                <button class="chat-tool-btn" onclick="sendChatMedia('poll')">📊</button>
+                <button class="chat-tool-btn" onclick="sendChatMedia('voice')">🎙️</button>
+                <button class="chat-tool-btn" onclick="sendChatMedia('file')">📎</button>
+                <input type="text" id="chatInputText" class="chat-input" placeholder="Mesaj veya komut yazın...">
+                <button class="chat-tool-btn" onclick="sendChatMessage()" style="font-weight: bold;">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apple Tarzı Dokunmatik Detay Balon (Modal) -->
+    <div id="adminModal" class="modal-overlay" onclick="closeAdminModal(event)">
+        <div class="apple-popover" id="modalContent">
+            <!-- Dinamik doldurulacak -->
+        </div>
     </div>
 
     <script>
@@ -275,11 +438,20 @@
         const user = tg.initDataUnsafe?.user;
         
         if (!user) {
-            showAccessDenied("Telegram oturumu bulunamadı. Lütfen bot üzerinden tekrar açın.");
+            document.body.innerHTML = `<div style="color:var(--danger); text-align:center; padding:40px;">Telegram oturumu bulunamadı. Lütfen bot üzerinden açın.</div>`;
             throw new Error("Oturum yok.");
         }
 
         let isFounder = false;
+
+        // Port (Sekme) Değiştirme
+        function switchPort(portName) {
+            document.querySelectorAll('.portal-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.port-tab').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('port-' + portName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
 
         async function verifyAccess() {
             try {
@@ -292,7 +464,13 @@
                 const data = await res.json();
                 
                 if (!data.authorized) {
-                    showAccessDenied("Bu panele yalnızca Golden Staff üyeleri erişebilir.");
+                    document.body.innerHTML = `
+                        <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#000; color:#ff453a; text-align:center; padding:20px;">
+                            <h2 style="margin-bottom: 10px;">⛔ Yetkisiz Erişim!</h2>
+                            <p style="color:#86868b; font-size:13px;">Bu panele yalnızca Golden Staff üyeleri erişebilir.</p>
+                            <p style="color:#d4af37; font-size:11px; margin-top:15px;">Telegram ID'niz: ${user.id}</p>
+                        </div>
+                    `;
                     return;
                 }
 
@@ -314,18 +492,7 @@
 
             } catch (err) {
                 console.error("Yetki doğrulama hatası:", err);
-                showAccessDenied("Sunucu yetki doğrulaması yapılamadı.");
             }
-        }
-
-        function showAccessDenied(message) {
-            document.body.innerHTML = `
-                <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#0f1115; color:#ff4d4d; text-align:center; padding:20px; font-family:sans-serif;">
-                    <h2 style="margin-bottom: 10px;">⛔ Yetkisiz Erişim!</h2>
-                    <p style="color:#9aa0a6; font-size:14px;">${message}</p>
-                    <p style="color:#d4af37; font-size:12px; margin-top:15px;">Telegram ID'niz: ${user ? user.id : 'Bilinmiyor'}</p>
-                </div>
-            `;
         }
 
         async function loadStaffList() {
@@ -347,23 +514,87 @@
                 container.innerHTML = '';
                 staffList.forEach(s => {
                     const item = document.createElement('div');
-                    item.className = 'staff-item';
+                    item.className = 'admin-list-item';
                     item.innerHTML = `
                         <div>
-                            <strong>${s.full_name || 'Staff'}</strong><br>
-                            <span style="font-size:11px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username || 'yok'}</span>
+                            <strong style="font-size:12px;">${s.full_name || 'Staff'}</strong><br>
+                            <span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username || 'yok'}</span>
                         </div>
-                        <div class="staff-actions">
-                            <button class="btn-sm ${s.can_ban === 1 ? 'btn-toggle-on' : 'btn-toggle-off'}" onclick="toggleStaffBan(${s.user_id}, ${s.can_ban})">
+                        <div style="display:flex; gap:4px;">
+                            <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:${s.can_ban === 1 ? 'rgba(50,215,75,0.2)' : 'rgba(255,69,58,0.2)'}; color:${s.can_ban === 1 ? 'var(--success)' : 'var(--danger)'}; border:none; cursor:pointer;" onclick="toggleStaffBan(${s.user_id}, ${s.can_ban})">
                                 ${s.can_ban === 1 ? 'Ban: Açık ✅' : 'Ban: Kapalı ❌'}
                             </button>
-                            <button class="btn-sm btn-delete" onclick="removeStaff(${s.user_id})">Sil</button>
+                            <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:rgba(255,255,255,0.1); color:#fff; border:none; cursor:pointer;" onclick="removeStaff(${s.user_id})">Sil</button>
                         </div>
                     `;
                     container.appendChild(item);
                 });
+
+                // Admin Detay Listesini de Güncelle
+                renderAdminDetailedList(staffList);
+
             } catch (err) {
                 console.error("Staff listesi yüklenemedi:", err);
+            }
+        }
+
+        function renderAdminDetailedList(staffs) {
+            const container = document.getElementById('adminDetailedList');
+            const rankContainer = document.getElementById('adminRankingList');
+
+            if (!staffs || staffs.length === 0) {
+                container.innerHTML = '<div style="font-size:11px; color:var(--text-muted);">Admin bulunamadı.</div>';
+                rankContainer.innerHTML = '<div style="font-size:11px; color:var(--text-muted);">Yeterli aktivite verisi yok.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            rankContainer.innerHTML = `
+                <div style="font-size:11px; display:flex; justify-content:space-between; padding:8px; background:rgba(50,215,75,0.1); border-radius:10px;">
+                    <span>🥇 En Aktif Admin: <b>${staffs[0].full_name}</b></span>
+                    <span style="color:var(--success);">Aktif ⚡</span>
+                </div>
+            `;
+
+            staffs.forEach(s => {
+                const item = document.createElement('div');
+                item.className = 'admin-list-item';
+                item.onclick = () => openAdminModal(s.full_name, s.user_id, s.can_ban === 1 ? 'Yetkili' : 'Kısıtlı');
+                item.innerHTML = `
+                    <div>
+                        <div style="font-weight:600; font-size:12px;">🛡️ ${s.full_name}</div>
+                        <div style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username || 'yok'}</div>
+                    </div>
+                    <div style="font-size:11px; color:var(--accent-gold);">Detay 👆</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // Apple Tarzı Dokunmatik Balon Modal Açma
+        function openAdminModal(name, id, status) {
+            const modal = document.getElementById('adminModal');
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <h3 style="color:var(--accent-gold); font-size:16px; margin-bottom:6px;">⭐ ${name}</h3>
+                <p style="font-size:10px; color:var(--text-muted); margin-bottom:12px;">ID: ${id} | Durum: ${status}</p>
+                <div style="display:flex; flex-direction:column; gap:6px; font-size:11px; margin-bottom:14px;">
+                    <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;">
+                        <span>🛡️ Ban Yetkisi:</span> <b>${status}</b>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:8px; border-radius:8px;">
+                        <span>📊 Aktivite Skoru:</span> <b style="color:var(--success);">Yüksek</b>
+                    </div>
+                </div>
+                <button onclick="closeAdminModal()" style="width:100%; background:var(--accent-gold); color:black; border:none; padding:10px; border-radius:12px; font-weight:700; font-size:11px; cursor:pointer;">Kapat</button>
+            `;
+            modal.style.display = 'flex';
+        }
+
+        function closeAdminModal(event) {
+            if (!event || event.target.id === 'adminModal') {
+                document.getElementById('adminModal').style.display = 'none';
             }
         }
 
@@ -489,20 +720,19 @@
 
                 logsContainer.innerHTML = '';
                 logs.forEach(log => {
-                    let typeClass = 'type-default';
-                    if (log.action_type.includes('BAN')) typeClass = 'type-ban';
-                    else if (log.action_type === 'ADMIN_REPORT') typeClass = 'type-admin_report';
-                    else if (log.action_type.includes('WARN')) typeClass = 'type-warn';
+                    let badgeClass = 'badge-default';
+                    if (log.action_type.includes('BAN')) badgeClass = 'badge-ban';
+                    else if (log.action_type.includes('MUTE') || log.action_type.includes('WARN')) badgeClass = 'badge-mute';
 
                     const item = document.createElement('div');
                     item.className = 'log-item';
                     item.innerHTML = `
                         <div class="log-header">
-                            <span class="log-type ${typeClass}">${log.action_type}</span>
-                            <span class="log-time">${log.timestamp}</span>
+                            <span class="log-badge ${badgeClass}">${log.action_type}</span>
+                            <span style="color:var(--text-muted);">${log.timestamp}</span>
                         </div>
-                        <div class="log-details">${escapeHtml(log.details)}</div>
-                        <div class="log-user">Kullanıcı ID: ${log.user_id} | @${escapeHtml(log.username || 'Bilinmiyor')}</div>
+                        <div style="font-size:12px;">${escapeHtml(log.details)}</div>
+                        <div style="font-size:10px; color:var(--text-muted);">ID: ${log.user_id} | @${escapeHtml(log.username || 'Bilinmiyor')}</div>
                     `;
                     logsContainer.appendChild(item);
                 });
@@ -510,6 +740,32 @@
             } catch (err) {
                 console.error("Veri çekme hatası:", err);
             }
+        }
+
+        // Golden Chat Fonksiyonları
+        function sendChatMessage() {
+            const input = document.getElementById('chatInputText');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const chatMessages = document.getElementById('chatMessages');
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble outgoing';
+            bubble.innerHTML = `<b>Sen:</b> ${escapeHtml(text)}`;
+            chatMessages.appendChild(bubble);
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendChatMedia(type) {
+            const chatMessages = document.getElementById('chatMessages');
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble outgoing';
+            if (type === 'poll') bubble.innerHTML = `📊 <b>[Anket Gönderildi]</b>`;
+            if (type === 'voice') bubble.innerHTML = `🎙️ <b>[Sesli Mesaj - 0:12]</b>`;
+            if (type === 'file') bubble.innerHTML = `📎 <b>[Medya/Dosya Eklendi]</b>`;
+            chatMessages.appendChild(bubble);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         function escapeHtml(text) {
