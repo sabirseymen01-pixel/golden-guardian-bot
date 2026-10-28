@@ -2,6 +2,7 @@ import os
 import json
 import asyncio
 import logging
+import time
 from aiohttp import web
 from telegram import Update, ChatPermissions, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.helpers import escape_markdown
@@ -26,6 +27,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 CONFIG_FILE = "config.json"
+
+# --- GÜVENLİK & ACİT DURUM KİLİDİ DEĞİŞKENLERİ ---
+ADMIN_ACTION_LIMITS = {}
+MAX_ACTIONS_PER_MINUTE = 5  # 1 dakikada en fazla 5 kritik işlem
+EMERGENCY_LOCKDOWN = False  # True olduğunda kurucu hariç kimse ban/mute atamaz
 
 def get_button_config():
     try:
@@ -60,12 +66,38 @@ async def api_get_logs(request):
     except Exception as e:
         return web.json_response({"error": str(e)}, status=500)
 
+async def api_get_lock_status(request):
+    """Acil durum kilidinin o anki durumunu döndürür."""
+    return web.json_response({"lockdown": EMERGENCY_LOCKDOWN})
+
+async def api_toggle_lockdown(request):
+    """Kurucunun Mini App üzerinden tek tuşla kilidi açıp kapatmasını sağlar."""
+    global EMERGENCY_LOCKDOWN
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        
+        # Sadece Render'daki Kurucu (FOUNDER_ID) bu tuşa basabilir!
+        founder_id = os.environ.get("FOUNDER_ID")
+        if not founder_id or str(user_id) != str(founder_id).strip():
+            return web.json_response({"success": False, "error": "Yetkisiz işlem!"}, status=403)
+        
+        EMERGENCY_LOCKDOWN = not EMERGENCY_LOCKDOWN
+        status_text = "AKTİF (Banlar Kilitlendi!)" if EMERGENCY_LOCKDOWN else "KAPALI (Bot Normal Çalışıyor)"
+        logger.warning(f"🛡️ Kurucu Mini App üzerinden Acil Durum Kilidini değiştirdi: {status_text}")
+        
+        return web.json_response({"success": True, "lockdown": EMERGENCY_LOCKDOWN})
+    except Exception as e:
+        return web.json_response({"success": False, "error": str(e)}, status=500)
+
 async def start_web_server(app_context):
     app = web.Application()
     
     # API Rotaları
     app.router.add_get("/api/stats", api_get_stats)
     app.router.add_get("/api/logs", api_get_logs)
+    app.router.add_get("/api/lock-status", api_get_lock_status)
+    app.router.add_post("/api/toggle-lockdown", api_toggle_lockdown)
     
     # Kök dizine girildiğinde index.html'i doğrudan HTML olarak sun
     async def handle_root(request):
@@ -115,7 +147,6 @@ async def safe_delete_user_message(update: Update):
 
 # Admin ve Kurucu Kontrolü (Founder ID Destekli)
 async def is_user_admin(chat_id: int, user_id: int, context: ContextTypes.DEFAULT_TYPE) -> bool:
-    # Render'a eklenen kurucu (FOUNDER_ID) kontrolü
     founder_id = os.environ.get("FOUNDER_ID")
     if founder_id and str(user_id) == str(founder_id).strip():
         return True
@@ -126,6 +157,49 @@ async def is_user_admin(chat_id: int, user_id: int, context: ContextTypes.DEFAUL
     except Exception as e:
         logger.error(f"Admin kontrol hatası: {e}")
         return False
+
+# --- FLOOD / KÖTÜYE KULLANIM KONTROLÜ ---
+async def check_admin_rate_limit(chat_id: int, user_id: int, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    global EMERGENCY_LOCKDOWN
+
+    founder_id = os.environ.get("FOUNDER_ID")
+    if founder_id and str(user_id) == str(founder_id).strip():
+        return True
+
+    if EMERGENCY_LOCKDOWN:
+        try:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text="🚨 *ACİL DURUM KİLİDİ AKTİF!* \nGüvenlik ihlali nedeniyle botun ban mekanizmaları kurucu tarafından donduruldu."
+            )
+        except Exception:
+            pass
+        return False
+
+    now = time.time()
+    key = (chat_id, user_id)
+    
+    if key not in ADMIN_ACTION_LIMITS:
+        ADMIN_ACTION_LIMITS[key] = []
+
+    ADMIN_ACTION_LIMITS[key] = [t for t in ADMIN_ACTION_LIMITS[key] if now - t < 60]
+
+    if len(ADMIN_ACTION_LIMITS[key]) >= MAX_ACTIONS_PER_MINUTE:
+        EMERGENCY_LOCKDOWN = True
+        logger.warning(f"🚨 GÜVENLİK ALARMI: Kullanıcı {user_id} çok fazla seri işlem yaptı. Acil Durum Kilidi devreye sokuldu!")
+        
+        if founder_id:
+            try:
+                await context.bot.send_message(
+                    chat_id=int(founder_id),
+                    text=f"🚨 *GÜVENLİK ALARMI!*\n\nBir yönetici kısa sürede çok fazla ban/işlem denemesi yaptı. Botun tüm ban yetkileri otomatik olarak kilitlendi!\n\nKilidi açmak için Golden Staff Paneli'ni kullanabilirsin."
+                )
+            except Exception:
+                pass
+        return False
+
+    ADMIN_ACTION_LIMITS[key].append(now)
+    return True
 
 # Hedef kullanıcıyı bulma
 async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -176,7 +250,7 @@ async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYP
     else:
         logger.error(f"İşlenmeyen hata meydana geldi: {context.error}", exc_info=context.error)
 
-# /start & /help (Komut listesi ve en altta Golden Staff Dokunmatik Paneli İle)
+# /start & /help
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
         "🤖 *Grup Yönetim & Golden Staff Güvenlik Botu*\n\n"
@@ -198,9 +272,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Aşağıdaki butona dokunarak **Golden Staff Paneli**'ne giriş yapabilirsin! 👇"
     )
 
-    # Render üzerindeki canlı web servisinizin adresi
     web_app_url = "https://golden-guardian-bot.onrender.com/"
-    
     keyboard = [
         [InlineKeyboardButton(text="🛡️ Golden Staff Paneli", web_app=WebAppInfo(url=web_app_url))]
     ]
@@ -466,7 +538,7 @@ async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"Kilit Hatası: {e}")
 
-# /defol (Ban)
+# /defol (Ban) - Korumalı Hali
 async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     admin_id = update.effective_user.id
@@ -474,6 +546,10 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await is_user_admin(chat_id, admin_id, context):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
+        return
+
+    if not await check_admin_rate_limit(chat_id, admin_id, context):
+        await send_auto_delete_message(context, chat_id, "⚠️ Güvenlik Sınırı: Çok hızlı işlem yapıyorsunuz. Bot kilitlendi.", delay=10)
         return
 
     user = await get_target_user(update, context)
@@ -516,7 +592,7 @@ async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"Unban Hatası: {e}")
 
-# /itaat (Mute)
+# /itaat (Mute) - Korumalı Hali
 async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     admin_id = update.effective_user.id
@@ -524,6 +600,10 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not await is_user_admin(chat_id, admin_id, context):
         await send_auto_delete_message(context, chat_id, "❌ Bu komutu sadece yöneticiler kullanabilir.", parse_mode=None)
+        return
+
+    if not await check_admin_rate_limit(chat_id, admin_id, context):
+        await send_auto_delete_message(context, chat_id, "⚠️ Güvenlik Sınırı: Çok hızlı işlem yapıyorsunuz. Bot kilitlendi.", delay=10)
         return
 
     user = await get_target_user(update, context)
@@ -614,14 +694,13 @@ async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_auto_delete_message(context, chat_id, f"✅ *{safe_name}* uyarıları sıfırlandı.", parse_mode="Markdown")
     database.log_action(chat_id, "UNWARN", user.id, user.username, "Uyarıları sıfırlandı.")
 
-# --- @ADMIN BİLDİRİ VE ŞİKAYET SİSTEMİ (Grup İçi %100 Gizli & PM/Mini App Raporlu) ---
+# --- @ADMIN BİLDİRİ VE ŞİKAYET SİSTEMİ ---
 async def handle_admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
     if not update.message or not update.message.text:
         return False
 
     text = update.message.text.lower()
     
-    # Eğer mesajda @admin geçiyorsa ve bir mesaja yanıt verildiyse
     if "@admin" in text and update.message.reply_to_message:
         reporter = update.effective_user
         reported_msg = update.message.reply_to_message
@@ -633,7 +712,6 @@ async def handle_admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE
         try:
             admins = await context.bot.get_chat_administrators(chat.id)
             
-            # Şikayeti veritabanına logla (Sadece Golden Staff Mini App içinde görünecek)
             database.log_action(
                 chat.id, 
                 "ADMIN_REPORT", 
@@ -642,10 +720,8 @@ async def handle_admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE
                 f"Şikayet Edilen: {reported_user.full_name} | İçerik: {report_content[:50]}"
             )
 
-            # Kullanıcının @admin yazan mesajını gruptan tamamen temizle (Sohbet asla kirlenmez)
             await safe_delete_user_message(update)
 
-            # Yöneticilere (YT'lere) özel mesajla (PM) temiz rapor gönder
             admin_report_text = (
                 f"🚨 *YENİ YÖNETİCİ BİLDİRİMİ*\n"
                 f"📌 *Grup:* `{chat.title}`\n\n"
@@ -664,7 +740,7 @@ async def handle_admin_report(update: Update, context: ContextTypes.DEFAULT_TYPE
                             parse_mode="Markdown"
                         )
                     except Exception:
-                        pass # Botu özelden başlatmamış adminler için hata vermesini engeller
+                        pass
 
             return True
         except Exception as e:
@@ -677,7 +753,6 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message:
         return
 
-    # Önce @admin bildiri kontrolü yap
     if await handle_admin_report(update, context):
         return
 
@@ -694,14 +769,12 @@ async def handle_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not text:
         return
 
-    # Yasaklı içerik, küfür, argo veya dış link tespit edilirse mesajı sil ve direkt banla
     if custom_filters.contains_profanity(text):
         try:
             await update.message.delete()
             safe_name = escape_markdown(user.full_name, version=1)
             await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
             
-            # Veritabanına güvenlik banı logunu kaydet
             database.log_action(chat_id, "SECURITY_BAN", user.id, user.username, f"Yasaklı içerik/link tespit edildi.")
 
             await send_auto_delete_message(
