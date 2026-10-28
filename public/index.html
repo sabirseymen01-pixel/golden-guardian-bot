@@ -17,7 +17,7 @@
             --text-muted: #9aa0a6;
             --danger: #ff4d4d;
             --success: #2ecc71;
-            /* 3D Baloncuk Renkleri (Görsel Esintili) */
+            /* 3D Derinlikli Baloncuk Renkleri */
             --bubble-incoming: rgba(35, 40, 50, 0.9);
             --bubble-outgoing: linear-gradient(135deg, #d4af37, #b89728);
         }
@@ -188,7 +188,7 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 25px rgba(212,175,55,0.05);
         }
 
-        /* Üst Header (Görseldeki gibi lüks üst bar ve sağ üstte arama/ses odası butonu) */
+        /* Üst Header (Görseldeki stil, sağ üstte arama tuşu ile ses odası tetikleme) */
         .chat-top-bar {
             background: var(--surface-glass-bright);
             border-bottom: 1px solid var(--border-glass);
@@ -203,7 +203,7 @@
         }
         .chat-actions-right { display: flex; align-items: center; gap: 12px; }
         
-        /* Sağ üstteki arama butonu -> Ses Odasına Giriş */
+        /* Sağ üstteki arama butonu -> Ses Odasına Giriş / Çıkış */
         .header-call-btn {
             background: rgba(212, 175, 55, 0.15); border: 1px solid var(--border-glass);
             width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -229,7 +229,7 @@
             box-shadow: 0 6px 20px var(--accent-gold-glow);
         }
 
-        /* Otomatik Ses Odası / Konferans Kartı Tasarımı */
+        /* Otomatik Ses Odası Kartı */
         .voice-room-card {
             background: linear-gradient(135deg, rgba(212,175,55,0.18), rgba(20,22,30,0.95));
             border: 1px solid var(--accent-gold);
@@ -274,7 +274,7 @@
         .voice-waves { flex: 1; height: 20px; display: flex; align-items: center; gap: 2px; }
         .w-bar { flex: 1; background: currentColor; border-radius: 3px; opacity: 0.9; height: 70%; }
 
-        /* Alt Giriş Barı (Görseldeki tasarımı birebir yansıtan lüks ikonlar) */
+        /* Alt Giriş Barı */
         .chat-input-bar {
             display: flex; align-items: center; gap: 10px; padding: 14px 16px;
             background: var(--surface-glass-bright); border-top: 1px solid var(--border-glass);
@@ -387,7 +387,7 @@
     <!-- PORT 4: STAFF CHAT & SESLİ KONFERANS -->
     <div id="port-chat" class="portal-section">
         <div class="chat-container-pro">
-            <!-- Üst Bar (Görseldeki Stil + Sağ Üstte Arama Butonu ile Ses Odası Girişi) -->
+            <!-- Üst Bar (Sağ üstte arama/ses odası butonu) -->
             <div class="chat-top-bar">
                 <div class="chat-title-info">
                     <div class="chat-avatar">GS</div>
@@ -397,7 +397,7 @@
                     </div>
                 </div>
                 <div class="chat-actions-right">
-                    <!-- Sağ üstteki arama butonu -> Ses Odası Açma / Giriş -->
+                    <!-- Sağ üstteki arama butonu -> Ses Odasına Bağlan / Ayrıl -->
                     <button class="header-call-btn" onclick="toggleVoiceChat()" title="Ses Odasına Bağlan">
                         <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
                     </button>
@@ -409,7 +409,7 @@
                 <div class="chat-bubble incoming"><b>Sistem:</b> Golden Staff Lüks Haberleşme Portalına hoş geldiniz. Anket, sesli mesaj ve ses odası aktiftir.</div>
             </div>
 
-            <!-- Alt Araç ve Giriş Barı (Emoji, Ataç, Kamera, Mikrofon ve Gönder) -->
+            <!-- Alt Giriş Barı -->
             <div class="chat-input-bar">
                 <button class="tool-btn" onclick="openPollCreator()" title="Anket Oluştur">
                     <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
@@ -814,9 +814,15 @@
             }
         }
 
+        // Anket Oluşturucu (Şıklı sistem)
         async function openPollCreator() {
             const question = prompt("Anket sorusunu yazın:");
             if (!question) return;
+            const optionsInput = prompt("Şıkları virgülle ayırarak yazın (Örn: Kabul, Ret, Çekimser):");
+            if (!optionsInput) return;
+            const options = optionsInput.split(',').map(o => o.trim()).filter(o => o);
+
+            let pollData = { question: question, options: options };
 
             try {
                 await fetch('/api/chat', {
@@ -826,7 +832,7 @@
                         user_id: user.id,
                         username: user.username || 'admin',
                         full_name: user.first_name || 'Admin',
-                        message: question,
+                        message: JSON.stringify(pollData),
                         msg_type: 'poll'
                     })
                 });
@@ -865,7 +871,6 @@
             
             if (isVoiceChatActive) {
                 status.innerText = "Konferans Aktif (Bağlandınız)";
-                // Chata otomatik ses odası kartı gönder
                 await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
