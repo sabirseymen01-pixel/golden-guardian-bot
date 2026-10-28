@@ -2,6 +2,9 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Golden Guardian | Antik Medusa & Staff Hub</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -192,7 +195,6 @@
             border: 1px solid var(--accent-gold);
         }
 
-        /* Sağ üstteki arama/ses butonu -> Ses Evi (Voice Lounge) Açar */
         .header-call-btn {
             background: rgba(212, 175, 55, 0.15); border: 1px solid var(--border-glass);
             width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -227,7 +229,6 @@
             box-shadow: 0 4px 15px var(--accent-gold-glow);
         }
 
-        /* Ses Odası Kartı (Chat İçinde) */
         .voice-room-card {
             background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(15,17,23,0.95));
             border: 1px solid var(--accent-gold);
@@ -245,7 +246,6 @@
             border-radius: 9px; font-size: 11px; font-weight: 800; cursor: pointer;
         }
 
-        /* Anket Kartı */
         .poll-box {
             background: rgba(0,0,0,0.6); border: 1px solid var(--border-glass);
             border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; width: 100%;
@@ -257,7 +257,6 @@
         }
         .poll-option-item:hover { background: rgba(212,175,55,0.2); }
 
-        /* Sesli Mesaj Oynatıcı */
         .voice-player { display: flex; align-items: center; gap: 10px; }
         .voice-play-trigger {
             background: #07080a; color: var(--accent-gold); border: 1px solid var(--accent-gold);
@@ -266,7 +265,6 @@
         .voice-waves { flex: 1; height: 18px; display: flex; align-items: center; gap: 2px; }
         .w-bar { flex: 1; background: currentColor; border-radius: 3px; opacity: 0.9; height: 70%; }
 
-        /* Alt Giriş Barı (Geniş & Rahat) */
         .chat-input-bar {
             display: flex; align-items: center; gap: 8px; padding: 10px 14px;
             background: var(--surface-glass-bright); border-top: 1px solid var(--border-glass);
@@ -284,7 +282,6 @@
         .tool-btn:hover { background: var(--accent-gold); color: #07080a; }
         .tool-btn svg { width: 17px; height: 17px; fill: currentColor; }
 
-        /* --- "SES EVİ" TARZI YUVARLAK KÜRSÜ SLOTLARI (MODAL) --- */
         .voice-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.88); backdrop-filter: blur(12px);
@@ -299,7 +296,6 @@
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-        /* İkinci Görseldeki Yuvarlak Kürsü Grid Alanı */
         .speakers-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -438,7 +434,6 @@
                     </div>
                 </div>
                 <div class="chat-actions-right">
-                    <!-- Sağ üstteki arama butonu -> "Ses Evi" Modalını Açar -->
                     <button class="header-call-btn" onclick="openVoiceRoomModal()" title="Ses Evi'ni Aç">
                         <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
                     </button>
@@ -478,7 +473,6 @@
             </div>
             <div style="font-size: 11px; color: var(--text-muted);">Antik kürsü konseptli canlı ses odası. Kurucu olarak yetkililerin profillerine dokunarak seslerini açıp kapatabilirsiniz.</div>
             
-            <!-- İkinci görseldeki gibi yuvarlak avatarların grid dizilimi -->
             <div class="speakers-grid" id="voiceSpeakersGrid">
                 <div class="loading">Kürsüler yükleniyor...</div>
             </div>
@@ -705,10 +699,6 @@
 
                 logsContainer.innerHTML = '';
                 logs.forEach(log => {
-                    let badgeClass = 'badge-default';
-                    if (log.action_type.includes('BAN')) badgeClass = 'badge-ban';
-                    else if (log.action_type.includes('MUTE') || log.action_type.includes('WARN')) badgeClass = 'badge-mute';
-
                     const item = document.createElement('div');
                     item.className = 'glass-card';
                     item.style.padding = '10px';
@@ -909,7 +899,6 @@
             }
         }
 
-        # Sağ üstteki arama tuşuna basıldığında açılan Ses Evi Modalı
         async function openVoiceRoomModal() {
             document.getElementById('voiceModal').style.display = 'flex';
             loadVoiceSpeakers();
@@ -948,7 +937,6 @@
                     const slot = document.createElement('div');
                     slot.className = 'speaker-slot';
                     
-                    // Kurucu tıklayarak susturma/açma yapabilsin
                     if (isFounder) {
                         slot.onclick = () => {
                             const newMute = s.is_muted === 1 ? 0 : 1;
