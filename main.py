@@ -116,6 +116,62 @@ async def api_remove_staff(request):
     database.remove_staff_member(target_id)
     return web.json_response({"success": True})
 
+# --- YENİ EKLENEN ÜYE VE AYAR YÖNETİMİ API'LERİ ---
+async def api_member_action(request):
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        target_input = str(data.get("target", "")).strip()
+        action = str(data.get("action", "")).strip()
+        
+        if not database.is_authorized_staff(user_id):
+            founder_id = (config and getattr(config, "FOUNDER_ID", None)) or os.environ.get("FOUNDER_ID")
+            if not founder_id or str(user_id) != str(founder_id).strip():
+                return web.json_response({"success": False, "error": "Yetkisiz işlem!"}, status=403)
+
+        bot = request.app['bot']
+        chat_id = data.get("chat_id", 0)
+
+        clean_target = target_input.lstrip("@").lower()
+        if clean_target.isdigit() or (clean_target.startswith("-") and clean_target[1:].isdigit()):
+            target_id = int(clean_target)
+        else:
+            target_id = database.get_user_id_by_username(int(chat_id) if chat_id else 0, clean_target)
+            if not target_id:
+                return web.json_response({"success": False, "error": "Kullanıcı bulunamadı!"}, status=404)
+
+        if chat_id:
+            if action == "ban":
+                await bot.ban_chat_member(chat_id=int(chat_id), user_id=target_id)
+                database.log_action(int(chat_id), "WEB_BAN", target_id, clean_target, "Web panelinden üye banlandı.")
+            elif action == "mute":
+                await bot.restrict_chat_member(chat_id=int(chat_id), user_id=target_id, permissions=ChatPermissions(can_send_messages=False))
+                database.log_action(int(chat_id), "WEB_MUTE", target_id, clean_target, "Web panelinden üye susturuldu.")
+
+        return web.json_response({"success": True})
+    except Exception as e:
+        return web.json_response({"success": False, "error": str(e)}, status=500)
+
+async def api_update_settings(request):
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        if not database.is_authorized_staff(user_id):
+            return web.json_response({"success": False, "error": "Yetkisiz!"}, status=403)
+
+        chat_id = int(data.get("chat_id", 0))
+        if chat_id:
+            if "welcome_msg" in data:
+                database.update_group_setting(chat_id, "welcome_msg", data["welcome_msg"])
+            if "btn_text" in data:
+                database.update_group_setting(chat_id, "btn_text", data["btn_text"])
+            if "btn_url" in data:
+                database.update_group_setting(chat_id, "btn_url", data["btn_url"])
+
+        return web.json_response({"success": True})
+    except Exception as e:
+        return web.json_response({"success": False, "error": str(e)}, status=500)
+
 async def start_web_server(app_context):
     app = web.Application()
     app['bot'] = app_context.bot
@@ -131,6 +187,8 @@ async def start_web_server(app_context):
     app.router.add_post("/api/staff/list", api_get_staff_list)
     app.router.add_post("/api/staff/add", api_add_staff)
     app.router.add_post("/api/staff/remove", api_remove_staff)
+    app.router.add_post("/api/member/action", api_member_action)
+    app.router.add_post("/api/settings/update", api_update_settings)
     
     async def handle_root(request):
         try:
@@ -194,7 +252,6 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> b
     await send_auto_delete_message(context, chat_id, "❌ Bu komutu kullanmak için yetkiniz yok!")
     return False
 
-# --- KUSURSUZ HEDEF BULMA ---
 async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
@@ -253,7 +310,6 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 
     return None
 
-# --- TELEGRAM KOMUTLARI ---
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type in ["group", "supergroup"]:
         try:
@@ -488,7 +544,6 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
 
     text = (update.message.text or update.message.caption or "").strip()
     
-    # --- YASAKLI LİNK, CP VE İÇERİK KORUMASI (YÖNETİCİ KORUMALI) ---
     if update.effective_chat.type in ["group", "supergroup"]:
         is_admin = False
         if user:
