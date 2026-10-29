@@ -184,11 +184,11 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> b
     await send_auto_delete_message(context, chat_id, "❌ Bu komutu kullanmak için yetkiniz yok!")
     return False
 
-# --- KUSURSUZ HEDEF BULMA (YANITLA, ID, KULLANICI ADI) ---
+# --- KÜRESEL DOĞRUDAN TELEGRAM API DESTEKLİ HEDEF BULMA ---
 async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
-    # 1. Mesaja yanıt verilmişse
+    # 1. Yanıtlanan mesaj
     if update.message and update.message.reply_to_message:
         target = update.message.reply_to_message.from_user
         if target:
@@ -202,7 +202,7 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if entity.type == "text_mention" and entity.user:
                 return entity.user
 
-    # 3. Argüman olarak ID veya @kullanici verilmişse
+    # 3. Argüman olarak verilen ID veya @kullaniciadi
     if context.args:
         arg = context.args[0].strip()
         clean_arg = arg.lstrip("@").lower()
@@ -221,37 +221,32 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         self.username = f"id_{user_id}"
                 return TempUser(uid)
         else:
-            # Önce veritabanından ID eşleşmesini ara
-            db_uid = database.get_user_id_by_username(chat_id, clean_arg)
-            if not db_uid:
-                db_uid = database.get_user_id_by_username(0, clean_arg)
-                
+            # Önce veritabanından ara
+            db_uid = database.get_user_id_by_username(chat_id, clean_arg) or database.get_user_id_by_username(0, clean_arg)
             if db_uid:
                 try:
                     member = await context.bot.get_chat_member(chat_id, db_uid)
                     return member.user
                 except Exception:
-                    class TempUser:
-                        def __init__(self, user_id, uname):
-                            self.id = user_id
-                            self.full_name = f"@{uname}"
-                            self.username = uname
-                    return TempUser(db_uid, clean_arg)
-            else:
-                # Veritabanında yoksa bile Telegram üzerinden username ile bulmayı dene
-                try:
-                    chat_member = await context.bot.get_chat_member(chat_id, f"@{clean_arg}")
-                    if chat_member and chat_member.user:
-                        return chat_member.user
-                except Exception:
                     pass
 
-                class TempUser:
-                    def __init__(self, uname):
-                        self.id = int(hashlib.md5(uname.encode()).hexdigest()[:8], 16)
-                        self.full_name = f"@{uname}"
-                        self.username = uname
-                return TempUser(clean_arg)
+            # Veritabanında yoksa, Telegram grup üyelerinden veya yöneticilerden username eşleştirmesi dene
+            try:
+                admins = await context.bot.get_chat_administrators(chat_id)
+                for admin in admins:
+                    if admin.user.username and admin.user.username.lower() == clean_arg:
+                        database.save_user(chat_id, admin.user.id, clean_arg)
+                        return admin.user
+            except Exception:
+                pass
+
+            # Son çare olarak geçici nesne oluştur (ID bulunamasa bile bot API üzerinden username ile işlem yapmayı dener)
+            class UsernameTarget:
+                def __init__(self, uname):
+                    self.id = uname # Telegram bazı durumlarda @username'i string ID olarak kabul eder
+                    self.full_name = f"@{uname}"
+                    self.username = uname
+            return UsernameTarget(clean_arg)
                 
     return None
 
@@ -358,13 +353,13 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "⚠️ Kullanıcı bulunamadı (Yanıt verin veya @kullanici yazın).")
+        await send_auto_delete_message(context, chat_id, "⚠️ Kullanıcı bulunamadı.")
         return
     try:
         await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
         name = getattr(user, 'full_name', str(user.id))
         await send_auto_delete_message(context, chat_id, f"🚫 {name} gruptan banlandı!")
-        database.log_action(chat_id, "BAN", user.id, update.effective_user.username or "admin", f"{name} banlandı.")
+        database.log_action(chat_id, "BAN", str(user.id), update.effective_user.username or "admin", f"{name} banlandı.")
     except Exception as e:
         await send_auto_delete_message(context, chat_id, f"❌ Ban hatası: {e}")
 
@@ -385,13 +380,13 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "⚠️ Kullanıcı bulunamadı (Yanıt verin veya @kullanici yazın).")
+        await send_auto_delete_message(context, chat_id, "⚠️ Kullanıcı bulunamadı.")
         return
     try:
         await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=ChatPermissions(can_send_messages=False))
         name = getattr(user, 'full_name', str(user.id))
         await send_auto_delete_message(context, chat_id, f"🔇 {name} susturuldu!")
-        database.log_action(chat_id, "MUTE", user.id, update.effective_user.username or "admin", f"{name} susturuldu.")
+        database.log_action(chat_id, "MUTE", str(user.id), update.effective_user.username or "admin", f"{name} susturuldu.")
     except Exception as e:
         await send_auto_delete_message(context, chat_id, f"❌ Mute hatası: {e}")
 
@@ -413,7 +408,7 @@ async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
     if not user:
-        await send_auto_delete_message(context, chat_id, "⚠️ Kullanıcı bulunamadı (Yanıt verin veya @kullanici yazın).")
+        await send_auto_delete_message(context, chat_id, "⚠️ Kullanıcı bulunamadı.")
         return
     name = getattr(user, 'full_name', str(user.id))
     current_warns = database.add_warning(user.id)
@@ -459,7 +454,6 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
     text = (update.message.text or update.message.caption or "").strip()
     if not text: return
 
-    # Komut algılama ve @botadi uzantılarını tamamen temizleme
     if text.startswith(("/", "!")):
         parts = text.split()
         cmd_word = parts[0][1:].split("@")[0].lower()
