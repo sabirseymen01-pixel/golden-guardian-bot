@@ -473,6 +473,13 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
                     pass
                 return
 
+            # Admin komutlarında kullanıcının yazdığı komut mesajını gruptan temizle/sil
+            if update.effective_chat.type in ["group", "supergroup"]:
+                try:
+                    await update.message.delete()
+                except Exception:
+                    pass
+
             await COMMAND_MAP[cmd_word](update, context)
             return
 
