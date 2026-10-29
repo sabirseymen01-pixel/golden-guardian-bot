@@ -234,7 +234,7 @@
                     item.innerHTML = `
                         <div>
                             <strong>${s.full_name}</strong><br>
-                            <span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | Uyarı: ${s.warnings}/3</span>
+                            <span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username || 'yok'} | Uyarı: ${s.warnings}/3</span>
                         </div>
                         <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:rgba(255,255,255,0.1); color:#fff; border:none; cursor:pointer;" onclick="removeStaff(${s.user_id})">Sil</button>
                     `;
@@ -306,7 +306,7 @@
                 const stats = await statsRes.json();
                 document.getElementById('totalActions').innerText = stats.total_actions || 0;
                 const bd = stats.action_breakdown || {};
-                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['FILTER_DELETE'] || 0);
+                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['FILTER_DELETE'] || 0) + (bd['AUTO_BAN_LINK'] || 0);
 
                 const cloudRes = await fetch('/api/data-cloud');
                 const cloudTags = await cloudRes.json();
