@@ -91,12 +91,16 @@ async def api_add_staff(request):
     full_name = data.get("full_name", "Yetkili")
     if not input_value:
         return web.json_response({"success": False, "error": "Boş değer"}, status=400)
-    clean_val = input_value.lstrip("@")
+    
+    clean_val = input_value.lstrip("@").lower()
+    
+    # ID veya @username ile akıllı arama ve ekleme
     if clean_val.isdigit() or (clean_val.startswith("-") and clean_val[1:].isdigit()):
         target_id = int(clean_val)
     else:
-        found_id = database.get_user_id_by_username(0, clean_val.lower())
-        target_id = found_id if found_id else int(hashlib.md5(clean_val.lower().encode()).hexdigest()[:8], 16)
+        found_id = database.get_user_id_by_username(0, clean_val)
+        target_id = found_id if found_id else int(hashlib.md5(clean_val.encode()).hexdigest()[:8], 16)
+        
     database.add_staff_member(target_id, clean_val, full_name, user_id)
     return web.json_response({"success": True})
 
@@ -478,6 +482,38 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
         database.save_user(chat_id, user.id, user.username.lower())
 
     text = (update.message.text or update.message.caption or "").strip()
+    
+    # --- YASAKLI LİNK, ŞEKİLLİ METİN VE İÇERİK FİLTRELEMESİ ---
+    if update.effective_chat.type in ["group", "supergroup"]:
+        is_admin = False
+        if user:
+            try:
+                member = await context.bot.get_chat_member(chat_id, user.id)
+                if member.status in ["administrator", "creator"] or database.is_authorized_staff(user.id):
+                    is_admin = True
+            except Exception:
+                pass
+
+        if not is_admin and text:
+            lower_text = text.lower()
+            # Dış bağlantılar, telegram grup/kanal linkleri, şekilli zararlı yönlendirmeler
+            has_link = "http://" in lower_text or "https://" in lower_text or "t.me/" in lower_text or "telegram.me/" in lower_text or "www." in lower_text or "t.me" in lower_text
+            has_bad_words = any(word in lower_text for word in BAD_WORDS)
+            
+            if has_link or has_bad_words:
+                try:
+                    await update.message.delete()
+                    if user:
+                        await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+                        uname_str = f"@{user.username}" if user.username else str(user.id)
+                        name_str = user.full_name or "Kullanıcı"
+                        
+                        database.log_action(chat_id, "AUTO_BAN_LINK", user.id, uname_str, f"{name_str} ({user.id}) yasaklı içerik/link paylaştığı için otomatik banlandı.")
+                        await send_auto_delete_message(context, chat_id, f"🚨 Yasaklı içerik/link tespit edildi!\n👤 Kullanıcı: {name_str} ({uname_str})\n🆔 ID: `{user.id}`\n🚫 Gruptan uzaklaştırıldı.", delay=15)
+                except Exception as e:
+                    logger.error(f"Filtreleme hatası: {e}")
+                return
+
     if not text: return
 
     if text.startswith(("/", "!")):
@@ -493,7 +529,6 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
                     pass
                 return
 
-            # Admin komutlarında kullanıcının yazdığı komut mesajını gruptan temizle/sil
             if update.effective_chat.type in ["group", "supergroup"]:
                 try:
                     await update.message.delete()
