@@ -184,7 +184,7 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> b
     await send_auto_delete_message(context, chat_id, "❌ Bu komutu kullanmak için yetkiniz yok!")
     return False
 
-# --- KÜRESEL DOĞRUDAN TELEGRAM API DESTEKLİ HEDEF BULMA ---
+# --- KUSURSUZ HEDEF BULMA (YANITLA, ID, KULLANICI ADI) ---
 async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
@@ -230,7 +230,7 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 except Exception:
                     pass
 
-            # Veritabanında yoksa, Telegram grup üyelerinden veya yöneticilerden username eşleştirmesi dene
+            # Veritabanında yoksa, Telegram grup yöneticilerinden username eşleştirmesi dene
             try:
                 admins = await context.bot.get_chat_administrators(chat_id)
                 for admin in admins:
@@ -240,10 +240,10 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception:
                 pass
 
-            # Son çare olarak geçici nesne oluştur (ID bulunamasa bile bot API üzerinden username ile işlem yapmayı dener)
+            # Eğer yukarıdakiler bulamazsa doğrudan string username ile Telegram API'sine istek atmayı dener
             class UsernameTarget:
                 def __init__(self, uname):
-                    self.id = uname # Telegram bazı durumlarda @username'i string ID olarak kabul eder
+                    self.id = f"@{uname}"
                     self.full_name = f"@{uname}"
                     self.username = uname
             return UsernameTarget(clean_arg)
@@ -294,12 +294,14 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
     chat_id = update.effective_chat.id
     
+    reply = update.message.reply_to_message
     raw_text = update.message.text.partition(" ")[2].strip()
-    if not raw_text and update.message.reply_to_message:
-        raw_text = update.message.reply_to_message.text or update.message.reply_to_message.caption or ""
+    
+    if not raw_text and reply:
+        raw_text = reply.text or reply.caption or ""
         
     if not raw_text:
-        await send_auto_delete_message(context, chat_id, "⚠️ Kullanım: /duyuru Mesaj | Buton Yazısı | Link")
+        await send_auto_delete_message(context, chat_id, "⚠️ Kullanım: /duyuru Mesaj | Buton Yazısı | Link (Görseli yanıtlayarak yazın)")
         return
         
     settings = database.get_group_settings(chat_id)
@@ -318,17 +320,30 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
         btn_url = "https://" + btn_url
 
     keyboard = [[InlineKeyboardButton(text=btn_text, url=btn_url)]]
+    
     try:
-        msg = await context.bot.send_message(
-            chat_id=chat_id,
-            text=f"📢 **DUYURU**\n\n{msg_text}",
-            reply_markup=InlineKeyboardMarkup(keyboard),
-            parse_mode="Markdown"
-        )
+        if reply and reply.photo:
+            photo_id = reply.photo[-1].file_id
+            msg = await context.bot.send_photo(
+                chat_id=chat_id,
+                photo=photo_id,
+                caption=f"📢 **DUYURU**\n\n{msg_text}",
+                reply_markup=InlineKeyboardMarkup(keyboard),
+                parse_mode="Markdown"
+            )
+        else:
+            msg = await context.bot.send_message(
+                chat_id=chat_id,
+                text=f"📢 **DUYURU**\n\n{msg_text}",
+                reply_markup=InlineKeyboardMarkup(keyboard),
+                parse_mode="Markdown"
+            )
+            
         try:
             await context.bot.pin_chat_message(chat_id=chat_id, message_id=msg.message_id)
         except Exception:
             pass
+            
     except Exception as e:
         await send_auto_delete_message(context, chat_id, f"❌ Duyuru hatası: {e}")
 
