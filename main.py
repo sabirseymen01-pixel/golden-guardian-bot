@@ -15,13 +15,16 @@ from telegram.ext import (
 )
 from telegram.request import HTTPXRequest
 from telegram.error import TelegramError, Conflict
-import config
+
 import database
+try:
+    import config
+except ImportError:
+    config = None
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Arayüz log kalabalığını kapat
 logging.getLogger("aiohttp.access").setLevel(logging.WARNING)
 
 ADMIN_ACTION_LIMITS = {}
@@ -59,7 +62,7 @@ async def api_toggle_lockdown(request):
     global EMERGENCY_LOCKDOWN
     data = await request.json()
     user_id = int(data.get("user_id", 0))
-    founder_id = getattr(config, "FOUNDER_ID", None) or os.environ.get("FOUNDER_ID")
+    founder_id = (config and getattr(config, "FOUNDER_ID", None)) or os.environ.get("FOUNDER_ID")
     if founder_id and str(user_id) != str(founder_id).strip():
         return web.json_response({"success": False, "error": "Yetkisiz!"}, status=403)
     EMERGENCY_LOCKDOWN = not EMERGENCY_LOCKDOWN
@@ -68,7 +71,7 @@ async def api_toggle_lockdown(request):
 async def api_verify_admin(request):
     data = await request.json()
     user_id = int(data.get("user_id", 0))
-    founder_id = getattr(config, "FOUNDER_ID", None) or os.environ.get("FOUNDER_ID")
+    founder_id = (config and getattr(config, "FOUNDER_ID", None)) or os.environ.get("FOUNDER_ID")
     
     if founder_id and str(user_id) == str(founder_id).strip():
         return web.json_response({"authorized": True, "is_founder": True})
@@ -163,7 +166,7 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> b
     if update.message and update.message.sender_chat and update.message.sender_chat.id == chat_id:
         return True
 
-    founder_id = getattr(config, "FOUNDER_ID", None) or os.environ.get("FOUNDER_ID")
+    founder_id = (config and getattr(config, "FOUNDER_ID", None)) or os.environ.get("FOUNDER_ID")
     if founder_id and str(user_id) == str(founder_id).strip():
         return True
 
@@ -191,7 +194,7 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> b
 
 async def check_admin_rate_limit(chat_id, user_id, context):
     global EMERGENCY_LOCKDOWN
-    founder_id = getattr(config, "FOUNDER_ID", None) or os.environ.get("FOUNDER_ID")
+    founder_id = (config and getattr(config, "FOUNDER_ID", None)) or os.environ.get("FOUNDER_ID")
     if founder_id and str(user_id) == str(founder_id).strip():
         return True
     if EMERGENCY_LOCKDOWN:
@@ -600,7 +603,6 @@ async def handle_new_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
 
-# TÜM MESAJLARI VE KOMUTLARI YAKALAYAN MERKEZİ YÖNLENDİRİCİ
 COMMAND_MAP = {
     "start": cmd_start,
     "help": cmd_start,
@@ -632,7 +634,6 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
     if not text:
         return
 
-    # EĞER MESAJ "/" VEYA "!" İLE BAŞLIYORSA DOĞRUDAN KOMUT OLARAK ÇALIŞTIR
     if text.startswith(("/", "!")):
         parts = text.split()
         cmd_word = parts[0][1:].split("@")[0].lower()
@@ -643,7 +644,6 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
             await COMMAND_MAP[cmd_word](update, context)
             return
 
-    # Küfür / Argo Filtresi
     lower_text = text.lower()
     if any(word in lower_text for word in BAD_WORDS):
         try:
@@ -680,8 +680,13 @@ async def post_init(application):
     logger.info("Bot ve Web Sunucusu başarıyla başlatıldı.")
 
 def main():
+    token = os.environ.get("BOT_TOKEN") or (config and getattr(config, "BOT_TOKEN", None))
+    if not token:
+        logger.error("❌ BOT_TOKEN bulunamadı! Lütfen Render Environment değişkenlerine BOT_TOKEN ekleyin.")
+        return
+
     request_config = HTTPXRequest(connect_timeout=30.0, read_timeout=30.0)
-    app = ApplicationBuilder().token(config.BOT_TOKEN).request(request_config).post_init(post_init).build()
+    app = ApplicationBuilder().token(token).request(request_config).post_init(post_init).build()
 
     app.add_error_handler(global_error_handler)
     app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, handle_new_members))
