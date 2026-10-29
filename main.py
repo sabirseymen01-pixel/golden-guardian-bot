@@ -254,7 +254,27 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     chat_id = update.effective_chat.id
     settings = database.get_group_settings(chat_id)
-    welcome_text = f"🤖 *Golden Staff Panel*\n\n{settings['welcome_msg']}"
+    
+    welcome_text = (
+        "🤖 **Grup Yönetim & Golden Staff Güvenlik Botu**\n\n"
+        "Grup düzenini sağlamak, argo/küfür, dış linkler ve yasaklı içerikleri otomatik engellemek için aktifim.\n\n"
+        "📜 **Yönetici Komutları:**\n"
+        "• `/welcome <mesaj>` - Hoş geldin mesajını değiştirir.\n"
+        "• `/butonmetni <yazı>` - Varsayılan buton metnini değiştirir.\n"
+        "• `/butonlinki <url>` - Varsayılan buton linkini değiştirir.\n"
+        "• `/duyuru <mesaj>` - Duyuru gönderir.\n"
+        "• `/zamanla <dakika>` - Periyodik paylaşım başlatır.\n"
+        "• `/zamanladur` - Periyodik paylaşımı durdurur.\n"
+        "• `/kilit kapat / ac` - Sohbeti kilitler/açar.\n"
+        "• `/defol <kullanıcı>` - Kullanıcıyı banlar.\n"
+        "• `/undefol <kullanıcı>` - Banı kaldırır.\n"
+        "• `/itaat <kullanıcı>` - Susturur.\n"
+        "• `/unitaat <kullanıcı>` - Susturmayı kaldırır.\n"
+        "• `/warn <kullanıcı>` - Uyarı verir.\n"
+        "• `/unwarn <kullanıcı>` - Uyarıları sıfırlar.\n\n"
+        "Aşağıdaki butona dokunarak Golden Staff Paneli'ne giriş yapabilirsin! 👇"
+    )
+
     web_app_url = "https://golden-guardian-bot.onrender.com/"
     keyboard = [[InlineKeyboardButton(text="🛡️ Paneli Aç", web_app=WebAppInfo(url=web_app_url))]]
     await update.message.reply_text(welcome_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
