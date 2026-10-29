@@ -80,6 +80,13 @@ async def api_verify_admin(request):
     return web.json_response({"authorized": False})
 
 async def api_get_staff_list(request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    if not database.is_authorized_staff(user_id):
+        founder_id = (config and getattr(config, "FOUNDER_ID", None)) or os.environ.get("FOUNDER_ID")
+        if not founder_id or str(user_id) != str(founder_id).strip():
+            return web.json_response({"success": False, "error": "Yetkisiz!"}, status=403)
+            
     staffs = database.get_all_staff()
     result = [{"user_id": s[0], "username": s[1], "full_name": s[2], "can_ban": s[3], "can_speak": s[4], "can_write": s[5], "is_muted": s[6], "warnings": s[7]} for s in staffs]
     return web.json_response(result)
@@ -94,7 +101,6 @@ async def api_add_staff(request):
     
     clean_val = input_value.lstrip("@").lower()
     
-    # ID veya @username ile akıllı arama ve ekleme
     if clean_val.isdigit() or (clean_val.startswith("-") and clean_val[1:].isdigit()):
         target_id = int(clean_val)
     else:
@@ -188,7 +194,7 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> b
     await send_auto_delete_message(context, chat_id, "❌ Bu komutu kullanmak için yetkiniz yok!")
     return False
 
-# --- KUSURSUZ HEDEF BULMA (YANITLA, ID, KULLANICI ADI) ---
+# --- KUSURSUZ HEDEF BULMA ---
 async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
@@ -457,7 +463,6 @@ async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     database.reset_warnings(user.id)
     await send_auto_delete_message(context, chat_id, f"♻️ Uyarılar sıfırlandı.")
 
-# --- MERKEZİ KOMUT VE MESAJ YÖNLENDİRİCİSİ ---
 COMMAND_MAP = {
     "start": cmd_start,
     "help": cmd_start,
@@ -483,7 +488,7 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
 
     text = (update.message.text or update.message.caption or "").strip()
     
-    # --- YASAKLI LİNK, ŞEKİLLİ METİN VE İÇERİK FİLTRELEMESİ ---
+    # --- YASAKLI LİNK, CP VE İÇERİK KORUMASI (YÖNETİCİ KORUMALI) ---
     if update.effective_chat.type in ["group", "supergroup"]:
         is_admin = False
         if user:
@@ -496,8 +501,7 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
 
         if not is_admin and text:
             lower_text = text.lower()
-            # Dış bağlantılar, telegram grup/kanal linkleri, şekilli zararlı yönlendirmeler
-            has_link = "http://" in lower_text or "https://" in lower_text or "t.me/" in lower_text or "telegram.me/" in lower_text or "www." in lower_text or "t.me" in lower_text
+            has_link = "http://" in lower_text or "https://" in lower_text or "t.me/" in lower_text or "telegram.me/" in lower_text or "www." in lower_text or "t.me" in lower_text or "joinchat" in lower_text
             has_bad_words = any(word in lower_text for word in BAD_WORDS)
             
             if has_link or has_bad_words:
@@ -508,8 +512,8 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
                         uname_str = f"@{user.username}" if user.username else str(user.id)
                         name_str = user.full_name or "Kullanıcı"
                         
-                        database.log_action(chat_id, "AUTO_BAN_LINK", user.id, uname_str, f"{name_str} ({user.id}) yasaklı içerik/link paylaştığı için otomatik banlandı.")
-                        await send_auto_delete_message(context, chat_id, f"🚨 Yasaklı içerik/link tespit edildi!\n👤 Kullanıcı: {name_str} ({uname_str})\n🆔 ID: `{user.id}`\n🚫 Gruptan uzaklaştırıldı.", delay=15)
+                        database.log_action(chat_id, "AUTO_BAN_LINK", user.id, uname_str, f"{name_str} ({user.id}) yasaklı içerik/link paylaştığı için otomatik banlandı: {text}")
+                        await send_auto_delete_message(context, chat_id, f"🚨 Yasaklı içerik/link engellendi!\n👤 Kullanıcı: {name_str} ({uname_str})\n🆔 ID: `{user.id}`\n🚫 Gruptan banlandı.", delay=15)
                 except Exception as e:
                     logger.error(f"Filtreleme hatası: {e}")
                 return
