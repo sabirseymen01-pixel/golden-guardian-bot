@@ -188,7 +188,6 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> b
 async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     
-    # 1. Yanıtlanan mesaj
     if update.message and update.message.reply_to_message:
         target = update.message.reply_to_message.from_user
         if target:
@@ -196,18 +195,15 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 database.save_user(chat_id, target.id, target.username.lower())
             return target
 
-    # 2. Etiket (mention)
     if update.message and update.message.entities:
         for entity in update.message.entities:
             if entity.type == "text_mention" and entity.user:
                 return entity.user
 
-    # 3. Argüman olarak verilen ID veya @kullaniciadi
     if context.args:
         arg = context.args[0].strip()
         clean_arg = arg.lstrip("@").lower()
         
-        # Sayısal ID ise
         if clean_arg.isdigit() or (clean_arg.startswith("-") and clean_arg[1:].isdigit()):
             uid = int(clean_arg)
             try:
@@ -221,7 +217,6 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         self.username = f"id_{user_id}"
                 return TempUser(uid)
         else:
-            # Önce veritabanından ara
             db_uid = database.get_user_id_by_username(chat_id, clean_arg) or database.get_user_id_by_username(0, clean_arg)
             if db_uid:
                 try:
@@ -230,7 +225,6 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 except Exception:
                     pass
 
-            # Veritabanında yoksa, Telegram grup yöneticilerinden username eşleştirmesi dene
             try:
                 admins = await context.bot.get_chat_administrators(chat_id)
                 for admin in admins:
@@ -240,7 +234,6 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             except Exception:
                 pass
 
-            # Eğer yukarıdakiler bulamazsa doğrudan string username ile Telegram API'sine istek atmayı dener
             class UsernameTarget:
                 def __init__(self, uname):
                     self.id = f"@{uname}"
@@ -327,16 +320,14 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
             msg = await context.bot.send_photo(
                 chat_id=chat_id,
                 photo=photo_id,
-                caption=f"📢 **DUYURU**\n\n{msg_text}",
-                reply_markup=InlineKeyboardMarkup(keyboard),
-                parse_mode="Markdown"
+                caption=msg_text,
+                reply_markup=InlineKeyboardMarkup(keyboard)
             )
         else:
             msg = await context.bot.send_message(
                 chat_id=chat_id,
-                text=f"📢 **DUYURU**\n\n{msg_text}",
-                reply_markup=InlineKeyboardMarkup(keyboard),
-                parse_mode="Markdown"
+                text=msg_text,
+                reply_markup=InlineKeyboardMarkup(keyboard)
             )
             
         try:
