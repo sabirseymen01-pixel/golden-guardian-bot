@@ -2,7 +2,6 @@ import os
 import datetime
 from pymongo import MongoClient
 
-# Render ortamındaki MONGO_URI değişkenini alır
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
 DB_NAME = os.environ.get("MONGO_DB_NAME", "golden_guardian_db")
 
@@ -24,9 +23,10 @@ def init_db():
 
 def save_user(chat_id, user_id, username):
     try:
+        clean_uname = username.lstrip("@").lower() if username else ""
         users_col.update_one(
             {"user_id": int(user_id)},
-            {"$set": {"chat_id": chat_id, "username": (username or "").lower()}},
+            {"$set": {"chat_id": chat_id, "username": clean_uname}},
             upsert=True
         )
     except Exception:
@@ -39,7 +39,7 @@ def log_action(chat_id, action_type, target_id, username, details):
             "chat_id": chat_id,
             "action_type": action_type,
             "target_id": str(target_id),
-            "username": username,
+            "username": username.lstrip("@") if username else "Bilinmiyor",
             "details": details,
             "timestamp": now
         }
@@ -156,9 +156,10 @@ def get_all_staff():
 
 def add_staff_member(user_id, username, full_name, added_by):
     try:
+        clean_uname = username.lstrip("@").lower() if username else ""
         staff_doc = {
             "user_id": int(user_id),
-            "username": username,
+            "username": clean_uname,
             "full_name": full_name,
             "can_ban": 1,
             "can_speak": 1,
@@ -186,7 +187,8 @@ def set_staff_permission(user_id, perm_type, status):
 
 def get_user_id_by_username(chat_id, username):
     try:
-        row = users_col.find_one({"username": {"$regex": f"^{username}$", "$options": "i"}})
+        clean_uname = username.lstrip("@").lower() if username else ""
+        row = users_col.find_one({"username": {"$regex": f"^{clean_uname}$", "$options": "i"}})
         if row:
             return row.get("user_id")
     except Exception:
