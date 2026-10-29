@@ -49,10 +49,11 @@
         .logo h1 { font-size: 17px; color: var(--accent-gold); font-weight: 800; text-shadow: 0 0 12px var(--gold-glow); }
         .badge { background: rgba(212, 175, 55, 0.2); color: var(--accent-gold); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid var(--glass-border); }
 
+        /* Kaydırılabilir Port Menüsü */
         .port-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
         .port-nav::-webkit-scrollbar { display: none; }
         .port-tab {
-            flex: 0 0 auto; text-align: center; padding: 10px 14px; font-size: 12px; font-weight: 600;
+            flex: 0 0 auto; text-align: center; padding: 10px 12px; font-size: 11px; font-weight: 600;
             color: var(--text-muted); background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.08);
             border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
         }
@@ -71,7 +72,7 @@
             width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border);
             border-radius: 12px; padding: 12px; color: #fff; font-size: 13px; outline: none; margin-bottom: 10px;
         }
-        input:focus { border-color: var(--accent-gold); box-shadow: 0 0 10px var(--gold-glow); }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent-gold); box-shadow: 0 0 10px var(--gold-glow); }
 
         .btn {
             width: 100%; background: linear-gradient(135deg, #d4af37 0%, #996515 100%); color: #000;
@@ -93,7 +94,6 @@
             user-select: all; -webkit-user-select: all; background: rgba(0,0,0,0.4);
             padding: 6px 10px; border-radius: 6px; color: var(--accent-gold); font-family: monospace; margin-top: 6px; display: block;
         }
-
         .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px; }
     </style>
 </head>
@@ -106,12 +106,22 @@
         <div class="badge" id="userRole">Yönetici 🛡️</div>
     </div>
 
+    <!-- Aktif Grup Seçici Barı -->
+    <div class="glass-container" style="padding: 10px; margin-bottom: 10px;">
+        <label style="font-size: 10px; color: var(--text-muted); display: block; margin-bottom: 4px;">🎯 İŞLEM YAPILACAK GRUP SEÇİMİ:</label>
+        <select id="activeGroupSelect" onchange="changeActiveGroup()">
+            <option value="0">Tüm Gruplar / Varsayılan</option>
+        </select>
+    </div>
+
+    <!-- Kaydırılabilir Port Menüsü -->
     <div class="port-nav">
         <div class="port-tab active" onclick="switchPort('overview')">Genel Bakış</div>
-        <div class="port-tab" onclick="switchPort('staff')">Staff & YT</div>
+        <div class="port-tab" onclick="switchPort('staff')">Staff & Admin</div>
         <div class="port-tab" onclick="switchPort('members')">Üye İşlemleri</div>
-        <div class="port-tab" onclick="switchPort('links')">Özel Link Logları</div>
-        <div class="port-tab" onclick="switchPort('settings')">Grup Ayarları</div>
+        <div class="port-tab" onclick="switchPort('genlogs')">Genel Loglar</div>
+        <div class="port-tab" onclick="switchPort('adminlogs')">Admin Logları</div>
+        <div class="port-tab" onclick="switchPort('settings')">Grup & Duyuru</div>
     </div>
 
     <!-- PORT 1: GENEL BAKIŞ -->
@@ -141,16 +151,16 @@
         </div>
     </div>
 
-    <!-- PORT 2: STAFF & YT YÖNETİMİ -->
+    <!-- PORT 2: STAFF & ADMIN YÖNETİMİ -->
     <div id="port-staff" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">👑 Admin / Staff / YT Ekle & Çıkar</div>
+            <div class="section-title">👑 Admin / Staff Ekle & Çıkar</div>
             <input type="text" id="staffInput" placeholder="@kullaniciadi veya ID girin">
-            <input type="text" id="staffName" placeholder="Yetkili Ünvanı (Örn: YT / Moderator)">
+            <input type="text" id="staffName" placeholder="Yetkili Ünvanı (Örn: Yönetici / Moderator)">
             <button class="btn" onclick="addStaff()">Yetkiyi Tanımla</button>
         </div>
         <div class="glass-container">
-            <div class="section-title">🛡️ Mevcut Yetkililer</div>
+            <div class="section-title">🛡️ Kayıtlı Yetkililer Listesi</div>
             <div id="staffListContainer"><div class="loading">Yükleniyor...</div></div>
         </div>
     </div>
@@ -167,22 +177,39 @@
         </div>
     </div>
 
-    <!-- PORT 4: ÖZEL LİNK BİLDİRİMLERİ -->
-    <div id="port-links" class="portal-section">
+    <!-- PORT 4: GENEL LOGLAR & LİNK BİLDİRİMLERİ -->
+    <div id="port-genlogs" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">🚨 Yasaklı Link ve İçerik Bildirimleri</div>
-            <div id="linkLogsContainer"><div class="loading">Bildirimler taranıyor...</div></div>
+            <div class="section-title">📜 Tarihli & Saatli Genel Loglar</div>
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <select id="logClearDays" style="margin-bottom:0;">
+                    <option value="0">Tüm Logları Temizle</option>
+                    <option value="1">1 Günden Eskileri Sil</option>
+                    <option value="7">7 Günden Eskileri Sil</option>
+                </select>
+                <button class="btn" style="width: auto; padding: 0 14px; margin-top:0;" onclick="clearLogs()">Temizle 🗑️</button>
+            </div>
+            <div id="generalLogsContainer"><div class="loading">Loglar yükleniyor...</div></div>
         </div>
     </div>
 
-    <!-- PORT 5: GRUP AYARLARI -->
+    <!-- PORT 5: ADMIN İŞLEM LOGLARI -->
+    <div id="port-adminlogs" class="portal-section">
+        <div class="glass-container">
+            <div class="section-title">⭐ Adminlerin Yaptığı İşlemler (Tarihli/Saatli)</div>
+            <div id="adminLogsContainer"><div class="loading">Admin logları yükleniyor...</div></div>
+        </div>
+    </div>
+
+    <!-- PORT 6: GRUP AYARLARI & METİN+BUTON+GÖRSEL DUYURU -->
     <div id="port-settings" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">⚙️ Grup Hoş Geldin & Buton Ayarları</div>
-            <textarea id="welcomeMsgInput" rows="3" placeholder="Hoş geldin mesajı..."></textarea>
-            <input type="text" id="btnTextInput" placeholder="Buton Metni">
+            <div class="section-title">⚙️ Grup Hoş Geldin & Kombine Duyuru Ayarları</div>
+            <textarea id="welcomeMsgInput" rows="3" placeholder="Hoş geldin veya duyuru metni..."></textarea>
+            <input type="text" id="btnTextInput" placeholder="Buton Metni (Örn: Abone Ol / Panel)">
             <input type="text" id="btnUrlInput" placeholder="Buton Linki (URL)">
-            <button class="btn" onclick="saveSettings()">Ayarları Kaydet</button>
+            <input type="text" id="mediaUrlInput" placeholder="Görsel / Medya URL (Opsiyonel)">
+            <button class="btn" onclick="saveSettings()">Ayarları & Duyuruyu Kaydet</button>
         </div>
     </div>
 
@@ -196,13 +223,17 @@
             throw new Error("No user session");
         }
 
-        let currentChatId = tg.initDataUnsafe?.chat?.id || 0;
+        let selectedChatId = 0;
 
         function switchPort(portName) {
             document.querySelectorAll('.portal-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.port-tab').forEach(el => el.classList.remove('active'));
             document.getElementById('port-' + portName).classList.add('active');
             event.currentTarget.classList.add('active');
+        }
+
+        function changeActiveGroup() {
+            selectedChatId = document.getElementById('activeGroupSelect').value;
         }
 
         async function verifyAccess() {
@@ -214,13 +245,26 @@
                 });
                 const data = await res.json();
                 if (!data.authorized) {
-                    document.body.innerHTML = `<div style="text-align:center; padding:60px; color:var(--danger);"><h2>⛔ Yetkisiz Erişim Reddedildi!</h2><p>Bu panele yalnızca yetkili Staff/YT üyeleri girebilir.</p></div>`;
+                    document.body.innerHTML = `<div style="text-align:center; padding:60px; color:var(--danger);"><h2>⛔ Yetkisiz Erişim Reddedildi!</h2><p>Bu panele yalnızca yetkili Staff/Admin üyeleri girebilir.</p></div>`;
                     return;
                 }
                 document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (data.is_founder ? " 👑" : " 🛡️");
+                loadGroups();
                 loadData();
                 setInterval(loadData, 5000);
             } catch (e) { console.error(e); }
+        }
+
+        async function loadGroups() {
+            try {
+                const res = await fetch('/api/groups');
+                const groups = await res.json();
+                const select = document.getElementById('activeGroupSelect');
+                select.innerHTML = '<option value="0">Tüm Gruplar / Varsayılan</option>';
+                groups.forEach(g => {
+                    select.innerHTML += `<option value="${g.chat_id}">${g.title} (${g.chat_id})</option>`;
+                });
+            } catch (e) {}
         }
 
         async function loadData() {
@@ -229,22 +273,20 @@
                 const stats = await statsRes.json();
                 document.getElementById('totalActions').innerText = stats.total_actions || 0;
                 const bd = stats.action_breakdown || {};
-                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['AUTO_BAN_LINK'] || 0) + (bd['AUTO_BAN_CP_LINK'] || 0) + (bd['WEB_BAN'] || 0);
+                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['AUTO_BAN_LINK'] || 0) + (bd['WEB_BAN'] || 0);
 
-                const logsRes = await fetch('/api/logs');
-                const logs = await logsRes.json();
-                
-                const linkC = document.getElementById('linkLogsContainer');
-                const linkLogs = logs.filter(l => l.action_type.includes('LINK') || l.action_type.includes('CP'));
-                
-                if (linkLogs.length === 0) {
-                    linkC.innerHTML = '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Temiz. Yasaklı link tespit edilmedi.</div>';
+                // Genel Loglar
+                const genRes = await fetch('/api/logs?filter=general&limit=50');
+                const genLogs = await genRes.json();
+                const genC = document.getElementById('generalLogsContainer');
+                if (genLogs.length === 0) {
+                    genC.innerHTML = '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Genel log bulunmuyor.</div>';
                 } else {
-                    linkC.innerHTML = '';
-                    linkLogs.forEach(l => {
-                        linkC.innerHTML += `
+                    genC.innerHTML = '';
+                    genLogs.forEach(l => {
+                        genC.innerHTML += `
                             <div class="link-notification-box">
-                                <div><b>İşlem:</b> ${l.action_type} | 📅 ${l.timestamp}</div>
+                                <div><b>${l.action_type}</b> | 📅 ${l.timestamp}</div>
                                 <div>Kullanıcı: @${l.username} (ID: ${l.target_id})</div>
                                 <span class="selectable-text">${l.details}</span>
                             </div>
@@ -252,6 +294,29 @@
                     });
                 }
 
+                // Admin Logları
+                const adminRes = await fetch('/api/logs?filter=admin&limit=50');
+                const adminLogs = await adminRes.json();
+                const adminC = document.getElementById('adminLogsContainer');
+                if (adminLogs.length === 0) {
+                    adminC.innerHTML = '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Admin işlem kaydı yok.</div>';
+                } else {
+                    adminC.innerHTML = '';
+                    adminLogs.forEach(l => {
+                        adminC.innerHTML += `
+                            <div class="item-row" style="flex-direction:column; align-items:flex-start; gap:4px;">
+                                <div style="display:flex; justify-content:space-width; width:100%;">
+                                    <b style="color:var(--accent-gold);">${l.action_type}</b>
+                                    <span style="font-size:10px; color:var(--text-muted);">📅 ${l.timestamp}</span>
+                                </div>
+                                <div style="font-size:11px;">Admin/Yetkili: <b>@${l.username}</b></div>
+                                <div style="font-size:11px; color:var(--text-muted);">${l.details}</div>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Staff Listesi
                 const staffRes = await fetch('/api/staff/list', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -301,12 +366,12 @@
         async function memberAction(actionType) {
             const target = document.getElementById('memberTargetInput').value.trim();
             if (!target) return alert("Kullanıcı ID veya @username girin!");
-            if (!currentChatId) return alert("Grup ID algılanamadı! Lütfen gruptan paneli açın.");
+            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen yukarıdan işlem yapılacak grubu seçin!");
 
             const res = await fetch('/api/member/action', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: currentChatId })
+                body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: selectedChatId })
             });
             const data = await res.json();
             if (data.success) {
@@ -317,16 +382,35 @@
             }
         }
 
+        async function clearLogs() {
+            const days = parseInt(document.getElementById('logClearDays').value);
+            if (!confirm("Seçilen logları temizlemek istediğinize emin misiniz?")) return;
+            const res = await fetch('/api/logs/clear', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user.id, days: days })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert("✅ Loglar başarıyla temizlendi!");
+                loadData();
+            } else {
+                alert("❌ Temizleme hatası!");
+            }
+        }
+
         async function saveSettings() {
             const welcome = document.getElementById('welcomeMsgInput').value.trim();
             const btnText = document.getElementById('btnTextInput').value.trim();
             const btnUrl = document.getElementById('btnUrlInput').value.trim();
-            if (!currentChatId) return alert("Grup ID algılanamadı!");
+            const mediaUrl = document.getElementById('mediaUrlInput').value.trim();
+            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen yukarıdan grup seçin!");
 
-            const body = { user_id: user.id, chat_id: currentChatId };
+            const body = { user_id: user.id, chat_id: selectedChatId };
             if (welcome) body.welcome_msg = welcome;
             if (btnText) body.btn_text = btnText;
             if (btnUrl) body.btn_url = btnUrl;
+            if (mediaUrl) body.media_url = mediaUrl;
 
             const res = await fetch('/api/settings/update', {
                 method: 'POST',
@@ -335,7 +419,7 @@
             });
             const data = await res.json();
             if (data.success) {
-                alert("✅ Grup ayarları kaydedildi!");
+                alert("✅ Grup ayarları ve kombine duyuru bilgileri kaydedildi!");
             } else {
                 alert("❌ Kaydetme hatası!");
             }
