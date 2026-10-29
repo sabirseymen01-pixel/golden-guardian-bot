@@ -30,7 +30,6 @@
             overflow-x: hidden;
         }
 
-        /* Şeffaf Gold Camsı Kartlar & Işık Efektleri */
         .glass-container {
             background: var(--glass-bg);
             backdrop-filter: blur(30px);
@@ -50,7 +49,6 @@
         .logo h1 { font-size: 17px; color: var(--accent-gold); font-weight: 800; text-shadow: 0 0 12px var(--gold-glow); }
         .badge { background: rgba(212, 175, 55, 0.2); color: var(--accent-gold); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid var(--glass-border); }
 
-        /* Kaydırılabilir ve Yumuşak Işık Geçişli Port Menüsü */
         .port-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
         .port-nav::-webkit-scrollbar { display: none; }
         .port-tab {
@@ -78,7 +76,7 @@
         .btn {
             width: 100%; background: linear-gradient(135deg, #d4af37 0%, #996515 100%); color: #000;
             border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(212,175,55,0.3); transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(212,175,55,0.3); transition: transform 0.2s; margin-top: 5px;
         }
         .btn:active { transform: scale(0.97); }
 
@@ -87,14 +85,13 @@
             padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* Seçilebilir Link Bildirim Alanı */
         .link-notification-box {
             background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4);
             padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 11px;
         }
         .selectable-text {
             user-select: all; -webkit-user-select: all; background: rgba(0,0,0,0.4);
-            padding: 4px 8px; border-radius: 6px; color: var(--accent-gold); font-family: monospace; margin-top: 4px; display: block;
+            padding: 6px 10px; border-radius: 6px; color: var(--accent-gold); font-family: monospace; margin-top: 6px; display: block;
         }
 
         .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px; }
@@ -109,7 +106,6 @@
         <div class="badge" id="userRole">Yönetici 🛡️</div>
     </div>
 
-    <!-- Kaydırılabilir Port Menüsü -->
     <div class="port-nav">
         <div class="port-tab active" onclick="switchPort('overview')">Genel Bakış</div>
         <div class="port-tab" onclick="switchPort('staff')">Staff & YT</div>
@@ -164,17 +160,17 @@
         <div class="glass-container">
             <div class="section-title">👥 Üye Portu & Hızlı İşlem</div>
             <input type="text" id="memberTargetInput" placeholder="Kullanıcı ID veya @username">
-            <div style="display: flex; gap: 8px;">
-                <button class="btn" style="background: var(--danger); color: #fff;" onclick="memberAction('ban')">Banla</button>
-                <button class="btn" style="background: #e67e22; color: #fff;" onclick="memberAction('mute')">Sustur</button>
+            <div style="display: flex; gap: 8px; margin-top: 5px;">
+                <button class="btn" style="background: var(--danger); color: #fff; margin-top:0;" onclick="memberAction('ban')">Banla 🚫</button>
+                <button class="btn" style="background: #e67e22; color: #fff; margin-top:0;" onclick="memberAction('mute')">Sustur 🔇</button>
             </div>
         </div>
     </div>
 
-    <!-- PORT 4: ÖZEL LİNK BİLDİRİMLERİ (SEÇİLEBİLİR ID & USERNAME) -->
+    <!-- PORT 4: ÖZEL LİNK BİLDİRİMLERİ -->
     <div id="port-links" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">🚨 Yasaklı Link ve CP/Kanal Bildirimleri</div>
+            <div class="section-title">🚨 Yasaklı Link ve İçerik Bildirimleri</div>
             <div id="linkLogsContainer"><div class="loading">Bildirimler taranıyor...</div></div>
         </div>
     </div>
@@ -200,6 +196,8 @@
             throw new Error("No user session");
         }
 
+        let currentChatId = tg.initDataUnsafe?.chat?.id || 0;
+
         function switchPort(portName) {
             document.querySelectorAll('.portal-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.port-tab').forEach(el => el.classList.remove('active'));
@@ -216,7 +214,7 @@
                 });
                 const data = await res.json();
                 if (!data.authorized) {
-                    document.body.innerHTML = `<div style="text-align:center; padding:60px; color:var(--danger);"><h2>⛔ Yetkisiz Erişim Reddedildi!</h2><p>Bu panele yalnızca veritabanındaki Staff/YT yetkilileri girebilir.</p></div>`;
+                    document.body.innerHTML = `<div style="text-align:center; padding:60px; color:var(--danger);"><h2>⛔ Yetkisiz Erişim Reddedildi!</h2><p>Bu panele yalnızca yetkili Staff/YT üyeleri girebilir.</p></div>`;
                     return;
                 }
                 document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (data.is_founder ? " 👑" : " 🛡️");
@@ -231,7 +229,7 @@
                 const stats = await statsRes.json();
                 document.getElementById('totalActions').innerText = stats.total_actions || 0;
                 const bd = stats.action_breakdown || {};
-                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['AUTO_BAN_LINK'] || 0) + (bd['AUTO_BAN_CP_LINK'] || 0);
+                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['AUTO_BAN_LINK'] || 0) + (bd['AUTO_BAN_CP_LINK'] || 0) + (bd['WEB_BAN'] || 0);
 
                 const logsRes = await fetch('/api/logs');
                 const logs = await logsRes.json();
@@ -285,6 +283,7 @@
                 body: JSON.stringify({ user_id: user.id, staff_input: input, full_name: name })
             });
             document.getElementById('staffInput').value = '';
+            document.getElementById('staffName').value = '';
             loadData();
             alert("✅ Yetkili eklendi!");
         }
@@ -297,6 +296,49 @@
                 body: JSON.stringify({ user_id: user.id, target_id: targetId })
             });
             loadData();
+        }
+
+        async function memberAction(actionType) {
+            const target = document.getElementById('memberTargetInput').value.trim();
+            if (!target) return alert("Kullanıcı ID veya @username girin!");
+            if (!currentChatId) return alert("Grup ID algılanamadı! Lütfen gruptan paneli açın.");
+
+            const res = await fetch('/api/member/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: currentChatId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(`✅ İşlem başarılı (${actionType.toUpperCase()})`);
+                document.getElementById('memberTargetInput').value = '';
+            } else {
+                alert("❌ İşlem başarısız: " + (data.error || 'Bilinmeyen hata'));
+            }
+        }
+
+        async function saveSettings() {
+            const welcome = document.getElementById('welcomeMsgInput').value.trim();
+            const btnText = document.getElementById('btnTextInput').value.trim();
+            const btnUrl = document.getElementById('btnUrlInput').value.trim();
+            if (!currentChatId) return alert("Grup ID algılanamadı!");
+
+            const body = { user_id: user.id, chat_id: currentChatId };
+            if (welcome) body.welcome_msg = welcome;
+            if (btnText) body.btn_text = btnText;
+            if (btnUrl) body.btn_url = btnUrl;
+
+            const res = await fetch('/api/settings/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert("✅ Grup ayarları kaydedildi!");
+            } else {
+                alert("❌ Kaydetme hatası!");
+            }
         }
 
         async function toggleLockdown() {
