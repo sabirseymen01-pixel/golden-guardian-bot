@@ -3,166 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Staff | Match Web Hub</title>
+    <title>Golden Staff | Kristal Gold Hub</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #07080a;
-            --surface-glass: rgba(14, 16, 22, 0.96);
-            --border-glass: rgba(212, 175, 55, 0.35);
-            --accent-gold: #d4af37;
-            --accent-gold-glow: rgba(212, 175, 55, 0.45);
-            --text-main: #f3f4f6;
-            --text-muted: #9ca3af;
-            --danger: #ef4444;
-            --success: #22c55e;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(212, 175, 55, 0.4);
+            --gold-glow: rgba(212, 175, 55, 0.6);
+            --text-main: #ffffff;
+            --text-muted: #d1d5db;
+            --accent-gold: #f3e5ab;
+            --danger: #ff4d4d;
+            --success: #2ecc71;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding: 12px; min-height: 100vh; display: flex; flex-direction: column; }
+        
+        body {
+            background: linear-gradient(135deg, #1a150b 0%, #0d0e12 50%, #151007 100%);
+            color: var(--text-main);
+            padding: 14px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Şeffaf Gold Camsı Kartlar & Işık Efektleri */
+        .glass-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(212, 175, 55, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
         .header {
             display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 12px; padding: 10px 14px; background: var(--surface-glass);
-            border: 1px solid var(--border-glass); border-radius: 14px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+            padding: 12px 16px; margin-bottom: 14px;
         }
-        .logo-area { display: flex; align-items: center; gap: 8px; }
-        .logo-area h1 { font-size: 16px; color: var(--accent-gold); font-weight: 800; text-transform: uppercase; text-shadow: 0 0 10px var(--accent-gold-glow); }
-        .admin-badge { background: rgba(212, 175, 55, 0.15); color: var(--accent-gold); padding: 4px 10px; border-radius: 18px; font-size: 10px; font-weight: 700; border: 1px solid var(--border-glass); box-shadow: 0 0 10px var(--accent-gold-glow); }
+        .logo h1 { font-size: 17px; color: var(--accent-gold); font-weight: 800; text-shadow: 0 0 12px var(--gold-glow); }
+        .badge { background: rgba(212, 175, 55, 0.2); color: var(--accent-gold); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid var(--glass-border); }
 
-        .port-nav { display: flex; background: rgba(255, 255, 255, 0.03); padding: 3px; border-radius: 12px; margin-bottom: 12px; border: 1px solid var(--border-glass); }
-        .port-tab { flex: 1; text-align: center; padding: 8px; font-size: 11px; font-weight: 600; color: var(--text-muted); border-radius: 9px; cursor: pointer; transition: all 0.25s; }
-        .port-tab.active { background: var(--accent-gold); color: #07080a; font-weight: 800; box-shadow: 0 4px 15px var(--accent-gold-glow); }
-
-        .portal-section { display: none; flex-direction: column; flex: 1; }
-        .portal-section.active { display: flex; }
-
-        .glass-card { background: var(--surface-glass); border: 1px solid var(--border-glass); border-radius: 16px; padding: 14px; margin-bottom: 12px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6); }
-        .section-title { font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--accent-gold); display: flex; align-items: center; gap: 8px; }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px; }
-        .stat-card { background: var(--surface-glass); border: 1px solid var(--border-glass); border-radius: 14px; padding: 12px; }
-        .stat-title { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; }
-        .stat-value { font-size: 18px; font-weight: 800; color: var(--text-main); }
-
-        .match-cloud-box {
-            position: relative;
-            background: radial-gradient(circle at center, rgba(212,175,55,0.08) 0%, rgba(7,8,10,0.95) 100%);
-            border: 1px solid var(--border-glass);
-            border-radius: 16px;
-            padding: 20px;
-            min-height: 160px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            overflow: hidden;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        /* Kaydırılabilir ve Yumuşak Işık Geçişli Port Menüsü */
+        .port-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
+        .port-nav::-webkit-scrollbar { display: none; }
+        .port-tab {
+            flex: 0 0 auto; text-align: center; padding: 10px 14px; font-size: 12px; font-weight: 600;
+            color: var(--text-muted); background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
         }
-        .match-hub-node {
-            background: rgba(22, 25, 34, 0.9);
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold);
-            padding: 7px 12px;
-            border-radius: 30px;
-            font-weight: 700;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 0 10px var(--accent-gold-glow);
-        }
-        .node-counter {
-            background: rgba(255,255,255,0.15);
-            padding: 2px 6px;
-            border-radius: 50%;
-            font-size: 10px;
+        .port-tab.active {
+            background: linear-gradient(135deg, rgba(212,175,55,0.4) 0%, rgba(170,119,28,0.3) 100%);
+            color: var(--accent-gold); border-color: var(--accent-gold);
+            box-shadow: 0 0 15px var(--gold-glow); text-shadow: 0 0 8px rgba(212,175,55,0.6);
         }
 
-        .admin-list-item { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-glass); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .portal-section { display: none; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; flex-direction: column; }
+        .portal-section.active { display: flex; opacity: 1; transform: translateY(0); }
+
+        .section-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--accent-gold); display: flex; align-items: center; gap: 8px; }
+        
+        input, select, textarea {
+            width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border);
+            border-radius: 12px; padding: 12px; color: #fff; font-size: 13px; outline: none; margin-bottom: 10px;
+        }
+        input:focus { border-color: var(--accent-gold); box-shadow: 0 0 10px var(--gold-glow); }
+
+        .btn {
+            width: 100%; background: linear-gradient(135deg, #d4af37 0%, #996515 100%); color: #000;
+            border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212,175,55,0.3); transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.97); }
+
+        .item-row {
+            background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* Seçilebilir Link Bildirim Alanı */
+        .link-notification-box {
+            background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 11px;
+        }
+        .selectable-text {
+            user-select: all; -webkit-user-select: all; background: rgba(0,0,0,0.4);
+            padding: 4px 8px; border-radius: 6px; color: var(--accent-gold); font-family: monospace; margin-top: 4px; display: block;
+        }
+
         .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="logo-area">
-            <span style="font-size: 18px;">⚜️</span>
-            <h1>Golden Staff Hub</h1>
+    <div class="glass-container header">
+        <div class="logo">
+            <h1>⚜️ Golden Staff Hub</h1>
         </div>
-        <div class="admin-badge" id="userRole">Yönetici 🛡️</div>
+        <div class="badge" id="userRole">Yönetici 🛡️</div>
     </div>
 
+    <!-- Kaydırılabilir Port Menüsü -->
     <div class="port-nav">
         <div class="port-tab active" onclick="switchPort('overview')">Genel Bakış</div>
-        <div class="port-tab" onclick="switchPort('logs')">Zamanlı Loglar</div>
-        <div class="port-tab" onclick="switchPort('admins')">Admin Performans</div>
+        <div class="port-tab" onclick="switchPort('staff')">Staff & YT</div>
+        <div class="port-tab" onclick="switchPort('members')">Üye İşlemleri</div>
+        <div class="port-tab" onclick="switchPort('links')">Özel Link Logları</div>
+        <div class="port-tab" onclick="switchPort('settings')">Grup Ayarları</div>
     </div>
 
     <!-- PORT 1: GENEL BAKIŞ -->
     <div id="port-overview" class="portal-section active">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-title">Toplam İşlem</div>
-                <div class="stat-value" id="totalActions">-</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-title">Toplam Ban/Filtre</div>
-                <div class="stat-value" id="totalBans">-</div>
-            </div>
-        </div>
-
-        <div class="glass-card">
-            <div class="section-title">🌐 Match Web Hub Veri Bulutu</div>
-            <div class="match-cloud-box" id="matchCloudContainer">
-                <div class="loading">Web Hub düğümleri yükleniyor...</div>
+        <div class="glass-container">
+            <div class="section-title">📊 Sistem Durumu & İstatistikler</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border);">
+                    <div style="font-size: 10px; color: var(--text-muted);">TOPLAM İŞLEM</div>
+                    <div id="totalActions" style="font-size: 16px; font-weight: 800; color: var(--accent-gold);">-</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 10px; border: 1px solid var(--glass-border);">
+                    <div style="font-size: 10px; color: var(--text-muted);">ENGELLENEN LİNK/BAN</div>
+                    <div id="totalBans" style="font-size: 16px; font-weight: 800; color: var(--danger);">-</div>
+                </div>
             </div>
         </div>
 
-        <div id="founderPanel" class="glass-card" style="display: none;">
-            <div class="section-title">👑 Kurucu Yetki & Staff Yönetimi</div>
-            <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                <input type="text" id="newStaffInput" placeholder="ID veya @kullanici" style="flex: 1; background: #07080a; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
-                <input type="text" id="newStaffName" placeholder="İsim" style="width: 80px; background: #07080a; border: 1px solid var(--border-glass); padding: 8px; border-radius: 10px; color: white; font-size: 12px;">
-                <button onclick="addStaff()" style="background: var(--accent-gold); color: black; border: none; padding: 8px 12px; border-radius: 10px; font-weight: 800; cursor: pointer;">Ekle</button>
-            </div>
-            <div id="staffListContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                <div class="loading">Yükleniyor...</div>
-            </div>
-        </div>
-
-        <div class="glass-card">
+        <div class="glass-container">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <div class="stat-title">Genel Bot Ban Şalteri</div>
-                    <div id="lockStatusText" style="font-size: 14px; font-weight: 800; color: var(--success);">Normal (Aktif ✅)</div>
+                    <div style="font-size: 10px; color: var(--text-muted);">ACİL DURUM KİLİDİ</div>
+                    <div id="lockStatusText" style="font-size: 13px; font-weight: 800; color: var(--success);">Normal (Aktif ✅)</div>
                 </div>
-                <button id="lockdownBtn" onclick="toggleLockdown()" style="background: rgba(239,68,68,0.2); color: var(--danger); border: 1px solid var(--danger); padding: 8px 14px; border-radius: 12px; font-weight: 800; font-size: 11px; cursor: pointer;">Acil Durum Kilidi 🔒</button>
+                <button id="lockdownBtn" onclick="toggleLockdown()" style="background: rgba(239,68,68,0.2); color: var(--danger); border: 1px solid var(--danger); padding: 8px 12px; border-radius: 10px; font-weight: 800; font-size: 11px; cursor: pointer;">Şalteri Değiştir 🔒</button>
             </div>
         </div>
     </div>
 
-    <!-- PORT 2: ZAMANLI LOGLAR -->
-    <div id="port-logs" class="portal-section">
-        <div class="glass-card">
-            <div class="section-title">📜 Tarih & Saat Damgalı Moderasyon Logları</div>
-            <div id="logsList">
-                <div class="loading">Loglar yükleniyor...</div>
+    <!-- PORT 2: STAFF & YT YÖNETİMİ -->
+    <div id="port-staff" class="portal-section">
+        <div class="glass-container">
+            <div class="section-title">👑 Admin / Staff / YT Ekle & Çıkar</div>
+            <input type="text" id="staffInput" placeholder="@kullaniciadi veya ID girin">
+            <input type="text" id="staffName" placeholder="Yetkili Ünvanı (Örn: YT / Moderator)">
+            <button class="btn" onclick="addStaff()">Yetkiyi Tanımla</button>
+        </div>
+        <div class="glass-container">
+            <div class="section-title">🛡️ Mevcut Yetkililer</div>
+            <div id="staffListContainer"><div class="loading">Yükleniyor...</div></div>
+        </div>
+    </div>
+
+    <!-- PORT 3: ÜYE İŞLEMLERİ (MEMBER PORT) -->
+    <div id="port-members" class="portal-section">
+        <div class="glass-container">
+            <div class="section-title">👥 Üye Portu & Hızlı İşlem</div>
+            <input type="text" id="memberTargetInput" placeholder="Kullanıcı ID veya @username">
+            <div style="display: flex; gap: 8px;">
+                <button class="btn" style="background: var(--danger); color: #fff;" onclick="memberAction('ban')">Banla</button>
+                <button class="btn" style="background: #e67e22; color: #fff;" onclick="memberAction('mute')">Sustur</button>
             </div>
         </div>
     </div>
 
-    <!-- PORT 3: ADMIN PERFORMANS -->
-    <div id="port-admins" class="portal-section">
-        <div class="glass-card">
-            <div class="section-title">⭐ En Aktif Yöneticiler</div>
-            <div id="adminRankingList" style="display: flex; flex-direction: column; gap: 8px;">
-                <div class="loading">Hesaplanıyor...</div>
-            </div>
+    <!-- PORT 4: ÖZEL LİNK BİLDİRİMLERİ (SEÇİLEBİLİR ID & USERNAME) -->
+    <div id="port-links" class="portal-section">
+        <div class="glass-container">
+            <div class="section-title">🚨 Yasaklı Link ve CP/Kanal Bildirimleri</div>
+            <div id="linkLogsContainer"><div class="loading">Bildirimler taranıyor...</div></div>
+        </div>
+    </div>
+
+    <!-- PORT 5: GRUP AYARLARI -->
+    <div id="port-settings" class="portal-section">
+        <div class="glass-container">
+            <div class="section-title">⚙️ Grup Hoş Geldin & Buton Ayarları</div>
+            <textarea id="welcomeMsgInput" rows="3" placeholder="Hoş geldin mesajı..."></textarea>
+            <input type="text" id="btnTextInput" placeholder="Buton Metni">
+            <input type="text" id="btnUrlInput" placeholder="Buton Linki (URL)">
+            <button class="btn" onclick="saveSettings()">Ayarları Kaydet</button>
         </div>
     </div>
 
@@ -170,13 +194,11 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         const user = tg.initDataUnsafe?.user;
-        
-        if (!user) {
-            document.body.innerHTML = `<div style="color:var(--danger); text-align:center; padding:40px;">Telegram oturumu bulunamadı.</div>`;
-            throw new Error("Oturum yok.");
-        }
 
-        let isFounder = false;
+        if (!user) {
+            document.body.innerHTML = `<div style="color:var(--danger); text-align:center; padding:50px;"><h2>Telegram Oturumu Bulunamadı.</h2></div>`;
+            throw new Error("No user session");
+        }
 
         function switchPort(portName) {
             document.querySelectorAll('.portal-section').forEach(el => el.classList.remove('active'));
@@ -193,177 +215,96 @@
                     body: JSON.stringify({ user_id: user.id })
                 });
                 const data = await res.json();
-                
                 if (!data.authorized) {
-                    document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:90vh; background:#000; color:#ef4444; text-align:center; padding:20px;"><h2>⛔ Yetkisiz Erişim!</h2></div>`;
+                    document.body.innerHTML = `<div style="text-align:center; padding:60px; color:var(--danger);"><h2>⛔ Yetkisiz Erişim Reddedildi!</h2><p>Bu panele yalnızca veritabanındaki Staff/YT yetkilileri girebilir.</p></div>`;
                     return;
                 }
-
-                isFounder = !!data.is_founder;
-                document.getElementById('userRole').innerText = (user.first_name || 'Yönetici') + (isFounder ? " 👑" : " 🛡️");
-
-                if (isFounder) {
-                    document.getElementById('founderPanel').style.display = 'block';
-                    loadStaffList();
-                }
-
-                checkLockStatus();
-                fetchData();
-                setInterval(() => { checkLockStatus(); fetchData(); }, 4000);
-            } catch (err) {}
+                document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (data.is_founder ? " 👑" : " 🛡️");
+                loadData();
+                setInterval(loadData, 5000);
+            } catch (e) { console.error(e); }
         }
 
-        async function loadStaffList() {
-            if (!isFounder) return;
-            try {
-                const res = await fetch('/api/staff/list', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id })
-                });
-                const staffs = await res.json();
-                const container = document.getElementById('staffListContainer');
-                if (!staffs || staffs.length === 0) {
-                    container.innerHTML = '<div style="font-size:12px; color:var(--text-muted); text-align:center;">Kayıtlı staff yok.</div>';
-                    return;
-                }
-                container.innerHTML = '';
-                staffs.forEach(s => {
-                    const item = document.createElement('div');
-                    item.className = 'admin-list-item';
-                    item.innerHTML = `
-                        <div>
-                            <strong>${s.full_name}</strong><br>
-                            <span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username || 'yok'} | Uyarı: ${s.warnings}/3</span>
-                        </div>
-                        <button style="padding:4px 8px; font-size:10px; border-radius:6px; background:rgba(255,255,255,0.1); color:#fff; border:none; cursor:pointer;" onclick="removeStaff(${s.user_id})">Sil</button>
-                    `;
-                    container.appendChild(item);
-                });
-            } catch (err) {}
-        }
-
-        async function addStaff() {
-            const input = document.getElementById('newStaffInput').value.trim();
-            const name = document.getElementById('newStaffName').value.trim() || 'Staff';
-            if (!input) return;
-            try {
-                await fetch('/api/staff/add', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id, staff_input: input, full_name: name })
-                });
-                document.getElementById('newStaffInput').value = '';
-                document.getElementById('newStaffName').value = '';
-                loadStaffList();
-            } catch (err) {}
-        }
-
-        async function removeStaff(targetId) {
-            if (!confirm("Emin misin?")) return;
-            try {
-                await fetch('/api/staff/remove', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id, target_id: targetId })
-                });
-                loadStaffList();
-            } catch (err) {}
-        }
-
-        async function checkLockStatus() {
-            try {
-                const res = await fetch('/api/lock-status');
-                const data = await res.json();
-                const statusEl = document.getElementById('lockStatusText');
-                const btnEl = document.getElementById('lockdownBtn');
-                if (data.lockdown) {
-                    statusEl.innerText = "KİLİTLİ 🛑";
-                    statusEl.style.color = "var(--danger)";
-                    btnEl.innerText = "Kilidi Kaldır ✅";
-                } else {
-                    statusEl.innerText = "Normal (Aktif ✅)";
-                    statusEl.style.color = "var(--success)";
-                    btnEl.innerText = "Acil Durum Kilidi 🔒";
-                }
-            } catch (err) {}
-        }
-
-        async function toggleLockdown() {
-            try {
-                await fetch('/api/toggle-lockdown', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id })
-                });
-                checkLockStatus();
-            } catch (err) {}
-        }
-
-        async function fetchData() {
+        async function loadData() {
             try {
                 const statsRes = await fetch('/api/stats');
                 const stats = await statsRes.json();
                 document.getElementById('totalActions').innerText = stats.total_actions || 0;
                 const bd = stats.action_breakdown || {};
-                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['FILTER_DELETE'] || 0) + (bd['AUTO_BAN_LINK'] || 0);
-
-                const cloudRes = await fetch('/api/data-cloud');
-                const cloudTags = await cloudRes.json();
-                const cloudC = document.getElementById('matchCloudContainer');
-                if (cloudTags && cloudTags.length > 0) {
-                    cloudC.innerHTML = '';
-                    cloudTags.forEach(t => {
-                        const nodeEl = document.createElement('div');
-                        nodeEl.className = 'match-hub-node';
-                        nodeEl.innerHTML = `<span>${t.tag}</span> <span class="node-counter">${t.count}</span>`;
-                        cloudC.appendChild(nodeEl);
-                    });
-                } else {
-                    cloudC.innerHTML = '<div style="font-size:11px; color:var(--text-muted);">Web Hub düğüm verisi bekleniyor...</div>';
-                }
+                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['AUTO_BAN_LINK'] || 0) + (bd['AUTO_BAN_CP_LINK'] || 0);
 
                 const logsRes = await fetch('/api/logs');
                 const logs = await logsRes.json();
-                const logsC = document.getElementById('logsList');
-                if (logs.length === 0) {
-                    logsC.innerHTML = '<div class="loading">Kayıtlı işlem yok.</div>';
-                    return;
-                }
-
-                logsC.innerHTML = '';
-                logs.forEach(l => {
-                    const item = document.createElement('div');
-                    item.className = 'glass-card';
-                    item.style.padding = '10px';
-                    item.style.marginBottom = '8px';
-                    item.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-bottom:4px;">
-                            <span style="font-weight:800; color:var(--accent-gold);">${l.action_type}</span>
-                            <span style="color:var(--text-muted); font-size:10px;">📅 ${l.timestamp}</span>
-                        </div>
-                        <div style="font-size:11px; color:var(--text-muted);">@${escapeHtml(l.username)} | ${escapeHtml(l.details)}</div>
-                    `;
-                    logsC.appendChild(item);
-                });
-
-                const adminRes = await fetch('/api/admin-stats');
-                const admins = await adminRes.json();
-                const rankC = document.getElementById('adminRankingList');
-                if (admins.length > 0) {
-                    rankC.innerHTML = '';
-                    admins.forEach(a => {
-                        const row = document.createElement('div');
-                        row.className = 'admin-list-item';
-                        row.innerHTML = `<span>🛡️ @${escapeHtml(a.username)}</span><b style="color:var(--accent-gold);">${a.count} İşlem</b>`;
-                        rankC.appendChild(row);
+                
+                const linkC = document.getElementById('linkLogsContainer');
+                const linkLogs = logs.filter(l => l.action_type.includes('LINK') || l.action_type.includes('CP'));
+                
+                if (linkLogs.length === 0) {
+                    linkC.innerHTML = '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Temiz. Yasaklı link tespit edilmedi.</div>';
+                } else {
+                    linkC.innerHTML = '';
+                    linkLogs.forEach(l => {
+                        linkC.innerHTML += `
+                            <div class="link-notification-box">
+                                <div><b>İşlem:</b> ${l.action_type} | 📅 ${l.timestamp}</div>
+                                <div>Kullanıcı: @${l.username} (ID: ${l.target_id})</div>
+                                <span class="selectable-text">${l.details}</span>
+                            </div>
+                        `;
                     });
                 }
-            } catch (err) {}
+
+                const staffRes = await fetch('/api/staff/list', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id })
+                });
+                const staffs = await staffRes.json();
+                const staffC = document.getElementById('staffListContainer');
+                if (staffs.length > 0) {
+                    staffC.innerHTML = '';
+                    staffs.forEach(s => {
+                        staffC.innerHTML += `
+                            <div class="item-row">
+                                <div><b>${s.full_name}</b><br><span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username}</span></div>
+                                <button onclick="removeStaff(${s.user_id})" style="background:var(--danger); color:#fff; border:none; padding:5px 10px; border-radius:8px; font-size:10px; cursor:pointer;">Sil</button>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (e) {}
         }
 
-        function escapeHtml(text) {
-            return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+        async function addStaff() {
+            const input = document.getElementById('staffInput').value.trim();
+            const name = document.getElementById('staffName').value.trim() || 'Yetkili';
+            if (!input) return alert("Değer girin!");
+            await fetch('/api/staff/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user.id, staff_input: input, full_name: name })
+            });
+            document.getElementById('staffInput').value = '';
+            loadData();
+            alert("✅ Yetkili eklendi!");
+        }
+
+        async function removeStaff(targetId) {
+            if (!confirm("Silmek istediğinize emin misiniz?")) return;
+            await fetch('/api/staff/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user.id, target_id: targetId })
+            });
+            loadData();
+        }
+
+        async function toggleLockdown() {
+            await fetch('/api/toggle-lockdown', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user.id })
+            });
         }
 
         verifyAccess();
