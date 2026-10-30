@@ -305,7 +305,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/butonmetni <yazı>` - Buton yazısı\n"
         "• `/butonlinki <url>` - Buton linki\n"
         "• `/duyuru <mesaj>` - Duyuru gönder (Otomatik Pinlenir)\n"
-        "• `/duyuru <mesaj> | <metin> | <link>` - Özel butonlu duyuru gönder (Otomatik Pinlenir)\n"
+        "• `/duyuru <mesaj> | <metin> | <link>` - Özel butonlu duyuru (Otomatik Pinlenir)\n"
         "• `/zamanla <dakika> | <mesaj> | <buton> | <link>` - Periyodik duyuru başlat (Pinlenmez)\n"
         "• `/zamanladur <dakika> | <mesaj> | <buton> | <link>` - Periyodik duyuruyu durdur\n"
         "• `/defol <kullanıcı>` - Banla\n"
@@ -372,7 +372,12 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
     settings = database.get_group_settings(chat_id)
     btn_text = parts[2] if len(parts) > 2 and parts[2] else settings["btn_text"]
     btn_url = parts[3] if len(parts) > 3 and parts[3] else settings["btn_url"]
-    media_url = reply.photo[-1].file_id if (reply and reply.photo) else settings.get("media_url", "")
+    
+    media_url = ""
+    if reply and reply.photo:
+        media_url = reply.photo[-1].file_id
+    elif reply and reply.video:
+        media_url = reply.video.file_id
     
     job_id = hashlib.md5(f"{chat_id}_{raw_text}".encode()).hexdigest()
     
@@ -439,7 +444,6 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             msg = await context.bot.send_message(chat_id=chat_id, text=msg_text, reply_markup=InlineKeyboardMarkup(keyboard))
         
-        # Normal duyuru otomatik olarak sabite (pin) çekilir
         try: await context.bot.pin_chat_message(chat_id=chat_id, message_id=msg.message_id)
         except Exception: pass
     except Exception as e: logger.error(f"Duyuru hatası: {e}")
