@@ -156,13 +156,19 @@ async def api_member_action(request):
         if not target_id: return web.json_response({"success": False, "error": "Kullanıcı bulunamadı!"}, status=404)
 
         if chat_id:
-            admin_uname = user.username if 'user' in locals() and user else "Panel"
             if action == "ban":
                 await bot.ban_chat_member(chat_id=chat_id, user_id=target_id)
                 database.log_action(chat_id, "BAN", target_id, clean_target, f"Üye Portundan banlandı (ID: {target_id})")
+            elif action == "unban":
+                await bot.unban_chat_member(chat_id=chat_id, user_id=target_id, only_if_banned=True)
+                database.log_action(chat_id, "UNBAN", target_id, clean_target, f"Üye Portundan banı kaldırıldı (ID: {target_id})")
             elif action == "mute":
                 await bot.restrict_chat_member(chat_id=chat_id, user_id=target_id, permissions=ChatPermissions(can_send_messages=False))
                 database.log_action(chat_id, "MUTE", target_id, clean_target, f"Üye Portundan susturuldu (ID: {target_id})")
+            elif action == "unmute":
+                perms = ChatPermissions(can_send_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True)
+                await bot.restrict_chat_member(chat_id=chat_id, user_id=target_id, permissions=perms)
+                database.log_action(chat_id, "UNMUTE", target_id, clean_target, f"Üye Portundan susturması kaldırıldı (ID: {target_id})")
         return web.json_response({"success": True})
     except Exception as e:
         return web.json_response({"success": False, "error": str(e)}, status=500)
@@ -285,7 +291,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/butonlinki <url>` - Buton linki\n"
         "• `/duyuru <mesaj>` - Duyuru gönder\n"
         "• `/zamanla <dakika>` - Zamanlı paylaşım\n"
-        "• `/zamanladur` - Zamanlayıcıyı durdur\n"
+        "• `/zamanladur` - Durdur\n"
         "• `/kilit kapat / ac` - Sohbet kilidi\n"
         "• `/defol <kullanıcı>` - Banla\n"
         "• `/undefol <kullanıcı>` - Ban kaldır\n"
@@ -500,7 +506,6 @@ def main():
     app = ApplicationBuilder().token(token).request(HTTPXRequest(connect_timeout=30.0, read_timeout=30.0)).post_init(post_init).build()
     app.add_error_handler(global_error_handler)
     
-    # --- TÜM KOMUTLAR GRUP İÇİNDE AKTİF EDİLDİ ---
     for cmd, func in COMMAND_MAP.items():
         app.add_handler(CommandHandler(cmd, func))
         
