@@ -304,8 +304,9 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/welcome <mesaj>` - Hoş geldin mesajı\n"
         "• `/butonmetni <yazı>` - Buton yazısı\n"
         "• `/butonlinki <url>` - Buton linki\n"
-        "• `/duyuru <mesaj>` - Duyuru gönder\n"
-        "• `/zamanla <dakika> | <mesaj> | <buton> | <link>` - Periyodik duyuru başlat\n"
+        "• `/duyuru <mesaj>` - Duyuru gönder (Otomatik Pinlenir)\n"
+        "• `/duyuru <mesaj> | <metin> | <link>` - Özel butonlu duyuru gönder (Otomatik Pinlenir)\n"
+        "• `/zamanla <dakika> | <mesaj> | <buton> | <link>` - Periyodik duyuru başlat (Pinlenmez)\n"
         "• `/zamanladur <dakika> | <mesaj> | <buton> | <link>` - Periyodik duyuruyu durdur\n"
         "• `/defol <kullanıcı>` - Banla\n"
         "• `/undefol <kullanıcı>` - Ban kaldır\n"
@@ -373,7 +374,6 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
     btn_url = parts[3] if len(parts) > 3 and parts[3] else settings["btn_url"]
     media_url = reply.photo[-1].file_id if (reply and reply.photo) else settings.get("media_url", "")
     
-    # Uniquely identify the scheduled job based on chat and exact text content
     job_id = hashlib.md5(f"{chat_id}_{raw_text}".encode()).hexdigest()
     
     scheduler.add_job(
@@ -385,6 +385,7 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
         replace_existing=True
     )
     
+    database.save_scheduled_job(job_id, chat_id, minutes, msg_text, btn_text, btn_url, media_url)
     database.log_action(chat_id, "SCHEDULE_START", 0, "SYSTEM", f"Her {minutes} dakikada bir otomatik duyuru başlatıldı.")
     await send_auto_delete_message(context, chat_id, f"✅ Her {minutes} dakikada bir tekrarlanacak duyuru başlatıldı!", 5)
     try: await update.message.delete()
@@ -404,6 +405,7 @@ async def cmd_zamanladur(update: Update, context: ContextTypes.DEFAULT_TYPE):
     job_id = hashlib.md5(f"{chat_id}_{raw_text}".encode()).hexdigest()
     try:
         scheduler.remove_job(job_id)
+        database.remove_scheduled_job_db(job_id)
         await send_auto_delete_message(context, chat_id, "🛑 Belirtilen periyodik duyuru durduruldu!", 5)
         database.log_action(chat_id, "SCHEDULE_STOP", 0, "SYSTEM", "Periyodik duyuru durduruldu.")
     except Exception:
@@ -436,6 +438,8 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
             msg = await context.bot.send_photo(chat_id=chat_id, photo=photo_to_send, caption=msg_text, reply_markup=InlineKeyboardMarkup(keyboard))
         else:
             msg = await context.bot.send_message(chat_id=chat_id, text=msg_text, reply_markup=InlineKeyboardMarkup(keyboard))
+        
+        # Normal duyuru otomatik olarak sabite (pin) çekilir
         try: await context.bot.pin_chat_message(chat_id=chat_id, message_id=msg.message_id)
         except Exception: pass
     except Exception as e: logger.error(f"Duyuru hatası: {e}")
@@ -586,6 +590,21 @@ async def post_init(application):
     database.init_db()
     if not scheduler.running:
         scheduler.start()
+        
+    saved_jobs = database.get_all_scheduled_jobs()
+    for job in saved_jobs:
+        try:
+            scheduler.add_job(
+                send_periodic_announcement,
+                'interval',
+                minutes=job["minutes"],
+                args=[application.bot, job["chat_id"], job["msg_text"], job["btn_text"], job["btn_url"], job["media_url"]],
+                id=job["job_id"],
+                replace_existing=True
+            )
+        except Exception as e:
+            logger.error(f"Kayıtlı görev yüklenemedi: {e}")
+
     await application.bot.delete_webhook(drop_pending_updates=True)
     asyncio.create_task(start_web_server(application))
 
