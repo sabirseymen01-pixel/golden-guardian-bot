@@ -114,19 +114,21 @@
         </div>
     </div>
 
-    <!-- PORT 3: ÜYE İŞLEMLERİ (Ban ve Mute Butonları Aktif) -->
+    <!-- PORT 3: ÜYE İŞLEMLERİ (Ban, Unban, Mute, Unmute Tam Donanımlı) -->
     <div id="port-members" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">👥 Üye Portu & Hızlı İşlem</div>
+            <div class="section-title">👥 Üye Portu & Hızlı İşlemler</div>
             <input type="text" id="memberTargetInput" placeholder="Kullanıcı ID veya @username">
-            <div style="display: flex; gap: 8px; margin-top: 5px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px;">
                 <button class="apple-btn" style="background: var(--danger); color: #fff;" onclick="memberAction('ban')">Banla 🚫</button>
+                <button class="apple-btn" style="background: var(--success); color: #fff;" onclick="memberAction('unban')">Banı Kaldır ✅</button>
                 <button class="apple-btn" style="background: #e67e22; color: #fff;" onclick="memberAction('mute')">Sustur 🔇</button>
+                <button class="apple-btn" style="background: #3498db; color: #fff;" onclick="memberAction('unmute')">Susturmayı Aç 🔊</button>
             </div>
         </div>
     </div>
 
-    <!-- PORT 4: GENEL LOGLAR (ID, Kullanıcı Adı ve Süre Seçenekleri) -->
+    <!-- PORT 4: GENEL LOGLAR -->
     <div id="port-genlogs" class="portal-section">
         <div class="glass-container">
             <div class="section-title">📜 Tarihli & Saatli Genel Loglar</div>
@@ -163,7 +165,7 @@
         </div>
     </div>
 
-    <!-- PORT 7: FİNAL SÜRPRİZİ (NEURAL GUARD) -->
+    <!-- PORT 7: NEURAL GUARD -->
     <div id="port-neural" class="portal-section">
         <div class="glass-container">
             <div class="section-title">🧠 Golden Neural Guard (Yapay Zeka Tehdit Analizi)</div>
@@ -220,7 +222,6 @@
                 const bd = stats.action_breakdown || {};
                 document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['AUTO_BAN'] || 0);
 
-                // Genel Loglar (ID ve Kullanıcı Adı Dahil)
                 const genRes = await fetch('/api/logs?filter=general&limit=50');
                 const genLogs = await genRes.json();
                 const genC = document.getElementById('generalLogsContainer');
@@ -235,7 +236,6 @@
                     `;
                 });
 
-                // Admin Logları
                 const adminRes = await fetch('/api/logs?filter=admin&limit=50');
                 const adminLogs = await adminRes.json();
                 const adminC = document.getElementById('adminLogsContainer');
@@ -250,7 +250,6 @@
                     `;
                 });
 
-                // Staff Listesi
                 const staffRes = await fetch('/api/staff/list', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id }) });
                 const staffs = await staffRes.json();
                 const staffC = document.getElementById('staffListContainer');
