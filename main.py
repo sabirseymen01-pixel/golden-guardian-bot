@@ -159,10 +159,10 @@ async def api_member_action(request):
             admin_uname = user.username if 'user' in locals() and user else "Panel"
             if action == "ban":
                 await bot.ban_chat_member(chat_id=chat_id, user_id=target_id)
-                database.log_action(chat_id, "BAN", target_id, clean_target, f"Panelden banlandı (ID: {target_id})")
+                database.log_action(chat_id, "BAN", target_id, clean_target, f"Üye Portundan banlandı (ID: {target_id})")
             elif action == "mute":
                 await bot.restrict_chat_member(chat_id=chat_id, user_id=target_id, permissions=ChatPermissions(can_send_messages=False))
-                database.log_action(chat_id, "MUTE", target_id, clean_target, f"Panelden susturuldu (ID: {target_id})")
+                database.log_action(chat_id, "MUTE", target_id, clean_target, f"Üye Portundan susturuldu (ID: {target_id})")
         return web.json_response({"success": True})
     except Exception as e:
         return web.json_response({"success": False, "error": str(e)}, status=500)
@@ -268,7 +268,7 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return UsernameTarget(clean_arg)
     return None
 
-# --- TELEGRAM KOMUTLARI (Güncel Liste ve Anında Silinme) ---
+# --- TELEGRAM KOMUTLARI ---
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     try: await update.message.delete()
@@ -280,21 +280,19 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     welcome_text = (
         "🤖 **Grup Yönetim & Golden Staff Güvenlik Botu**\n\n"
         "📜 **Yönetici Komutları:**\n"
-        "• `/welcome <mesaj>` - Hoş geldin mesajını değiştirir.\n"
-        "• `/butonmetni <yazı>` - Varsayılan buton üzerindeki yazıyı değiştirir.\n"
-        "• `/butonlinki <url>` - Varsayılan butonun yönlendireceği linki değiştirir.\n"
-        "• `/duyuru <mesaj>` - Kayıtlı buton ile duyuru gönderir.\n"
-        "• `/duyuru <mesaj> | <metin> | <link>` - Özel butonlu duyuru gönderir.\n"
-        "• `/zamanla <dakika>` - Periyodik otomatik paylaşım başlatır.\n"
-        "• `/zamanladur` - Aktif otomatik paylaşımı durdurur.\n"
-        "• `/kilit kapat / ac` - Sohbeti kilitler veya açar.\n"
-        "• `/defol <@kullanici|ID|yanıt>` - Kullanıcıyı banlar.\n"
-        "• `/undefol <ID|yanıt>` - Engeli kaldırır.\n"
-        "• `/itaat <@kullanici|ID|yanıt>` - Kullanıcıyı susturur.\n"
-        "• `/unitaat <@kullanici|ID|yanıt>` - Susturmayı kaldırır.\n"
-        "• `/warn <@kullanici|ID|yanıt>` - Kullanıcıya uyarı verir.\n"
-        "• `/unwarn <@kullanici|ID|yanıt>` - Uyarıları sıfırlar.\n\n"
-        "━━━━━━━━━━━━━━━━━━━━━━\n"
+        "• `/welcome <mesaj>` - Hoş geldin mesajı\n"
+        "• `/butonmetni <yazı>` - Buton yazısı\n"
+        "• `/butonlinki <url>` - Buton linki\n"
+        "• `/duyuru <mesaj>` - Duyuru gönder\n"
+        "• `/zamanla <dakika>` - Zamanlı paylaşım\n"
+        "• `/zamanladur` - Zamanlayıcıyı durdur\n"
+        "• `/kilit kapat / ac` - Sohbet kilidi\n"
+        "• `/defol <kullanıcı>` - Banla\n"
+        "• `/undefol <kullanıcı>` - Ban kaldır\n"
+        "• `/itaat <kullanıcı>` - Sustur\n"
+        "• `/unitaat <kullanıcı>` - Susturma kaldır\n"
+        "• `/warn <kullanıcı>` - Uyarı ver\n"
+        "• `/unwarn <kullanıcı>` - Uyarı sıfırla\n\n"
         "⚜️ *Powered by Golden Guardian Bot Engine*"
     )
     web_app_url = "https://golden-guardian-bot.onrender.com/"
@@ -325,13 +323,11 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
     try: await update.message.delete()
     except Exception: pass
-    await send_auto_delete_message(context, update.effective_chat.id, "⏱️ Periyodik paylaşım zamanlayıcısı devrede.")
 
 async def cmd_zamanladur(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
     try: await update.message.delete()
     except Exception: pass
-    await send_auto_delete_message(context, update.effective_chat.id, "⏹️ Periyodik paylaşım durduruldu.")
 
 async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
@@ -386,7 +382,7 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not user: return
     try:
         await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
-        name, uname = getattr(user, 'full_name', str(user.id)), getattr(user, 'username', str(user.id))
+        uname = getattr(user, 'username', str(user.id))
         admin_uname = update.effective_user.username or update.effective_user.first_name
         database.log_action(chat_id, "BAN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından banlandı.")
     except Exception as e: logger.error(f"Ban hatası: {e}")
@@ -400,7 +396,7 @@ async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not user: return
     try:
         await context.bot.unban_chat_member(chat_id=chat_id, user_id=user.id, only_if_banned=True)
-        name, uname = getattr(user, 'full_name', str(user.id)), getattr(user, 'username', str(user.id))
+        uname = getattr(user, 'username', str(user.id))
         admin_uname = update.effective_user.username or update.effective_user.first_name
         database.log_action(chat_id, "UNBAN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından banı kaldırıldı.")
     except Exception as e: logger.error(f"Unban hatası: {e}")
@@ -414,7 +410,7 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not user: return
     try:
         await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=ChatPermissions(can_send_messages=False))
-        name, uname = getattr(user, 'full_name', str(user.id)), getattr(user, 'username', str(user.id))
+        uname = getattr(user, 'username', str(user.id))
         admin_uname = update.effective_user.username or update.effective_user.first_name
         database.log_action(chat_id, "MUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından susturuldu.")
     except Exception as e: logger.error(f"Mute hatası: {e}")
@@ -429,7 +425,7 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         perms = ChatPermissions(can_send_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True)
         await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=perms)
-        name, uname = getattr(user, 'full_name', str(user.id)), getattr(user, 'username', str(user.id))
+        uname = getattr(user, 'username', str(user.id))
         admin_uname = update.effective_user.username or update.effective_user.first_name
         database.log_action(chat_id, "UNMUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından susturması kaldırıldı.")
     except Exception as e: logger.error(f"Unmute hatası: {e}")
@@ -441,7 +437,7 @@ async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
     if not user: return
-    name, uname = getattr(user, 'full_name', str(user.id)), getattr(user, 'username', str(user.id))
+    uname = getattr(user, 'username', str(user.id))
     admin_uname = update.effective_user.username or update.effective_user.first_name
     current_warns = database.add_warning(user.id)
     database.log_action(chat_id, "WARN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} uyarı verdi ({current_warns}/3).")
@@ -489,8 +485,8 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
                     await update.message.delete()
                     if user:
                         await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
-                        uname_str, name_str = f"@{user.username}" if user.username else str(user.id), user.full_name or "Kullanıcı"
-                        database.log_action(chat_id, "AUTO_BAN", user.id, f"{uname_str} (ID: {user.id})", f"Yasaklı içerik/link paylaştığı için otomatik banlandı.")
+                        uname_str = f"@{user.username}" if user.username else str(user.id)
+                        database.log_action(chat_id, "AUTO_BAN", user.id, f"{uname_str} (ID: {user.id})", f"Yasaklı içerik paylaştığı için otomatik banlandı.")
                 except Exception as e: logger.error(f"Filtre hatası: {e}")
 
 async def post_init(application):
@@ -503,7 +499,11 @@ def main():
     if not token: return
     app = ApplicationBuilder().token(token).request(HTTPXRequest(connect_timeout=30.0, read_timeout=30.0)).post_init(post_init).build()
     app.add_error_handler(global_error_handler)
-    for cmd, func in COMMAND_MAP.items(): app.add_handler(CommandHandler(cmd, func))
+    
+    # --- TÜM KOMUTLAR GRUP İÇİNDE AKTİF EDİLDİ ---
+    for cmd, func in COMMAND_MAP.items():
+        app.add_handler(CommandHandler(cmd, func))
+        
     app.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, master_message_router))
     app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
