@@ -13,6 +13,7 @@ logs_col = db["logs"]
 staff_col = db["staff"]
 settings_col = db["group_settings"]
 groups_col = db["bot_groups"]
+scheduled_jobs_col = db["scheduled_jobs"]
 
 def init_db():
     try:
@@ -20,6 +21,7 @@ def init_db():
         staff_col.create_index("user_id", unique=True)
         settings_col.create_index("chat_id", unique=True)
         groups_col.create_index("chat_id", unique=True)
+        scheduled_jobs_col.create_index("job_id", unique=True)
     except Exception:
         pass
 
@@ -217,3 +219,33 @@ def get_user_id_by_username(chat_id, username):
     except Exception:
         pass
     return None
+
+# --- YENİ: Zamanlı Görevler Veritabanı Fonksiyonları ---
+def save_scheduled_job(job_id, chat_id, minutes, msg_text, btn_text, btn_url, media_url):
+    try:
+        scheduled_jobs_col.update_one(
+            {"job_id": job_id},
+            {"$set": {
+                "chat_id": int(chat_id),
+                "minutes": int(minutes),
+                "msg_text": msg_text,
+                "btn_text": btn_text,
+                "btn_url": btn_url,
+                "media_url": media_url
+            }},
+            upsert=True
+        )
+    except Exception:
+        pass
+
+def remove_scheduled_job_db(job_id):
+    try:
+        scheduled_jobs_col.delete_one({"job_id": job_id})
+    except Exception:
+        pass
+
+def get_all_scheduled_jobs():
+    try:
+        return list(scheduled_jobs_col.find({}, {"_id": 0}))
+    except Exception:
+        return []
