@@ -221,12 +221,12 @@ async def start_web_server(app_context):
     site = web.TCPSite(runner, "0.0.0.0", port)
     await site.start()
 
-async def _delete_after_delay(context, chat_id, message_id, delay=10):
+async def _delete_after_delay(context, chat_id, message_id, delay=5):
     await asyncio.sleep(delay)
     try: await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
     except Exception: pass
 
-async def send_auto_delete_message(context, chat_id, text, delay=10):
+async def send_auto_delete_message(context, chat_id, text, delay=5):
     try:
         msg = await context.bot.send_message(chat_id=chat_id, text=text)
         asyncio.create_task(_delete_after_delay(context, chat_id, msg.message_id, delay))
@@ -274,7 +274,7 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return UsernameTarget(clean_arg)
     return None
 
-# --- TELEGRAM KOMUTLARI (İşlem Tamamlandıktan Sonra Silinme Garantili) ---
+# --- TELEGRAM KOMUTLARI (Görsel Geri Bildirim Mesajlı) ---
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     if chat.type in ["group", "supergroup"]:
@@ -290,9 +290,6 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/butonmetni <yazı>` - Buton yazısı\n"
         "• `/butonlinki <url>` - Buton linki\n"
         "• `/duyuru <mesaj>` - Duyuru gönder\n"
-        "• `/zamanla <dakika>` - Zamanlı paylaşım\n"
-        "• `/zamanladur` - Durdur\n"
-        "• `/kilit kapat / ac` - Sohbet kilidi\n"
         "• `/defol <kullanıcı>` - Banla\n"
         "• `/undefol <kullanıcı>` - Ban kaldır\n"
         "• `/itaat <kullanıcı>` - Sustur\n"
@@ -308,20 +305,26 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
     text = " ".join(context.args)
-    if text: database.update_group_setting(update.effective_chat.id, "welcome_msg", text)
+    if text: 
+        database.update_group_setting(update.effective_chat.id, "welcome_msg", text)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin mesajı güncellendi!", 4)
     try: await update.message.delete()
     except Exception: pass
 
 async def cmd_butonmetni(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
     text = " ".join(context.args)
-    if text: database.update_group_setting(update.effective_chat.id, "btn_text", text)
+    if text: 
+        database.update_group_setting(update.effective_chat.id, "btn_text", text)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Buton metni güncellendi!", 4)
     try: await update.message.delete()
     except Exception: pass
 
 async def cmd_butonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
-    if context.args: database.update_group_setting(update.effective_chat.id, "btn_url", context.args[0].strip())
+    if context.args: 
+        database.update_group_setting(update.effective_chat.id, "btn_url", context.args[0].strip())
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Buton linki güncellendi!", 4)
     try: await update.message.delete()
     except Exception: pass
 
@@ -373,8 +376,10 @@ async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             if action in ["kapat", "kilit"]:
                 await context.bot.set_chat_permissions(chat_id=chat_id, permissions=ChatPermissions(can_send_messages=False))
+                await send_auto_delete_message(context, chat_id, "🔒 Sohbet kilitlendi!", 4)
             elif action in ["ac", "aç"]:
                 await context.bot.set_chat_permissions(chat_id=chat_id, permissions=ChatPermissions(can_send_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True))
+                await send_auto_delete_message(context, chat_id, "🔓 Sohbet kilidi açıldı!", 4)
         except Exception as e: logger.error(f"Kilit hatası: {e}")
     try: await update.message.delete()
     except Exception: pass
@@ -389,6 +394,7 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
             uname = getattr(user, 'username', str(user.id))
             admin_uname = update.effective_user.username or update.effective_user.first_name
             database.log_action(chat_id, "BAN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından banlandı.")
+            await send_auto_delete_message(context, chat_id, f"🚫 @{uname} gruptan banlandı!", 5)
         except Exception as e: logger.error(f"Ban hatası: {e}")
     try: await update.message.delete()
     except Exception: pass
@@ -403,6 +409,7 @@ async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
             uname = getattr(user, 'username', str(user.id))
             admin_uname = update.effective_user.username or update.effective_user.first_name
             database.log_action(chat_id, "UNBAN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından banı kaldırıldı.")
+            await send_auto_delete_message(context, chat_id, f"✅ @{uname} kullanıcısının banı kaldırıldı!", 5)
         except Exception as e: logger.error(f"Unban hatası: {e}")
     try: await update.message.delete()
     except Exception: pass
@@ -417,6 +424,7 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             uname = getattr(user, 'username', str(user.id))
             admin_uname = update.effective_user.username or update.effective_user.first_name
             database.log_action(chat_id, "MUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından susturuldu.")
+            await send_auto_delete_message(context, chat_id, f"🔇 @{uname} susturuldu!", 5)
         except Exception as e: logger.error(f"Mute hatası: {e}")
     try: await update.message.delete()
     except Exception: pass
@@ -432,6 +440,7 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             uname = getattr(user, 'username', str(user.id))
             admin_uname = update.effective_user.username or update.effective_user.first_name
             database.log_action(chat_id, "UNMUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından susturması kaldırıldı.")
+            await send_auto_delete_message(context, chat_id, f"🔊 @{uname} kullanıcısının susturması kaldırıldı!", 5)
         except Exception as e: logger.error(f"Unmute hatası: {e}")
     try: await update.message.delete()
     except Exception: pass
@@ -445,9 +454,12 @@ async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
         admin_uname = update.effective_user.username or update.effective_user.first_name
         current_warns = database.add_warning(user.id)
         database.log_action(chat_id, "WARN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} uyarı verdi ({current_warns}/3).")
+        await send_auto_delay_msg = f"⚠️ @{uname} uyarlandı ({current_warns}/3)."
         if current_warns >= 3:
             await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
             database.reset_warnings(user.id)
+            await_delay_msg = f"⚠️ @{uname} 3 uyarıya ulaştığı için banlandı!"
+        await send_auto_delete_message(context, chat_id, f"⚠️ @{uname} uyarlandı ({current_warns}/3).", 5)
     try: await update.message.delete()
     except Exception: pass
 
@@ -455,7 +467,9 @@ async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
-    if user: database.reset_warnings(user.id)
+    if user: 
+        database.reset_warnings(user.id)
+        await send_auto_delete_message(context, chat_id, "✅ Kullanıcının uyarıları sıfırlandı!", 5)
     try: await update.message.delete()
     except Exception: pass
 
