@@ -70,9 +70,9 @@ def get_recent_logs(limit=100, log_filter="all"):
     try:
         query = {}
         if log_filter == "admin":
-            query["action_type"] = {"$in": ["BAN", "MUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE"]}
+            query["action_type"] = {"$in": ["BAN", "MUTE", "VOICE_MUTE", "VOICE_UNMUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN"]}
         elif log_filter == "general":
-            query["action_type"] = {"$nin": ["BAN", "MUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE"]}
+            query["action_type"] = {"$nin": ["BAN", "MUTE", "VOICE_MUTE", "VOICE_UNMUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN"]}
             
         rows = list(logs_col.find(query, {"_id": 0, "datetime_obj": 0}).sort("_id", -1).limit(limit))
         return rows
@@ -101,7 +101,7 @@ def get_bot_statistics():
 def get_admin_performance_stats():
     try:
         pipeline = [
-            {"$match": {"action_type": {"$in": ["BAN", "MUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE"]}}},
+            {"$match": {"action_type": {"$in": ["BAN", "MUTE", "VOICE_MUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN"]}}},
             {"$group": {"_id": "$username", "count": {"$sum": 1}}},
             {"$sort": {"count": -1}},
             {"$limit": 10}
@@ -158,10 +158,14 @@ def get_staff_permissions(user_id):
     try:
         row = staff_col.find_one({"user_id": int(user_id)})
         if row:
-            return {"can_ban": row.get("can_ban", 1), "warnings": row.get("warnings", 0)}
+            return {
+                "can_ban": row.get("can_ban", 1),
+                "can_mute": row.get("can_mute", 1),
+                "warnings": row.get("warnings", 0)
+            }
     except Exception:
         pass
-    return {"can_ban": 1, "warnings": 0}
+    return {"can_ban": 1, "can_mute": 1, "warnings": 0}
 
 def get_all_staff():
     try:
@@ -178,12 +182,25 @@ def add_staff_member(user_id, username, full_name, added_by):
             "username": clean_uname,
             "full_name": full_name,
             "can_ban": 1,
+            "can_mute": 1,
             "warnings": 0,
             "added_by": added_by
         }
         staff_col.update_one({"user_id": int(user_id)}, {"$set": staff_doc}, upsert=True)
     except Exception:
         pass
+
+def toggle_staff_permission(user_id, perm_field):
+    try:
+        row = staff_col.find_one({"user_id": int(user_id)})
+        if row:
+            current_val = row.get(perm_field, 1)
+            new_val = 0 if current_val == 1 else 1
+            staff_col.update_one({"user_id": int(user_id)}, {"$set": {perm_field: new_val}})
+            return new_val
+    except Exception:
+        pass
+    return None
 
 def remove_staff_member(user_id):
     try:
