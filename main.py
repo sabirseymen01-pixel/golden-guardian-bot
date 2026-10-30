@@ -274,13 +274,13 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return UsernameTarget(clean_arg)
     return None
 
-# --- TELEGRAM KOMUTLARI ---
+# --- TELEGRAM KOMUTLARI (İşlem Tamamlandıktan Sonra Silinme Garantili) ---
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
-    try: await update.message.delete()
-    except Exception: pass
     if chat.type in ["group", "supergroup"]:
         database.register_bot_group(chat.id, chat.title or "Grup")
+        try: await update.message.delete()
+        except Exception: pass
         return
 
     welcome_text = (
@@ -307,23 +307,23 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def cmd_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
-    try: await update.message.delete()
-    except Exception: pass
     text = " ".join(context.args)
     if text: database.update_group_setting(update.effective_chat.id, "welcome_msg", text)
+    try: await update.message.delete()
+    except Exception: pass
 
 async def cmd_butonmetni(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
-    try: await update.message.delete()
-    except Exception: pass
     text = " ".join(context.args)
     if text: database.update_group_setting(update.effective_chat.id, "btn_text", text)
+    try: await update.message.delete()
+    except Exception: pass
 
 async def cmd_butonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
+    if context.args: database.update_group_setting(update.effective_chat.id, "btn_url", context.args[0].strip())
     try: await update.message.delete()
     except Exception: pass
-    if context.args: database.update_group_setting(update.effective_chat.id, "btn_url", context.args[0].strip())
 
 async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
@@ -337,8 +337,6 @@ async def cmd_zamanladur(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
-    try: await update.message.delete()
-    except Exception: pass
     chat_id = update.effective_chat.id
     reply = update.message.reply_to_message
     raw_text = update.message.text.partition(" ")[2].strip()
@@ -364,101 +362,102 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try: await context.bot.pin_chat_message(chat_id=chat_id, message_id=msg.message_id)
         except Exception: pass
     except Exception as e: logger.error(f"Duyuru hatası: {e}")
+    try: await update.message.delete()
+    except Exception: pass
 
 async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    if context.args:
+        action = context.args[0].lower()
+        try:
+            if action in ["kapat", "kilit"]:
+                await context.bot.set_chat_permissions(chat_id=chat_id, permissions=ChatPermissions(can_send_messages=False))
+            elif action in ["ac", "aç"]:
+                await context.bot.set_chat_permissions(chat_id=chat_id, permissions=ChatPermissions(can_send_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True))
+        except Exception as e: logger.error(f"Kilit hatası: {e}")
     try: await update.message.delete()
     except Exception: pass
-    chat_id = update.effective_chat.id
-    if not context.args: return
-    action = context.args[0].lower()
-    try:
-        if action in ["kapat", "kilit"]:
-            await context.bot.set_chat_permissions(chat_id=chat_id, permissions=ChatPermissions(can_send_messages=False))
-        elif action in ["ac", "aç"]:
-            await context.bot.set_chat_permissions(chat_id=chat_id, permissions=ChatPermissions(can_send_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True))
-    except Exception as e: logger.error(f"Kilit hatası: {e}")
 
 async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
-    try: await update.message.delete()
-    except Exception: pass
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
-    if not user: return
-    try:
-        await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
-        uname = getattr(user, 'username', str(user.id))
-        admin_uname = update.effective_user.username or update.effective_user.first_name
-        database.log_action(chat_id, "BAN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından banlandı.")
-    except Exception as e: logger.error(f"Ban hatası: {e}")
+    if user:
+        try:
+            await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+            uname = getattr(user, 'username', str(user.id))
+            admin_uname = update.effective_user.username or update.effective_user.first_name
+            database.log_action(chat_id, "BAN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından banlandı.")
+        except Exception as e: logger.error(f"Ban hatası: {e}")
+    try: await update.message.delete()
+    except Exception: pass
 
 async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
-    try: await update.message.delete()
-    except Exception: pass
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
-    if not user: return
-    try:
-        await context.bot.unban_chat_member(chat_id=chat_id, user_id=user.id, only_if_banned=True)
-        uname = getattr(user, 'username', str(user.id))
-        admin_uname = update.effective_user.username or update.effective_user.first_name
-        database.log_action(chat_id, "UNBAN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından banı kaldırıldı.")
-    except Exception as e: logger.error(f"Unban hatası: {e}")
+    if user:
+        try:
+            await context.bot.unban_chat_member(chat_id=chat_id, user_id=user.id, only_if_banned=True)
+            uname = getattr(user, 'username', str(user.id))
+            admin_uname = update.effective_user.username or update.effective_user.first_name
+            database.log_action(chat_id, "UNBAN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından banı kaldırıldı.")
+        except Exception as e: logger.error(f"Unban hatası: {e}")
+    try: await update.message.delete()
+    except Exception: pass
 
 async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
-    try: await update.message.delete()
-    except Exception: pass
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
-    if not user: return
-    try:
-        await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=ChatPermissions(can_send_messages=False))
-        uname = getattr(user, 'username', str(user.id))
-        admin_uname = update.effective_user.username or update.effective_user.first_name
-        database.log_action(chat_id, "MUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından susturuldu.")
-    except Exception as e: logger.error(f"Mute hatası: {e}")
+    if user:
+        try:
+            await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=ChatPermissions(can_send_messages=False))
+            uname = getattr(user, 'username', str(user.id))
+            admin_uname = update.effective_user.username or update.effective_user.first_name
+            database.log_action(chat_id, "MUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından susturuldu.")
+        except Exception as e: logger.error(f"Mute hatası: {e}")
+    try: await update.message.delete()
+    except Exception: pass
 
 async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
-    try: await update.message.delete()
-    except Exception: pass
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
-    if not user: return
-    try:
-        perms = ChatPermissions(can_send_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True)
-        await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=perms)
-        uname = getattr(user, 'username', str(user.id))
-        admin_uname = update.effective_user.username or update.effective_user.first_name
-        database.log_action(chat_id, "UNMUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından susturması kaldırıldı.")
-    except Exception as e: logger.error(f"Unmute hatası: {e}")
+    if user:
+        try:
+            perms = ChatPermissions(can_send_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True)
+            await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=perms)
+            uname = getattr(user, 'username', str(user.id))
+            admin_uname = update.effective_user.username or update.effective_user.first_name
+            database.log_action(chat_id, "UNMUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından susturması kaldırıldı.")
+        except Exception as e: logger.error(f"Unmute hatası: {e}")
+    try: await update.message.delete()
+    except Exception: pass
 
 async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
-    try: await update.message.delete()
-    except Exception: pass
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
-    if not user: return
-    uname = getattr(user, 'username', str(user.id))
-    admin_uname = update.effective_user.username or update.effective_user.first_name
-    current_warns = database.add_warning(user.id)
-    database.log_action(chat_id, "WARN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} uyarı verdi ({current_warns}/3).")
-    if current_warns >= 3:
-        await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
-        database.reset_warnings(user.id)
+    if user:
+        uname = getattr(user, 'username', str(user.id))
+        admin_uname = update.effective_user.username or update.effective_user.first_name
+        current_warns = database.add_warning(user.id)
+        database.log_action(chat_id, "WARN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} uyarı verdi ({current_warns}/3).")
+        if current_warns >= 3:
+            await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+            database.reset_warnings(user.id)
+    try: await update.message.delete()
+    except Exception: pass
 
 async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
-    try: await update.message.delete()
-    except Exception: pass
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
-    if not user: return
-    database.reset_warnings(user.id)
+    if user: database.reset_warnings(user.id)
+    try: await update.message.delete()
+    except Exception: pass
 
 COMMAND_MAP = {
     "start": cmd_start, "help": cmd_start, "welcome": cmd_welcome,
