@@ -274,7 +274,7 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return UsernameTarget(clean_arg)
     return None
 
-# --- TELEGRAM KOMUTLARI (Görsel Geri Bildirim Mesajlı) ---
+# --- TELEGRAM KOMUTLARI ---
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     if chat.type in ["group", "supergroup"]:
@@ -454,12 +454,12 @@ async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
         admin_uname = update.effective_user.username or update.effective_user.first_name
         current_warns = database.add_warning(user.id)
         database.log_action(chat_id, "WARN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} uyarı verdi ({current_warns}/3).")
-        await send_auto_delay_msg = f"⚠️ @{uname} uyarlandı ({current_warns}/3)."
         if current_warns >= 3:
             await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
             database.reset_warnings(user.id)
-            await_delay_msg = f"⚠️ @{uname} 3 uyarıya ulaştığı için banlandı!"
-        await send_auto_delete_message(context, chat_id, f"⚠️ @{uname} uyarlandı ({current_warns}/3).", 5)
+            await send_auto_delete_message(context, chat_id, f"⚠️ @{uname} 3 uyarıya ulaştığı için banlandı!", 5)
+        else:
+            await send_auto_delete_message(context, chat_id, f"⚠️ @{uname} uyarlandı ({current_warns}/3).", 5)
     try: await update.message.delete()
     except Exception: pass
 
