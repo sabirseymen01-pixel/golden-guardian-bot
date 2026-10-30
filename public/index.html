@@ -17,43 +17,20 @@
             --danger: #ff4d4d;
             --success: #2ecc71;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        
         body {
-            /* Siyah yerine tamamen şeffaf kristal camsı arka plan */
             background: linear-gradient(135deg, rgba(30,24,12,0.85) 0%, rgba(10,12,18,0.90) 50%, rgba(20,15,8,0.85) 100%), 
                         radial-gradient(circle at 50% 20%, rgba(212,175,55,0.15) 0%, transparent 60%);
-            background-attachment: fixed;
-            color: var(--text-main);
-            padding: 14px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
+            background-attachment: fixed; color: var(--text-main); padding: 14px; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
         }
-
-        /* Apple Tarzı Kristal Camsı Kartlar */
         .glass-container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--glass-border);
-            border-radius: 22px;
-            padding: 16px;
-            margin-bottom: 14px;
+            background: var(--glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border); border-radius: 22px; padding: 16px; margin-bottom: 14px;
             box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(212, 175, 55, 0.08);
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-
-        .header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 16px; margin-bottom: 14px;
-        }
+        .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 14px; }
         .logo h1 { font-size: 16px; color: var(--accent-gold); font-weight: 800; text-shadow: 0 0 10px var(--gold-glow); }
         .badge { background: rgba(212, 175, 55, 0.15); color: var(--accent-gold); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid var(--glass-border); }
-
-        /* Kaydırılabilir Port Menüsü */
         .port-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
         .port-nav::-webkit-scrollbar { display: none; }
         .port-tab {
@@ -63,65 +40,39 @@
         }
         .port-tab.active {
             background: linear-gradient(135deg, rgba(212,175,55,0.35) 0%, rgba(170,119,28,0.25) 100%);
-            color: var(--accent-gold); border-color: var(--accent-gold);
-            box-shadow: 0 0 15px var(--gold-glow); text-shadow: 0 0 8px rgba(212,175,55,0.5);
+            color: var(--accent-gold); border-color: var(--accent-gold); box-shadow: 0 0 15px var(--gold-glow);
         }
-
         .portal-section { display: none; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; flex-direction: column; }
         .portal-section.active { display: flex; opacity: 1; transform: translateY(0); }
-
         .section-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--accent-gold); display: flex; align-items: center; gap: 8px; }
-        
         input, select, textarea {
             width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border);
-            border-radius: 14px; padding: 12px; color: #fff; font-size: 13px; outline: none; margin-bottom: 10px;
-            backdrop-filter: blur(10px);
+            border-radius: 14px; padding: 12px; color: #fff; font-size: 13px; outline: none; margin-bottom: 10px; backdrop-filter: blur(10px);
         }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent-gold); box-shadow: 0 0 12px var(--gold-glow); }
-
-        /* Apple Tarzı Dokunma Hissiyatı (Baloncuk Küçülme/Büyüme) */
         .apple-btn {
             width: 100%; background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%); color: #000;
             border: none; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 13px; cursor: pointer;
-            box-shadow: 0 4px 20px rgba(212,175,55,0.25);
-            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease;
+            box-shadow: 0 4px 20px rgba(212,175,55,0.25); transition: transform 0.15s;
         }
-        .apple-btn:active { transform: scale(0.94); box-shadow: 0 2px 10px rgba(212,175,55,0.15); }
-
-        .item-row {
-            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.15);
-            padding: 12px; border-radius: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;
-        }
-
-        .link-notification-box {
-            background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3);
-            padding: 10px; border-radius: 12px; margin-bottom: 8px; font-size: 11px;
-        }
-        .selectable-text {
-            user-select: all; -webkit-user-select: all; background: rgba(0,0,0,0.3);
-            padding: 6px 10px; border-radius: 8px; color: var(--accent-gold); font-family: monospace; margin-top: 6px; display: block;
-        }
+        .apple-btn:active { transform: scale(0.94); }
+        .item-row { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.15); padding: 12px; border-radius: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .log-box { background: rgba(0, 0, 0, 0.25); border: 1px solid var(--glass-border); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; font-size: 11px; }
+        .selectable-text { user-select: all; -webkit-user-select: all; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 6px; color: var(--accent-gold); font-family: monospace; display: inline-block; margin-top: 4px; }
         .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px; }
     </style>
 </head>
 <body>
 
     <div class="glass-container header">
-        <div class="logo">
-            <h1>⚜️ Golden Staff Hub</h1>
-        </div>
+        <div class="logo"><h1>⚜️ Golden Staff Hub</h1></div>
         <div class="badge" id="userRole">Yönetici 🛡️</div>
     </div>
 
-    <!-- Aktif Grup Seçici -->
     <div class="glass-container" style="padding: 10px; margin-bottom: 10px;">
         <label style="font-size: 10px; color: var(--text-muted); display: block; margin-bottom: 4px;">🎯 İŞLEM YAPILACAK GRUP:</label>
-        <select id="activeGroupSelect" onchange="changeActiveGroup()">
-            <option value="0">Tüm Gruplar / Varsayılan</option>
-        </select>
+        <select id="activeGroupSelect" onchange="changeActiveGroup()"><option value="0">Tüm Gruplar / Varsayılan</option></select>
     </div>
 
-    <!-- Kaydırılabilir Port Menüsü -->
     <div class="port-nav">
         <div class="port-tab active" onclick="switchPort('overview')">Genel Bakış</div>
         <div class="port-tab" onclick="switchPort('staff')">Staff & Admin</div>
@@ -132,7 +83,7 @@
         <div class="port-tab" onclick="switchPort('neural')">🧠 Neural Guard</div>
     </div>
 
-    <!-- PORT 1: GENEL BAKIŞ -->
+    <!-- PORT 1 -->
     <div id="port-overview" class="portal-section active">
         <div class="glass-container">
             <div class="section-title">📊 Sistem Durumu & İstatistikler</div>
@@ -142,33 +93,23 @@
                     <div id="totalActions" style="font-size: 16px; font-weight: 800; color: var(--accent-gold);">-</div>
                 </div>
                 <div style="background: rgba(0,0,0,0.15); padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border);">
-                    <div style="font-size: 10px; color: var(--text-muted);">ENGELLENEN / BAN</div>
+                    <div style="font-size: 10px; color: var(--text-muted);">ENGELLEMELER</div>
                     <div id="totalBans" style="font-size: 16px; font-weight: 800; color: var(--danger);">-</div>
                 </div>
             </div>
         </div>
-
-        <div class="glass-container">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <div style="font-size: 10px; color: var(--text-muted);">ACİL DURUM KİLİDİ</div>
-                    <div id="lockStatusText" style="font-size: 13px; font-weight: 800; color: var(--success);">Normal (Aktif ✅)</div>
-                </div>
-                <button id="lockdownBtn" class="apple-btn" style="width: auto; padding: 8px 14px; font-size: 11px; background: rgba(239,68,68,0.25); color: var(--danger); border: 1px solid var(--danger);" onclick="toggleLockdown()">Şalteri Değiştir 🔒</button>
-            </div>
-        </div>
     </div>
 
-    <!-- PORT 2: STAFF & ADMIN YÖNETİMİ (Tek Tuşla Yetki Aç/Kapat) -->
+    <!-- PORT 2: STAFF & ADMIN -->
     <div id="port-staff" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">👑 Admin / Staff Ekle & Yetki Yönetimi</div>
+            <div class="section-title">👑 Admin Ekle & Yetki Yönetimi</div>
             <input type="text" id="staffInput" placeholder="@kullaniciadi veya ID girin">
-            <input type="text" id="staffName" placeholder="Yetkili Ünvanı (Örn: Yönetici)">
+            <input type="text" id="staffName" placeholder="Yetkili Ünvanı">
             <button class="apple-btn" onclick="addStaff()">Yetkiyi Tanımla</button>
         </div>
         <div class="glass-container">
-            <div class="section-title">🛡️ Kayıtlı Yetkililer (Yetki Butonları)</div>
+            <div class="section-title">🛡️ Kayıtlı Yetkililer</div>
             <div id="staffListContainer"><div class="loading">Yükleniyor...</div></div>
         </div>
     </div>
@@ -185,16 +126,16 @@
         </div>
     </div>
 
-    <!-- PORT 4: GENEL LOGLAR (Tarihli, Saatli, Günlük/Haftalık/Aylık Saklama) -->
+    <!-- PORT 4: GENEL LOGLAR (ID, Kullanıcı Adı ve Süre Seçenekleri) -->
     <div id="port-genlogs" class="portal-section">
         <div class="glass-container">
             <div class="section-title">📜 Tarihli & Saatli Genel Loglar</div>
             <div style="display: flex; gap: 8px; margin-bottom: 10px;">
                 <select id="logClearDays" style="margin-bottom:0;">
-                    <option value="1">1 Günlük Sakla (Günlük)</option>
-                    <option value="7">7 Günlük Sakla (Haftalık)</option>
-                    <option value="30">30 Günlük Sakla (Aylık)</option>
-                    <option value="0">Tümünü Temizle</option>
+                    <option value="1">Günlük Temizleme</option>
+                    <option value="7">Haftalık Temizleme</option>
+                    <option value="30">Aylık Temizleme</option>
+                    <option value="0">Tümünü Sil</option>
                 </select>
                 <button class="apple-btn" style="width: auto; padding: 0 14px; background: rgba(239,68,68,0.3); color: var(--danger); border: 1px solid var(--danger);" onclick="clearLogs()">Uygula 🗑️</button>
             </div>
@@ -205,7 +146,7 @@
     <!-- PORT 5: ADMIN İŞLEM LOGLARI -->
     <div id="port-adminlogs" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">⭐ Adminlerin Yaptığı İşlemler (Tarihli/Saatli)</div>
+            <div class="section-title">⭐ Adminlerin Yaptığı İşlemler</div>
             <div id="adminLogsContainer"><div class="loading">Admin logları yükleniyor...</div></div>
         </div>
     </div>
@@ -213,25 +154,25 @@
     <!-- PORT 6: GRUP & DUYURU -->
     <div id="port-settings" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">⚙️ Grup Hoş Geldin & Kombine Duyuru Ayarları</div>
+            <div class="section-title">⚙️ Grup Hoş Geldin & Duyuru Ayarları</div>
             <textarea id="welcomeMsgInput" rows="3" placeholder="Hoş geldin veya duyuru metni..."></textarea>
             <input type="text" id="btnTextInput" placeholder="Buton Metni">
             <input type="text" id="btnUrlInput" placeholder="Buton Linki (URL)">
             <input type="text" id="mediaUrlInput" placeholder="Görsel / Medya URL (Opsiyonel)">
-            <button class="apple-btn" onclick="saveSettings()">Ayarları & Duyuruyu Kaydet</button>
+            <button class="apple-btn" onclick="saveSettings()">Ayarları Kaydet</button>
         </div>
     </div>
 
-    <!-- PORT 7: YENİ BÜYÜK SÜRPRİZ EKLENTİ (NEURAL GUARD) -->
+    <!-- PORT 7: FİNAL SÜRPRİZİ (NEURAL GUARD) -->
     <div id="port-neural" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">🧠 Golden Neural Guard (Yapay Zeka Analizi)</div>
+            <div class="section-title">🧠 Golden Neural Guard (Yapay Zeka Tehdit Analizi)</div>
             <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
-                Yapay zeka motoru; gruptaki mesajları psikolojik niyet, kışkırtma ve manipülasyon derecesine göre tarar. Sinsi tehditleri otomatik etkisiz hale getirir.
+                Yapay zeka motoru; gruptaki mesajları psikolojik niyet ve sinsi flood girişimlerine karşı tarar, olası topluluk manipülasyonlarını anında bloke eder.
             </p>
             <div style="background: rgba(0,0,0,0.25); padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border);">
-                <div style="font-size: 11px; color: var(--accent-gold); font-weight: 700; margin-bottom: 6px;">🟢 Nöral Koruma Durumu: AKTİF</div>
-                <div style="font-size: 10px; color: var(--text-muted);" id="neuralStats">Taranan Mesaj: Aktif Akış</div>
+                <div style="font-size: 11px; color: var(--accent-gold); font-weight: 700; margin-bottom: 6px;">🟢 Nöral Koruma: AKTİF (v4.2)</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Canlı Tehdit Algılama Motoru Devrede.</div>
             </div>
         </div>
     </div>
@@ -240,41 +181,24 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         const user = tg.initDataUnsafe?.user;
-
-        if (!user) {
-            document.body.innerHTML = `<div style="color:var(--danger); text-align:center; padding:50px;"><h2>Telegram Oturumu Bulunamadı.</h2></div>`;
-            throw new Error("No user session");
-        }
+        if (!user) { document.body.innerHTML = `<div style="color:var(--danger); text-align:center; padding:50px;"><h2>Telegram Oturumu Bulunamadı.</h2></div>`; throw new Error("No user"); }
 
         let selectedChatId = 0;
-
         function switchPort(portName) {
             document.querySelectorAll('.portal-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.port-tab').forEach(el => el.classList.remove('active'));
             document.getElementById('port-' + portName).classList.add('active');
             event.currentTarget.classList.add('active');
         }
-
-        function changeActiveGroup() {
-            selectedChatId = document.getElementById('activeGroupSelect').value;
-        }
+        function changeActiveGroup() { selectedChatId = document.getElementById('activeGroupSelect').value; }
 
         async function verifyAccess() {
             try {
-                const res = await fetch('/api/verify-admin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id })
-                });
+                const res = await fetch('/api/verify-admin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id }) });
                 const data = await res.json();
-                if (!data.authorized) {
-                    document.body.innerHTML = `<div style="text-align:center; padding:60px; color:var(--danger);"><h2>⛔ Yetkisiz Erişim Reddedildi!</h2><p>Bu panele yalnızca yetkili Staff üyeleri girebilir.</p></div>`;
-                    return;
-                }
+                if (!data.authorized) { document.body.innerHTML = `<div style="text-align:center; padding:60px; color:var(--danger);"><h2>⛔ Yetkisiz Erişim!</h2></div>`; return; }
                 document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (data.is_founder ? " 👑" : " 🛡️");
-                loadGroups();
-                loadData();
-                setInterval(loadData, 5000);
+                loadGroups(); loadData(); setInterval(loadData, 5000);
             } catch (e) { console.error(e); }
         }
 
@@ -284,9 +208,7 @@
                 const groups = await res.json();
                 const select = document.getElementById('activeGroupSelect');
                 select.innerHTML = '<option value="0">Tüm Gruplar / Varsayılan</option>';
-                groups.forEach(g => {
-                    select.innerHTML += `<option value="${g.chat_id}">${g.title} (${g.chat_id})</option>`;
-                });
+                groups.forEach(g => { select.innerHTML += `<option value="${g.chat_id}">${g.title} (${g.chat_id})</option>`; });
             } catch (e) {}
         }
 
@@ -296,72 +218,55 @@
                 const stats = await statsRes.json();
                 document.getElementById('totalActions').innerText = stats.total_actions || 0;
                 const bd = stats.action_breakdown || {};
-                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['AUTO_BAN_LINK'] || 0) + (bd['WEB_BAN'] || 0);
+                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['AUTO_BAN'] || 0);
 
+                // Genel Loglar (ID ve Kullanıcı Adı Dahil)
                 const genRes = await fetch('/api/logs?filter=general&limit=50');
                 const genLogs = await genRes.json();
                 const genC = document.getElementById('generalLogsContainer');
-                if (genLogs.length === 0) {
-                    genC.innerHTML = '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Genel log bulunmuyor.</div>';
-                } else {
-                    genC.innerHTML = '';
-                    genLogs.forEach(l => {
-                        genC.innerHTML += `
-                            <div class="link-notification-box">
-                                <div><b>${l.action_type}</b> | 📅 ${l.timestamp}</div>
-                                <div>Kullanıcı: @${l.username} (ID: ${l.target_id})</div>
-                                <span class="selectable-text">${l.details}</span>
-                            </div>
-                        `;
-                    });
-                }
+                genC.innerHTML = genLogs.length === 0 ? '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Log yok.</div>' : '';
+                genLogs.forEach(l => {
+                    genC.innerHTML += `
+                        <div class="log-box">
+                            <div><b>${l.action_type}</b> | 📅 ${l.timestamp}</div>
+                            <div>Kullanıcı: <span class="selectable-text">@${l.username}</span> | ID: <span class="selectable-text">${l.target_id}</span></div>
+                            <div style="margin-top:4px; color:var(--text-muted);">${l.details}</div>
+                        </div>
+                    `;
+                });
 
+                // Admin Logları
                 const adminRes = await fetch('/api/logs?filter=admin&limit=50');
                 const adminLogs = await adminRes.json();
                 const adminC = document.getElementById('adminLogsContainer');
-                if (adminLogs.length === 0) {
-                    adminC.innerHTML = '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Admin işlem kaydı yok.</div>';
-                } else {
-                    adminC.innerHTML = '';
-                    adminLogs.forEach(l => {
-                        adminC.innerHTML += `
-                            <div class="item-row" style="flex-direction:column; align-items:flex-start; gap:4px;">
-                                <div style="display:flex; justify-content:space-between; width:100%;">
-                                    <b style="color:var(--accent-gold);">${l.action_type}</b>
-                                    <span style="font-size:10px; color:var(--text-muted);">📅 ${l.timestamp}</span>
-                                </div>
-                                <div style="font-size:11px;">Yetkili: <b>@${l.username}</b></div>
-                                <div style="font-size:11px; color:var(--text-muted);">${l.details}</div>
-                            </div>
-                        `;
-                    });
-                }
-
-                const staffRes = await fetch('/api/staff/list', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: user.id })
+                adminC.innerHTML = adminLogs.length === 0 ? '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Admin log yok.</div>' : '';
+                adminLogs.forEach(l => {
+                    adminC.innerHTML += `
+                        <div class="log-box" style="border-color: rgba(212,175,55,0.4);">
+                            <div style="display:flex; justify-content:space-width;"><b style="color:var(--accent-gold);">${l.action_type}</b> <span style="font-size:10px; color:var(--text-muted);">${l.timestamp}</span></div>
+                            <div>Yetkili: <span class="selectable-text">@${l.username}</span> | Hedef ID: <span class="selectable-text">${l.target_id}</span></div>
+                            <div style="margin-top:4px; color:var(--text-muted);">${l.details}</div>
+                        </div>
+                    `;
                 });
+
+                // Staff Listesi
+                const staffRes = await fetch('/api/staff/list', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id }) });
                 const staffs = await staffRes.json();
                 const staffC = document.getElementById('staffListContainer');
-                if (staffs.length > 0) {
-                    staffC.innerHTML = '';
-                    staffs.forEach(s => {
-                        staffC.innerHTML += `
-                            <div class="item-row">
-                                <div>
-                                    <b>${s.full_name}</b><br>
-                                    <span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username}</span>
-                                </div>
-                                <div style="display:flex; gap:6px; align-items:center;">
-                                    <button onclick="toggleStaffPerm(${s.user_id}, 'can_ban')" style="background:${s.can_ban ? 'var(--success)' : 'var(--danger)'}; color:#fff; border:none; padding:6px 10px; border-radius:8px; font-size:10px; cursor:pointer;" title="Ban Yetkisi">Ban: ${s.can_ban ? 'AÇIK' : 'KAPALI'}</button>
-                                    <button onclick="toggleStaffPerm(${s.user_id}, 'can_mute')" style="background:${s.can_mute ? 'var(--success)' : 'var(--danger)'}; color:#fff; border:none; padding:6px 10px; border-radius:8px; font-size:10px; cursor:pointer;" title="Mute Yetkisi">Mute: ${s.can_mute ? 'AÇIK' : 'KAPALI'}</button>
-                                    <button onclick="removeStaff(${s.user_id})" style="background:#555; color:#fff; border:none; padding:6px 10px; border-radius:8px; font-size:10px; cursor:pointer;">Sil</button>
-                                </div>
+                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Yetkili yok.</div>' : '';
+                staffs.forEach(s => {
+                    staffC.innerHTML += `
+                        <div class="item-row">
+                            <div><b>${s.full_name}</b><br><span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username}</span></div>
+                            <div style="display:flex; gap:6px;">
+                                <button onclick="toggleStaffPerm(${s.user_id}, 'can_ban')" style="background:${s.can_ban ? 'var(--success)' : 'var(--danger)'}; color:#fff; border:none; padding:5px 8px; border-radius:8px; font-size:10px; cursor:pointer;">Ban: ${s.can_ban ? 'AÇIK' : 'KAPALI'}</button>
+                                <button onclick="toggleStaffPerm(${s.user_id}, 'can_mute')" style="background:${s.can_mute ? 'var(--success)' : 'var(--danger)'}; color:#fff; border:none; padding:5px 8px; border-radius:8px; font-size:10px; cursor:pointer;">Mute: ${s.can_mute ? 'AÇIK' : 'KAPALI'}</button>
+                                <button onclick="removeStaff(${s.user_id})" style="background:#555; color:#fff; border:none; padding:5px 8px; border-radius:8px; font-size:10px; cursor:pointer;">Sil</button>
                             </div>
-                        `;
-                    });
-                }
+                        </div>
+                    `;
+                });
             } catch (e) {}
         }
 
@@ -369,70 +274,36 @@
             const input = document.getElementById('staffInput').value.trim();
             const name = document.getElementById('staffName').value.trim() || 'Yetkili';
             if (!input) return alert("Değer girin!");
-            await fetch('/api/staff/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, staff_input: input, full_name: name })
-            });
-            document.getElementById('staffInput').value = '';
-            document.getElementById('staffName').value = '';
-            loadData();
-            alert("✅ Yetkili eklendi!");
+            await fetch('/api/staff/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id, staff_input: input, full_name: name }) });
+            document.getElementById('staffInput').value = ''; document.getElementById('staffName').value = ''; loadData(); alert("✅ Yetkili eklendi!");
         }
 
         async function toggleStaffPerm(targetId, permField) {
-            await fetch('/api/staff/toggle', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ target_id: targetId, perm: permField })
-            });
+            await fetch('/api/staff/toggle', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ target_id: targetId, perm: permField }) });
             loadData();
         }
 
         async function removeStaff(targetId) {
-            if (!confirm("Silmek istediğinize emin misiniz?")) return;
-            await fetch('/api/staff/remove', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, target_id: targetId })
-            });
+            if (!confirm("Silinsin mi?")) return;
+            await fetch('/api/staff/remove', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id, target_id: targetId }) });
             loadData();
         }
 
         async function memberAction(actionType) {
             const target = document.getElementById('memberTargetInput').value.trim();
-            if (!target) return alert("Kullanıcı ID veya @username girin!");
-            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen yukarıdan işlem yapılacak grubu seçin!");
-
-            const res = await fetch('/api/member/action', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: selectedChatId })
-            });
+            if (!target) return alert("Hedef girin!");
+            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen yukarıdan grup seçin!");
+            const res = await fetch('/api/member/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: selectedChatId }) });
             const data = await res.json();
-            if (data.success) {
-                alert(`✅ İşlem başarılı (${actionType.toUpperCase()})`);
-                document.getElementById('memberTargetInput').value = '';
-            } else {
-                alert("❌ İşlem başarısız: " + (data.error || 'Yetkisiz!'));
-            }
+            if (data.success) { alert(`✅ Başarılı (${actionType.toUpperCase()})`); document.getElementById('memberTargetInput').value = ''; loadData(); }
+            else { alert("❌ Hata: " + (data.error || 'Yetkisiz!')); }
         }
 
         async function clearLogs() {
             const days = parseInt(document.getElementById('logClearDays').value);
-            if (!confirm("Log saklama zamanlaması uygulanacak. Emin misiniz?")) return;
-            const res = await fetch('/api/logs/clear', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, days: days })
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert("✅ Log saklama zamanlaması güncellendi!");
-                loadData();
-            } else {
-                alert("❌ Yetkisiz işlem!");
-            }
+            if (!confirm("Log saklama zamanlaması uygulansın mı?")) return;
+            await fetch('/api/logs/clear', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id, days: days }) });
+            loadData(); alert("✅ Log zamanlaması güncellendi!");
         }
 
         async function saveSettings() {
@@ -440,34 +311,17 @@
             const btnText = document.getElementById('btnTextInput').value.trim();
             const btnUrl = document.getElementById('btnUrlInput').value.trim();
             const mediaUrl = document.getElementById('mediaUrlInput').value.trim();
-            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen yukarıdan grup seçin!");
-
+            if (!selectedChatId || selectedChatId == 0) return alert("Grup seçin!");
             const body = { user_id: user.id, chat_id: selectedChatId };
             if (welcome) body.welcome_msg = welcome;
             if (btnText) body.btn_text = btnText;
             if (btnUrl) body.btn_url = btnUrl;
             if (mediaUrl) body.media_url = mediaUrl;
-
-            const res = await fetch('/api/settings/update', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert("✅ Grup ayarları kaydedildi!");
-            } else {
-                alert("❌ Kaydetme hatası!");
-            }
+            await fetch('/api/settings/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            alert("✅ Ayarlar kaydedildi!");
         }
 
-        async function toggleLockdown() {
-            await fetch('/api/toggle-lockdown', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id })
-            });
-        }
+        async function toggleLockdown() { await fetch('/api/toggle-lockdown', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id }) }); }
 
         verifyAccess();
     </script>
