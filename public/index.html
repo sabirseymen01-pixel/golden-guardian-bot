@@ -114,7 +114,7 @@
         </div>
     </div>
 
-    <!-- PORT 3: ÜYE İŞLEMLERİ -->
+    <!-- PORT 3: ÜYE İŞLEMLERİ (Ban ve Mute Butonları Aktif) -->
     <div id="port-members" class="portal-section">
         <div class="glass-container">
             <div class="section-title">👥 Üye Portu & Hızlı İşlem</div>
@@ -243,7 +243,7 @@
                 adminLogs.forEach(l => {
                     adminC.innerHTML += `
                         <div class="log-box" style="border-color: rgba(212,175,55,0.4);">
-                            <div style="display:flex; justify-content:space-width;"><b style="color:var(--accent-gold);">${l.action_type}</b> <span style="font-size:10px; color:var(--text-muted);">${l.timestamp}</span></div>
+                            <div style="display:flex; justify-content:space-between;"><b style="color:var(--accent-gold);">${l.action_type}</b> <span style="font-size:10px; color:var(--text-muted);">${l.timestamp}</span></div>
                             <div>Yetkili: <span class="selectable-text">@${l.username}</span> | Hedef ID: <span class="selectable-text">${l.target_id}</span></div>
                             <div style="margin-top:4px; color:var(--text-muted);">${l.details}</div>
                         </div>
