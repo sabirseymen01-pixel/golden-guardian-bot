@@ -72,9 +72,9 @@ def get_recent_logs(limit=100, log_filter="all"):
     try:
         query = {}
         if log_filter == "admin":
-            query["action_type"] = {"$in": ["BAN", "MUTE", "VOICE_MUTE", "VOICE_UNMUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN"]}
+            query["action_type"] = {"$in": ["BAN", "MUTE", "VOICE_MUTE", "VOICE_UNMUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN", "SCHEDULE_START", "SCHEDULE_STOP", "ANNOUNCEMENT"]}
         elif log_filter == "general":
-            query["action_type"] = {"$nin": ["BAN", "MUTE", "VOICE_MUTE", "VOICE_UNMUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN"]}
+            query["action_type"] = {"$nin": ["BAN", "MUTE", "VOICE_MUTE", "VOICE_UNMUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN", "SCHEDULE_START", "SCHEDULE_STOP", "ANNOUNCEMENT"]}
             
         rows = list(logs_col.find(query, {"_id": 0, "datetime_obj": 0}).sort("_id", -1).limit(limit))
         return rows
@@ -103,7 +103,7 @@ def get_bot_statistics():
 def get_admin_performance_stats():
     try:
         pipeline = [
-            {"$match": {"action_type": {"$in": ["BAN", "MUTE", "VOICE_MUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN"]}}},
+            {"$match": {"action_type": {"$in": ["BAN", "MUTE", "VOICE_MUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN", "SCHEDULE_START", "SCHEDULE_STOP", "ANNOUNCEMENT"]}}},
             {"$group": {"_id": "$username", "count": {"$sum": 1}}},
             {"$sort": {"count": -1}},
             {"$limit": 10}
@@ -121,7 +121,9 @@ def get_group_settings(chat_id):
                 "welcome_msg": row.get("welcome_msg", "Hoş geldin!"),
                 "btn_text": row.get("btn_text", "Buton"),
                 "btn_url": row.get("btn_url", "https://t.me/"),
-                "media_url": row.get("media_url", "")
+                "media_url": row.get("media_url", ""),
+                "announcement_btn_text": row.get("announcement_btn_text", row.get("btn_text", "Buton")),
+                "announcement_btn_url": row.get("announcement_btn_url", row.get("btn_url", "https://t.me/"))
             }
     except Exception:
         pass
@@ -129,7 +131,9 @@ def get_group_settings(chat_id):
         "welcome_msg": "Grup düzenini sağlamak için aktifim.",
         "btn_text": "🛡️ Golden Panel",
         "btn_url": "https://golden-guardian-bot.onrender.com/",
-        "media_url": ""
+        "media_url": "",
+        "announcement_btn_text": "🛡️ Golden Panel",
+        "announcement_btn_url": "https://golden-guardian-bot.onrender.com/"
     }
 
 def update_group_setting(chat_id, field, value):
@@ -142,12 +146,29 @@ def update_group_setting(chat_id, field, value):
                 "welcome_msg": settings["welcome_msg"],
                 "btn_text": settings["btn_text"],
                 "btn_url": settings["btn_url"],
-                "media_url": settings.get("media_url", "")
+                "media_url": settings.get("media_url", ""),
+                "announcement_btn_text": settings.get("announcement_btn_text", settings["btn_text"]),
+                "announcement_btn_url": settings.get("announcement_btn_url", settings["btn_url"])
             }},
             upsert=True
         )
     except Exception:
         pass
+
+def get_announcement_settings(chat_id):
+    try:
+        row = settings_col.find_one({"chat_id": int(chat_id)})
+        if row:
+            return {
+                "btn_text": row.get("announcement_btn_text", row.get("btn_text", "🛡️ Golden Panel")),
+                "btn_url": row.get("announcement_btn_url", row.get("btn_url", "https://golden-guardian-bot.onrender.com/"))
+            }
+    except Exception:
+        pass
+    return {
+        "btn_text": "🛡️ Golden Panel",
+        "btn_url": "https://golden-guardian-bot.onrender.com/"
+    }
 
 def is_authorized_staff(user_id):
     try:
@@ -220,7 +241,31 @@ def get_user_id_by_username(chat_id, username):
         pass
     return None
 
-# --- YENİ: Zamanlı Görevler Veritabanı Fonksiyonları ---
+# --- UYARI (WARN) SİSTEMİ ---
+def add_warning(user_id):
+    try:
+        res = users_col.find_one_and_update(
+            {"user_id": int(user_id)},
+            {"$inc": {"warnings": 1}},
+            upsert=True,
+            return_document=True
+        )
+        return res.get("warnings", 1) if res else 1
+    except Exception:
+        return 1
+
+def reset_warnings(user_id):
+    try:
+        users_col.update_one(
+            {"user_id": int(user_id)},
+            {"$set": {"warnings": 0}},
+            upsert=True
+        )
+        return True
+    except Exception:
+        return False
+
+# --- ZAMANLI GÖREVLER VERİTABANI FONKSİYONLARI ---
 def save_scheduled_job(job_id, chat_id, minutes, msg_text, btn_text, btn_url, media_url):
     try:
         scheduled_jobs_col.update_one(
@@ -249,3 +294,20 @@ def get_all_scheduled_jobs():
         return list(scheduled_jobs_col.find({}, {"_id": 0}))
     except Exception:
         return []
+
+def get_latest_scheduled_job(chat_id):
+    try:
+        return scheduled_jobs_col.find_one({"chat_id": int(chat_id)}, sort=[("_id", -1)])
+    except Exception:
+        return None
+
+def find_scheduled_job_by_text(chat_id, text_snippet):
+    try:
+        if not text_snippet:
+            return None
+        return scheduled_jobs_col.find_one({
+            "chat_id": int(chat_id),
+            "msg_text": {"$regex": text_snippet, "$options": "i"}
+        })
+    except Exception:
+        return None
