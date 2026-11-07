@@ -182,7 +182,7 @@ async def api_update_settings(request):
         chat_id = int(data.get("chat_id", 0))
         if not database.is_authorized_staff(user_id): return web.json_response({"success": False, "error": "Yetkisiz!"}, status=403)
         if chat_id:
-            for key in ["welcome_msg", "btn_text", "btn_url", "media_url"]:
+            for key in ["welcome_msg", "btn_text", "btn_url", "media_url", "announcement_btn_text", "announcement_btn_url"]:
                 if key in data: database.update_group_setting(chat_id, key, data[key])
         return web.json_response({"success": True})
     except Exception as e:
@@ -276,16 +276,19 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return UsernameTarget(clean_arg)
     return None
 
-# --- PERİYODİK ZAMANLI DUYURU FONKSİYONU ---
+# --- PERİYODİK ZAMANLI DUYURU İŞLEYİCİSİ ---
 async def send_periodic_announcement(bot, chat_id, text, btn_text, btn_url, media_url):
     try:
-        if not btn_url.startswith(("http://", "https://", "tg://")):
-            btn_url = "https://" + btn_url
-        keyboard = [[InlineKeyboardButton(text=btn_text, url=btn_url)]]
+        reply_markup = None
+        if btn_text and btn_url:
+            if not btn_url.startswith(("http://", "https://", "tg://")):
+                btn_url = "https://" + btn_url
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=btn_url)]])
+
         if media_url:
-            await bot.send_photo(chat_id=chat_id, photo=media_url, caption=text, reply_markup=InlineKeyboardMarkup(keyboard))
+            await bot.send_photo(chat_id=chat_id, photo=media_url, caption=text, reply_markup=reply_markup)
         else:
-            await bot.send_message(chat_id=chat_id, text=text, reply_markup=InlineKeyboardMarkup(keyboard))
+            await bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup)
     except Exception as e:
         logger.error(f"Zamanlı duyuru gönderme hatası: {e}")
 
@@ -302,18 +305,21 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "🤖 **Grup Yönetim & Golden Staff Güvenlik Botu**\n\n"
         "📜 **Yönetici Komutları:**\n"
         "• `/welcome <mesaj>` - Hoş geldin mesajı\n"
-        "• `/butonmetni <yazı>` - Buton yazısı\n"
-        "• `/butonlinki <url>` - Buton linki\n"
-        "• `/duyuru <mesaj>` - Duyuru gönder (Otomatik Pinlenir)\n"
-        "• `/duyuru <mesaj> | <metin> | <link>` - Özel butonlu duyuru (Otomatik Pinlenir)\n"
-        "• `/zamanla <dakika> | <mesaj> | <buton> | <link>` - Periyodik duyuru başlat (Pinlenmez)\n"
-        "• `/zamanladur <dakika> | <mesaj> | <buton> | <link>` - Periyodik duyuruyu durdur\n"
+        "• `/butonmetni <yazı>` - Hoş geldin butonu yazısı\n"
+        "• `/butonlinki <url>` - Hoş geldin butonu linki\n"
+        "• `/duyuru <mesaj>` - Duyuru gönder (Otomatik Pinlenir / Yanıtlanan görseli sabitler)\n"
+        "• `/duyuru <mesaj> | <buton metni> | <link>` - Özel butonlu duyuru (Görsele yanıtla atılırsa butonlu görseli pinler)\n"
+        "• `/duyurubutonmetni <yazı>` - Varsayılan duyuru butonu yazısını ayarla\n"
+        "• `/duyurubutonlinki <url>` - Varsayılan duyuru butonu linkini ayarla\n"
+        "• `/zamanla <dakika> <mesaj>` - Butonsuz periyodik duyuru başlat (Pinlenmez)\n"
+        "• `/zamanla <dakika> | <mesaj> | <buton metni> | <link>` - Butonlu periyodik duyuru başlat (Pinlenmez)\n"
+        "• `/zamanladur` veya `/zamanla dur` - Yanıtlanan zamanlanmış paylaşımı durdur\n"
         "• `/defol <kullanıcı>` - Banla\n"
         "• `/undefol <kullanıcı>` - Ban kaldır\n"
         "• `/itaat <kullanıcı>` - Sustur\n"
         "• `/unitaat <kullanıcı>` - Susturma kaldır\n"
-        "• `/warn <kullanıcı>` - Uyarı ver\n"
-        "• `/unwarn <kullanıcı>` - Uyarı sıfırla\n\n"
+        "• `/uyarı <kullanıcı>` - Uyarı ver (3 uyarıda otomatik banlar)\n"
+        "• `/unuyarı <kullanıcı>` - Uyarı sıfırla\n\n"
         "⚜️ *Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸*"
     )
     web_app_url = "https://golden-guardian-bot.onrender.com/"
@@ -334,7 +340,7 @@ async def cmd_butonmetni(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = " ".join(context.args)
     if text: 
         database.update_group_setting(update.effective_chat.id, "btn_text", text)
-        await send_auto_delete_message(context, update.effective_chat.id, "✅ Buton metni güncellendi!", 4)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin buton metni güncellendi!", 4)
     try: await update.message.delete()
     except Exception: pass
 
@@ -342,80 +348,24 @@ async def cmd_butonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
     if context.args: 
         database.update_group_setting(update.effective_chat.id, "btn_url", context.args[0].strip())
-        await send_auto_delete_message(context, update.effective_chat.id, "✅ Buton linki güncellendi!", 4)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin buton linki güncellendi!", 4)
     try: await update.message.delete()
     except Exception: pass
 
-async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def cmd_duyurubutonmetni(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
-    chat_id = update.effective_chat.id
-    reply = update.message.reply_to_message
-    raw_text = update.message.text.partition(" ")[2].strip()
-    if not raw_text and reply: raw_text = reply.text or reply.caption or ""
-    
-    if "|" not in raw_text:
-        await send_auto_delete_message(context, chat_id, "❌ Format: /zamanla <dakika> | <mesaj> | <buton> | <link>", 6)
-        try: await update.message.delete()
-        except Exception: pass
-        return
-        
-    parts = [p.strip() for p in raw_text.split("|")]
-    try:
-        minutes = int(parts[0])
-    except ValueError:
-        await send_auto_delete_message(context, chat_id, "❌ Dakika sayısal olmalıdır!", 5)
-        try: await update.message.delete()
-        except Exception: pass
-        return
-        
-    msg_text = parts[1] if len(parts) > 1 else ""
-    settings = database.get_group_settings(chat_id)
-    btn_text = parts[2] if len(parts) > 2 and parts[2] else settings["btn_text"]
-    btn_url = parts[3] if len(parts) > 3 and parts[3] else settings["btn_url"]
-    
-    media_url = ""
-    if reply and reply.photo:
-        media_url = reply.photo[-1].file_id
-    elif reply and reply.video:
-        media_url = reply.video.file_id
-    
-    job_id = hashlib.md5(f"{chat_id}_{raw_text}".encode()).hexdigest()
-    
-    scheduler.add_job(
-        send_periodic_announcement,
-        'interval',
-        minutes=minutes,
-        args=[context.bot, chat_id, msg_text, btn_text, btn_url, media_url],
-        id=job_id,
-        replace_existing=True
-    )
-    
-    database.save_scheduled_job(job_id, chat_id, minutes, msg_text, btn_text, btn_url, media_url)
-    database.log_action(chat_id, "SCHEDULE_START", 0, "SYSTEM", f"Her {minutes} dakikada bir otomatik duyuru başlatıldı.")
-    await send_auto_delete_message(context, chat_id, f"✅ Her {minutes} dakikada bir tekrarlanacak duyuru başlatıldı!", 5)
+    text = " ".join(context.args).strip()
+    if text:
+        database.update_group_setting(update.effective_chat.id, "announcement_btn_text", text)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Duyuru varsayılan buton metni güncellendi!", 4)
     try: await update.message.delete()
     except Exception: pass
 
-async def cmd_zamanladur(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def cmd_duyurubutonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
-    chat_id = update.effective_chat.id
-    raw_text = update.message.text.partition(" ")[2].strip()
-    
-    if not raw_text:
-        await send_auto_delete_message(context, chat_id, "❌ Durdurulacak duyuruyu belirtin! Örnek: /zamanladur 30 | Mesaj | Buton | Link", 6)
-        try: await update.message.delete()
-        except Exception: pass
-        return
-        
-    job_id = hashlib.md5(f"{chat_id}_{raw_text}".encode()).hexdigest()
-    try:
-        scheduler.remove_job(job_id)
-        database.remove_scheduled_job_db(job_id)
-        await send_auto_delete_message(context, chat_id, "🛑 Belirtilen periyodik duyuru durduruldu!", 5)
-        database.log_action(chat_id, "SCHEDULE_STOP", 0, "SYSTEM", "Periyodik duyuru durduruldu.")
-    except Exception:
-        await send_auto_delete_message(context, chat_id, "❌ Eşleşen aktif periyodik duyuru bulunamadı!", 5)
-        
+    if context.args:
+        database.update_group_setting(update.effective_chat.id, "announcement_btn_url", context.args[0].strip())
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Duyuru varsayılan buton linki güncellendi!", 4)
     try: await update.message.delete()
     except Exception: pass
 
@@ -424,29 +374,165 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     reply = update.message.reply_to_message
     raw_text = update.message.text.partition(" ")[2].strip()
-    if not raw_text and reply: raw_text = reply.text or reply.caption or ""
-    if not raw_text: return
-        
-    settings = database.get_group_settings(chat_id)
-    msg_text, btn_text, btn_url, media_url = raw_text, settings["btn_text"], settings["btn_url"], settings.get("media_url", "")
+
+    photo_file_id = None
+    if reply:
+        if reply.photo:
+            photo_file_id = reply.photo[-1].file_id
+        if not raw_text:
+            raw_text = reply.caption or reply.text or ""
+
+    if not raw_text and not photo_file_id:
+        await send_auto_delete_message(context, chat_id, "❌ Duyuru metni veya görsel belirtmelisiniz!", 4)
+        try: await update.message.delete()
+        except Exception: pass
+        return
+
+    def_settings = database.get_announcement_settings(chat_id)
+    btn_text = def_settings["btn_text"]
+    btn_url = def_settings["btn_url"]
+    msg_text = raw_text
+
     if "|" in raw_text:
         parts = [p.strip() for p in raw_text.split("|")]
         msg_text = parts[0]
         if len(parts) > 1 and parts[1]: btn_text = parts[1]
         if len(parts) > 2 and parts[2]: btn_url = parts[2]
-    if not btn_url.startswith(("http://", "https://", "tg://")): btn_url = "https://" + btn_url
+
+    if not btn_url.startswith(("http://", "https://", "tg://")):
+        btn_url = "https://" + btn_url
 
     keyboard = [[InlineKeyboardButton(text=btn_text, url=btn_url)]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
     try:
-        photo_to_send = media_url if media_url else (reply.photo[-1].file_id if (reply and reply.photo) else None)
-        if photo_to_send:
-            msg = await context.bot.send_photo(chat_id=chat_id, photo=photo_to_send, caption=msg_text, reply_markup=InlineKeyboardMarkup(keyboard))
+        if photo_file_id:
+            sent_msg = await context.bot.send_photo(
+                chat_id=chat_id,
+                photo=photo_file_id,
+                caption=msg_text,
+                reply_markup=reply_markup
+            )
         else:
-            msg = await context.bot.send_message(chat_id=chat_id, text=msg_text, reply_markup=InlineKeyboardMarkup(keyboard))
-        
-        try: await context.bot.pin_chat_message(chat_id=chat_id, message_id=msg.message_id)
+            sent_msg = await context.bot.send_message(
+                chat_id=chat_id,
+                text=msg_text,
+                reply_markup=reply_markup
+            )
+
+        await context.bot.pin_chat_message(
+            chat_id=chat_id,
+            message_id=sent_msg.message_id,
+            disable_notification=False
+        )
+
+        admin_user = update.effective_user.username or update.effective_user.first_name
+        database.log_action(chat_id, "ANNOUNCEMENT", 0, f"@{admin_user}", f"Duyuru gönderildi ve sabitlendi: {msg_text[:30]}...")
+    except Exception as e:
+        logger.error(f"Duyuru gönderme hatası: {e}")
+
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_zamanladur(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    reply = update.message.reply_to_message
+    raw_text = update.message.text.partition(" ")[2].strip()
+
+    job_to_remove = None
+
+    if reply:
+        text_snippet = (reply.caption or reply.text or "")[:20]
+        if text_snippet:
+            job_to_remove = database.find_scheduled_job_by_text(chat_id, text_snippet)
+
+    if not job_to_remove and raw_text and raw_text.lower() != "dur":
+        job_to_remove = database.find_scheduled_job_by_text(chat_id, raw_text[:20])
+
+    if not job_to_remove:
+        job_to_remove = database.get_latest_scheduled_job(chat_id)
+
+    if job_to_remove:
+        job_id = job_to_remove["job_id"]
+        try:
+            scheduler.remove_job(job_id)
+        except Exception:
+            pass
+        database.remove_scheduled_job_db(job_id)
+        admin_user = update.effective_user.username or update.effective_user.first_name
+        database.log_action(chat_id, "SCHEDULE_STOP", 0, f"@{admin_user}", f"Periyodik duyuru durduruldu: {job_to_remove.get('msg_text', '')[:30]}")
+        await send_auto_delete_message(context, chat_id, "🛑 Periyodik duyuru başarıyla durduruldu!", 5)
+    else:
+        await send_auto_delete_message(context, chat_id, "❌ Durdurulacak aktif periyodik duyuru bulunamadı!", 5)
+
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    reply = update.message.reply_to_message
+    raw_args = update.message.text.partition(" ")[2].strip()
+
+    if raw_args.lower().startswith("dur"):
+        return await cmd_zamanladur(update, context)
+
+    media_url = ""
+    if reply and reply.photo:
+        media_url = reply.photo[-1].file_id
+
+    btn_text, btn_url = "", ""
+    minutes = 0
+    msg_text = ""
+
+    if "|" in raw_args:
+        parts = [p.strip() for p in raw_args.split("|")]
+        try:
+            minutes = int(parts[0])
+        except ValueError:
+            await send_auto_delete_message(context, chat_id, "❌ Dakika sayısal olmalıdır!", 5)
+            try: await update.message.delete()
+            except Exception: pass
+            return
+
+        msg_text = parts[1] if len(parts) > 1 else ""
+        btn_text = parts[2] if len(parts) > 2 else ""
+        btn_url = parts[3] if len(parts) > 3 else ""
+    else:
+        parts = raw_args.split(maxsplit=1)
+        if not parts or not parts[0].isdigit():
+            await send_auto_delete_message(context, chat_id, "❌ Format: /zamanla <dakika> <mesaj> veya /zamanla <dakika> | <mesaj> | <buton> | <link>", 6)
+            try: await update.message.delete()
+            except Exception: pass
+            return
+        minutes = int(parts[0])
+        msg_text = parts[1] if len(parts) > 1 else ""
+
+    if not msg_text and reply:
+        msg_text = reply.caption or reply.text or ""
+
+    if not msg_text and not media_url:
+        await send_auto_delete_message(context, chat_id, "❌ Bir mesaj metni veya görsel eklemelisiniz!", 5)
+        try: await update.message.delete()
         except Exception: pass
-    except Exception as e: logger.error(f"Duyuru hatası: {e}")
+        return
+
+    job_id = hashlib.md5(f"{chat_id}_{minutes}_{msg_text[:20]}".encode()).hexdigest()
+
+    scheduler.add_job(
+        send_periodic_announcement,
+        'interval',
+        minutes=minutes,
+        args=[context.bot, chat_id, msg_text, btn_text, btn_url, media_url],
+        id=job_id,
+        replace_existing=True
+    )
+
+    database.save_scheduled_job(job_id, chat_id, minutes, msg_text, btn_text, btn_url, media_url)
+    admin_user = update.effective_user.username or update.effective_user.first_name
+    database.log_action(chat_id, "SCHEDULE_START", 0, f"@{admin_user}", f"Her {minutes} dakikada bir duyuru başlatıldı: {msg_text[:30]}")
+    await send_auto_delete_message(context, chat_id, f"✅ Her {minutes} dakikada bir paylaşılacak görev başlatıldı!", 5)
     try: await update.message.delete()
     except Exception: pass
 
@@ -527,7 +613,7 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try: await update.message.delete()
     except Exception: pass
 
-async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def cmd_uyari(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
@@ -535,32 +621,54 @@ async def cmd_warn(update: Update, context: ContextTypes.DEFAULT_TYPE):
         uname = getattr(user, 'username', str(user.id))
         admin_uname = update.effective_user.username or update.effective_user.first_name
         current_warns = database.add_warning(user.id)
-        database.log_action(chat_id, "WARN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} uyarı verdi ({current_warns}/3).")
         if current_warns >= 3:
-            await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
-            database.reset_warnings(user.id)
-            await send_auto_delete_message(context, chat_id, f"⚠️ @{uname} 3 uyarıya ulaştığı için banlandı!", 5)
+            try:
+                await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+                database.reset_warnings(user.id)
+                database.log_action(chat_id, "BAN", user.id, f"@{uname} (ID: {user.id})", f"3 uyarı sınırını aştığı için Admin @{admin_uname} müdahalesiyle otomatik banlandı.")
+                await send_auto_delete_message(context, chat_id, f"🚫 @{uname} 3 uyarı sınırını aştığı için otomatik banlandı!", 6)
+            except Exception as e: logger.error(f"Otomatik ban hatası: {e}")
         else:
-            await send_auto_delete_message(context, chat_id, f"⚠️ @{uname} uyarlandı ({current_warns}/3).", 5)
+            database.log_action(chat_id, "WARN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} uyarı verdi ({current_warns}/3).")
+            await send_auto_delete_message(context, chat_id, f"⚠️ @{uname} uyarıldı! ({current_warns}/3)", 5)
     try: await update.message.delete()
     except Exception: pass
 
-async def cmd_unwarn(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def cmd_unuyari(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
     if user: 
+        uname = getattr(user, 'username', str(user.id))
+        admin_uname = update.effective_user.username or update.effective_user.first_name
         database.reset_warnings(user.id)
-        await send_auto_delete_message(context, chat_id, "✅ Kullanıcının uyarıları sıfırlandı!", 5)
+        database.log_action(chat_id, "UNWARN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} uyarıları sıfırladı.")
+        await send_auto_delete_message(context, chat_id, f"✅ @{uname} kullanıcısının uyarıları sıfırlandı!", 5)
     try: await update.message.delete()
     except Exception: pass
 
 COMMAND_MAP = {
-    "start": cmd_start, "help": cmd_start, "welcome": cmd_welcome,
-    "butonmetni": cmd_butonmetni, "butonlinki": cmd_butonlinki, "duyuru": cmd_duyuru,
-    "zamanla": cmd_zamanla, "zamanladur": cmd_zamanladur, "kilit": cmd_kilit,
-    "defol": cmd_defol, "undefol": cmd_undefol, "itaat": cmd_itaat,
-    "unitaat": cmd_unitaat, "warn": cmd_warn, "unwarn": cmd_unwarn,
+    "start": cmd_start,
+    "help": cmd_start,
+    "welcome": cmd_welcome,
+    "butonmetni": cmd_butonmetni,
+    "butonlinki": cmd_butonlinki,
+    "duyurubutonmetni": cmd_duyurubutonmetni,
+    "duyurubutonlinki": cmd_duyurubutonlinki,
+    "duyuru": cmd_duyuru,
+    "zamanla": cmd_zamanla,
+    "zamanladur": cmd_zamanladur,
+    "kilit": cmd_kilit,
+    "defol": cmd_defol,
+    "undefol": cmd_undefol,
+    "itaat": cmd_itaat,
+    "unitaat": cmd_unitaat,
+    "uyarı": cmd_uyari,
+    "uyari": cmd_uyari,
+    "warn": cmd_uyari,
+    "unuyarı": cmd_unuyari,
+    "unuyari": cmd_unuyari,
+    "unwarn": cmd_unuyari,
 }
 
 async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -602,7 +710,7 @@ async def post_init(application):
                 send_periodic_announcement,
                 'interval',
                 minutes=job["minutes"],
-                args=[application.bot, job["chat_id"], job["msg_text"], job["btn_text"], job["btn_url"], job["media_url"]],
+                args=[application.bot, job["chat_id"], job["msg_text"], job.get("btn_text", ""), job.get("btn_url", ""), job.get("media_url", "")],
                 id=job["job_id"],
                 replace_existing=True
             )
