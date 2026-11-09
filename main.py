@@ -318,8 +318,8 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/undefol <kullanıcı>` - Ban kaldır\n"
         "• `/itaat <kullanıcı>` - Sustur\n"
         "• `/unitaat <kullanıcı>` - Susturma kaldır\n"
-        "• `/uyarı <kullanıcı>` - Uyarı ver (3 uyarıda otomatik banlar)\n"
-        "• `/unuyarı <kullanıcı>` - Uyarı sıfırla\n\n"
+        "• `/uyari <kullanıcı>` - Uyarı ver (3 uyarıda otomatik banlar)\n"
+        "• `/unuyari <kullanıcı>` - Uyarı sıfırla\n\n"
         "⚜️ *Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸*"
     )
     web_app_url = "https://golden-guardian-bot.onrender.com/"
@@ -647,6 +647,7 @@ async def cmd_unuyari(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try: await update.message.delete()
     except Exception: pass
 
+# Telegram API uyumlu ASCII komut haritası (Türkçe harfler CommandHandler'da yasaktır)
 COMMAND_MAP = {
     "start": cmd_start,
     "help": cmd_start,
@@ -663,10 +664,8 @@ COMMAND_MAP = {
     "undefol": cmd_undefol,
     "itaat": cmd_itaat,
     "unitaat": cmd_unitaat,
-    "uyarı": cmd_uyari,
     "uyari": cmd_uyari,
     "warn": cmd_uyari,
-    "unuyarı": cmd_unuyari,
     "unuyari": cmd_unuyari,
     "unwarn": cmd_unuyari,
 }
@@ -678,7 +677,20 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
     if user and user.username: database.save_user(chat_id, user.id, user.username.lower())
 
     text = (update.message.text or update.message.caption or "").strip()
-    if chat.type in ["group", "supergroup"] and text:
+    if not text: return
+
+    # Türkçe karakterli /uyarı ve /unuyarı için özel köprü
+    lower_first_word = text.split()[0].lower()
+    if lower_first_word in ["/uyarı", "/uyari"]:
+        args = text.split()[1:]
+        context.args = args
+        return await cmd_uyari(update, context)
+    elif lower_first_word in ["/unuyarı", "/unuyari"]:
+        args = text.split()[1:]
+        context.args = args
+        return await cmd_unuyari(update, context)
+
+    if chat.type in ["group", "supergroup"]:
         is_admin = False
         if user:
             try:
