@@ -16,6 +16,8 @@
             --accent-gold: #f3e5ab;
             --danger: #ff4d4d;
             --success: #2ecc71;
+            --warning: #f39c12;
+            --info: #3498db;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         body {
@@ -45,19 +47,28 @@
         .portal-section { display: none; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; flex-direction: column; }
         .portal-section.active { display: flex; opacity: 1; transform: translateY(0); }
         .section-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--accent-gold); display: flex; align-items: center; gap: 8px; }
+        .subsection-title { font-size: 11px; font-weight: 700; color: var(--accent-gold); margin: 8px 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; }
         input, select, textarea {
-            width: 100%; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--glass-border);
+            width: 100%; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--glass-border);
             border-radius: 14px; padding: 12px; color: #fff; font-size: 13px; outline: none; margin-bottom: 10px; backdrop-filter: blur(10px);
         }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent-gold); box-shadow: 0 0 8px var(--gold-glow); }
         .apple-btn {
             width: 100%; background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%); color: #000;
             border: none; padding: 12px; border-radius: 14px; font-weight: 800; font-size: 13px; cursor: pointer;
             box-shadow: 0 4px 20px rgba(212,175,55,0.25); transition: transform 0.15s;
         }
-        .apple-btn:active { transform: scale(0.94); }
+        .apple-btn:active { transform: scale(0.96); }
         .item-row { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.15); padding: 12px; border-radius: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         .log-box { background: rgba(0, 0, 0, 0.25); border: 1px solid var(--glass-border); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; font-size: 11px; }
-        .selectable-text { user-select: all; -webkit-user-select: all; background: rgba(0,0,0,0.4); padding: 4px 8px; border-radius: 6px; color: var(--accent-gold); font-family: monospace; display: inline-block; margin-top: 4px; }
+        .action-tag { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 6px; display: inline-block; margin-right: 6px; }
+        .tag-ban { background: rgba(255, 77, 77, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+        .tag-mute { background: rgba(230, 126, 34, 0.2); color: #e67e22; border: 1px solid #e67e22; }
+        .tag-warn { background: rgba(243, 156, 18, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+        .tag-ann { background: rgba(52, 152, 219, 0.2); color: var(--info); border: 1px solid var(--info); }
+        .tag-sched { background: rgba(46, 204, 113, 0.2); color: var(--success); border: 1px solid var(--success); }
+        .tag-default { background: rgba(255, 255, 255, 0.1); color: var(--text-muted); }
+        .selectable-text { user-select: all; -webkit-user-select: all; background: rgba(0,0,0,0.4); padding: 3px 6px; border-radius: 6px; color: var(--accent-gold); font-family: monospace; display: inline-block; margin-top: 3px; font-size: 10px; }
         .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px; }
     </style>
 </head>
@@ -74,16 +85,16 @@
     </div>
 
     <div class="port-nav">
-        <div class="port-tab active" onclick="switchPort('overview')">Genel Bakış</div>
-        <div class="port-tab" onclick="switchPort('staff')">Staff & Admin</div>
-        <div class="port-tab" onclick="switchPort('members')">Üye Portu</div>
-        <div class="port-tab" onclick="switchPort('genlogs')">Genel Loglar</div>
-        <div class="port-tab" onclick="switchPort('adminlogs')">Admin Logları</div>
-        <div class="port-tab" onclick="switchPort('settings')">Grup & Duyuru</div>
-        <div class="port-tab" onclick="switchPort('neural')">🧠 Neural Guard</div>
+        <div class="port-tab active" onclick="switchPort('overview', event)">Genel Bakış</div>
+        <div class="port-tab" onclick="switchPort('staff', event)">Staff & Admin</div>
+        <div class="port-tab" onclick="switchPort('members', event)">Üye Portu</div>
+        <div class="port-tab" onclick="switchPort('genlogs', event)">Genel Loglar</div>
+        <div class="port-tab" onclick="switchPort('adminlogs', event)">Admin Logları</div>
+        <div class="port-tab" onclick="switchPort('settings', event)">Grup & Duyuru</div>
+        <div class="port-tab" onclick="switchPort('neural', event)">🧠 Neural Guard</div>
     </div>
 
-    <!-- PORT 1 -->
+    <!-- PORT 1: GENEL BAKIŞ -->
     <div id="port-overview" class="portal-section active">
         <div class="glass-container">
             <div class="section-title">📊 Sistem Durumu & İstatistikler</div>
@@ -114,7 +125,7 @@
         </div>
     </div>
 
-    <!-- PORT 3: ÜYE İŞLEMLERİ (Ban, Unban, Mute, Unmute Tam Donanımlı) -->
+    <!-- PORT 3: ÜYE İŞLEMLERİ -->
     <div id="port-members" class="portal-section">
         <div class="glass-container">
             <div class="section-title">👥 Üye Portu & Hızlı İşlemler</div>
@@ -148,33 +159,40 @@
     <!-- PORT 5: ADMIN İŞLEM LOGLARI -->
     <div id="port-adminlogs" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">⭐ Adminlerin Yaptığı İşlemler</div>
+            <div class="section-title">⭐ Admin & Sistem İşlem Logları</div>
             <div id="adminLogsContainer"><div class="loading">Admin logları yükleniyor...</div></div>
         </div>
     </div>
 
-    <!-- PORT 6: GRUP & DUYURU -->
+    <!-- PORT 6: GRUP & DUYURU AYARLARI -->
     <div id="port-settings" class="portal-section">
         <div class="glass-container">
             <div class="section-title">⚙️ Grup Hoş Geldin & Duyuru Ayarları</div>
-            <textarea id="welcomeMsgInput" rows="3" placeholder="Hoş geldin veya duyuru metni..."></textarea>
-            <input type="text" id="btnTextInput" placeholder="Buton Metni">
-            <input type="text" id="btnUrlInput" placeholder="Buton Linki (URL)">
+            
+            <div class="subsection-title">👋 Hoş Geldin Yapılandırması</div>
+            <textarea id="welcomeMsgInput" rows="2" placeholder="Grup hoş geldin karşılama metni..."></textarea>
+            <input type="text" id="btnTextInput" placeholder="Hoş Geldin Buton Metni">
+            <input type="text" id="btnUrlInput" placeholder="Hoş Geldin Buton Linki (https://...)">
             <input type="text" id="mediaUrlInput" placeholder="Görsel / Medya URL (Opsiyonel)">
-            <button class="apple-btn" onclick="saveSettings()">Ayarları Kaydet</button>
+
+            <div class="subsection-title" style="margin-top: 14px;">📢 Varsayılan Duyuru Butonu</div>
+            <input type="text" id="annBtnTextInput" placeholder="Varsayılan Duyuru Buton Metni (Örn: 🛡️ Golden Panel)">
+            <input type="text" id="annBtnUrlInput" placeholder="Varsayılan Duyuru Buton Linki (https://...)">
+
+            <button class="apple-btn" style="margin-top: 6px;" onclick="saveSettings()">Tüm Ayarları Kaydet</button>
         </div>
     </div>
 
     <!-- PORT 7: NEURAL GUARD -->
     <div id="port-neural" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">🧠 Golden Neural Guard (Yapay Zeka Tehdit Analizi)</div>
+            <div class="section-title">🧠 Golden Neural Guard (Tehdit Analizi)</div>
             <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 12px;">
-                Yapay zeka motoru; gruptaki mesajları psikolojik niyet ve sinsi flood girişimlerine karşı tarar, olası topluluk manipülasyonlarını anında bloke eder.
+                Yapay zeka motoru; gruptaki mesajları psikolojik niyet, reklam linkleri ve flood girişimlerine karşı tarar, zararlı paylaşımları anında bloke ederek 3 uyarı sınırında otomatik uzaklaştırır.
             </p>
             <div style="background: rgba(0,0,0,0.25); padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border);">
                 <div style="font-size: 11px; color: var(--accent-gold); font-weight: 700; margin-bottom: 6px;">🟢 Nöral Koruma: AKTİF (v4.2)</div>
-                <div style="font-size: 10px; color: var(--text-muted);">Canlı Tehdit Algılama Motoru Devrede.</div>
+                <div style="font-size: 10px; color: var(--text-muted);">Otomatik Ban & Pin Denetimi Devrede.</div>
             </div>
         </div>
     </div>
@@ -183,24 +201,56 @@
         const tg = window.Telegram.WebApp;
         tg.expand();
         const user = tg.initDataUnsafe?.user;
-        if (!user) { document.body.innerHTML = `<div style="color:var(--danger); text-align:center; padding:50px;"><h2>Telegram Oturumu Bulunamadı.</h2></div>`; throw new Error("No user"); }
+        if (!user) { 
+            document.body.innerHTML = `<div style="color:var(--danger); text-align:center; padding:50px;"><h2>Telegram Oturumu Bulunamadı.</h2></div>`; 
+            throw new Error("No user"); 
+        }
 
         let selectedChatId = 0;
-        function switchPort(portName) {
+
+        function switchPort(portName, evt) {
             document.querySelectorAll('.portal-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.port-tab').forEach(el => el.classList.remove('active'));
             document.getElementById('port-' + portName).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if (evt && evt.currentTarget) {
+                evt.currentTarget.classList.add('active');
+            }
         }
-        function changeActiveGroup() { selectedChatId = document.getElementById('activeGroupSelect').value; }
+
+        function changeActiveGroup() { 
+            selectedChatId = document.getElementById('activeGroupSelect').value; 
+        }
+
+        function getActionBadge(type) {
+            switch(type) {
+                case 'BAN':
+                case 'AUTO_BAN': return `<span class="action-tag tag-ban">${type}</span>`;
+                case 'MUTE': return `<span class="action-tag tag-mute">MUTE</span>`;
+                case 'WARN': return `<span class="action-tag tag-warn">WARN (UYARI)</span>`;
+                case 'UNWARN': return `<span class="action-tag tag-warn">UNWARN</span>`;
+                case 'ANNOUNCEMENT': return `<span class="action-tag tag-ann">DUYURU</span>`;
+                case 'SCHEDULE_START': return `<span class="action-tag tag-sched">ZAMANLA BAŞLADI</span>`;
+                case 'SCHEDULE_STOP': return `<span class="action-tag tag-ban">ZAMANLA DURDU</span>`;
+                default: return `<span class="action-tag tag-default">${type}</span>`;
+            }
+        }
 
         async function verifyAccess() {
             try {
-                const res = await fetch('/api/verify-admin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id }) });
+                const res = await fetch('/api/verify-admin', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ user_id: user.id }) 
+                });
                 const data = await res.json();
-                if (!data.authorized) { document.body.innerHTML = `<div style="text-align:center; padding:60px; color:var(--danger);"><h2>⛔ Yetkisiz Erişim!</h2></div>`; return; }
+                if (!data.authorized) { 
+                    document.body.innerHTML = `<div style="text-align:center; padding:60px; color:var(--danger);"><h2>⛔ Yetkisiz Erişim!</h2></div>`; 
+                    return; 
+                }
                 document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (data.is_founder ? " 👑" : " 🛡️");
-                loadGroups(); loadData(); setInterval(loadData, 5000);
+                await loadGroups(); 
+                await loadData(); 
+                setInterval(loadData, 5000);
             } catch (e) { console.error(e); }
         }
 
@@ -210,7 +260,9 @@
                 const groups = await res.json();
                 const select = document.getElementById('activeGroupSelect');
                 select.innerHTML = '<option value="0">Tüm Gruplar / Varsayılan</option>';
-                groups.forEach(g => { select.innerHTML += `<option value="${g.chat_id}">${g.title} (${g.chat_id})</option>`; });
+                groups.forEach(g => { 
+                    select.innerHTML += `<option value="${g.chat_id}">${g.title} (${g.chat_id})</option>`; 
+                });
             } catch (e) {}
         }
 
@@ -229,8 +281,11 @@
                 genLogs.forEach(l => {
                     genC.innerHTML += `
                         <div class="log-box">
-                            <div><b>${l.action_type}</b> | 📅 ${l.timestamp}</div>
-                            <div>Kullanıcı: <span class="selectable-text">@${l.username}</span> | ID: <span class="selectable-text">${l.target_id}</span></div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>${getActionBadge(l.action_type)}</div>
+                                <span style="font-size:10px; color:var(--text-muted);">${l.timestamp}</span>
+                            </div>
+                            <div style="margin-top:5px;">Hedef: <span class="selectable-text">@${l.username}</span> | ID: <span class="selectable-text">${l.target_id}</span></div>
                             <div style="margin-top:4px; color:var(--text-muted);">${l.details}</div>
                         </div>
                     `;
@@ -239,18 +294,25 @@
                 const adminRes = await fetch('/api/logs?filter=admin&limit=50');
                 const adminLogs = await adminRes.json();
                 const adminC = document.getElementById('adminLogsContainer');
-                adminC.innerHTML = adminLogs.length === 0 ? '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Admin log yok.</div>' : '';
+                adminC.innerHTML = adminLogs.length === 0 ? '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Admin işlem kaydı yok.</div>' : '';
                 adminLogs.forEach(l => {
                     adminC.innerHTML += `
                         <div class="log-box" style="border-color: rgba(212,175,55,0.4);">
-                            <div style="display:flex; justify-content:space-between;"><b style="color:var(--accent-gold);">${l.action_type}</b> <span style="font-size:10px; color:var(--text-muted);">${l.timestamp}</span></div>
-                            <div>Yetkili: <span class="selectable-text">@${l.username}</span> | Hedef ID: <span class="selectable-text">${l.target_id}</span></div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>${getActionBadge(l.action_type)}</div>
+                                <span style="font-size:10px; color:var(--text-muted);">${l.timestamp}</span>
+                            </div>
+                            <div style="margin-top:5px;">Yetkili: <span class="selectable-text">@${l.username}</span> | ID: <span class="selectable-text">${l.target_id}</span></div>
                             <div style="margin-top:4px; color:var(--text-muted);">${l.details}</div>
                         </div>
                     `;
                 });
 
-                const staffRes = await fetch('/api/staff/list', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id }) });
+                const staffRes = await fetch('/api/staff/list', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ user_id: user.id }) 
+                });
                 const staffs = await staffRes.json();
                 const staffC = document.getElementById('staffListContainer');
                 staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Yetkili yok.</div>' : '';
@@ -273,36 +335,65 @@
             const input = document.getElementById('staffInput').value.trim();
             const name = document.getElementById('staffName').value.trim() || 'Yetkili';
             if (!input) return alert("Değer girin!");
-            await fetch('/api/staff/add', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id, staff_input: input, full_name: name }) });
-            document.getElementById('staffInput').value = ''; document.getElementById('staffName').value = ''; loadData(); alert("✅ Yetkili eklendi!");
+            await fetch('/api/staff/add', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ user_id: user.id, staff_input: input, full_name: name }) 
+            });
+            document.getElementById('staffInput').value = ''; 
+            document.getElementById('staffName').value = ''; 
+            loadData(); 
+            alert("✅ Yetkili başarıyla tanımlandı!");
         }
 
         async function toggleStaffPerm(targetId, permField) {
-            await fetch('/api/staff/toggle', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ target_id: targetId, perm: permField }) });
+            await fetch('/api/staff/toggle', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ target_id: targetId, perm: permField }) 
+            });
             loadData();
         }
 
         async function removeStaff(targetId) {
-            if (!confirm("Silinsin mi?")) return;
-            await fetch('/api/staff/remove', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id, target_id: targetId }) });
+            if (!confirm("Yetkili kaydı silinsin mi?")) return;
+            await fetch('/api/staff/remove', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ user_id: user.id, target_id: targetId }) 
+            });
             loadData();
         }
 
         async function memberAction(actionType) {
             const target = document.getElementById('memberTargetInput').value.trim();
-            if (!target) return alert("Hedef girin!");
-            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen yukarıdan grup seçin!");
-            const res = await fetch('/api/member/action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: selectedChatId }) });
+            if (!target) return alert("Kullanıcı ID veya username girin!");
+            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen yukarıdan işlem yapılacak grubu seçin!");
+            const res = await fetch('/api/member/action', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: selectedChatId }) 
+            });
             const data = await res.json();
-            if (data.success) { alert(`✅ Başarılı (${actionType.toUpperCase()})`); document.getElementById('memberTargetInput').value = ''; loadData(); }
-            else { alert("❌ Hata: " + (data.error || 'Yetkisiz!')); }
+            if (data.success) { 
+                alert(`✅ İşlem uygulandı (${actionType.toUpperCase()})`); 
+                document.getElementById('memberTargetInput').value = ''; 
+                loadData(); 
+            } else { 
+                alert("❌ Hata: " + (data.error || 'Yetkisiz erişim!')); 
+            }
         }
 
         async function clearLogs() {
             const days = parseInt(document.getElementById('logClearDays').value);
-            if (!confirm("Log saklama zamanlaması uygulansın mı?")) return;
-            await fetch('/api/logs/clear', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id, days: days }) });
-            loadData(); alert("✅ Log zamanlaması güncellendi!");
+            if (!confirm("Log temizleme kuralı uygulansın mı?")) return;
+            await fetch('/api/logs/clear', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ user_id: user.id, days: days }) 
+            });
+            loadData(); 
+            alert("✅ Log temizleme kuralı uygulandı!");
         }
 
         async function saveSettings() {
@@ -310,17 +401,39 @@
             const btnText = document.getElementById('btnTextInput').value.trim();
             const btnUrl = document.getElementById('btnUrlInput').value.trim();
             const mediaUrl = document.getElementById('mediaUrlInput').value.trim();
-            if (!selectedChatId || selectedChatId == 0) return alert("Grup seçin!");
+            const annBtnText = document.getElementById('annBtnTextInput').value.trim();
+            const annBtnUrl = document.getElementById('annBtnUrlInput').value.trim();
+
+            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen önce bir grup seçin!");
+
             const body = { user_id: user.id, chat_id: selectedChatId };
             if (welcome) body.welcome_msg = welcome;
             if (btnText) body.btn_text = btnText;
             if (btnUrl) body.btn_url = btnUrl;
             if (mediaUrl) body.media_url = mediaUrl;
-            await fetch('/api/settings/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-            alert("✅ Ayarlar kaydedildi!");
+            if (annBtnText) body.announcement_btn_text = annBtnText;
+            if (annBtnUrl) body.announcement_btn_url = annBtnUrl;
+
+            const res = await fetch('/api/settings/update', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify(body) 
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert("✅ Hoş geldin ve Duyuru ayarları başarıyla kaydedildi!");
+            } else {
+                alert("❌ Hata: " + (data.error || "Ayarlar kaydedilemedi!"));
+            }
         }
 
-        async function toggleLockdown() { await fetch('/api/toggle-lockdown', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: user.id }) }); }
+        async function toggleLockdown() { 
+            await fetch('/api/toggle-lockdown', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ user_id: user.id }) 
+            }); 
+        }
 
         verifyAccess();
     </script>
