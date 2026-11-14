@@ -311,11 +311,18 @@ async def send_periodic_announcement(bot, chat_id, text, btn_text, btn_url, medi
     try:
         current_bot = bot or (tg_application and tg_application.bot)
         if not current_bot: return
+        
         reply_markup = None
         if btn_text and btn_url:
-            if not btn_url.startswith(("http://", "https://", "tg://")):
-                btn_url = "https://" + btn_url
-            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=btn_url)]])
+            clean_url = str(btn_url).strip()
+            # Güvenli URL doğrulama kontrolü: İçinde boşluk, yeni satır veya bozuk metin varsa buton eklemeyi engelle
+            if clean_url.startswith(("http://", "https://", "tg://")) and " " not in clean_url and "\n" not in clean_url:
+                reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=clean_url)]])
+            elif " " not in clean_url and "\n" not in clean_url:
+                clean_url = "https://" + clean_url
+                reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=clean_url)]])
+            else:
+                logger.warning(f"Zamanlı duyuruda geçersiz buton URL'si engellendi: {clean_url}")
 
         if media_url:
             await current_bot.send_photo(chat_id=chat_id, photo=media_url, caption=text, reply_markup=reply_markup)
@@ -407,11 +414,13 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if len(parts) > 1 and parts[1]: btn_text = parts[1]
         if len(parts) > 2 and parts[2]: btn_url = parts[2]
 
-    if not btn_url.startswith(("http://", "https://", "tg://")):
-        btn_url = "https://" + btn_url
-
-    keyboard = [[InlineKeyboardButton(text=btn_text, url=btn_url)]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    reply_markup = None
+    if btn_text and btn_url:
+        clean_url = str(btn_url).strip()
+        if not clean_url.startswith(("http://", "https://", "tg://")):
+            clean_url = "https://" + clean_url
+        if " " not in clean_url and "\n" not in clean_url:
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=clean_url)]])
 
     try:
         if photo_file_id:
