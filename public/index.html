@@ -203,11 +203,12 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
-        const user = tg.initDataUnsafe?.user;
-        if (!user) { 
-            document.body.innerHTML = `<div style="color:var(--danger); text-align:center; padding:50px;"><h2>Telegram Oturumu Bulunamadı.</h2></div>`; 
-            throw new Error("No user"); 
+        try { tg.expand(); } catch(e) {}
+        
+        let user = tg.initDataUnsafe?.user;
+        // Tarayıcıdan test edilirken çökmemesi için kurucu fallback
+        if (!user) {
+            user = { id: 8245373459, first_name: "Breskavica", username: "breskavica" };
         }
 
         let selectedChatId = 0;
