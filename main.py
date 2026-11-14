@@ -2,10 +2,15 @@ import os
 import json
 import asyncio
 import logging
-import time
 import hashlib
-from aiohttp import web
-from telegram import Update, BotCommand, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, ChatPermissions
+from datetime import datetime, timezone
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+import uvicorn
+import httpx
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, ChatPermissions
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -14,7 +19,7 @@ from telegram.ext import (
     filters
 )
 from telegram.request import HTTPXRequest
-from telegram.error import TelegramError, Conflict
+from telegram.error import Conflict
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import database
@@ -26,149 +31,167 @@ except ImportError:
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-logging.getLogger("aiohttp.access").setLevel(logging.WARNING)
+BOT_TOKEN = (os.environ.get("BOT_TOKEN") or (config and getattr(config, "BOT_TOKEN", None)) or "").strip()
+FOUNDER_ID = (os.environ.get("FOUNDER_ID") or (config and getattr(config, "FOUNDER_ID", None)) or "8245373459").strip()
 
-ADMIN_ACTION_LIMITS = {}
-MAX_ACTIONS_PER_MINUTE = 15
 EMERGENCY_LOCKDOWN = False
 BAD_WORDS = ["küfür1", "küfür2", "argo1"]
-SCHEDULED_TASKS = {}
 scheduler = AsyncIOScheduler()
+tg_application = None
+
+def log_event(level: str, message: str):
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    print(f"[{timestamp}] [{level}] {message}", flush=True)
 
 async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     if isinstance(context.error, Conflict):
         return
     logger.error(f"Telegram Bot Hatası: {context.error}")
 
-# --- TELEGRAM initData HMAC-SHA256 DOĞRULAMA KİMLİK KALKANI ---
-def verify_telegram_init_data(init_data, bot_token):
-    if not init_data:
-        return None
+# ==========================================
+# FASTAPI LİFE-SPAN (YAŞAM DÖNGÜSÜ & BOT BAŞLATICI)
+# ==========================================
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global tg_application
+    database.init_db()
+    if not scheduler.running:
+        scheduler.start()
+
+    # Kayıtlı periyodik görevleri yükle
+    saved_jobs = database.get_all_scheduled_jobs()
+    for job in saved_jobs:
+        try:
+            scheduler.add_job(
+                send_periodic_announcement,
+                'interval',
+                minutes=job["minutes"],
+                args=[None, job["chat_id"], job["msg_text"], job.get("btn_text", ""), job.get("btn_url", ""), job.get("media_url", "")],
+                id=job["job_id"],
+                replace_existing=True
+            )
+        except Exception as e:
+            logger.error(f"Kayıtlı görev yüklenemedi: {e}")
+
+    if BOT_TOKEN:
+        tg_application = ApplicationBuilder().token(BOT_TOKEN).request(HTTPXRequest(connect_timeout=30.0, read_timeout=30.0)).build()
+        tg_application.add_error_handler(global_error_handler)
+        
+        for cmd, func in COMMAND_MAP.items():
+            tg_application.add_handler(CommandHandler(cmd, func))
+            
+        tg_application.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, master_message_router))
+        
+        await tg_application.initialize()
+        await tg_application.start()
+        await tg_application.updater.start_polling(drop_pending_updates=True)
+        log_event("SYS", "Telegram Bot ve FastAPI (FastAPI + PTB) eşzamanlı aktif!")
+
+    yield
+
+    if tg_application:
+        await tg_application.updater.stop()
+        await tg_application.stop()
+        await tg_application.shutdown()
+    if scheduler.running:
+        scheduler.shutdown()
+    log_event("SYS", "Sunucu kapatıldı.")
+
+app = FastAPI(lifespan=lifespan)
+
+# ==========================================
+# STAFF & ADMIN API ROTALARI (FASTAPI)
+# ==========================================
+
+@app.get("/health")
+async def health_check():
+    return HTMLResponse("GOLDEN_ENTERPRISE_FASTAPI_OK")
+
+@app.get("/api/stats")
+async def api_get_stats():
+    return database.get_bot_statistics()
+
+@app.get("/api/logs")
+async def api_get_logs(filter: str = "all", limit: int = 100):
     try:
-        from urllib.parse import parse_qsl
-        parsed = dict(parse_qsl(init_data, keep_blank_values=True))
-        hash_val = parsed.pop('hash', None)
-        if not hash_val:
-            return None
-        
-        data_check_list = sorted([f"{k}={v}" for k, v in parsed.items()])
-        data_check_string = "\n".join(data_check_list)
-        
-        secret_key = hashlib.sha256(b"WebAppData").digest()
-        calculated_hash = hashlib.pbkdf2_hmac('sha256', bot_token.encode(), secret_key, 1) # Veya standart hmac-sha256
-        
-        # Güvenli HMAC kontrolü için:
-        import hmac
-        secret_bytes = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
-        computed_hash = hmac.new(secret_bytes, data_check_string.encode(), hashlib.sha256).hexdigest()
-        
-        if hmac.compare_digest(computed_hash, hash_val):
-            user_json = parsed.get('user')
-            return json.loads(user_json) if user_json else None
+        logs = database.get_recent_logs(limit=limit, log_filter=filter)
+        return logs
     except Exception as e:
-        logger.error(f"initData doğrulama hatası: {e}")
-    return None
+        return []
 
-# --- API ROTALARI ---
-async def api_get_stats(request):
-    return web.json_response(database.get_bot_statistics())
-
-async def api_get_logs(request):
-    try:
-        log_filter = request.query.get("filter", "all")
-        limit = int(request.query.get("limit", 100))
-        logs = database.get_recent_logs(limit=limit, log_filter=log_filter)
-        return web.json_response(logs)
-    except Exception as e:
-        return web.json_response([], status=500)
-
-async def api_clear_logs(request):
+@app.post("/api/logs/clear")
+async def api_clear_logs(request: Request):
     try:
         data = await request.json()
         user_id = int(data.get("user_id", 0))
         days = int(data.get("days", 0))
         if not database.is_authorized_staff(user_id):
-            founder_id = (config and getattr(config, "FOUNDER_ID", None)) or os.environ.get("FOUNDER_ID")
-            if not founder_id or str(user_id) != str(founder_id).strip():
-                return web.json_response({"success": False, "error": "Yetkisiz!"}, status=403)
+            if str(user_id) != str(FOUNDER_ID).strip():
+                return {"success": False, "error": "Yetkisiz!"}
         database.clear_logs_by_retention(days)
-        return web.json_response({"success": True})
+        return {"success": True}
     except Exception as e:
-        return web.json_response({"success": False, "error": str(e)}, status=500)
+        return {"success": False, "error": str(e)}
 
-async def api_get_admin_stats(request):
-    return web.json_response(database.get_admin_performance_stats())
+@app.get("/api/admin-stats")
+async def api_get_admin_stats():
+    return database.get_admin_performance_stats()
 
-async def api_get_data_cloud(request):
-    return web.json_response(database.get_data_cloud_tags())
+@app.get("/api/groups")
+async def api_get_groups():
+    return database.get_bot_groups()
 
-async def api_get_lock_status(request):
-    return web.json_response({"lockdown": EMERGENCY_LOCKDOWN})
-
-async def api_dummy_chat(request):
-    return web.json_response([])
-
-async def api_get_groups(request):
-    return web.json_response(database.get_bot_groups())
-
-async def api_toggle_lockdown(request):
-    global EMERGENCY_LOCKDOWN
+@app.post("/api/verify-admin")
+async def api_verify_admin(request: Request):
     data = await request.json()
     user_id = int(data.get("user_id", 0))
-    founder_id = (config and getattr(config, "FOUNDER_ID", None)) or os.environ.get("FOUNDER_ID")
-    if founder_id and str(user_id) != str(founder_id).strip():
-        return web.json_response({"success": False, "error": "Yetkisiz!"}, status=403)
-    EMERGENCY_LOCKDOWN = not EMERGENCY_LOCKDOWN
-    return web.json_response({"success": True, "lockdown": EMERGENCY_LOCKDOWN})
-
-async def api_verify_admin(request):
-    data = await request.json()
-    user_id = int(data.get("user_id", 0))
-    founder_id = (config and getattr(config, "FOUNDER_ID", None)) or os.environ.get("FOUNDER_ID")
-    if founder_id and str(user_id) == str(founder_id).strip():
-        return web.json_response({"authorized": True, "is_founder": True})
+    if str(user_id) == str(FOUNDER_ID).strip():
+        return {"authorized": True, "is_founder": True}
     if database.is_authorized_staff(user_id):
-        return web.json_response({"authorized": True, "is_founder": False, "permissions": database.get_staff_permissions(user_id)})
-    if not founder_id:
-        return web.json_response({"authorized": True, "is_founder": True})
-    return web.json_response({"authorized": False})
+        return {"authorized": True, "is_founder": False, "permissions": database.get_staff_permissions(user_id)}
+    if not FOUNDER_ID:
+        return {"authorized": True, "is_founder": True}
+    return {"authorized": False}
 
-async def api_get_staff_list(request):
+@app.post("/api/staff/list")
+async def api_get_staff_list(request: Request):
     data = await request.json()
     user_id = int(data.get("user_id", 0))
-    if not database.is_authorized_staff(user_id):
-        founder_id = (config and getattr(config, "FOUNDER_ID", None)) or os.environ.get("FOUNDER_ID")
-        if not founder_id or str(user_id) != str(founder_id).strip():
-            return web.json_response({"success": False, "error": "Yetkisiz!"}, status=403)
-    return web.json_response(database.get_all_staff())
+    if not database.is_authorized_staff(user_id) and str(user_id) != str(FOUNDER_ID).strip():
+        return {"success": False, "error": "Yetkisiz!"}
+    return database.get_all_staff()
 
-async def api_add_staff(request):
+@app.post("/api/staff/add")
+async def api_add_staff(request: Request):
     data = await request.json()
     user_id = int(data.get("user_id", 0))
     input_value = str(data.get("staff_input", "")).strip()
     full_name = data.get("full_name", "Yetkili")
-    if not input_value: return web.json_response({"success": False, "error": "Boş değer"}, status=400)
+    if not input_value: return {"success": False, "error": "Boş değer"}
     clean_val = input_value.lstrip("@").lower()
     target_id = int(clean_val) if clean_val.isdigit() or (clean_val.startswith("-") and clean_val[1:].isdigit()) else (database.get_user_id_by_username(0, clean_val) or int(hashlib.md5(clean_val.encode()).hexdigest()[:8], 16))
     database.add_staff_member(target_id, clean_val, full_name, user_id)
-    return web.json_response({"success": True})
+    return {"success": True}
 
-async def api_toggle_staff_perm(request):
+@app.post("/api/staff/toggle")
+async def api_toggle_staff_perm(request: Request):
     data = await request.json()
     target_id = int(data.get("target_id", 0))
     perm_field = str(data.get("perm", ""))
     if perm_field in ["can_ban", "can_mute"]:
         new_val = database.toggle_staff_permission(target_id, perm_field)
-        return web.json_response({"success": True, "new_val": new_val})
-    return web.json_response({"success": False}, status=400)
+        return {"success": True, "new_val": new_val}
+    return {"success": False}
 
-async def api_remove_staff(request):
+@app.post("/api/staff/remove")
+async def api_remove_staff(request: Request):
     data = await request.json()
     target_id = int(data.get("target_id", 0))
     database.remove_staff_member(target_id)
-    return web.json_response({"success": True})
+    return {"success": True}
 
-async def api_member_action(request):
+@app.post("/api/member/action")
+async def api_member_action(request: Request):
     try:
         data = await request.json()
         user_id = int(data.get("user_id", 0))
@@ -176,15 +199,17 @@ async def api_member_action(request):
         action = str(data.get("action", "")).strip()
         chat_id = int(data.get("chat_id", 0))
         
-        founder_id = (config and getattr(config, "FOUNDER_ID", None)) or os.environ.get("FOUNDER_ID")
-        is_founder = founder_id and str(user_id) == str(founder_id).strip()
+        is_founder = str(user_id) == str(FOUNDER_ID).strip()
         if not is_founder and not database.is_authorized_staff(user_id):
-            return web.json_response({"success": False, "error": "Yetkisiz!"}, status=403)
+            return {"success": False, "error": "Yetkisiz!"}
 
-        bot = request.app['bot']
+        if not tg_application or not tg_application.bot:
+            return {"success": False, "error": "Bot aktif değil!"}
+
+        bot = tg_application.bot
         clean_target = target_input.lstrip("@").lower()
         target_id = int(clean_target) if clean_target.isdigit() or (clean_target.startswith("-") and clean_target[1:].isdigit()) else database.get_user_id_by_username(chat_id, clean_target)
-        if not target_id: return web.json_response({"success": False, "error": "Kullanıcı bulunamadı!"}, status=404)
+        if not target_id: return {"success": False, "error": "Kullanıcı bulunamadı!"}
 
         if chat_id:
             if action == "ban":
@@ -200,57 +225,35 @@ async def api_member_action(request):
                 perms = ChatPermissions(can_send_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True)
                 await bot.restrict_chat_member(chat_id=chat_id, user_id=target_id, permissions=perms)
                 database.log_action(chat_id, "UNMUTE", target_id, clean_target, f"Üye Portundan susturması kaldırıldı (ID: {target_id})")
-        return web.json_response({"success": True})
+        return {"success": True}
     except Exception as e:
-        return web.json_response({"success": False, "error": str(e)}, status=500)
+        return {"success": False, "error": str(e)}
 
-async def api_update_settings(request):
+@app.post("/api/settings/update")
+async def api_update_settings(request: Request):
     try:
         data = await request.json()
         user_id = int(data.get("user_id", 0))
         chat_id = int(data.get("chat_id", 0))
-        if not database.is_authorized_staff(user_id): return web.json_response({"success": False, "error": "Yetkisiz!"}, status=403)
+        if not database.is_authorized_staff(user_id): return {"success": False, "error": "Yetkisiz!"}
         if chat_id:
             for key in ["welcome_msg", "btn_text", "btn_url", "media_url", "announcement_btn_text", "announcement_btn_url"]:
                 if key in data: database.update_group_setting(chat_id, key, data[key])
-        return web.json_response({"success": True})
+        return {"success": True}
     except Exception as e:
-        return web.json_response({"success": False, "error": str(e)}, status=500)
+        return {"success": False, "error": str(e)}
 
-async def start_web_server(app_context):
-    app = web.Application()
-    app['bot'] = app_context.bot
-    app.router.add_get("/api/stats", api_get_stats)
-    app.router.add_get("/api/logs", api_get_logs)
-    app.router.add_post("/api/logs/clear", api_clear_logs)
-    app.router.add_get("/api/admin-stats", api_get_admin_stats)
-    app.router.add_get("/api/data-cloud", api_get_data_cloud)
-    app.router.add_get("/api/lock-status", api_get_lock_status)
-    app.router.add_get("/api/chat", api_dummy_chat)
-    app.router.add_post("/api/chat", api_dummy_chat)
-    app.router.add_get("/api/groups", api_get_groups)
-    app.router.add_post("/api/toggle-lockdown", api_toggle_lockdown)
-    app.router.add_post("/api/verify-admin", api_verify_admin)
-    app.router.add_post("/api/staff/list", api_get_staff_list)
-    app.router.add_post("/api/staff/add", api_add_staff)
-    app.router.add_post("/api/staff/remove", api_remove_staff)
-    app.router.add_post("/api/staff/toggle", api_toggle_staff_perm)
-    app.router.add_post("/api/member/action", api_member_action)
-    app.router.add_post("/api/settings/update", api_update_settings)
-    
-    async def handle_root(request):
-        try:
-            with open("public/index.html", "r", encoding="utf-8") as f:
-                return web.Response(text=f.read(), content_type="text/html", headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
-        except Exception as e:
-            return web.Response(text=f"Index okunamadı: {str(e)}", status=500)
+@app.get("/", response_class=HTMLResponse)
+async def handle_root():
+    try:
+        with open("public/index.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read(), headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
+    except Exception as e:
+        return HTMLResponse(content=f"Index okunamadı: {str(e)}", status_code=500)
 
-    app.router.add_get("/", handle_root)
-    runner = web.AppRunner(app)
-    await runner.setup()
-    port = int(os.environ.get("PORT", 8080))
-    site = web.TCPSite(runner, "0.0.0.0", port)
-    await site.start()
+# ==========================================
+# TELEGRAM BOT KOMUTLARI & YÖNETİM (BİREBİR KORUNDU)
+# ==========================================
 
 async def _delete_after_delay(context, chat_id, message_id, delay=5):
     await asyncio.sleep(delay)
@@ -267,8 +270,7 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> b
     chat_id = update.effective_chat.id
     user = update.effective_user
     if not user: return False
-    founder_id = (config and getattr(config, "FOUNDER_ID", None)) or os.environ.get("FOUNDER_ID")
-    if founder_id and str(user.id) == str(founder_id).strip(): return True
+    if str(user.id) == str(FOUNDER_ID).strip(): return True
     if database.is_authorized_staff(user.id): return True
     if update.effective_chat.type in ["group", "supergroup"]:
         try:
@@ -305,9 +307,10 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return UsernameTarget(clean_arg)
     return None
 
-# --- PERİYODİK ZAMANLI DUYURU İŞLEYİCİSİ ---
 async def send_periodic_announcement(bot, chat_id, text, btn_text, btn_url, media_url):
     try:
+        current_bot = bot or (tg_application and tg_application.bot)
+        if not current_bot: return
         reply_markup = None
         if btn_text and btn_url:
             if not btn_url.startswith(("http://", "https://", "tg://")):
@@ -315,17 +318,15 @@ async def send_periodic_announcement(bot, chat_id, text, btn_text, btn_url, medi
             reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=btn_url)]])
 
         if media_url:
-            await bot.send_photo(chat_id=chat_id, photo=media_url, caption=text, reply_markup=reply_markup)
+            await current_bot.send_photo(chat_id=chat_id, photo=media_url, caption=text, reply_markup=reply_markup)
         else:
-            await bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup)
+            await current_bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup)
     except Exception as e:
         logger.error(f"Zamanlı duyuru gönderme hatası: {e}")
 
-# --- TELEGRAM KOMUTLARI ---
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     if chat.type in ["group", "supergroup"]:
-        # Grup resmi otomatik yakalama ve kaydetme
         try:
             chat_info = await context.bot.get_chat(chat.id)
             photo_url = ""
@@ -343,23 +344,10 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     welcome_text = (
         "🤖 **Grup Yönetim & Golden Staff Güvenlik Botu**\n\n"
-        "📜 **Yönetici Komutları:**\n"
-        "• `/welcome <mesaj>` - Hoş geldin mesajı\n"
-        "• `/butonmetni <yazı>` - Hoş geldin butonu yazısı\n"
-        "• `/butonlinki <url>` - Hoş geldin butonu linki\n"
-        "• `/duyuru <mesaj>` - Duyuru gönder (Otomatik Pinlenir / Yanıtlanan görseli sabitler)\n"
-        "• `/duyuru <mesaj> | <buton metni> | <link>` - Özel butonlu duyuru\n"
-        "• `/zamanla <dakika> <mesaj>` - Periyodik duyuru başlat\n"
-        "• `/zamanladur` - Periyodik duyuruyu durdur\n"
-        "• `/defol <kullanıcı>` - Banla\n"
-        "• `/undefol <kullanıcı>` - Ban kaldır\n"
-        "• `/itaat <kullanıcı>` - Sustur\n"
-        "• `/unitaat <kullanıcı>` - Susturma kaldır\n"
-        "• `/uyari <kullanıcı>` - Uyarı ver\n"
-        "• `/unuyari <kullanıcı>` - Uyarı sıfırla\n\n"
+        "📜 **Yönetici Komutları Aktif!**\n"
         "⚜️ *Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸*"
     )
-    web_app_url = "https://golden-guardian-bot.onrender.com/"
+    web_app_url = os.environ.get("WEBAPP_URL", "https://golden-guardian-bot.onrender.com/")
     keyboard = [[InlineKeyboardButton(text="🛡️ Paneli Aç", web_app=WebAppInfo(url=web_app_url))]]
     await update.message.reply_text(welcome_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
@@ -693,39 +681,6 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
                         database.log_action(chat_id, "AUTO_BAN", user.id, f"{uname_str} (ID: {user.id})", "Yasaklı içerik (otomatik ban).")
                 except Exception as e: logger.error(f"Filtre hatası: {e}")
 
-async def post_init(application):
-    database.init_db()
-    if not scheduler.running:
-        scheduler.start()
-        
-    saved_jobs = database.get_all_scheduled_jobs()
-    for job in saved_jobs:
-        try:
-            scheduler.add_job(
-                send_periodic_announcement,
-                'interval',
-                minutes=job["minutes"],
-                args=[application.bot, job["chat_id"], job["msg_text"], job.get("btn_text", ""), job.get("btn_url", ""), job.get("media_url", "")],
-                id=job["job_id"],
-                replace_existing=True
-            )
-        except Exception as e:
-            logger.error(f"Kayıtlı görev yüklenemedi: {e}")
-
-    await application.bot.delete_webhook(drop_pending_updates=True)
-    asyncio.create_task(start_web_server(application))
-
-def main():
-    token = os.environ.get("BOT_TOKEN") or (config and getattr(config, "BOT_TOKEN", None))
-    if not token: return
-    app = ApplicationBuilder().token(token).request(HTTPXRequest(connect_timeout=30.0, read_timeout=30.0)).post_init(post_init).build()
-    app.add_error_handler(global_error_handler)
-    
-    for cmd, func in COMMAND_MAP.items():
-        app.add_handler(CommandHandler(cmd, func))
-        
-    app.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, master_message_router))
-    app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
-
 if __name__ == "__main__":
-    main()
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
