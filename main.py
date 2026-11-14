@@ -245,11 +245,14 @@ async def api_update_settings(request: Request):
 
 @app.get("/", response_class=HTMLResponse)
 async def handle_root():
-    try:
-        with open("public/index.html", "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read(), headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
-    except Exception as e:
-        return HTMLResponse(content=f"Index okunamadı: {str(e)}", status_code=500)
+    for path in ["public/index.html", "index.html"]:
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    return HTMLResponse(content=f.read(), headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
+            except Exception as e:
+                pass
+    return HTMLResponse(content="Index dosyası (public/index.html) bulunamadı!", status_code=500)
 
 # ==========================================
 # TELEGRAM BOT KOMUTLARI & YÖNETİM
@@ -348,22 +351,24 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     welcome_text = (
         "🤖 **Grup Yönetim & Golden Staff Güvenlik Botu**\n\n"
-        "Grup düzenini sağlamak, argo/küfür, dış linkler ve yasaklı içerikleri otomatik engellemek için aktifim.\n\n"
         "📜 **Yönetici Komutları:**\n"
-        "• `/welcome <mesaj>` - Hoş geldin mesajını değiştirir.\n"
-        "• `/butonmetni <yazı>` - Varsayılan buton metnini değiştirir.\n"
-        "• `/butonlinki <url>` - Varsayılan buton linkini değiştirir.\n"
-        "• `/duyuru <mesaj>` - Duyuru gönderir.\n"
-        "• `/zamanla <dakika> <mesaj>` - Periyodik paylaşım başlatır.\n"
-        "• `/zamanladur` - Periyodik paylaşımı durdurur.\n"
-        "• `/kilit kapat / ac` - Sohbeti kilitler/açar.\n"
-        "• `/defol <kullanıcı>` - Kullanıcıyı banlar.\n"
-        "• `/undefol <kullanıcı>` - Banı kaldırır.\n"
-        "• `/itaat <kullanıcı>` - Susturur.\n"
-        "• `/unitaat <kullanıcı>` - Susturmayı kaldırır.\n"
-        "• `/warn <kullanıcı>` - Uyarı verir.\n"
-        "• `/unwarn <kullanıcı>` - Uyarıları sıfırlar.\n\n"
-        "⚜️ *Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸*"
+        "- /welcome <mesaj> - Hoş geldin mesajı\n"
+        "- /butonmetni <yazı> - Hoş geldin butonu yazısı\n"
+        "- /butonlinki <url> - Hoş geldin butonu linki\n"
+        "- /duyuru <mesaj> - Duyuru gönder (Otomatik Pinlenir / Yanıtlanan görseli sabitler)\n"
+        "- /duyuru <mesaj> | <buton metni> | <link> - Özel butonlu duyuru (Görsele yanıtla atılırsa butonlu görseli pinler)\n"
+        "- /duyurubutonmetni <yazı> - Varsayılan duyuru butonu yazısını ayarla\n"
+        "- /duyurubutonlinki <url> - Varsayılan duyuru butonu linkini ayarla\n"
+        "- /zamanla <dakika> <mesaj> - Butonsuz periyodik duyuru başlat (Pinlenmez)\n"
+        "- /zamanla <dakika> | <mesaj> | <buton metni> | <link> - Butonlu periyodik duyuru başlat (Pinlenmez)\n"
+        "- /zamanladur veya /zamanla dur - Yanıtlanan zamanlanmış paylaşımı durdur\n"
+        "- /defol <kullanıcı> - Banla\n"
+        "- /undefol <kullanıcı> - Ban kaldır\n"
+        "- /itaat <kullanıcı> - Sustur\n"
+        "- /unitaat <kullanıcı> - Susturma kaldır\n"
+        "- /uyari <kullanıcı> - Uyarı ver (3 uyarıda otomatik banlar)\n"
+        "- /unuyari <kullanıcı> - Uyarı sıfırla\n\n"
+        "⚜️ **Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸**"
     )
     web_app_url = os.environ.get("WEBAPP_URL", "https://katya-asistan-bot.onrender.com/")
     keyboard = [[InlineKeyboardButton(text="🛡️ Paneli Aç", web_app=WebAppInfo(url=web_app_url))]]
@@ -415,8 +420,8 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     def_settings = database.get_announcement_settings(chat_id)
-    btn_text = def_settings["btn_text"]
-    btn_url = def_settings["btn_url"]
+    btn_text = def_settings.get("btn_text", "")
+    btn_url = def_settings.get("btn_url", "")
     msg_text = raw_text
 
     if "|" in raw_text:
@@ -445,6 +450,23 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error(f"Duyuru gönderme hatası: {e}")
 
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_duyurubutonmetni(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    text = " ".join(context.args)
+    if text:
+        database.update_group_setting(update.effective_chat.id, "announcement_btn_text", text)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Varsayılan duyuru buton metni güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_duyurubutonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    if context.args:
+        database.update_group_setting(update.effective_chat.id, "announcement_btn_url", context.args[0].strip())
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Varsayılan duyuru buton linki güncellendi!", 4)
     try: await update.message.delete()
     except Exception: pass
 
@@ -639,6 +661,8 @@ COMMAND_MAP = {
     "butonmetni": cmd_butonmetni,
     "butonlinki": cmd_butonlinki,
     "duyuru": cmd_duyuru,
+    "duyurubutonmetni": cmd_duyurubutonmetni,
+    "duyurubutonlinki": cmd_duyurubutonlinki,
     "zamanla": cmd_zamanla,
     "zamanladur": cmd_zamanladur,
     "kilit": cmd_kilit,
