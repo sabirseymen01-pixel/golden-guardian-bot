@@ -40,6 +40,35 @@ async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYP
         return
     logger.error(f"Telegram Bot Hatası: {context.error}")
 
+# --- TELEGRAM initData HMAC-SHA256 DOĞRULAMA KİMLİK KALKANI ---
+def verify_telegram_init_data(init_data, bot_token):
+    if not init_data:
+        return None
+    try:
+        from urllib.parse import parse_qsl
+        parsed = dict(parse_qsl(init_data, keep_blank_values=True))
+        hash_val = parsed.pop('hash', None)
+        if not hash_val:
+            return None
+        
+        data_check_list = sorted([f"{k}={v}" for k, v in parsed.items()])
+        data_check_string = "\n".join(data_check_list)
+        
+        secret_key = hashlib.sha256(b"WebAppData").digest()
+        calculated_hash = hashlib.pbkdf2_hmac('sha256', bot_token.encode(), secret_key, 1) # Veya standart hmac-sha256
+        
+        # Güvenli HMAC kontrolü için:
+        import hmac
+        secret_bytes = hmac.new(b"WebAppData", bot_token.encode(), hashlib.sha256).digest()
+        computed_hash = hmac.new(secret_bytes, data_check_string.encode(), hashlib.sha256).hexdigest()
+        
+        if hmac.compare_digest(computed_hash, hash_val):
+            user_json = parsed.get('user')
+            return json.loads(user_json) if user_json else None
+    except Exception as e:
+        logger.error(f"initData doğrulama hatası: {e}")
+    return None
+
 # --- API ROTALARI ---
 async def api_get_stats(request):
     return web.json_response(database.get_bot_statistics())
@@ -296,7 +325,18 @@ async def send_periodic_announcement(bot, chat_id, text, btn_text, btn_url, medi
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     if chat.type in ["group", "supergroup"]:
-        database.register_bot_group(chat.id, chat.title or "Grup")
+        # Grup resmi otomatik yakalama ve kaydetme
+        try:
+            chat_info = await context.bot.get_chat(chat.id)
+            photo_url = ""
+            if chat_info.photo:
+                file_id = chat_info.photo.small_file_id
+                file_obj = await context.bot.get_file(file_id)
+                photo_url = file_obj.file_path
+            database.register_bot_group(chat.id, chat.title or "Grup", photo_url)
+        except Exception:
+            database.register_bot_group(chat.id, chat.title or "Grup", "")
+
         try: await update.message.delete()
         except Exception: pass
         return
@@ -308,17 +348,14 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• `/butonmetni <yazı>` - Hoş geldin butonu yazısı\n"
         "• `/butonlinki <url>` - Hoş geldin butonu linki\n"
         "• `/duyuru <mesaj>` - Duyuru gönder (Otomatik Pinlenir / Yanıtlanan görseli sabitler)\n"
-        "• `/duyuru <mesaj> | <buton metni> | <link>` - Özel butonlu duyuru (Görsele yanıtla atılırsa butonlu görseli pinler)\n"
-        "• `/duyurubutonmetni <yazı>` - Varsayılan duyuru butonu yazısını ayarla\n"
-        "• `/duyurubutonlinki <url>` - Varsayılan duyuru butonu linkini ayarla\n"
-        "• `/zamanla <dakika> <mesaj>` - Butonsuz periyodik duyuru başlat (Pinlenmez)\n"
-        "• `/zamanla <dakika> | <mesaj> | <buton metni> | <link>` - Butonlu periyodik duyuru başlat (Pinlenmez)\n"
-        "• `/zamanladur` veya `/zamanla dur` - Yanıtlanan zamanlanmış paylaşımı durdur\n"
+        "• `/duyuru <mesaj> | <buton metni> | <link>` - Özel butonlu duyuru\n"
+        "• `/zamanla <dakika> <mesaj>` - Periyodik duyuru başlat\n"
+        "• `/zamanladur` - Periyodik duyuruyu durdur\n"
         "• `/defol <kullanıcı>` - Banla\n"
         "• `/undefol <kullanıcı>` - Ban kaldır\n"
         "• `/itaat <kullanıcı>` - Sustur\n"
         "• `/unitaat <kullanıcı>` - Susturma kaldır\n"
-        "• `/uyari <kullanıcı>` - Uyarı ver (3 uyarıda otomatik banlar)\n"
+        "• `/uyari <kullanıcı>` - Uyarı ver\n"
         "• `/unuyari <kullanıcı>` - Uyarı sıfırla\n\n"
         "⚜️ *Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸*"
     )
@@ -349,23 +386,6 @@ async def cmd_butonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.args: 
         database.update_group_setting(update.effective_chat.id, "btn_url", context.args[0].strip())
         await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin buton linki güncellendi!", 4)
-    try: await update.message.delete()
-    except Exception: pass
-
-async def cmd_duyurubutonmetni(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context): return
-    text = " ".join(context.args).strip()
-    if text:
-        database.update_group_setting(update.effective_chat.id, "announcement_btn_text", text)
-        await send_auto_delete_message(context, update.effective_chat.id, "✅ Duyuru varsayılan buton metni güncellendi!", 4)
-    try: await update.message.delete()
-    except Exception: pass
-
-async def cmd_duyurubutonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context): return
-    if context.args:
-        database.update_group_setting(update.effective_chat.id, "announcement_btn_url", context.args[0].strip())
-        await send_auto_delete_message(context, update.effective_chat.id, "✅ Duyuru varsayılan buton linki güncellendi!", 4)
     try: await update.message.delete()
     except Exception: pass
 
@@ -407,27 +427,13 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         if photo_file_id:
-            sent_msg = await context.bot.send_photo(
-                chat_id=chat_id,
-                photo=photo_file_id,
-                caption=msg_text,
-                reply_markup=reply_markup
-            )
+            sent_msg = await context.bot.send_photo(chat_id=chat_id, photo=photo_file_id, caption=msg_text, reply_markup=reply_markup)
         else:
-            sent_msg = await context.bot.send_message(
-                chat_id=chat_id,
-                text=msg_text,
-                reply_markup=reply_markup
-            )
+            sent_msg = await context.bot.send_message(chat_id=chat_id, text=msg_text, reply_markup=reply_markup)
 
-        await context.bot.pin_chat_message(
-            chat_id=chat_id,
-            message_id=sent_msg.message_id,
-            disable_notification=False
-        )
-
+        await context.bot.pin_chat_message(chat_id=chat_id, message_id=sent_msg.message_id, disable_notification=False)
         admin_user = update.effective_user.username or update.effective_user.first_name
-        database.log_action(chat_id, "ANNOUNCEMENT", 0, f"@{admin_user}", f"Duyuru gönderildi ve sabitlendi: {msg_text[:30]}...")
+        database.log_action(chat_id, "ANNOUNCEMENT", 0, f"@{admin_user}", f"Duyuru gönderildi: {msg_text[:30]}...")
     except Exception as e:
         logger.error(f"Duyuru gönderme hatası: {e}")
 
@@ -437,35 +443,18 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def cmd_zamanladur(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
     chat_id = update.effective_chat.id
-    reply = update.message.reply_to_message
-    raw_text = update.message.text.partition(" ")[2].strip()
-
-    job_to_remove = None
-
-    if reply:
-        text_snippet = (reply.caption or reply.text or "")[:20]
-        if text_snippet:
-            job_to_remove = database.find_scheduled_job_by_text(chat_id, text_snippet)
-
-    if not job_to_remove and raw_text and raw_text.lower() != "dur":
-        job_to_remove = database.find_scheduled_job_by_text(chat_id, raw_text[:20])
-
-    if not job_to_remove:
-        job_to_remove = database.get_latest_scheduled_job(chat_id)
+    job_to_remove = database.get_latest_scheduled_job(chat_id)
 
     if job_to_remove:
         job_id = job_to_remove["job_id"]
-        try:
-            scheduler.remove_job(job_id)
-        except Exception:
-            pass
+        try: scheduler.remove_job(job_id)
+        except Exception: pass
         database.remove_scheduled_job_db(job_id)
         admin_user = update.effective_user.username or update.effective_user.first_name
-        database.log_action(chat_id, "SCHEDULE_STOP", 0, f"@{admin_user}", f"Periyodik duyuru durduruldu: {job_to_remove.get('msg_text', '')[:30]}")
-        await send_auto_delete_message(context, chat_id, "🛑 Periyodik duyuru başarıyla durduruldu!", 5)
+        database.log_action(chat_id, "SCHEDULE_STOP", 0, f"@{admin_user}", "Periyodik duyuru durduruldu.")
+        await send_auto_delete_message(context, chat_id, "🛑 Periyodik duyuru durduruldu!", 5)
     else:
-        await send_auto_delete_message(context, chat_id, "❌ Durdurulacak aktif periyodik duyuru bulunamadı!", 5)
-
+        await send_auto_delete_message(context, chat_id, "❌ Aktif periyodik duyuru bulunamadı!", 5)
     try: await update.message.delete()
     except Exception: pass
 
@@ -482,27 +471,22 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if reply and reply.photo:
         media_url = reply.photo[-1].file_id
 
-    btn_text, btn_url = "", ""
-    minutes = 0
-    msg_text = ""
-
+    btn_text, btn_url, minutes, msg_text = "", "", 0, ""
     if "|" in raw_args:
         parts = [p.strip() for p in raw_args.split("|")]
-        try:
-            minutes = int(parts[0])
+        try: minutes = int(parts[0])
         except ValueError:
             await send_auto_delete_message(context, chat_id, "❌ Dakika sayısal olmalıdır!", 5)
             try: await update.message.delete()
             except Exception: pass
             return
-
         msg_text = parts[1] if len(parts) > 1 else ""
         btn_text = parts[2] if len(parts) > 2 else ""
         btn_url = parts[3] if len(parts) > 3 else ""
     else:
         parts = raw_args.split(maxsplit=1)
         if not parts or not parts[0].isdigit():
-            await send_auto_delete_message(context, chat_id, "❌ Format: /zamanla <dakika> <mesaj> veya /zamanla <dakika> | <mesaj> | <buton> | <link>", 6)
+            await send_auto_delete_message(context, chat_id, "❌ Format: /zamanla <dakika> <mesaj>", 6)
             try: await update.message.delete()
             except Exception: pass
             return
@@ -512,14 +496,7 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not msg_text and reply:
         msg_text = reply.caption or reply.text or ""
 
-    if not msg_text and not media_url:
-        await send_auto_delete_message(context, chat_id, "❌ Bir mesaj metni veya görsel eklemelisiniz!", 5)
-        try: await update.message.delete()
-        except Exception: pass
-        return
-
     job_id = hashlib.md5(f"{chat_id}_{minutes}_{msg_text[:20]}".encode()).hexdigest()
-
     scheduler.add_job(
         send_periodic_announcement,
         'interval',
@@ -531,7 +508,7 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     database.save_scheduled_job(job_id, chat_id, minutes, msg_text, btn_text, btn_url, media_url)
     admin_user = update.effective_user.username or update.effective_user.first_name
-    database.log_action(chat_id, "SCHEDULE_START", 0, f"@{admin_user}", f"Her {minutes} dakikada bir duyuru başlatıldı: {msg_text[:30]}")
+    database.log_action(chat_id, "SCHEDULE_START", 0, f"@{admin_user}", f"Her {minutes} dakikada bir duyuru başlatıldı.")
     await send_auto_delete_message(context, chat_id, f"✅ Her {minutes} dakikada bir paylaşılacak görev başlatıldı!", 5)
     try: await update.message.delete()
     except Exception: pass
@@ -576,8 +553,8 @@ async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.unban_chat_member(chat_id=chat_id, user_id=user.id, only_if_banned=True)
             uname = getattr(user, 'username', str(user.id))
             admin_uname = update.effective_user.username or update.effective_user.first_name
-            database.log_action(chat_id, "UNBAN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından banı kaldırıldı.")
-            await send_auto_delete_message(context, chat_id, f"✅ @{uname} kullanıcısının banı kaldırıldı!", 5)
+            database.log_action(chat_id, "UNBAN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} banı kaldırdı.")
+            await send_auto_delete_message(context, chat_id, f"✅ @{uname} banı kaldırıldı!", 5)
         except Exception as e: logger.error(f"Unban hatası: {e}")
     try: await update.message.delete()
     except Exception: pass
@@ -591,7 +568,7 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=ChatPermissions(can_send_messages=False))
             uname = getattr(user, 'username', str(user.id))
             admin_uname = update.effective_user.username or update.effective_user.first_name
-            database.log_action(chat_id, "MUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından susturuldu.")
+            database.log_action(chat_id, "MUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} susturdu.")
             await send_auto_delete_message(context, chat_id, f"🔇 @{uname} susturuldu!", 5)
         except Exception as e: logger.error(f"Mute hatası: {e}")
     try: await update.message.delete()
@@ -607,8 +584,8 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=perms)
             uname = getattr(user, 'username', str(user.id))
             admin_uname = update.effective_user.username or update.effective_user.first_name
-            database.log_action(chat_id, "UNMUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından susturması kaldırıldı.")
-            await send_auto_delete_message(context, chat_id, f"🔊 @{uname} kullanıcısının susturması kaldırıldı!", 5)
+            database.log_action(chat_id, "UNMUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} susturmayı kaldırdı.")
+            await send_auto_delete_message(context, chat_id, f"🔊 @{uname} susturması kaldırıldı!", 5)
         except Exception as e: logger.error(f"Unmute hatası: {e}")
     try: await update.message.delete()
     except Exception: pass
@@ -625,8 +602,8 @@ async def cmd_uyari(update: Update, context: ContextTypes.DEFAULT_TYPE):
             try:
                 await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
                 database.reset_warnings(user.id)
-                database.log_action(chat_id, "BAN", user.id, f"@{uname} (ID: {user.id})", f"3 uyarı sınırını aştığı için Admin @{admin_uname} müdahalesiyle otomatik banlandı.")
-                await send_auto_delete_message(context, chat_id, f"🚫 @{uname} 3 uyarı sınırını aştığı için otomatik banlandı!", 6)
+                database.log_action(chat_id, "BAN", user.id, f"@{uname} (ID: {user.id})", f"3 uyarı sınırını aştığı için otomatik banlandı.")
+                await send_auto_delete_message(context, chat_id, f"🚫 @{uname} 3 uyarıyı aştığı için otomatik banlandı!", 6)
             except Exception as e: logger.error(f"Otomatik ban hatası: {e}")
         else:
             database.log_action(chat_id, "WARN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} uyarı verdi ({current_warns}/3).")
@@ -642,12 +619,11 @@ async def cmd_unuyari(update: Update, context: ContextTypes.DEFAULT_TYPE):
         uname = getattr(user, 'username', str(user.id))
         admin_uname = update.effective_user.username or update.effective_user.first_name
         database.reset_warnings(user.id)
-        database.log_action(chat_id, "UNWARN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} uyarıları sıfırladı.")
-        await send_auto_delete_message(context, chat_id, f"✅ @{uname} kullanıcısının uyarıları sıfırlandı!", 5)
+        database.log_action(chat_id, "UNWARN", user.id, f"@{uname} (ID: {user.id})", f"Admin uyarıları sıfırladı.")
+        await send_auto_delete_message(context, chat_id, f"✅ @{uname} uyarıları sıfırlandı!", 5)
     try: await update.message.delete()
     except Exception: pass
 
-# Telegram API uyumlu ASCII komut haritası (Türkçe harfler CommandHandler'da yasaktır)
 COMMAND_MAP = {
     "start": cmd_start,
     "help": cmd_start,
@@ -673,21 +649,28 @@ COMMAND_MAP = {
 async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not update.message: return
     user, chat, chat_id = update.effective_user, update.effective_chat, update.effective_chat.id
-    if chat.type in ["group", "supergroup"]: database.register_bot_group(chat_id, chat.title or "Grup")
+    if chat.type in ["group", "supergroup"]:
+        try:
+            chat_info = await context.bot.get_chat(chat.id)
+            photo_url = ""
+            if chat_info.photo:
+                file_obj = await context.bot.get_file(chat_info.photo.small_file_id)
+                photo_url = file_obj.file_path
+            database.register_bot_group(chat.id, chat.title or "Grup", photo_url)
+        except Exception:
+            database.register_bot_group(chat.id, chat.title or "Grup", "")
+
     if user and user.username: database.save_user(chat_id, user.id, user.username.lower())
 
     text = (update.message.text or update.message.caption or "").strip()
     if not text: return
 
-    # Türkçe karakterli /uyarı ve /unuyarı için özel köprü
     lower_first_word = text.split()[0].lower()
     if lower_first_word in ["/uyarı", "/uyari"]:
-        args = text.split()[1:]
-        context.args = args
+        context.args = text.split()[1:]
         return await cmd_uyari(update, context)
     elif lower_first_word in ["/unuyarı", "/unuyari"]:
-        args = text.split()[1:]
-        context.args = args
+        context.args = text.split()[1:]
         return await cmd_unuyari(update, context)
 
     if chat.type in ["group", "supergroup"]:
@@ -707,7 +690,7 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
                     if user:
                         await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
                         uname_str = f"@{user.username}" if user.username else str(user.id)
-                        database.log_action(chat_id, "AUTO_BAN", user.id, f"{uname_str} (ID: {user.id})", f"Yasaklı içerik paylaştığı için otomatik banlandı.")
+                        database.log_action(chat_id, "AUTO_BAN", user.id, f"{uname_str} (ID: {user.id})", "Yasaklı içerik (otomatik ban).")
                 except Exception as e: logger.error(f"Filtre hatası: {e}")
 
 async def post_init(application):
