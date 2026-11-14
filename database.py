@@ -36,11 +36,19 @@ def save_user(chat_id, user_id, username):
     except Exception:
         pass
 
-def register_bot_group(chat_id, title):
+# 🌟 Güncellenmiş Grup Kaydı (Profil Fotoğrafı Destekli)
+def register_bot_group(chat_id, title, photo_url=""):
     try:
+        update_data = {
+            "title": title,
+            "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        }
+        if photo_url:
+            update_data["photo_url"] = photo_url
+            
         groups_col.update_one(
             {"chat_id": int(chat_id)},
-            {"$set": {"title": title, "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")}},
+            {"$set": update_data},
             upsert=True
         )
     except Exception:
