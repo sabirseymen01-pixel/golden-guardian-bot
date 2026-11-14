@@ -252,7 +252,7 @@ async def handle_root():
         return HTMLResponse(content=f"Index okunamadı: {str(e)}", status_code=500)
 
 # ==========================================
-# TELEGRAM BOT KOMUTLARI & YÖNETİM (BİREBİR KORUNDU)
+# TELEGRAM BOT KOMUTLARI & YÖNETİM
 # ==========================================
 
 async def _delete_after_delay(context, chat_id, message_id, delay=5):
@@ -315,14 +315,11 @@ async def send_periodic_announcement(bot, chat_id, text, btn_text, btn_url, medi
         reply_markup = None
         if btn_text and btn_url:
             clean_url = str(btn_url).strip()
-            # Güvenli URL doğrulama kontrolü: İçinde boşluk, yeni satır veya bozuk metin varsa buton eklemeyi engelle
             if clean_url.startswith(("http://", "https://", "tg://")) and " " not in clean_url and "\n" not in clean_url:
                 reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=clean_url)]])
             elif " " not in clean_url and "\n" not in clean_url:
                 clean_url = "https://" + clean_url
                 reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=clean_url)]])
-            else:
-                logger.warning(f"Zamanlı duyuruda geçersiz buton URL'si engellendi: {clean_url}")
 
         if media_url:
             await current_bot.send_photo(chat_id=chat_id, photo=media_url, caption=text, reply_markup=reply_markup)
@@ -354,7 +351,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "📜 **Yönetici Komutları Aktif!**\n"
         "⚜️ *Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸*"
     )
-    web_app_url = os.environ.get("WEBAPP_URL", "https://golden-guardian-bot.onrender.com/")
+    web_app_url = os.environ.get("WEBAPP_URL", "https://katya-asistan-bot.onrender.com/")
     keyboard = [[InlineKeyboardButton(text="🛡️ Paneli Aç", web_app=WebAppInfo(url=web_app_url))]]
     await update.message.reply_text(welcome_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
 
@@ -627,8 +624,6 @@ COMMAND_MAP = {
     "welcome": cmd_welcome,
     "butonmetni": cmd_butonmetni,
     "butonlinki": cmd_butonlinki,
-    "duyurubutonmetni": cmd_duyurubutonmetni,
-    "duyurubutonlinki": cmd_duyurubutonlinki,
     "duyuru": cmd_duyuru,
     "zamanla": cmd_zamanla,
     "zamanladur": cmd_zamanladur,
