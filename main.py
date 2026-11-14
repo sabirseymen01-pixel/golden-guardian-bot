@@ -348,7 +348,21 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     welcome_text = (
         "🤖 **Grup Yönetim & Golden Staff Güvenlik Botu**\n\n"
-        "📜 **Yönetici Komutları Aktif!**\n"
+        "Grup düzenini sağlamak, argo/küfür, dış linkler ve yasaklı içerikleri otomatik engellemek için aktifim.\n\n"
+        "📜 **Yönetici Komutları:**\n"
+        "• `/welcome <mesaj>` - Hoş geldin mesajını değiştirir.\n"
+        "• `/butonmetni <yazı>` - Varsayılan buton metnini değiştirir.\n"
+        "• `/butonlinki <url>` - Varsayılan buton linkini değiştirir.\n"
+        "• `/duyuru <mesaj>` - Duyuru gönderir.\n"
+        "• `/zamanla <dakika> <mesaj>` - Periyodik paylaşım başlatır.\n"
+        "• `/zamanladur` - Periyodik paylaşımı durdurur.\n"
+        "• `/kilit kapat / ac` - Sohbeti kilitler/açar.\n"
+        "• `/defol <kullanıcı>` - Kullanıcıyı banlar.\n"
+        "• `/undefol <kullanıcı>` - Banı kaldırır.\n"
+        "• `/itaat <kullanıcı>` - Susturur.\n"
+        "• `/unitaat <kullanıcı>` - Susturmayı kaldırır.\n"
+        "• `/warn <kullanıcı>` - Uyarı verir.\n"
+        "• `/unwarn <kullanıcı>` - Uyarıları sıfırlar.\n\n"
         "⚜️ *Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸*"
     )
     web_app_url = os.environ.get("WEBAPP_URL", "https://katya-asistan-bot.onrender.com/")
