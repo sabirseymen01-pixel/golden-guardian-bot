@@ -31,7 +31,7 @@
             box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.3), inset 0 0 20px rgba(212, 175, 55, 0.08);
         }
         .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 14px; }
-        .logo h1 { font-size: 16px; color: var(--accent-gold); font-weight: 800; text-shadow: 0 0 10px var(--gold-glow); }
+        .logo h1 { font-size: 15px; color: var(--accent-gold); font-weight: 800; text-shadow: 0 0 10px var(--gold-glow); }
         .badge { background: rgba(212, 175, 55, 0.15); color: var(--accent-gold); padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid var(--glass-border); }
         .port-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
         .port-nav::-webkit-scrollbar { display: none; }
@@ -47,7 +47,7 @@
         .portal-section { display: none; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; flex-direction: column; }
         .portal-section.active { display: flex; opacity: 1; transform: translateY(0); }
         .section-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--accent-gold); display: flex; align-items: center; gap: 8px; }
-        .subsection-title { font-size: 11px; font-weight: 700; color: var(--accent-gold); margin: 8px 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+        .subsection-title { font-size: 11px; font-weight: 700; color: var(--accent-gold); margin: 12px 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(212,175,55,0.15); padding-bottom: 4px; }
         input, select, textarea {
             width: 100%; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--glass-border);
             border-radius: 14px; padding: 12px; color: #fff; font-size: 13px; outline: none; margin-bottom: 10px; backdrop-filter: blur(10px);
@@ -175,11 +175,15 @@
             <input type="text" id="btnUrlInput" placeholder="Hoş Geldin Buton Linki (https://...)">
             <input type="text" id="mediaUrlInput" placeholder="Görsel / Medya URL (Opsiyonel)">
 
-            <div class="subsection-title" style="margin-top: 14px;">📢 Varsayılan Duyuru Butonu</div>
-            <input type="text" id="annBtnTextInput" placeholder="Varsayılan Duyuru Buton Metni (Örn: 🛡️ Golden Panel)">
+            <div class="subsection-title">📢 Varsayılan Duyuru Butonu</div>
+            <input type="text" id="annBtnTextInput" placeholder="Varsayılan Duyuru Buton Metni">
             <input type="text" id="annBtnUrlInput" placeholder="Varsayılan Duyuru Buton Linki (https://...)">
 
-            <button class="apple-btn" style="margin-top: 6px;" onclick="saveSettings()">Tüm Ayarları Kaydet</button>
+            <div class="subsection-title">⏳ Zamanlı (Periyodik) Duyuru Butonu</div>
+            <input type="text" id="schedBtnTextInput" placeholder="Zamanlı Duyuru Buton Metni (/zamanlabutonmetin)">
+            <input type="text" id="schedBtnUrlInput" placeholder="Zamanlı Duyuru Buton Linki (/zamanlabutonlinki)">
+
+            <button class="apple-btn" style="margin-top: 10px;" onclick="saveSettings()">Tüm Ayarları Kaydet</button>
         </div>
     </div>
 
@@ -403,6 +407,8 @@
             const mediaUrl = document.getElementById('mediaUrlInput').value.trim();
             const annBtnText = document.getElementById('annBtnTextInput').value.trim();
             const annBtnUrl = document.getElementById('annBtnUrlInput').value.trim();
+            const schedBtnText = document.getElementById('schedBtnTextInput').value.trim();
+            const schedBtnUrl = document.getElementById('schedBtnUrlInput').value.trim();
 
             if (!selectedChatId || selectedChatId == 0) return alert("Lütfen önce bir grup seçin!");
 
@@ -413,6 +419,8 @@
             if (mediaUrl) body.media_url = mediaUrl;
             if (annBtnText) body.announcement_btn_text = annBtnText;
             if (annBtnUrl) body.announcement_btn_url = annBtnUrl;
+            if (schedBtnText) body.scheduled_btn_text = schedBtnText;
+            if (schedBtnUrl) body.scheduled_btn_url = schedBtnUrl;
 
             const res = await fetch('/api/settings/update', { 
                 method: 'POST', 
@@ -421,18 +429,10 @@
             });
             const data = await res.json();
             if (data.success) {
-                alert("✅ Hoş geldin ve Duyuru ayarları başarıyla kaydedildi!");
+                alert("✅ Tüm grup ve duyuru ayarları başarıyla kaydedildi!");
             } else {
                 alert("❌ Hata: " + (data.error || "Ayarlar kaydedilemedi!"));
             }
-        }
-
-        async function toggleLockdown() { 
-            await fetch('/api/toggle-lockdown', { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ user_id: user.id }) 
-            }); 
         }
 
         verifyAccess();
