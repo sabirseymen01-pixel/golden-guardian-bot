@@ -350,8 +350,8 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     welcome_text = (
-        "🤖 **Grup Yönetim & Golden Staff Güvenlik Botu**\n\n"
-        "📜 **Yönetici Komutları:**\n"
+        "🤖 Grup Yönetim & Golden Staff Güvenlik Botu\n\n"
+        "📜 Yönetici Komutları:\n"
         "- /welcome <mesaj> - Hoş geldin mesajı\n"
         "- /butonmetni <yazı> - Hoş geldin butonu yazısı\n"
         "- /butonlinki <url> - Hoş geldin butonu linki\n"
@@ -368,11 +368,11 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "- /unitaat <kullanıcı> - Susturma kaldır\n"
         "- /uyari <kullanıcı> - Uyarı ver (3 uyarıda otomatik banlar)\n"
         "- /unuyari <kullanıcı> - Uyarı sıfırla\n\n"
-        "⚜️ **Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸**"
+        "⚜️ Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸"
     )
     web_app_url = os.environ.get("WEBAPP_URL", "https://katya-asistan-bot.onrender.com/")
     keyboard = [[InlineKeyboardButton(text="🛡️ Paneli Aç", web_app=WebAppInfo(url=web_app_url))]]
-    await update.message.reply_text(welcome_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="Markdown")
+    await update.message.reply_text(welcome_text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def cmd_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not await is_user_admin(update, context): return
