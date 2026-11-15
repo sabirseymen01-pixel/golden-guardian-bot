@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Jarvis | Spacecraft Command HUD</title>
+    <title>Golden Jarvis | Command Deck HUD</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --space-bg: #070604;
-            --glass-deck: rgba(20, 16, 10, 0.85);
-            --glass-border: rgba(212, 175, 55, 0.45);
-            --gold-glow: rgba(212, 175, 55, 0.75);
+            /* 🏛️ İç Mekan Komuta Odası & Lüks Gold Palet */
+            --room-bg: #0b0907;
+            --glass-deck: rgba(22, 18, 12, 0.88);
+            --glass-border: rgba(212, 175, 55, 0.4);
+            --gold-glow: rgba(212, 175, 55, 0.7);
             --gold-shine: #f3e5ab;
             --accent-gold: #d4af37;
             --danger-glow: rgba(255, 77, 77, 0.9);
@@ -25,27 +26,28 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; -webkit-tap-highlight-color: transparent; }
         
         html, body {
-            background-color: var(--space-bg) !important;
+            background-color: var(--room-bg) !important;
             min-height: 100vh;
             overflow-x: hidden;
         }
 
+        /* ✨ Lüks İç Mekan Komuta Odası Arka Planı (Uzay Yok) */
         body {
-            background: radial-gradient(circle at 50% 15%, rgba(40,32,18,0.95) 0%, rgba(7,6,4,0.99) 80%),
-                        linear-gradient(135deg, #070604 0%, #141008 100%);
+            background: radial-gradient(circle at 50% 10%, rgba(45, 35, 20, 0.7) 0%, rgba(11, 9, 7, 0.98) 75%),
+                        linear-gradient(135deg, #0b0907 0%, #15110a 50%, #0d0a06 100%);
             background-attachment: fixed; color: var(--text-main); padding: 12px; display: flex; flex-direction: column;
         }
 
         /* 🚀 Kokpit HUD Konteynerleri */
         .hud-deck {
             background: var(--glass-deck);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             border: 1px solid var(--glass-border);
-            border-radius: 22px;
+            border-radius: 20px;
             padding: 14px;
             margin-bottom: 12px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.85), inset 0 0 25px rgba(212, 175, 55, 0.12);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.75), inset 0 0 20px rgba(212, 175, 55, 0.1);
             position: relative;
         }
         .hud-deck::after {
@@ -68,9 +70,9 @@
         .orbit-node:active { transform: scale(0.92); }
         
         .orbit-avatar {
-            width: 62px; height: 62px; border-radius: 50%; border: 2.5px solid var(--glass-border);
+            width: 60px; height: 60px; border-radius: 50%; border: 2.5px solid var(--glass-border);
             background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; overflow: hidden;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.9), inset 0 0 15px rgba(212,175,55,0.4); transition: all 0.4s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.8), inset 0 0 15px rgba(212,175,55,0.3); transition: all 0.4s ease;
             position: relative;
         }
         .orbit-node.active-node .orbit-avatar {
@@ -171,7 +173,7 @@
     <!-- DECK 1: TELEMETRİ -->
     <div id="deck-telemetry" class="deck-section active">
         <div class="hud-deck">
-            <div class="section-title">📊 Mekik Durum & Nöral Telemetri</div>
+            <div class="section-title">📊 Komuta Durumu & Nöral Telemetri</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div style="background: rgba(0,0,0,0.35); padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);">
                     <div style="font-size: 9px; color: var(--text-muted);">TOPLAM İŞLEM</div>
@@ -244,13 +246,13 @@
     <!-- DECK 6: JARVIS ÇEKİRDEĞİ (AI) -->
     <div id="deck-jarvis" class="deck-section">
         <div class="hud-deck">
-            <div class="section-title">🤖 Jarvis AI - Uzay Mekiği Komuta Asistanı</div>
+            <div class="section-title">🤖 Jarvis AI - Komuta Asistanı</div>
             <p style="font-size: 10px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.3;">
                 Kraljica komutunda çalışan Jarvis yapay zekası; ekosistemdeki tüm akışları denetler, taktiksel raporlar sunar ve anlık müdahale eder.
             </p>
             <div class="jarvis-terminal">
                 <div class="jarvis-screen" id="jarvisScreen">
-                    <div class="jarvis-msg ai">⚜️ Jarvis sistemleri çevrimiçi, Kraljica. Nöral yörünge halkaları kilitlendi. Güvenlik seviyesi maksimum. Nasıl yardımcı olayım?</div>
+                    <div class="jarvis-msg ai">⚜️ Jarvis sistemleri çevrimiçi, Kraljica. Komuta konsolu kilitlendi. Güvenlik seviyesi maksimum. Nasıl yardımcı olayım?</div>
                 </div>
                 <div class="jarvis-input-bar">
                     <input type="text" id="jarvisInput" placeholder="Jarvis'e komut ver (Örn: Rapor ver, Flood temizle)..." onkeypress="handleJarvisKey(event)">
@@ -490,7 +492,7 @@
                 } else if (lower.includes('temizle') || lower.includes('flood')) {
                     aiReply = "🛡️ Acil protokol aktif! Akıştaki tüm şüpheli parazitler ve spam dalgaları engellendi.";
                 } else if (lower.includes('merhaba') || lower.includes('selam')) {
-                    aiReply = "Emrinizdeyim Kraljica. Mekiğin tüm kontrolü sizin elinizde.";
+                    aiReply = "Emrinizdeyim Kraljica. Komuta konsolunun tüm kontrolü sizin elinizde.";
                 }
 
                 screen.innerHTML += `<div class="jarvis-msg ai">${aiReply}</div>`;
