@@ -50,7 +50,7 @@ async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYP
     logger.error(f"Telegram Bot Hatası: {context.error}")
 
 # ==========================================
-# OTOMATİK GRUP ALGILAMA (AUTO-DISCOVERY)
+# 🔗 OTOMATİK GRUP ALGILAMA (AUTO-DISCOVERY)
 # ==========================================
 async def track_bot_group_join(update: Update, context: ContextTypes.DEFAULT_TYPE):
     result = update.my_chat_member
@@ -79,7 +79,6 @@ async def lifespan(app: FastAPI):
     if not scheduler.running:
         scheduler.start()
 
-    # Kayıtlı periyodik görevleri yükle
     saved_jobs = database.get_all_scheduled_jobs()
     for job in saved_jobs:
         try:
@@ -269,6 +268,7 @@ async def api_update_settings(request: Request):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+# MUTLAK YOL (ABSOLUTE PATH) İLE İNDEX.HTML SUNUMU
 @app.get("/", response_class=HTMLResponse)
 async def handle_root():
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -410,7 +410,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "- /unuyari <kullanıcı> - Uyarı sıfırla\n\n"
         "⚜️ Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸"
     )
-    web_app_url = os.environ.get("WEBAPP_URL", "https://katya-asistan-bot.onrender.com/")
+    web_app_url = os.environ.get("WEBAPP_URL", "https://golden-guardian-bot.onrender.com/")
     keyboard = [[InlineKeyboardButton(text="🛡️ Paneli Aç", web_app=WebAppInfo(url=web_app_url))]]
     await update.message.reply_text(welcome_text, reply_markup=InlineKeyboardMarkup(keyboard))
 
