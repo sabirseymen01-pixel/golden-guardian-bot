@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Katya | 3D Spatial Cockpit Simulation</title>
+    <title>Golden Katya | Multi-Monitor Sci-Fi Cockpit</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Babylon.js 3D Oyun Motoru ve GUI Kütüphaneleri -->
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
     <style>
@@ -16,204 +15,197 @@
             --gold-glow: #f8ecbe;
             --danger-red: #ff3333;
             --success-green: #2ecc71;
-            --glass-panel: rgba(12, 8, 3, 0.88);
-            --border-gold: rgba(212, 175, 55, 0.75);
+            --monitor-bg: rgba(8, 6, 2, 0.92);
+            --border-gold: rgba(212, 175, 55, 0.65);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: monospace; -webkit-tap-highlight-color: transparent; }
         
         html, body {
             height: 100vh; width: 100vw; overflow: hidden; background-color: var(--space-black);
-            perspective: 1400px;
         }
 
         body {
-            background: radial-gradient(circle at 50% 40%, rgba(212, 175, 55, 0.35) 0%, rgba(1, 1, 0, 0.99) 90%);
-            display: flex; flex-direction: column; justify-content: space-between; padding: 6px;
+            background: radial-gradient(circle at 50% 40%, rgba(212, 175, 55, 0.28) 0%, rgba(1, 1, 0, 0.98) 90%);
+            display: flex; flex-direction: column; justify-content: space-between; padding: 4px;
         }
 
-        /* Babylon.js 3D WebGL Tuvali (Arka Planda ve 3D Sahnede) */
         #renderCanvas {
             position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; outline: none; touch-action: none;
         }
 
-        /* Üst Komuta Çubuğu (Holografik Header) */
+        /* Üst Ana Komuta Başlığı */
         .hud-header {
             position: relative; z-index: 20; display: flex; justify-content: space-between; align-items: center;
-            padding: 6px 12px; background: rgba(8, 6, 2, 0.92); backdrop-filter: blur(25px); border-radius: 8px;
-            border: 1.5px solid var(--border-gold); box-shadow: 0 5px 25px rgba(0,0,0,0.95), inset 0 0 15px rgba(212,175,55,0.3);
+            padding: 4px 10px; background: rgba(5, 4, 1, 0.95); backdrop-filter: blur(20px); border-radius: 4px;
+            border: 1.5px solid var(--border-gold); box-shadow: 0 4px 20px rgba(0,0,0,0.9), inset 0 0 10px rgba(212,175,55,0.2);
         }
-        .logo { font-size: 10px; color: var(--gold-glow); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 12px var(--hud-gold); }
-        .badge { background: rgba(212,175,55,0.3); color: var(--gold-glow); padding: 3px 8px; border-radius: 6px; font-size: 8px; border: 1px solid var(--hud-gold); font-weight: 900; }
+        .logo { font-size: 9px; color: var(--gold-glow); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px var(--hud-gold); }
+        .badge { background: rgba(212,175,55,0.25); color: var(--gold-glow); padding: 2px 6px; border-radius: 4px; font-size: 7px; border: 1px solid var(--hud-gold); font-weight: 900; }
 
-        /* Merkezi Dönen Yörünge Radar Çemberi */
-        .radar-deck {
-            position: relative; z-index: 20; width: 100%; height: 110px; display: flex; align-items: center; justify-content: center;
-            background: rgba(4, 3, 1, 0.88); border-radius: 50%; border: 2px solid var(--border-gold);
-            box-shadow: 0 0 35px rgba(212,175,55,0.4), inset 0 0 20px rgba(212,175,55,0.3);
-            margin: 4px auto; max-width: 260px;
+        /* 🖥️ ÇOKLU MONİTÖR KOKPİT DÜZENİ (Asimetrik Detaylı Ekranlar) */
+        .cockpit-deck {
+            position: relative; z-index: 20; flex: 1; display: grid;
+            grid-template-columns: 240px 1fr 240px;
+            grid-template-rows: 1fr 1fr;
+            gap: 5px; margin-top: 4px; overflow: hidden;
         }
-        
-        .katya-core {
-            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-            width: 42px; height: 42px; border-radius: 50%; background: radial-gradient(circle, #f8ecbe 0%, #d4af37 60%, #3a2e0f 100%);
-            border: 2px solid var(--gold-glow); display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 20px var(--hud-gold); z-index: 25; cursor: pointer;
-        }
-        .core-icon { font-size: 14px; }
-        .core-text { font-size: 5px; font-weight: 900; color: #000; text-transform: uppercase; }
-
-        .orbit-ring {
-            position: absolute; width: 100%; height: 100%; left: 0; top: 0; animation: orbitSpin 35s linear infinite;
-        }
-        @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        .orbit-node {
-            position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 22;
-        }
-        .orbit-node-inner { display: flex; flex-direction: column; align-items: center; animation: counterSpin 35s linear infinite; }
-        @keyframes counterSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
-
-        .orbit-avatar {
-            width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--hud-gold);
-            background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 10px var(--hud-gold);
-        }
-        .orbit-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .orbit-label { font-size: 6px; color: #d4c8b0; background: rgba(0,0,0,0.95); padding: 1px 4px; border-radius: 3px; margin-top: 2px; max-width: 50px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(212,175,55,0.4); }
-
-        /* 🪞 3D Uzay Kokpiti Spatial (Derinlikli) Holografik Pencereler */
-        .cockpit-grid {
-            position: relative; z-index: 20; flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; margin-top: 4px; overflow: hidden;
-            transform-style: preserve-3d;
-            transform: perspective(1200px) rotateX(8deg);
+        @media(max-width: 768px) {
+            .cockpit-deck { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto auto; }
         }
 
-        .hud-panel {
-            background: var(--glass-panel); backdrop-filter: blur(30px);
-            border: 1.5px solid var(--border-gold); border-radius: 10px; padding: 7px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.95), inset 0 0 20px rgba(212, 175, 55, 0.25);
+        .sci-fi-monitor {
+            background: var(--monitor-bg); backdrop-filter: blur(25px);
+            border: 1px solid var(--border-gold); border-radius: 5px; padding: 5px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.95), inset 0 0 12px rgba(212, 175, 55, 0.15);
             position: relative; display: flex; flex-direction: column; overflow: hidden;
-            transition: all 0.4s cubic-bezier(0.15, 0.85, 0.35, 1.2);
-            transform: translateZ(20px);
         }
-        .hud-panel:hover {
-            transform: translateZ(40px) scale(1.03);
-            box-shadow: 0 20px 50px rgba(212,175,55,0.4), inset 0 0 30px rgba(212,175,55,0.5);
-        }
-        .hud-panel::before {
-            content: ""; position: absolute; top: -1px; left: -1px; width: 6px; height: 6px;
+        /* Köşe Tekno Nişangahlar */
+        .sci-fi-monitor::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 4px;
             border-top: 2px solid var(--gold-glow); border-left: 2px solid var(--gold-glow);
         }
-        .hud-panel::after {
-            content: ""; position: absolute; bottom: -1px; right: -1px; width: 6px; height: 6px;
+        .sci-fi-monitor::after {
+            content: ""; position: absolute; bottom: 0; right: 0; width: 4px; height: 4px;
             border-bottom: 2px solid var(--gold-glow); border-right: 2px solid var(--gold-glow);
         }
 
-        .panel-title { font-size: 8px; font-weight: 900; color: var(--gold-glow); border-bottom: 1px solid rgba(212,175,55,0.4); padding-bottom: 3px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
-        .panel-body { flex: 1; overflow-y: auto; font-size: 8px; display: flex; flex-direction: column; gap: 4px; scrollbar-width: none; }
-        .panel-body::-webkit-scrollbar { display: none; }
+        .monitor-header {
+            font-size: 7px; font-weight: 900; color: var(--gold-glow); border-bottom: 1px solid rgba(212,175,55,0.3);
+            padding-bottom: 2px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase;
+        }
+        .monitor-body { flex: 1; overflow-y: auto; font-size: 7px; display: flex; flex-direction: column; gap: 3px; scrollbar-width: none; }
+        .monitor-body::-webkit-scrollbar { display: none; }
+
+        /* 🪐 Merkezi Radar Ekranı Konsolu */
+        .radar-box {
+            position: relative; width: 100%; height: 95px; display: flex; align-items: center; justify-content: center;
+            background: rgba(3, 2, 0, 0.9); border-radius: 50%; border: 1.5px dashed var(--border-gold);
+            box-shadow: inset 0 0 15px rgba(212,175,55,0.2); margin: 2px auto; max-width: 130px;
+        }
+        .katya-core {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(circle, #f8ecbe 0%, #d4af37 60%, #3a2e0f 100%);
+            border: 2px solid var(--gold-glow); display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 0 10px var(--hud-gold); z-index: 25; cursor: pointer;
+        }
+        .orbit-ring { position: absolute; width: 100%; height: 100%; left: 0; top: 0; animation: orbitSpin 30s linear infinite; }
+        @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .orbit-node { position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 22; }
+        .orbit-node-inner { display: flex; flex-direction: column; align-items: center; animation: counterSpin 30s linear infinite; }
+        @keyframes counterSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+
+        .orbit-avatar {
+            width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--hud-gold);
+            background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center;
+        }
+        .orbit-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .orbit-label { font-size: 5px; color: #d4c8b0; background: rgba(0,0,0,0.9); padding: 1px 2px; border-radius: 2px; margin-top: 1px; max-width: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         input, select, textarea {
-            width: 100%; background: rgba(0,0,0,0.92); border: 1px solid rgba(212,175,55,0.6);
-            border-radius: 5px; padding: 5px; color: #fff; font-size: 8px; outline: none; margin-bottom: 3px;
+            width: 100%; background: rgba(0,0,0,0.9); border: 1px solid rgba(212,175,55,0.4);
+            border-radius: 3px; padding: 3px; color: #fff; font-size: 7px; outline: none; margin-bottom: 2px;
         }
-        input:focus { border-color: var(--gold-glow); box-shadow: 0 0 10px var(--gold-glow); }
+        input:focus { border-color: var(--gold-glow); box-shadow: 0 0 5px var(--gold-glow); }
 
         .cyber-btn {
             width: 100%; background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%); color: #000;
-            border: none; padding: 6px; border-radius: 5px; font-weight: 900; font-size: 7px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;
-            box-shadow: 0 0 10px rgba(212,175,55,0.3);
+            border: none; padding: 4px; border-radius: 3px; font-weight: 900; font-size: 6px; cursor: pointer; text-transform: uppercase;
         }
-        .cyber-btn:active { transform: scale(0.95); }
+        .cyber-btn:active { transform: scale(0.97); }
 
-        .item-row { background: rgba(0,0,0,0.75); border: 1px solid rgba(212,175,55,0.35); padding: 4px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 7px; }
-        .log-box { background: rgba(0,0,0,0.85); border: 1px solid rgba(212,175,55,0.4); padding: 4px; border-radius: 5px; font-size: 7px; color: #d4c8b0; }
+        .item-row { background: rgba(0,0,0,0.65); border: 1px solid rgba(212,175,55,0.25); padding: 3px; border-radius: 3px; display: flex; justify-content: space-between; align-items: center; font-size: 6px; }
+        .log-box { background: rgba(0,0,0,0.75); border: 1px solid rgba(212,175,55,0.3); padding: 3px; border-radius: 3px; font-size: 6px; color: #d4c8b0; }
 
-        /* Katya AI Terminal Paneli */
-        .katya-box { display: flex; flex-direction: column; height: 100%; background: rgba(0,0,0,0.95); border-radius: 5px; overflow: hidden; border: 1px solid rgba(212,175,55,0.4); }
-        .katya-screen { flex: 1; padding: 4px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; font-size: 7px; }
-        .j-msg { max-width: 90%; padding: 3px 6px; border-radius: 4px; line-height: 1.3; }
-        .j-msg.ai { background: rgba(212,175,55,0.2); color: var(--gold-glow); border: 1px solid rgba(212,175,55,0.6); align-self: flex-start; }
-        .j-msg.user { background: rgba(255,255,255,0.12); color: #fff; align-self: flex-end; }
-        .j-input-bar { display: flex; padding: 3px; background: #000; border-top: 1px solid var(--hud-gold); gap: 3px; }
+        /* Katya AI Terminal Monitörü */
+        .katya-box { display: flex; flex-direction: column; height: 100%; background: rgba(0,0,0,0.9); border-radius: 3px; overflow: hidden; }
+        .katya-screen { flex: 1; padding: 2px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; font-size: 6px; }
+        .j-msg { max-width: 90%; padding: 2px 4px; border-radius: 3px; line-height: 1.2; }
+        .j-msg.ai { background: rgba(212,175,55,0.15); color: var(--gold-glow); border: 1px solid rgba(212,175,55,0.4); align-self: flex-start; }
+        .j-msg.user { background: rgba(255,255,255,0.1); color: #fff; align-self: flex-end; }
+        .j-input-bar { display: flex; padding: 2px; background: #000; border-top: 1px solid var(--hud-gold); gap: 2px; }
         .j-input-bar input { margin-bottom: 0; }
     </style>
 </head>
 <body>
 
-    <!-- Babylon.js 3D Oyun Motoru Tuvali -->
     <canvas id="renderCanvas"></canvas>
 
-    <!-- Üst Header -->
     <div class="hud-header">
-        <div class="logo">⚜️ KATYA 3D SIMULATION HUD</div>
+        <div class="logo">⚜️ KATYA MULTI-MONITOR DECK</div>
         <div class="badge" id="userRole">Kraljica 👑</div>
     </div>
 
-    <!-- Merkezi Dönen Yörünge Halkası -->
-    <div class="radar-deck" id="radarContainer">
-        <div class="katya-core" onclick="selectGroupNode(0)" title="Genel Hub">
-            <div class="core-icon">⚜️</div>
-            <div class="core-text">Katya</div>
-        </div>
-        <div class="orbit-ring" id="radarNodesRing"></div>
-    </div>
-
-    <!-- 🪞 3D Süzülen Holografik Pencereler (Spatial Cockpit Grid) -->
-    <div class="cockpit-grid">
+    <!-- 🖥️ Çoklu Monitör Kokpit Izgarası -->
+    <div class="cockpit-deck">
         
-        <!-- PENCERE 1: TELEMETRİ -->
-        <div class="hud-panel">
-            <div class="panel-title">📊 Telemetri</div>
-            <div class="panel-body">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-                    <div style="background: rgba(0,0,0,0.7); padding: 5px; border-radius: 4px; border: 1px solid rgba(212,175,55,0.4);">
-                        <div style="font-size: 6px; color: #d4c8b0;">İŞLEM</div>
-                        <div id="totalActions" style="font-size: 11px; font-weight: 900; color: var(--gold-glow);">-</div>
+        <!-- MONİTÖR 1: TELEMETRİ & DURUM -->
+        <div class="sci-fi-monitor">
+            <div class="monitor-header"><span>📊 Telemetri Monitörü</span><span>[ONLINE]</span></div>
+            <div class="monitor-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px;">
+                    <div style="background: rgba(0,0,0,0.6); padding: 4px; border-radius: 3px; border: 1px solid rgba(212,175,55,0.3);">
+                        <div style="font-size: 5px; color: #d4c8b0;">TOPLAM İŞLEM</div>
+                        <div id="totalActions" style="font-size: 10px; font-weight: 900; color: var(--gold-glow);">-</div>
                     </div>
-                    <div style="background: rgba(0,0,0,0.7); padding: 5px; border-radius: 4px; border: 1px solid rgba(212,175,55,0.4);">
-                        <div style="font-size: 6px; color: #d4c8b0;">BLOKE</div>
-                        <div id="totalBans" style="font-size: 11px; font-weight: 900; color: var(--danger-red);">-</div>
+                    <div style="background: rgba(0,0,0,0.6); padding: 4px; border-radius: 3px; border: 1px solid rgba(212,175,55,0.3);">
+                        <div style="font-size: 5px; color: #d4c8b0;">BLOKE</div>
+                        <div id="totalBans" style="font-size: 10px; font-weight: 900; color: var(--danger-red);">-</div>
                     </div>
                 </div>
+                <div style="margin-top: 4px; font-size: 5px; color: var(--gold-glow);">Sistem Durumu: KARARLI (%99.8)</div>
             </div>
         </div>
 
-        <!-- PENCERE 2: STAFF MATRİSİ -->
-        <div class="hud-panel">
-            <div class="panel-title">👑 Staff Matrisi</div>
-            <div class="panel-body">
+        <!-- MONİTÖR 2: MERKEZİ RADAR & KONSOL -->
+        <div class="sci-fi-monitor" style="grid-row: span 2;">
+            <div class="monitor-header"><span>🪐 Yörüngesel Radar & Kontrol</span><span>[ACTIVE]</span></div>
+            <div class="monitor-body" style="align-items: center; justify-content: center;">
+                <div class="radar-box" id="radarContainer">
+                    <div class="katya-core" onclick="selectGroupNode(0)" title="Genel Hub">
+                        <div style="font-size:10px;">⚜️</div>
+                    </div>
+                    <div class="orbit-ring" id="radarNodesRing"></div>
+                </div>
+                <div style="font-size: 5px; color: #d4c8b0; text-align: center; margin-top: 2px;">Aktif Yörünge Bağlantısı</div>
+            </div>
+        </div>
+
+        <!-- MONİTÖR 3: STAFF MATRİSİ -->
+        <div class="sci-fi-monitor">
+            <div class="monitor-header"><span>👑 Yetki Matrisi</span><span>[SECURE]</span></div>
+            <div class="monitor-body">
                 <input type="text" id="staffInput" placeholder="@username/ID">
                 <input type="text" id="staffName" placeholder="Rozet Ünvanı">
                 <button class="cyber-btn" onclick="addStaff()">Mühürle</button>
-                <div id="staffListContainer" style="margin-top: 2px;"><div style="font-size:6px; color:#d4c8b0;">Yükleniyor...</div></div>
+                <div id="staffListContainer" style="margin-top: 1px;"><div style="font-size:5px; color:#d4c8b0;">Yükleniyor...</div></div>
             </div>
         </div>
 
-        <!-- PENCERE 3: TAKTİKSEL & LOGLAR -->
-        <div class="hud-panel">
-            <div class="panel-title">⚡ Taktiksel & Log</div>
-            <div class="panel-body">
+        <!-- MONİTÖR 4: TAKTİKSEL MÜDAHALE -->
+        <div class="sci-fi-monitor">
+            <div class="monitor-header"><span>⚡ Taktiksel Port</span><span>[ARMED]</span></div>
+            <div class="monitor-body">
                 <input type="text" id="memberTargetInput" placeholder="Hedef ID/@username">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-bottom: 2px;">
-                    <button class="cyber-btn" style="background: var(--danger-red); color:#fff; padding:3px;" onclick="memberAction('ban')">Banla 🚫</button>
-                    <button class="cyber-btn" style="background: var(--success-green); color:#fff; padding:3px;" onclick="memberAction('unban')">Aç ✅</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 2px;">
+                    <button class="cyber-btn" style="background: var(--danger-red); color:#fff; padding:2px;" onclick="memberAction('ban')">Banla 🚫</button>
+                    <button class="cyber-btn" style="background: var(--success-green); color:#fff; padding:2px;" onclick="memberAction('unban')">Aç ✅</button>
                 </div>
-                <div id="generalLogsContainer"><div style="font-size:6px; color:#d4c8b0;">Loglar akıyor...</div></div>
             </div>
         </div>
 
-        <!-- PENCERE 4: KATYA AI -->
-        <div class="hud-panel">
-            <div class="panel-title">🤖 Katya AI Asistan</div>
-            <div class="panel-body" style="padding:0;">
+        <!-- MONİTÖR 5: KATYA AI ASİSTAN & LOGLAR -->
+        <div class="sci-fi-monitor" style="grid-column: span 2;">
+            <div class="monitor-header"><span>🤖 Katya AI & Log Akışı</span><span>[LIVE]</span></div>
+            <div class="monitor-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 0;">
+                <div id="generalLogsContainer" style="overflow-y: auto; max-height: 70px;"><div style="font-size:5px; color:#d4c8b0;">Loglar akıyor...</div></div>
                 <div class="katya-box">
                     <div class="katya-screen" id="katyaScreen">
-                        <div class="j-msg ai">⚜️ 3D Uzay simülasyonu aktif, Kraljica.</div>
+                        <div class="j-msg ai">⚜️ Multi-Monitor deck aktif, Kraljica.</div>
                     </div>
                     <div class="j-input-bar">
                         <input type="text" id="katyaInput" placeholder="Komut ver..." onkeypress="handleKatyaKey(event)">
-                        <button class="cyber-btn" style="width: 35px; padding: 0; font-size: 6px;" onclick="sendKatyaCommand()">İlet</button>
+                        <button class="cyber-btn" style="width: 30px; padding: 0; font-size: 5px;" onclick="sendKatyaCommand()">İlet</button>
                     </div>
                 </div>
             </div>
@@ -222,7 +214,7 @@
     </div>
 
     <script>
-        // 🎮 Babylon.js AAA 3D Oyun Motoru ve Glow (Neon Parlama) Mimarisi
+        // Babylon.js 3D Sahne ve Glow Mimarisi
         const canvas = document.getElementById("renderCanvas");
         const engine = new BABYLON.Engine(canvas, true);
 
@@ -230,33 +222,29 @@
             const scene = new BABYLON.Scene();
             scene.clearColor = new BABYLON.Color4(0.005, 0.002, 0, 1);
 
-            // Kokpit Kamera Açılandırması
             const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2.3, 14, BABYLON.Vector3.Zero(), scene);
-            camera.inputs.clear(); // Sabit kokpit duruşu
+            camera.inputs.clear();
 
-            // Sinematik Işıklandırma
             const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
             light.intensity = 0.9;
 
-            // 🌟 GlowLayer (Altın Neon Parlamaları ve Işık Efekti)
             const glowLayer = new BABYLON.GlowLayer("glow", scene, { blurKernelSize: 64 });
-            glowLayer.intensity = 1.2;
+            glowLayer.intensity = 1.3;
 
-            // 3D Altın Parçacık Evreni (Starfield)
-            const particleSystem = new BABYLON.ParticleSystem("spaceDust", 800, scene);
+            const particleSystem = new BABYLON.ParticleSystem("spaceDust", 700, scene);
             particleSystem.particleTexture = new BABYLON.Texture("https://www.babylonjs.com/assets/flare.png", scene);
             particleSystem.emitter = BABYLON.Vector3.Zero();
-            particleSystem.minEmitBox = new BABYLON.Vector3(-25, -25, -25);
-            particleSystem.maxEmitBox = new BABYLON.Vector3(25, 25, 25);
-            particleSystem.color1 = new BABYLON.Color4(0.9, 0.75, 0.25, 1); // Parlayan altın sarısı
+            particleSystem.minEmitBox = new BABYLON.Vector3(-20, -20, -20);
+            particleSystem.maxEmitBox = new BABYLON.Vector3(20, 20, 20);
+            particleSystem.color1 = new BABYLON.Color4(0.9, 0.75, 0.25, 1);
             particleSystem.color2 = new BABYLON.Color4(1, 0.98, 0.85, 1);
-            particleSystem.sizeStart = 0.06;
+            particleSystem.sizeStart = 0.05;
             particleSystem.sizeEnd = 0.01;
-            particleSystem.emitRate = 40;
+            particleSystem.emitRate = 35;
             particleSystem.start();
 
             scene.registerBeforeRender(() => {
-                particleSystem.emitter.y += 0.0015;
+                particleSystem.emitter.y += 0.0012;
             });
 
             return scene;
@@ -266,7 +254,7 @@
         engine.runRenderLoop(() => { scene.render(); });
         window.addEventListener("resize", () => { engine.resize(); });
 
-        // TELEGRAM WEB APP & API KONTROL MİMARİSİ
+        // Telegram Web App & API Kontrolleri
         const tg = window.Telegram.WebApp;
         try { tg.ready(); tg.expand(); } catch(e) {}
         
@@ -297,14 +285,14 @@
 
                 if (ringContainer) {
                     let html = '';
-                    const radius = 42; 
+                    const radius = 35; 
                     groups.forEach((g, index) => {
                         const angle = (index / groups.length) * 2 * Math.PI;
                         const x = Math.cos(angle) * radius;
                         const y = Math.sin(angle) * radius;
                         const isActive = selectedChatId == g.chat_id;
 
-                        let avatar = `<span style="font-size:10px;">🛡️</span>`;
+                        let avatar = `<span style="font-size:8px;">🛡️</span>`;
                         if (g.photo_url) {
                             const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(g.photo_url)}`;
                             avatar = `<img src="${proxyUrl}" onerror="this.parentElement.innerHTML='🛡️'">`;
@@ -343,7 +331,7 @@
                 const genRes = await fetch('/api/logs?filter=general&limit=15');
                 const genLogs = await genRes.json();
                 const genC = document.getElementById('generalLogsContainer');
-                genC.innerHTML = genLogs.length === 0 ? '<div style="font-size:6px; color:#d4c8b0;">Log yok.</div>' : '';
+                genC.innerHTML = genLogs.length === 0 ? '<div style="font-size:5px; color:#d4c8b0;">Log yok.</div>' : '';
                 genLogs.forEach(l => {
                     genC.innerHTML += `<div class="log-box"><b>${l.action_type}</b>: @${l.username || l.target_id}</div>`;
                 });
@@ -354,7 +342,7 @@
                 });
                 const staffs = await staffRes.json();
                 const staffC = document.getElementById('staffListContainer');
-                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:6px; color:#d4c8b0;">Yetkili yok.</div>' : '';
+                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:5px; color:#d4c8b0;">Yetkili yok.</div>' : '';
                 
                 staffs.forEach(s => {
                     const sName = s.full_name || s.name || s.first_name || "Muhafız";
@@ -362,7 +350,7 @@
                     staffC.innerHTML += `
                         <div class="item-row">
                             <span><b>${sName}</b></span>
-                            <button onclick="removeStaff(${targetId})" style="background:#444; color:#fff; border:none; padding:1px 3px; font-size:6px; cursor:pointer;">Sil</button>
+                            <button onclick="removeStaff(${targetId})" style="background:#444; color:#fff; border:none; padding:1px 3px; font-size:5px; cursor:pointer;">Sil</button>
                         </div>
                     `;
                 });
@@ -416,8 +404,8 @@
             input.value = '';
             screen.scrollTop = screen.scrollHeight;
             setTimeout(() => {
-                let reply = "⚜️ Babylon.js Spatial HUD aktif, Kraljica.";
-                if (text.toLowerCase().includes('rapor')) reply = "📊 Simülasyon kararlı, 3D parlamalar tam güçte.";
+                let reply = "⚜️ Çoklu monitör konsolu senkronize, Kraljica.";
+                if (text.toLowerCase().includes('rapor')) reply = "📊 Tüm ekranlar kararlı çalışıyor.";
                 screen.innerHTML += `<div class="j-msg ai">${reply}</div>`;
                 screen.scrollTop = screen.scrollHeight;
             }, 400);
