@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 import httpx
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, ChatPermissions
@@ -119,6 +120,10 @@ async def lifespan(app: FastAPI):
     log_event("SYS", "Sunucu kapatıldı.")
 
 app = FastAPI(lifespan=lifespan)
+
+# 🌐 STATİK DOSYA BAĞLANTISI (Public klasörünün garantili sunumu)
+if os.path.exists("public"):
+    app.mount("/static", StaticFiles(directory="public"), name="static")
 
 # ==========================================
 # STAFF & ADMIN API ROTALARI (FASTAPI)
@@ -268,7 +273,7 @@ async def api_update_settings(request: Request):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-# MUTLAK YOL (ABSOLUTE PATH) İLE İNDEX.HTML SUNUMU
+# 💎 GARANTİLİ KÖK DİZİN (INDEX.HTML) SUNUMU
 @app.get("/", response_class=HTMLResponse)
 async def handle_root():
     base_dir = os.path.dirname(os.path.abspath(__file__))
