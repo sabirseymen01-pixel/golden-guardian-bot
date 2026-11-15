@@ -12,7 +12,7 @@
             --hud-gold: #d4af37;
             --gold-glow: #f8ecbe;
             --danger-red: #ff3333;
-            --glass-panel: rgba(10, 8, 4, 0.94);
+            --glass-panel: rgba(12, 10, 6, 0.92);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: monospace; -webkit-tap-highlight-color: transparent; }
         
@@ -21,7 +21,7 @@
         }
 
         body {
-            background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.15) 0%, rgba(1, 1, 1, 0.98) 80%);
+            background: radial-gradient(circle at 50% 40%, rgba(212, 175, 55, 0.18) 0%, rgba(1, 1, 1, 0.99) 85%);
             color: #fff; padding: 6px; display: flex; flex-direction: column; justify-content: space-between;
         }
 
@@ -30,40 +30,34 @@
         .logo { font-size: 10px; color: var(--gold-glow); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px var(--hud-gold); }
         .badge { background: rgba(212,175,55,0.2); color: var(--gold-glow); padding: 3px 8px; border-radius: 6px; font-size: 8px; border: 1px solid var(--hud-gold); }
 
-        /* 🪐 MERKEZİ RADAR VE YÖRÜNGE HALKASI (Dairesel Konsol) */
+        /* 🪐 GENİŞLETİLMİŞ RADAR VE YÖRÜNGE HALKASI */
         .radar-container {
-            position: relative; width: 100%; height: 150px; display: flex; align-items: center; justify-content: center;
-            background: rgba(5, 4, 2, 0.8); border-radius: 50%; border: 1px dashed rgba(212,175,55,0.4);
-            box-shadow: 0 0 25px rgba(212,175,55,0.15), inset 0 0 20px rgba(212,175,55,0.1);
+            position: relative; width: 100%; height: 165px; display: flex; align-items: center; justify-content: center;
+            background: rgba(5, 4, 2, 0.85); border-radius: 50%; border: 1px dashed rgba(212,175,55,0.45);
+            box-shadow: 0 0 30px rgba(212,175,55,0.15), inset 0 0 20px rgba(212,175,55,0.1);
+            margin: 4px 0;
         }
         
         /* Merkez Jarvis Çekirdeği */
         .radar-core {
-            width: 48px; height: 48px; border-radius: 50%; background: radial-gradient(circle, #d4af37 0%, #3a2e0f 100%);
+            width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle, #d4af37 0%, #3a2e0f 100%);
             border: 2px solid var(--gold-glow); display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 15px var(--hud-gold); z-index: 5; cursor: pointer; font-size: 16px;
+            box-shadow: 0 0 15px var(--hud-gold); z-index: 5; cursor: pointer; font-size: 15px;
         }
 
-        /* Çevrede Dönen Grup Halkaları (Radial Düğümler) */
+        /* Çevrede Dönen Grup Halkaları */
         .radar-nodes-ring {
             position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
-            animation: radarSpin 40s linear infinite;
-        }
-        .radar-nodes-ring:hover { animation-play-state: paused; }
-
-        @keyframes radarSpin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
         }
 
         .orbit-node {
             position: absolute; display: flex; flex-direction: column; align-items: center; cursor: pointer;
             transition: transform 0.3s ease;
         }
-        .orbit-node:hover { transform: scale(1.2); }
+        .orbit-node:hover { transform: scale(1.15); }
 
         .orbit-avatar {
-            width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--hud-gold);
+            width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--hud-gold);
             background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 0 10px var(--hud-gold);
         }
@@ -76,15 +70,32 @@
         }
 
         .orbit-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .orbit-label { font-size: 7px; color: #d4c8b0; background: rgba(0,0,0,0.8); padding: 1px 4px; border-radius: 4px; margin-top: 2px; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(212,175,55,0.3); }
+        .orbit-label { font-size: 7px; color: #d4c8b0; background: rgba(0,0,0,0.85); padding: 1px 4px; border-radius: 4px; margin-top: 2px; max-width: 65px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(212,175,55,0.3); }
 
-        /* 🧭 HUD SEKMELERİ */
-        .hud-nav { display: flex; gap: 3px; justify-content: center; overflow-x: auto; padding: 2px 0; }
+        /* 🪞 ŞEFFAF PANEL GÖRÜNÜMLÜ SEKME MENÜSÜ (Butonların Yerini Alan HUD Panelleri) */
+        .hud-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 2px 0; }
         .hud-tab {
-            background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.3); color: #b8ab91;
-            padding: 5px 8px; font-size: 8px; font-weight: 900; border-radius: 4px; cursor: pointer; text-transform: uppercase;
+            background: rgba(18, 14, 8, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            color: #b8ab91;
+            padding: 6px 4px;
+            font-size: 8px;
+            font-weight: 900;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6), inset 0 0 8px rgba(212, 175, 55, 0.1);
+            transition: all 0.3s ease;
         }
-        .hud-tab.active { background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%); color: #000; border-color: #fff; box-shadow: 0 0 10px var(--hud-gold); }
+        .hud-tab.active {
+            background: linear-gradient(135deg, rgba(212,175,55,0.45) 0%, rgba(170,119,28,0.35) 100%);
+            color: var(--gold-glow);
+            border-color: var(--hud-gold);
+            box-shadow: 0 0 15px var(--hud-gold), inset 0 0 10px rgba(212,175,55,0.3);
+        }
 
         /* VIEWPORT (İçerik Paneli) */
         .hud-viewport { flex: 1; background: var(--glass-panel); border: 1px solid var(--hud-gold); border-radius: 8px; padding: 8px; overflow-y: auto; margin: 4px 0; box-shadow: inset 0 0 15px rgba(212,175,55,0.1); }
@@ -109,7 +120,7 @@
         .log-box { background: rgba(0,0,0,0.7); border: 1px solid rgba(212,175,55,0.25); padding: 5px; border-radius: 4px; margin-bottom: 3px; font-size: 7px; color: #b8ab91; }
 
         /* JARVIS TERMİNALİ */
-        .jarvis-box { display: flex; flex-direction: column; height: 160px; background: rgba(0,0,0,0.9); border-radius: 4px; border: 1px solid var(--hud-gold); overflow: hidden; }
+        .jarvis-box { display: flex; flex-direction: column; height: 150px; background: rgba(0,0,0,0.9); border-radius: 4px; border: 1px solid var(--hud-gold); overflow: hidden; }
         .jarvis-screen { flex: 1; padding: 5px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; font-size: 8px; }
         .j-msg { max-width: 85%; padding: 4px 6px; border-radius: 4px; line-height: 1.2; }
         .j-msg.ai { background: rgba(212,175,55,0.15); color: var(--gold-glow); border: 1px solid rgba(212,175,55,0.4); align-self: flex-start; }
@@ -125,15 +136,15 @@
         <div class="badge" id="userRole">Kraljica 👑</div>
     </div>
 
-    <!-- 🪐 RADAR ÇEKİRDEĞİ VE YÖRÜNGE HALKASI -->
+    <!-- 🪐 GENİŞLETİLMİŞ RADAR VE YÖRÜNGE HALKASI -->
     <div class="radar-container" id="radarContainer">
         <div class="radar-core" onclick="selectGroupNode(0)" title="Genel Hub">👑</div>
         <div class="radar-nodes-ring" id="radarNodesRing">
-            <!-- Dinamik dairesel yörünge düğümleri buraya yüklenecek -->
+            <!-- Dinamik dairesel yörünge düğümleri -->
         </div>
     </div>
 
-    <!-- 🧭 SEKME MENÜSÜ -->
+    <!-- 🪞 ŞEFFAF PANEL GÖRÜNÜMLÜ SEKME MENÜSÜ -->
     <div class="hud-nav">
         <div class="hud-tab active" onclick="switchMod('telemetry', event)">Telemetri</div>
         <div class="hud-tab" onclick="switchMod('staff', event)">Staff</div>
@@ -166,7 +177,7 @@
             <input type="text" id="staffInput" placeholder="@kullaniciadi veya ID">
             <input type="text" id="staffName" placeholder="Rozet Ünvanı (Örn: 💎 Kristal)">
             <button class="cyber-btn" onclick="addStaff()">Mühürle</button>
-            <div id="staffListContainer" style="max-height: 90px; overflow-y: auto; margin-top: 4px;"><div style="font-size:8px;">Yükleniyor...</div></div>
+            <div id="staffListContainer" style="max-height: 85px; overflow-y: auto; margin-top: 4px;"><div style="font-size:8px;">Yükleniyor...</div></div>
         </div>
 
         <!-- TAKTİKSEL -->
@@ -188,7 +199,7 @@
                 <select id="logClearDays" style="margin-bottom:0;"><option value="1">Günlük</option><option value="7">Haftalık</option><option value="0">Tümünü Sil</option></select>
                 <button class="cyber-btn" style="width: auto; background: rgba(255,51,51,0.3); color: var(--danger-red); border: 1px solid var(--danger-red);" onclick="clearLogs()">Temizle</button>
             </div>
-            <div id="generalLogsContainer" style="max-height: 100px; overflow-y: auto;"><div style="font-size:8px;">Loglar akıyor...</div></div>
+            <div id="generalLogsContainer" style="max-height: 95px; overflow-y: auto;"><div style="font-size:8px;">Loglar akıyor...</div></div>
         </div>
 
         <!-- PROTOKOLLER -->
@@ -204,7 +215,7 @@
         <div id="mod-jarvis" class="mod-section" style="height: 100%;">
             <div class="jarvis-box">
                 <div class="jarvis-screen" id="jarvisScreen">
-                    <div class="j-msg ai">⚜️ Jarvis radar konsolu çevrimiçi, Kraljica. Komut bekliyorum.</div>
+                    <div class="j-msg ai">⚜️ Radar konsolu çevrimiçi, Kraljica. Komut bekliyorum.</div>
                 </div>
                 <div class="j-input-bar">
                     <input type="text" id="jarvisInput" placeholder="Jarvis'e komut ver..." onkeypress="handleJarvisKey(event)">
@@ -252,10 +263,8 @@
 
                 if (ringContainer) {
                     let html = '';
-                    const total = groups.length + 1; // +1 Genel Hub
-                    const radius = 52; // Radar yarıçapı (px)
+                    const radius = 68; // Genişletilmiş radar çember yarıçapı
 
-                    // Genel Hub Merkezin etrafında hesaplanır
                     groups.forEach((g, index) => {
                         const angle = (index / groups.length) * 2 * Math.PI;
                         const x = Math.cos(angle) * radius;
@@ -263,7 +272,7 @@
                         const isActive = selectedChatId == g.chat_id;
                         const hasAlarm = (index === 0 && Math.random() > 0.7);
 
-                        let avatar = `<span style="font-size:16px;">🛡️</span>`;
+                        let avatar = `<span style="font-size:14px;">🛡️</span>`;
                         if (g.photo_url) {
                             avatar = `<img src="${g.photo_url}" onerror="this.parentElement.innerHTML='🛡️'">`;
                         }
@@ -319,10 +328,13 @@
                 const staffs = await staffRes.json();
                 const staffC = document.getElementById('staffListContainer');
                 staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:7px; color:#b8ab91;">Bu yörüngede yetkili yok.</div>' : '';
+                
                 staffs.forEach(s => {
+                    const sName = s.full_name || s.name || s.first_name || "Muhafız";
+                    const sUser = s.username ? `@${s.username}` : `ID: ${s.user_id}`;
                     staffC.innerHTML += `
                         <div class="item-row">
-                            <div><b>${s.full_name}</b><br><span style="font-size:6px; color:#b8ab91;">@${s.username}</span></div>
+                            <div><b>${sName}</b><br><span style="font-size:6px; color:#b8ab91;">${sUser}</span></div>
                             <button onclick="removeStaff(${s.user_id})" style="background:#444; color:#fff; border:none; padding:2px 4px; border-radius:3px; font-size:6px; cursor:pointer;">Sil</button>
                         </div>
                     `;
