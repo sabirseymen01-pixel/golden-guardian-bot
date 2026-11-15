@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Jarvis | Radial HUD Deck</title>
+    <title>Golden Katya | 3D Spatial HUD Cockpit</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --space-black: #010101;
+            --space-black: #020100;
             --hud-gold: #d4af37;
             --gold-glow: #f8ecbe;
             --danger-red: #ff3333;
-            --glass-panel: rgba(12, 10, 6, 0.92);
+            --glass-panel: rgba(10, 8, 4, 0.90);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: monospace; -webkit-tap-highlight-color: transparent; }
         
@@ -21,211 +22,261 @@
         }
 
         body {
-            background: radial-gradient(circle at 50% 40%, rgba(212, 175, 55, 0.18) 0%, rgba(1, 1, 1, 0.99) 85%);
-            color: #fff; padding: 6px; display: flex; flex-direction: column; justify-content: space-between;
+            background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.2) 0%, rgba(2, 1, 0, 0.98) 85%);
+            color: #fff; display: flex; flex-direction: column; justify-content: space-between;
         }
 
-        /* Üst Header */
-        .hud-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; border-bottom: 1px solid rgba(212,175,55,0.3); }
-        .logo { font-size: 10px; color: var(--gold-glow); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px var(--hud-gold); }
-        .badge { background: rgba(212,175,55,0.2); color: var(--gold-glow); padding: 3px 8px; border-radius: 6px; font-size: 8px; border: 1px solid var(--hud-gold); }
+        /* 🌌 3D Uzay Kokpiti Tuvali (Three.js WebGL Viewport) */
+        #webgl-container {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none;
+        }
 
-        /* 🪐 GENİŞLETİLMİŞ RADAR VE YÖRÜNGE HALKASI */
-        .radar-container {
-            position: relative; width: 100%; height: 165px; display: flex; align-items: center; justify-content: center;
-            background: rgba(5, 4, 2, 0.85); border-radius: 50%; border: 1px dashed rgba(212,175,55,0.45);
-            box-shadow: 0 0 30px rgba(212,175,55,0.15), inset 0 0 20px rgba(212,175,55,0.1);
-            margin: 4px 0;
+        /* 🪞 Üst Komuta Çerçevesi (Holografik Header) */
+        .hud-header {
+            position: relative; z-index: 10; display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px; background: rgba(8, 6, 3, 0.85); backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(212,175,55,0.4); box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+        }
+        .logo { font-size: 11px; color: var(--gold-glow); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 12px var(--hud-gold); }
+        .badge { background: rgba(212,175,55,0.25); color: var(--gold-glow); padding: 4px 10px; border-radius: 8px; font-size: 9px; border: 1px solid var(--hud-gold); font-weight: 900; }
+
+        /* 🪐 3D Yörünge ve Radar Paneli */
+        .cockpit-viewport {
+            position: relative; z-index: 10; flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 8px;
+        }
+
+        .radar-deck {
+            position: relative; width: 100%; height: 160px; display: flex; align-items: center; justify-content: center;
+            background: rgba(4, 3, 1, 0.75); border-radius: 50%; border: 1.5px solid rgba(212,175,55,0.5);
+            box-shadow: 0 0 40px rgba(212,175,55,0.2), inset 0 0 25px rgba(212,175,55,0.15);
+            backdrop-filter: blur(10px); margin: 0 auto; max-width: 320px;
         }
         
-        /* Merkez Jarvis Çekirdeği */
-        .radar-core {
-            width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle, #d4af37 0%, #3a2e0f 100%);
-            border: 2px solid var(--gold-glow); display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 15px var(--hud-gold); z-index: 5; cursor: pointer; font-size: 15px;
+        /* 🛡️ Merkez Katya Güvenlik Çekirdeği */
+        .katya-core {
+            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle, #f8ecbe 0%, #d4af37 60%, #3a2e0f 100%);
+            border: 2px solid var(--gold-glow); display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 0 25px var(--hud-gold); z-index: 15; cursor: pointer;
         }
+        .core-icon { font-size: 16px; }
+        .core-text { font-size: 6px; font-weight: 900; color: #000; text-transform: uppercase; margin-top: 1px; }
 
-        /* Çevrede Dönen Grup Halkaları */
-        .radar-nodes-ring {
-            position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+        .orbit-ring {
+            position: absolute; width: 100%; height: 100%; left: 0; top: 0; animation: orbitSpin 30s linear infinite;
         }
+        @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .orbit-node {
-            position: absolute; display: flex; flex-direction: column; align-items: center; cursor: pointer;
-            transition: transform 0.3s ease;
+            position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 12;
         }
-        .orbit-node:hover { transform: scale(1.15); }
+        .orbit-node-inner { display: flex; flex-direction: column; align-items: center; animation: counterSpin 30s linear infinite; }
+        @keyframes counterSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
 
         .orbit-avatar {
-            width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--hud-gold);
+            width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--hud-gold);
             background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 10px var(--hud-gold);
+            box-shadow: 0 0 12px var(--hud-gold); transition: transform 0.3s ease;
         }
-        .orbit-node.active .orbit-avatar { border-color: #fff; box-shadow: 0 0 18px #fff; }
-        .orbit-node.alarm .orbit-avatar { border-color: var(--danger-red); box-shadow: 0 0 20px var(--danger-red); animation: pulseAlarm 0.6s infinite alternate; }
-        
-        @keyframes pulseAlarm {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.15); }
-        }
-
+        .orbit-node:hover .orbit-avatar { transform: scale(1.2); border-color: #fff; box-shadow: 0 0 20px #fff; }
         .orbit-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .orbit-label { font-size: 7px; color: #d4c8b0; background: rgba(0,0,0,0.85); padding: 1px 4px; border-radius: 4px; margin-top: 2px; max-width: 65px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(212,175,55,0.3); }
+        .orbit-label { font-size: 7px; color: #d4c8b0; background: rgba(0,0,0,0.9); padding: 1px 4px; border-radius: 4px; margin-top: 2px; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(212,175,55,0.3); }
 
-        /* 🪞 ŞEFFAF PANEL GÖRÜNÜMLÜ SEKME MENÜSÜ (Butonların Yerini Alan HUD Panelleri) */
-        .hud-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 2px 0; }
+        /* 🪞 Holografik Modül Sekmeleri (Cam Paneller) */
+        .hud-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 6px; }
         .hud-tab {
-            background: rgba(18, 14, 8, 0.85);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(212, 175, 55, 0.35);
-            color: #b8ab91;
-            padding: 6px 4px;
-            font-size: 8px;
-            font-weight: 900;
-            border-radius: 6px;
-            cursor: pointer;
-            text-transform: uppercase;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6), inset 0 0 8px rgba(212, 175, 55, 0.1);
-            transition: all 0.3s ease;
+            background: rgba(15, 11, 6, 0.9); backdrop-filter: blur(20px);
+            border: 1px solid rgba(212, 175, 55, 0.45); color: #d4c8b0; padding: 8px 4px;
+            font-size: 8px; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(212, 175, 55, 0.15); transition: all 0.3s ease;
         }
         .hud-tab.active {
-            background: linear-gradient(135deg, rgba(212,175,55,0.45) 0%, rgba(170,119,28,0.35) 100%);
-            color: var(--gold-glow);
-            border-color: var(--hud-gold);
-            box-shadow: 0 0 15px var(--hud-gold), inset 0 0 10px rgba(212,175,55,0.3);
+            background: linear-gradient(135deg, rgba(212,175,55,0.6) 0%, rgba(170,119,28,0.5) 100%);
+            color: var(--gold-glow); border-color: var(--gold-glow); box-shadow: 0 0 20px var(--hud-gold), inset 0 0 12px rgba(212,175,55,0.4);
         }
 
-        /* VIEWPORT (İçerik Paneli) */
-        .hud-viewport { flex: 1; background: var(--glass-panel); border: 1px solid var(--hud-gold); border-radius: 8px; padding: 8px; overflow-y: auto; margin: 4px 0; box-shadow: inset 0 0 15px rgba(212,175,55,0.1); }
+        /* 🎛️ Ana Holografik İçerik Ekranı */
+        .hud-viewport {
+            background: var(--glass-panel); backdrop-filter: blur(25px); border: 1.5px solid var(--hud-gold);
+            border-radius: 12px; padding: 10px; overflow-y: auto; max-height: 230px; margin-top: 6px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(212,175,55,0.12);
+        }
         .mod-section { display: none; flex-direction: column; gap: 6px; }
         .mod-section.active { display: flex; }
 
-        .section-title { font-size: 9px; font-weight: 900; color: var(--gold-glow); border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 3px; margin-bottom: 4px; text-transform: uppercase; }
+        .section-title { font-size: 9px; font-weight: 900; color: var(--gold-glow); border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 3px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
 
         input, select, textarea {
             width: 100%; background: rgba(0,0,0,0.85); border: 1px solid rgba(212,175,55,0.4);
-            border-radius: 4px; padding: 6px; color: #fff; font-size: 9px; outline: none; margin-bottom: 4px;
+            border-radius: 6px; padding: 7px; color: #fff; font-size: 9px; outline: none; margin-bottom: 5px;
         }
-        input:focus { border-color: var(--gold-glow); box-shadow: 0 0 6px var(--hud-gold); }
+        input:focus { border-color: var(--gold-glow); box-shadow: 0 0 8px var(--hud-gold); }
 
         .cyber-btn {
             width: 100%; background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%); color: #000;
-            border: none; padding: 7px; border-radius: 4px; font-weight: 900; font-size: 8px; cursor: pointer; text-transform: uppercase;
+            border: none; padding: 8px; border-radius: 6px; font-weight: 900; font-size: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;
         }
         .cyber-btn:active { transform: scale(0.97); }
 
-        .item-row { background: rgba(0,0,0,0.6); border: 1px solid rgba(212,175,55,0.2); padding: 5px; border-radius: 4px; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; font-size: 8px; }
-        .log-box { background: rgba(0,0,0,0.7); border: 1px solid rgba(212,175,55,0.25); padding: 5px; border-radius: 4px; margin-bottom: 3px; font-size: 7px; color: #b8ab91; }
+        .item-row { background: rgba(0,0,0,0.65); border: 1px solid rgba(212,175,55,0.25); padding: 6px; border-radius: 6px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 8px; }
+        .log-box { background: rgba(0,0,0,0.75); border: 1px solid rgba(212,175,55,0.3); padding: 6px; border-radius: 6px; margin-bottom: 4px; font-size: 7px; color: #d4c8b0; }
 
-        /* JARVIS TERMİNALİ */
-        .jarvis-box { display: flex; flex-direction: column; height: 150px; background: rgba(0,0,0,0.9); border-radius: 4px; border: 1px solid var(--hud-gold); overflow: hidden; }
-        .jarvis-screen { flex: 1; padding: 5px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; font-size: 8px; }
-        .j-msg { max-width: 85%; padding: 4px 6px; border-radius: 4px; line-height: 1.2; }
-        .j-msg.ai { background: rgba(212,175,55,0.15); color: var(--gold-glow); border: 1px solid rgba(212,175,55,0.4); align-self: flex-start; }
+        /* Katya AI Terminali */
+        .katya-box { display: flex; flex-direction: column; height: 140px; background: rgba(0,0,0,0.95); border-radius: 6px; border: 1px solid var(--hud-gold); overflow: hidden; }
+        .katya-screen { flex: 1; padding: 6px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; font-size: 8px; }
+        .j-msg { max-width: 85%; padding: 5px 7px; border-radius: 5px; line-height: 1.2; }
+        .j-msg.ai { background: rgba(212,175,55,0.18); color: var(--gold-glow); border: 1px solid rgba(212,175,55,0.45); align-self: flex-start; }
         .j-msg.user { background: rgba(255,255,255,0.1); color: #fff; align-self: flex-end; }
-        .j-input-bar { display: flex; padding: 3px; background: #000; border-top: 1px solid var(--hud-gold); gap: 3px; }
+        .j-input-bar { display: flex; padding: 4px; background: #000; border-top: 1px solid var(--hud-gold); gap: 4px; }
         .j-input-bar input { margin-bottom: 0; }
     </style>
 </head>
 <body>
 
+    <!-- 🌌 Arka Plan 3D Uzay Kokpiti Simülasyonu -->
+    <div id="webgl-container"></div>
+
+    <!-- Üst Komuta Çerçevesi -->
     <div class="hud-header">
-        <div class="logo">⚜️ GOLDEN JARVIS HUD</div>
+        <div class="logo">⚜️ GOLDEN KATYA 3D HUD</div>
         <div class="badge" id="userRole">Kraljica 👑</div>
     </div>
 
-    <!-- 🪐 GENİŞLETİLMİŞ RADAR VE YÖRÜNGE HALKASI -->
-    <div class="radar-container" id="radarContainer">
-        <div class="radar-core" onclick="selectGroupNode(0)" title="Genel Hub">👑</div>
-        <div class="radar-nodes-ring" id="radarNodesRing">
-            <!-- Dinamik dairesel yörünge düğümleri -->
-        </div>
-    </div>
-
-    <!-- 🪞 ŞEFFAF PANEL GÖRÜNÜMLÜ SEKME MENÜSÜ -->
-    <div class="hud-nav">
-        <div class="hud-tab active" onclick="switchMod('telemetry', event)">Telemetri</div>
-        <div class="hud-tab" onclick="switchMod('staff', event)">Staff</div>
-        <div class="hud-tab" onclick="switchMod('tactical', event)">Taktiksel</div>
-        <div class="hud-tab" onclick="switchMod('logs', event)">Loglar</div>
-        <div class="hud-tab" onclick="switchMod('settings', event)">Ayar</div>
-        <div class="hud-tab" onclick="switchMod('jarvis', event)">🤖 Jarvis</div>
-    </div>
-
-    <!-- 🎛️ İÇERİK GÖRÜNÜMÜ -->
-    <div class="hud-viewport">
-        <!-- TELEMETRİ -->
-        <div id="mod-telemetry" class="mod-section active">
-            <div class="section-title">📊 Komuta Telemetrisi</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-                <div style="background: rgba(0,0,0,0.6); padding: 6px; border-radius: 4px; border: 1px solid rgba(212,175,55,0.3);">
-                    <div style="font-size: 7px; color: #b8ab91;">TOPLAM İŞLEM</div>
-                    <div id="totalActions" style="font-size: 12px; font-weight: 900; color: var(--gold-glow);">-</div>
-                </div>
-                <div style="background: rgba(0,0,0,0.6); padding: 6px; border-radius: 4px; border: 1px solid rgba(212,175,55,0.3);">
-                    <div style="font-size: 7px; color: #b8ab91;">OTONOM BLOKE</div>
-                    <div id="totalBans" style="font-size: 12px; font-weight: 900; color: var(--danger-red);">-</div>
-                </div>
+    <!-- Kokpit Arayüz Alanı -->
+    <div class="cockpit-viewport">
+        <!-- 🪐 3D Yörünge Radar Halkası -->
+        <div class="radar-deck">
+            <div class="katya-core" onclick="selectGroupNode(0)" title="Genel Hub">
+                <div class="core-icon">⚜️</div>
+                <div class="core-text">Katya</div>
+            </div>
+            <div class="orbit-ring" id="radarNodesRing">
+                <!-- Dinamik Dönen Düğümler -->
             </div>
         </div>
 
-        <!-- STAFF -->
-        <div id="mod-staff" class="mod-section">
-            <div class="section-title">👑 Yetki Matrisi</div>
-            <input type="text" id="staffInput" placeholder="@kullaniciadi veya ID">
-            <input type="text" id="staffName" placeholder="Rozet Ünvanı (Örn: 💎 Kristal)">
-            <button class="cyber-btn" onclick="addStaff()">Mühürle</button>
-            <div id="staffListContainer" style="max-height: 85px; overflow-y: auto; margin-top: 4px;"><div style="font-size:8px;">Yükleniyor...</div></div>
+        <!-- 🪞 Dokunmatik Şeffaf Cam Sekmeler -->
+        <div class="hud-nav">
+            <div class="hud-tab active" onclick="switchMod('telemetry', event)">Telemetri</div>
+            <div class="hud-tab" onclick="switchMod('staff', event)">Staff Matrisi</div>
+            <div class="hud-tab" onclick="switchMod('tactical', event)">Taktiksel</div>
+            <div class="hud-tab" onclick="switchMod('logs', event)">Loglar</div>
+            <div class="hud-tab" onclick="switchMod('settings', event)">Protokoller</div>
+            <div class="hud-tab" onclick="switchMod('jarvis', event)">🤖 Katya AI</div>
         </div>
 
-        <!-- TAKTİKSEL -->
-        <div id="mod-tactical" class="mod-section">
-            <div class="section-title">⚡ Taktiksel Müdahale</div>
-            <input type="text" id="memberTargetInput" placeholder="Kullanıcı ID veya @username">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-                <button class="cyber-btn" style="background: var(--danger-red); color:#fff;" onclick="memberAction('ban')">Banla 🚫</button>
-                <button class="cyber-btn" style="background: #2ecc71; color:#fff;" onclick="memberAction('unban')">Ban Aç ✅</button>
-                <button class="cyber-btn" style="background: #e67e22; color:#fff;" onclick="memberAction('mute')">Mute 🔇</button>
-                <button class="cyber-btn" style="background: #3498db; color:#fff;" onclick="memberAction('unmute')">Unmute 🔊</button>
-            </div>
-        </div>
-
-        <!-- LOGLAR -->
-        <div id="mod-logs" class="mod-section">
-            <div class="section-title">📜 Zaman Akış Logları</div>
-            <div style="display: flex; gap: 4px; margin-bottom: 4px;">
-                <select id="logClearDays" style="margin-bottom:0;"><option value="1">Günlük</option><option value="7">Haftalık</option><option value="0">Tümünü Sil</option></select>
-                <button class="cyber-btn" style="width: auto; background: rgba(255,51,51,0.3); color: var(--danger-red); border: 1px solid var(--danger-red);" onclick="clearLogs()">Temizle</button>
-            </div>
-            <div id="generalLogsContainer" style="max-height: 95px; overflow-y: auto;"><div style="font-size:8px;">Loglar akıyor...</div></div>
-        </div>
-
-        <!-- PROTOKOLLER -->
-        <div id="mod-settings" class="mod-section">
-            <div class="section-title">⚙️ Protokoller</div>
-            <textarea id="welcomeMsgInput" rows="2" placeholder="Karşılama metni..."></textarea>
-            <input type="text" id="btnTextInput" placeholder="Buton Metni">
-            <input type="text" id="btnUrlInput" placeholder="Buton Linki (https://)">
-            <button class="cyber-btn" onclick="saveSettings()">Kaydet</button>
-        </div>
-
-        <!-- JARVIS AI -->
-        <div id="mod-jarvis" class="mod-section" style="height: 100%;">
-            <div class="jarvis-box">
-                <div class="jarvis-screen" id="jarvisScreen">
-                    <div class="j-msg ai">⚜️ Radar konsolu çevrimiçi, Kraljica. Komut bekliyorum.</div>
+        <!-- 🎛️ Holografik İçerik Paneli -->
+        <div class="hud-viewport">
+            <!-- TELEMETRİ -->
+            <div id="mod-telemetry" class="mod-section active">
+                <div class="section-title">📊 Komuta Telemetrisi</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                    <div style="background: rgba(0,0,0,0.65); padding: 8px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.35);">
+                        <div style="font-size: 7px; color: #d4c8b0;">TOPLAM İŞLEM</div>
+                        <div id="totalActions" style="font-size: 13px; font-weight: 900; color: var(--gold-glow);">-</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.65); padding: 8px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.35);">
+                        <div style="font-size: 7px; color: #d4c8b0;">OTONOM BLOKE</div>
+                        <div id="totalBans" style="font-size: 13px; font-weight: 900; color: var(--danger-red);">-</div>
+                    </div>
                 </div>
-                <div class="j-input-bar">
-                    <input type="text" id="jarvisInput" placeholder="Jarvis'e komut ver..." onkeypress="handleJarvisKey(event)">
-                    <button class="cyber-btn" style="width: 45px; padding: 0; font-size: 7px;" onclick="sendJarvisCommand()">İlet</button>
+            </div>
+
+            <!-- STAFF -->
+            <div id="mod-staff" class="mod-section">
+                <div class="section-title">👑 Yetki Matrisi</div>
+                <input type="text" id="staffInput" placeholder="@kullaniciadi veya ID">
+                <input type="text" id="staffName" placeholder="Rozet Ünvanı (Örn: 💎 Kristal)">
+                <button class="cyber-btn" onclick="addStaff()">Mühürle</button>
+                <div id="staffListContainer" style="max-height: 90px; overflow-y: auto; margin-top: 4px;"><div style="font-size:8px;">Yükleniyor...</div></div>
+            </div>
+
+            <!-- TAKTİKSEL -->
+            <div id="mod-tactical" class="mod-section">
+                <div class="section-title">⚡ Taktiksel Müdahale</div>
+                <input type="text" id="memberTargetInput" placeholder="Kullanıcı ID veya @username">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                    <button class="cyber-btn" style="background: var(--danger-red); color:#fff;" onclick="memberAction('ban')">Banla 🚫</button>
+                    <button class="cyber-btn" style="background: #2ecc71; color:#fff;" onclick="memberAction('unban')">Ban Aç ✅</button>
+                    <button class="cyber-btn" style="background: #e67e22; color:#fff;" onclick="memberAction('mute')">Mute 🔇</button>
+                    <button class="cyber-btn" style="background: #3498db; color:#fff;" onclick="memberAction('unmute')">Unmute 🔊</button>
+                </div>
+            </div>
+
+            <!-- LOGLAR -->
+            <div id="mod-logs" class="mod-section">
+                <div class="section-title">📜 Zaman Akış Logları</div>
+                <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                    <select id="logClearDays" style="margin-bottom:0;"><option value="1">Günlük</option><option value="7">Haftalık</option><option value="0">Tümünü Sil</option></select>
+                    <button class="cyber-btn" style="width: auto; background: rgba(255,51,51,0.3); color: var(--danger-red); border: 1px solid var(--danger-red);" onclick="clearLogs()">Temizle</button>
+                </div>
+                <div id="generalLogsContainer" style="max-height: 100px; overflow-y: auto;"><div style="font-size:8px;">Loglar akıyor...</div></div>
+            </div>
+
+            <!-- PROTOKOLLER -->
+            <div id="mod-settings" class="mod-section">
+                <div class="section-title">⚙️ Protokoller</div>
+                <textarea id="welcomeMsgInput" rows="2" placeholder="Karşılama metni..."></textarea>
+                <input type="text" id="btnTextInput" placeholder="Buton Metni">
+                <input type="text" id="btnUrlInput" placeholder="Buton Linki (https://)">
+                <button class="cyber-btn" onclick="saveSettings()">Kaydet</button>
+            </div>
+
+            <!-- KATYA AI -->
+            <div id="mod-jarvis" class="mod-section" style="height: 100%;">
+                <div class="katya-box">
+                    <div class="katya-screen" id="jarvisScreen">
+                        <div class="j-msg ai">⚜️ Katya 3D kokpit motoru aktif, Kraljica. Komut bekliyorum.</div>
+                    </div>
+                    <div class="j-input-bar">
+                        <input type="text" id="jarvisInput" placeholder="Katya'ya komut ver..." onkeypress="handleJarvisKey(event)">
+                        <button class="cyber-btn" style="width: 50px; padding: 0; font-size: 7px;" onclick="sendJarvisCommand()">İlet</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // 🌌 THREE.JS 3D UZAY KOKPİT ARKA PLAN MOTORU
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('webgl-container').appendChild(renderer.domElement);
+
+        // Altın Tozu / Yıldız Alanı Parçacıkları (Starfield)
+        const particlesCount = 400;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particlesCount * 3);
+
+        for (let i = 0; i < particlesCount * 3; i += 3) {
+            positions[i] = (Math.random() - 0.5) * 15;
+            positions[i + 1] = (Math.random() - 0.5) * 15;
+            positions[i + 2] = (Math.random() - 0.5) * 15;
+        }
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const material = new THREE.PointsMaterial({ color: 0xd4af37, size: 0.04, transparent: true, opacity: 0.8 });
+        const starField = new THREE.Points(geometry, material);
+        scene.add(starField);
+
+        camera.position.z = 5;
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            starField.rotation.y += 0.001;
+            starField.rotation.x += 0.0005;
+            renderer.render(scene, camera);
+        }
+        animate3D();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // TELEGRAM WEB APP & KONTROL MİMARİSİ
         const tg = window.Telegram.WebApp;
         try { tg.ready(); tg.expand(); } catch(e) {}
         
@@ -246,7 +297,7 @@
                     body: JSON.stringify({ user_id: user.id }) 
                 });
                 const data = await res.json();
-                if (!data.authorized) { document.body.innerHTML = `<div style="text-align:center; padding:40px; color:red;"><h2>⛔ YETKİSİZ!</h2></div>`; return; }
+                if (!data.authorized) { document.body.innerHTML = `<div style="text-align:center; padding:50px; color:red;"><h2>⛔ YETKİSİZ ERİŞİM!</h2></div>`; return; }
                 const isFounder = String(user.id) === "8245373459" || data.is_founder;
                 document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (isFounder ? " Kraljica 👑" : " 🛡️");
                 await loadGroups(); 
@@ -263,14 +314,13 @@
 
                 if (ringContainer) {
                     let html = '';
-                    const radius = 68; // Genişletilmiş radar çember yarıçapı
+                    const radius = 62; 
 
                     groups.forEach((g, index) => {
                         const angle = (index / groups.length) * 2 * Math.PI;
                         const x = Math.cos(angle) * radius;
                         const y = Math.sin(angle) * radius;
                         const isActive = selectedChatId == g.chat_id;
-                        const hasAlarm = (index === 0 && Math.random() > 0.7);
 
                         let avatar = `<span style="font-size:14px;">🛡️</span>`;
                         if (g.photo_url) {
@@ -278,11 +328,13 @@
                         }
 
                         html += `
-                            <div class="orbit-node ${isActive ? 'active' : ''} ${hasAlarm ? 'alarm' : ''}" 
-                                 style="transform: translate(${x}px, ${y}px);" 
+                            <div class="orbit-node ${isActive ? 'active' : ''}" 
+                                 style="transform: translate(-50%, -50%) translate(${x}px, ${y}px);" 
                                  onclick="selectGroupNode(${g.chat_id})">
-                                <div class="orbit-avatar">${avatar}</div>
-                                <div class="orbit-label">${g.title || 'Grup'}</div>
+                                <div class="orbit-node-inner">
+                                    <div class="orbit-avatar">${avatar}</div>
+                                    <div class="orbit-label">${g.title || 'Grup'}</div>
+                                </div>
                             </div>
                         `;
                     });
@@ -308,7 +360,7 @@
                 const genRes = await fetch('/api/logs?filter=general&limit=30');
                 const genLogs = await genRes.json();
                 const genC = document.getElementById('generalLogsContainer');
-                genC.innerHTML = genLogs.length === 0 ? '<div style="font-size:7px; color:#b8ab91;">Log akışı boş.</div>' : '';
+                genC.innerHTML = genLogs.length === 0 ? '<div style="font-size:8px; color:#d4c8b0;">Log akışı boş.</div>' : '';
                 genLogs.forEach(l => {
                     genC.innerHTML += `
                         <div class="log-box">
@@ -327,15 +379,17 @@
                 });
                 const staffs = await staffRes.json();
                 const staffC = document.getElementById('staffListContainer');
-                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:7px; color:#b8ab91;">Bu yörüngede yetkili yok.</div>' : '';
+                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:8px; color:#d4c8b0;">Bu yörüngede yetkili yok.</div>' : '';
                 
                 staffs.forEach(s => {
                     const sName = s.full_name || s.name || s.first_name || "Muhafız";
-                    const sUser = s.username ? `@${s.username}` : `ID: ${s.user_id}`;
+                    const sUser = s.username ? `@${s.username}` : (s.user_id ? `ID: ${s.user_id}` : "Kayıtlı Yetkili");
+                    const targetId = s.user_id || s.id || 0;
+
                     staffC.innerHTML += `
                         <div class="item-row">
-                            <div><b>${sName}</b><br><span style="font-size:6px; color:#b8ab91;">${sUser}</span></div>
-                            <button onclick="removeStaff(${s.user_id})" style="background:#444; color:#fff; border:none; padding:2px 4px; border-radius:3px; font-size:6px; cursor:pointer;">Sil</button>
+                            <div><b>${sName}</b><br><span style="font-size:6px; color:#d4c8b0;">${sUser}</span></div>
+                            <button onclick="removeStaff(${targetId})" style="background:#444; color:#fff; border:none; padding:2px 5px; border-radius:3px; font-size:6px; cursor:pointer;">Sil</button>
                         </div>
                     `;
                 });
@@ -368,7 +422,7 @@
         async function memberAction(actionType) {
             const target = document.getElementById('memberTargetInput').value.trim();
             if (!target) return alert("Kullanıcı ID veya @username girin!");
-            if (!selectedChatId) return alert("Lütfen radyodan bir grup seçin!");
+            if (!selectedChatId) return alert("Lütfen yörüngeden bir grup seçin!");
             const res = await fetch('/api/member/action', { 
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: selectedChatId }) 
@@ -410,8 +464,8 @@
             input.value = '';
             screen.scrollTop = screen.scrollHeight;
             setTimeout(() => {
-                let reply = "⚜️ Radar kalkanları kararlı, Kraljica.";
-                if (text.toLowerCase().includes('rapor')) reply = "📊 Radar tarandı: Tehdit yok, sistemler aktif.";
+                let reply = "⚜️ Katya 3D kalkanları kararlı, Kraljica.";
+                if (text.toLowerCase().includes('rapor')) reply = "📊 Katya Uzay Taraması: Tüm yörüngeler temiz, savunma hatları tam güçte.";
                 screen.innerHTML += `<div class="j-msg ai">${reply}</div>`;
                 screen.scrollTop = screen.scrollHeight;
             }, 400);
