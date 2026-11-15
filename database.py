@@ -18,7 +18,7 @@ scheduled_jobs_col = db["scheduled_jobs"]
 def init_db():
     try:
         users_col.create_index("user_id", unique=True)
-        staff_col.create_index("user_id", unique=True)
+        staff_col.create_index([("user_id", 1), ("chat_id", 1)], unique=True)
         settings_col.create_index("chat_id", unique=True)
         groups_col.create_index("chat_id", unique=True)
         scheduled_jobs_col.create_index("job_id", unique=True)
@@ -36,7 +36,7 @@ def save_user(chat_id, user_id, username):
     except Exception:
         pass
 
-# 🌟 Güncellenmiş Grup Kaydı (Profil Fotoğrafı Destekli)
+# 🌟 Grup Kaydı (Profil Fotoğrafı Destekli)
 def register_bot_group(chat_id, title, photo_url=""):
     try:
         update_data = {
@@ -178,64 +178,80 @@ def get_announcement_settings(chat_id):
         "btn_url": "https://golden-guardian-bot.onrender.com/"
     }
 
-def is_authorized_staff(user_id):
+# 🛡️ GRUP BAZLI STAFF & YETKİ FONKSİYONLARI
+def is_authorized_staff(user_id, chat_id=0):
     try:
-        res = staff_col.find_one({"user_id": int(user_id)})
-        return res is not None
+        query = {"user_id": int(user_id)}
+        if chat_id and chat_id != 0:
+            query["chat_id"] = int(chat_id)
+        res = staff_col.find_one(query)
+        if res: return True
+        # Eğer özel grup bazlı bulunamazsa genel yetkiye de bakabilir
+        return staff_col.find_one({"user_id": int(user_id)}) is not None
     except Exception:
         return False
 
-def get_staff_permissions(user_id):
+def get_staff_permissions(user_id, chat_id=0):
     try:
-        row = staff_col.find_one({"user_id": int(user_id)})
+        query = {"user_id": int(user_id)}
+        if chat_id and chat_id != 0: query["chat_id"] = int(chat_id)
+        row = staff_col.find_one(query)
         if row:
             return {
-                "can_ban": row.get("can_ban", 1),
-                "can_mute": row.get("can_mute", 1),
+                "can_ban": row.get("can_ban", True),
+                "can_mute": row.get("can_mute", True),
                 "warnings": row.get("warnings", 0)
             }
     except Exception:
         pass
-    return {"can_ban": 1, "can_mute": 1, "warnings": 0}
+    return {"can_ban": True, "can_mute": True, "warnings": 0}
 
-def get_all_staff():
+def get_all_staff(chat_id=0):
     try:
-        rows = list(staff_col.find({}, {"_id": 0}))
+        query = {}
+        if chat_id and chat_id != 0:
+            query["chat_id"] = int(chat_id)
+        rows = list(staff_col.find(query, {"_id": 0}))
         return rows
     except Exception:
         return []
 
-def add_staff_member(user_id, username, full_name, added_by):
+def add_staff_member(user_id, username, full_name, added_by, chat_id=0):
     try:
         clean_uname = username.lstrip("@").lower() if username else ""
         staff_doc = {
             "user_id": int(user_id),
+            "chat_id": int(chat_id),
             "username": clean_uname,
             "full_name": full_name,
-            "can_ban": 1,
-            "can_mute": 1,
+            "can_ban": True,
+            "can_mute": True,
             "warnings": 0,
             "added_by": added_by
         }
-        staff_col.update_one({"user_id": int(user_id)}, {"$set": staff_doc}, upsert=True)
+        staff_col.update_one({"user_id": int(user_id), "chat_id": int(chat_id)}, {"$set": staff_doc}, upsert=True)
     except Exception:
         pass
 
-def toggle_staff_permission(user_id, perm_field):
+def toggle_staff_permission(user_id, chat_id, perm_field):
     try:
-        row = staff_col.find_one({"user_id": int(user_id)})
+        query = {"user_id": int(user_id)}
+        if chat_id and chat_id != 0: query["chat_id"] = int(chat_id)
+        row = staff_col.find_one(query)
         if row:
-            current_val = row.get(perm_field, 1)
-            new_val = 0 if current_val == 1 else 1
-            staff_col.update_one({"user_id": int(user_id)}, {"$set": {perm_field: new_val}})
+            current_val = row.get(perm_field, True)
+            new_val = not current_val
+            staff_col.update_one(query, {"$set": {perm_field: new_val}})
             return new_val
     except Exception:
         pass
     return None
 
-def remove_staff_member(user_id):
+def remove_staff_member(user_id, chat_id=0):
     try:
-        staff_col.delete_one({"user_id": int(user_id)})
+        query = {"user_id": int(user_id)}
+        if chat_id and chat_id != 0: query["chat_id"] = int(chat_id)
+        staff_col.delete_one(query)
     except Exception:
         pass
 
@@ -273,7 +289,7 @@ def reset_warnings(user_id):
     except Exception:
         return False
 
-# --- ZAMANLI GÖREVLER VERİTABANI FONKSİYONLARI ---
+# --- ZAMANLI GÖREVLER ---
 def save_scheduled_job(job_id, chat_id, minutes, msg_text, btn_text, btn_url, media_url):
     try:
         scheduled_jobs_col.update_one(
