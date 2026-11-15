@@ -4,283 +4,256 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Guardian | 2100 Gold Glass Command Hub</title>
+    <title>Golden Jarvis | Spacecraft Command HUD</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            /* 👑 Lüks Gold & Şeffaf Camsı Palet */
-            --glass-bg: rgba(26, 22, 15, 0.65);
-            --glass-border: rgba(212, 175, 55, 0.45);
-            --glass-card: rgba(35, 30, 20, 0.55);
-            --gold-glow: rgba(212, 175, 55, 0.8);
+            --space-bg: #070604;
+            --glass-deck: rgba(20, 16, 10, 0.75);
+            --glass-border: rgba(212, 175, 55, 0.4);
+            --gold-glow: rgba(212, 175, 55, 0.7);
             --gold-shine: #f3e5ab;
             --accent-gold: #d4af37;
             --danger-glow: rgba(255, 77, 77, 0.9);
             --text-main: #fcf8ee;
-            --text-muted: #d1c7b7;
+            --text-muted: #c2b6a0;
             --danger: #ff4d4d;
             --success: #2ecc71;
             --warning: #f39c12;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; -webkit-tap-highlight-color: transparent; }
         
         html, body {
-            background-color: #0d0b07 !important;
+            background-color: var(--space-bg) !important;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         body {
-            background: linear-gradient(135deg, rgba(20,16,10,0.96) 0%, rgba(10,8,5,0.98) 50%, rgba(25,20,12,0.96) 100%), 
-                        radial-gradient(circle at 50% 15%, rgba(212,175,55,0.2) 0%, transparent 70%);
-            background-attachment: fixed; color: var(--text-main); padding: 14px; display: flex; flex-direction: column; overflow-x: hidden;
+            background: radial-gradient(circle at 50% 20%, rgba(35,28,15,0.9) 0%, rgba(7,6,4,0.98) 70%),
+                        linear-gradient(135deg, #070604 0%, #120e07 100%);
+            background-attachment: fixed; color: var(--text-main); padding: 12px; display: flex; flex-direction: column;
         }
 
-        /* 🧊 Şeffaf Camsı Gold Konteynerler */
-        .glass-container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(35px);
-            -webkit-backdrop-filter: blur(35px);
+        /* 🚀 Mekik HUD Konteynerleri */
+        .hud-deck {
+            background: var(--glass-deck);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
             border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 16px;
-            margin-bottom: 14px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 25px rgba(212, 175, 55, 0.15);
+            border-radius: 20px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(212, 175, 55, 0.1);
+            position: relative;
+        }
+        .hud-deck::after {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-shine), transparent);
         }
 
-        .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 14px; }
-        .logo h1 { font-size: 15px; color: var(--gold-shine); font-weight: 800; text-shadow: 0 0 15px var(--gold-glow); display: flex; align-items: center; gap: 6px; }
-        .badge { background: rgba(212, 175, 55, 0.2); color: var(--gold-shine); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 900; border: 1px solid var(--gold-glow); box-shadow: 0 0 15px rgba(212,175,55,0.4); }
-        
-        /* 🔗 SÜREKLİ AKIŞKAN DAİRESEL ZİNCİRSEL GRUP LOGO CAROUSEL */
-        .group-chain-section { text-align: center; margin-bottom: 14px; background: rgba(20, 16, 10, 0.45); }
-        .group-chain-title { font-size: 10px; color: var(--accent-gold); letter-spacing: 2px; margin-bottom: 10px; font-weight: 800; text-shadow: 0 0 10px var(--gold-glow); }
-        .group-chain-wrapper { display: flex; justify-content: flex-start; gap: 16px; overflow-x: auto; padding: 8px 4px; scrollbar-width: none; animation: floatChain 8s ease-in-out infinite alternate; }
-        .group-chain-wrapper::-webkit-scrollbar { display: none; }
-        
-        @keyframes floatChain {
-            0% { transform: translateX(0px); }
-            100% { transform: translateX(6px); }
-        }
+        .header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; }
+        .logo h1 { font-size: 13px; color: var(--gold-shine); font-weight: 800; letter-spacing: 1px; text-shadow: 0 0 12px var(--gold-glow); display: flex; align-items: center; gap: 6px; }
+        .badge { background: rgba(212, 175, 55, 0.15); color: var(--gold-shine); padding: 5px 10px; border-radius: 14px; font-size: 10px; font-weight: 900; border: 1px solid var(--gold-glow); box-shadow: 0 0 12px rgba(212,175,55,0.3); }
 
-        .group-node { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .group-node:hover { transform: scale(1.1); }
-        .group-node:active { transform: scale(0.92); }
+        /* 🪐 1. KONSEPT: DAİRESEL YÖRÜNGE GRUP ZİNCİRİ (ORBITAL RING) */
+        .orbital-ring-section { text-align: center; }
+        .hud-title { font-size: 9px; color: var(--accent-gold); letter-spacing: 2px; margin-bottom: 10px; font-weight: 800; text-transform: uppercase; text-shadow: 0 0 8px var(--gold-glow); }
+        .orbital-wrapper { display: flex; justify-content: flex-start; gap: 14px; overflow-x: auto; padding: 6px; scrollbar-width: none; }
+        .orbital-wrapper::-webkit-scrollbar { display: none; }
         
-        .group-avatar {
-            width: 64px; height: 64px; border-radius: 50%; border: 2.5px solid var(--glass-border);
-            background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; overflow: hidden;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.8), inset 0 0 15px rgba(212,175,55,0.3); transition: all 0.4s ease;
+        .orbit-node { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .orbit-node:hover { transform: scale(1.08); }
+        .orbit-node:active { transform: scale(0.92); }
+        
+        .orbit-avatar {
+            width: 58px; height: 58px; border-radius: 50%; border: 2px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.9), inset 0 0 12px rgba(212,175,55,0.3); transition: all 0.4s ease;
+            position: relative;
         }
-        .group-node.active-node .group-avatar {
+        .orbit-node.active-node .orbit-avatar {
             border-color: var(--gold-shine);
-            box-shadow: 0 0 30px var(--gold-glow), inset 0 0 20px rgba(212,175,55,0.7);
+            box-shadow: 0 0 25px var(--gold-glow), inset 0 0 15px rgba(212,175,55,0.7);
         }
-        /* 🚨 KRİTİK ALARM DURUMU: KIRMIZI BÜYÜYEN PULSING LOGO */
-        .group-node.alarm-node .group-avatar {
+        /* 🚨 ALARM DURUMUNDA KIRMIZI PALSING HALKA */
+        .orbit-node.alarm-node .orbit-avatar {
             border-color: var(--danger);
             box-shadow: 0 0 35px var(--danger-glow), inset 0 0 20px rgba(255,77,77,0.8);
-            animation: alarmPulse 1s infinite alternate;
+            animation: alarmPulse 0.9s infinite alternate;
         }
         @keyframes alarmPulse {
             0% { transform: scale(1); }
             100% { transform: scale(1.15); }
         }
 
-        .group-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .group-avatar .fallback-icon { font-size: 26px; color: var(--accent-gold); }
-        .group-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; max-width: 78px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
-        .group-node.active-node .group-label { color: var(--gold-shine); font-weight: 900; text-shadow: 0 0 8px var(--gold-glow); }
+        .orbit-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .orbit-avatar .fallback-icon { font-size: 22px; color: var(--accent-gold); }
+        .orbit-label { font-size: 10px; color: var(--text-muted); margin-top: 5px; max-width: 68px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
+        .orbit-node.active-node .orbit-label { color: var(--gold-shine); font-weight: 900; text-shadow: 0 0 6px var(--gold-glow); }
 
-        /* ⚜️ PORT NAVİGASYON */
-        .port-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
-        .port-nav::-webkit-scrollbar { display: none; }
-        .port-tab {
-            flex: 0 0 auto; text-align: center; padding: 10px 14px; font-size: 11px; font-weight: 700;
-            color: var(--text-muted); background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(212, 175, 55, 0.2);
-            border-radius: 14px; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(12px);
+        /* 🧭 MEKİK KONTROL SEKMELERİ */
+        .deck-nav { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px; scrollbar-width: none; }
+        .deck-nav::-webkit-scrollbar { display: none; }
+        .deck-tab {
+            flex: 0 0 auto; text-align: center; padding: 8px 12px; font-size: 10px; font-weight: 800;
+            color: var(--text-muted); background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase;
         }
-        .port-tab.active {
-            background: linear-gradient(135deg, rgba(212,175,55,0.45) 0%, rgba(170,119,28,0.35) 100%);
-            color: var(--gold-shine); border-color: var(--gold-shine); box-shadow: 0 0 20px var(--gold-glow);
-            font-weight: 900;
+        .deck-tab.active {
+            background: linear-gradient(135deg, rgba(212,175,55,0.4) 0%, rgba(170,119,28,0.3) 100%);
+            color: var(--gold-shine); border-color: var(--gold-shine); box-shadow: 0 0 15px var(--gold-glow);
         }
         
-        .portal-section { display: none; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; flex-direction: column; }
-        .portal-section.active { display: flex; opacity: 1; transform: translateY(0); }
+        .deck-section { display: none; opacity: 0; transform: translateY(8px); transition: opacity 0.3s ease, transform 0.3s ease; flex-direction: column; }
+        .deck-section.active { display: flex; opacity: 1; transform: translateY(0); }
         
-        .section-title { font-size: 13px; font-weight: 800; margin-bottom: 12px; color: var(--gold-shine); display: flex; align-items: center; gap: 8px; text-shadow: 0 0 10px var(--gold-glow); }
-        .subsection-title { font-size: 11px; font-weight: 800; color: var(--accent-gold); margin: 12px 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 4px; }
+        .section-title { font-size: 12px; font-weight: 800; margin-bottom: 10px; color: var(--gold-shine); display: flex; align-items: center; gap: 6px; text-shadow: 0 0 8px var(--gold-glow); }
         
         input, select, textarea {
-            width: 100%; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border);
-            border-radius: 14px; padding: 12px; color: #fff; font-size: 13px; outline: none; margin-bottom: 10px; backdrop-filter: blur(10px);
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+            width: 100%; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--glass-border);
+            border-radius: 12px; padding: 10px; color: #fff; font-size: 12px; outline: none; margin-bottom: 8px;
         }
-        input::placeholder, textarea::placeholder { color: #888; }
-        input:focus, select:focus, textarea:focus { border-color: var(--gold-shine); box-shadow: 0 0 12px var(--gold-glow); background: rgba(0, 0, 0, 0.6); }
+        input:focus, select:focus, textarea:focus { border-color: var(--gold-shine); box-shadow: 0 0 10px var(--gold-glow); }
         
-        .apple-btn {
+        .tactical-btn {
             width: 100%; background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%); color: #000;
-            border: none; padding: 12px; border-radius: 14px; font-weight: 900; font-size: 13px; cursor: pointer;
-            box-shadow: 0 5px 20px rgba(212,175,55,0.4); transition: transform 0.15s; text-shadow: 0 1px 2px rgba(255,255,255,0.4);
+            border: none; padding: 11px; border-radius: 12px; font-weight: 900; font-size: 12px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(212,175,55,0.35); text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .apple-btn:active { transform: scale(0.96); }
+        .tactical-btn:active { transform: scale(0.96); }
+
+        .item-row { background: rgba(0,0,0,0.3); border: 1px solid rgba(212, 175, 55, 0.2); padding: 10px; border-radius: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+        .log-box { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); padding: 8px 10px; border-radius: 10px; margin-bottom: 6px; font-size: 10px; color: var(--text-muted); }
         
-        .item-row { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.25); padding: 12px; border-radius: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        .log-box { background: rgba(0, 0, 0, 0.35); border: 1px solid var(--glass-border); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; font-size: 11px; color: var(--text-muted); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        
-        .action-tag { font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 6px; display: inline-block; margin-right: 6px; }
+        .action-tag { font-size: 8px; font-weight: 800; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-right: 4px; }
         .tag-ban { background: rgba(255, 77, 77, 0.25); color: var(--danger); border: 1px solid var(--danger); }
         .tag-mute { background: rgba(230, 126, 34, 0.25); color: #e67e22; border: 1px solid #e67e22; }
-        .tag-warn { background: rgba(243, 156, 18, 0.25); color: var(--warning); border: 1px solid var(--warning); }
         .tag-ann { background: rgba(52, 152, 219, 0.25); color: var(--info); border: 1px solid var(--info); }
-        .tag-sched { background: rgba(46, 204, 113, 0.25); color: var(--success); border: 1px solid var(--success); }
         
-        .selectable-text { user-select: all; -webkit-user-select: all; background: rgba(0,0,0,0.5); padding: 3px 6px; border-radius: 6px; color: var(--gold-shine); font-family: monospace; display: inline-block; margin-top: 3px; font-size: 10px; font-weight: 800; }
-        .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px; }
+        .selectable-text { user-select: all; background: rgba(0,0,0,0.6); padding: 2px 5px; border-radius: 4px; color: var(--gold-shine); font-family: monospace; font-size: 9px; }
 
-        /* 🤖 KATYA AI SOHBET KUTUSU */
-        .chat-container { display: flex; flex-direction: column; height: 320px; background: rgba(0,0,0,0.3); border-radius: 16px; border: 1px solid var(--glass-border); overflow: hidden; }
-        .chat-messages { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 12px; line-height: 1.4; }
-        .chat-bubble.ai { background: rgba(212, 175, 55, 0.15); color: var(--gold-shine); align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid rgba(212,175,55,0.3); }
-        .chat-bubble.user { background: rgba(255, 255, 255, 0.1); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; border: 1px solid rgba(255,255,255,0.2); }
-        .chat-input-area { display: flex; padding: 8px; background: rgba(0,0,0,0.4); gap: 6px; border-top: 1px solid var(--glass-border); }
-        .chat-input-area input { margin-bottom: 0; }
+        /* 🤖 3. KONSEPT: JARVIS AI TACTICAL CORE (SESLİ/YAZILI OTONOM KONTROL) */
+        .jarvis-terminal { display: flex; flex-direction: column; height: 300px; background: rgba(0,0,0,0.45); border-radius: 14px; border: 1px solid var(--glass-border); overflow: hidden; }
+        .jarvis-screen { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 11px; }
+        .jarvis-msg { max-width: 85%; padding: 9px 12px; border-radius: 10px; line-height: 1.4; }
+        .jarvis-msg.ai { background: rgba(212, 175, 55, 0.15); color: var(--gold-shine); align-self: flex-start; border: 1px solid rgba(212,175,55,0.3); }
+        .jarvis-msg.user { background: rgba(255,255,255,0.08); color: #fff; align-self: flex-end; border: 1px solid rgba(255,255,255,0.2); }
+        .jarvis-input-bar { display: flex; padding: 6px; background: rgba(0,0,0,0.6); gap: 6px; border-top: 1px solid var(--glass-border); }
+        .jarvis-input-bar input { margin-bottom: 0; }
     </style>
 </head>
 <body>
 
-    <div class="glass-container header">
-        <div class="logo"><h1>⚜️ Golden Guardian Hub</h1></div>
+    <div class="hud-deck header">
+        <div class="logo"><h1>⚜️ Golden Jarvis HUD</h1></div>
         <div class="badge" id="userRole">Kraljica 👑</div>
     </div>
 
-    <!-- 🔗 AKIŞKAN DAİRESEL ZİNCİRSEL GRUP LOGO CAROUSEL -->
-    <div class="glass-container group-chain-section">
-        <div class="group-chain-title">✨ 2100 ZİNCİRSEL EKOSİSTEM & ALARM AĞI ✨</div>
-        <div class="group-chain-wrapper" id="groupChainContainer">
-            <!-- Dinamik dairesel logolar buraya akacaktır -->
+    <!-- 🪐 1. KONSEPT: ORBİTAL DAİRESEL ZİNCİR (GROUP RING) -->
+    <div class="hud-deck orbital-ring-section">
+        <div class="hud-title">🪐 Yörüngesel Ekosistem Halkaları</div>
+        <div class="orbital-wrapper" id="groupChainContainer">
+            <!-- Dinamik yörünge düğümleri -->
         </div>
     </div>
 
-    <div class="port-nav">
-        <div class="port-tab active" onclick="switchPort('overview', event)">Genel Bakış</div>
-        <div class="port-tab" onclick="switchPort('staff', event)">Staff & Yetki Matrisi</div>
-        <div class="port-tab" onclick="switchPort('members', event)">Üye Portu</div>
-        <div class="port-tab" onclick="switchPort('genlogs', event)">Genel Loglar</div>
-        <div class="port-tab" onclick="switchPort('adminlogs', event)">Admin Audit</div>
-        <div class="port-tab" onclick="switchPort('settings', event)">Grup & Duyuru</div>
-        <div class="port-tab" onclick="switchPort('aiport', event)">🤖 Katya AI Port</div>
+    <div class="deck-nav">
+        <div class="deck-tab active" onclick="switchDeck('telemetry', event)">Telemetri</div>
+        <div class="deck-tab" onclick="switchDeck('staff', event)">Staff Matrisi</div>
+        <div class="deck-tab" onclick="switchDeck('tactical', event)">Taktiksel İşlem</div>
+        <div class="deck-tab" onclick="switchDeck('logs', event)">Sistem Logları</div>
+        <div class="deck-tab" onclick="switchDeck('settings', event)">Mekik Ayarları</div>
+        <div class="deck-tab" onclick="switchDeck('jarvis', event)">🤖 Jarvis AI</div>
     </div>
 
-    <!-- PORT 1: GENEL BAKIŞ -->
-    <div id="port-overview" class="portal-section active">
-        <div class="glass-container">
-            <div class="section-title">📊 2100 Otonom Sistem Durumu</div>
+    <!-- DECK 1: TELEMETRİ -->
+    <div id="deck-telemetry" class="deck-section active">
+        <div class="hud-deck">
+            <div class="section-title">📊 Mekik Durum & Nöral Telemetri</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border);">
-                    <div style="font-size: 10px; color: var(--text-muted);">TOPLAM İŞLEM</div>
-                    <div id="totalActions" style="font-size: 16px; font-weight: 900; color: var(--gold-shine);">-</div>
+                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);">
+                    <div style="font-size: 9px; color: var(--text-muted);">TOPLAM İŞLEM</div>
+                    <div id="totalActions" style="font-size: 15px; font-weight: 900; color: var(--gold-shine);">-</div>
                 </div>
-                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border);">
-                    <div style="font-size: 10px; color: var(--text-muted);">OTONOM ENGELLEMELER</div>
-                    <div id="totalBans" style="font-size: 16px; font-weight: 900; color: var(--danger);">-</div>
+                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);">
+                    <div style="font-size: 9px; color: var(--text-muted);">OTONOM BLOKE</div>
+                    <div id="totalBans" style="font-size: 15px; font-weight: 900; color: var(--danger);">-</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- PORT 2: STAFF & YETKİ MATRİSİ -->
-    <div id="port-staff" class="portal-section">
-        <div class="glass-container">
-            <div class="section-title">👑 Grup Bazlı Granüler Yetki Matrisi</div>
-            <input type="text" id="staffInput" placeholder="@kullaniciadi veya ID girin">
-            <input type="text" id="staffName" placeholder="Yetkili Ünvanı (Örn: 💎 Kristal Muhafız)">
-            <button class="apple-btn" onclick="addStaff()">Gruba Yetkiyi Mühürle</button>
+    <!-- DECK 2: STAFF MATRİSİ -->
+    <div id="deck-staff" class="deck-section">
+        <div class="hud-deck">
+            <div class="section-title">👑 Granüler Yetki & Rozet Matrisi</div>
+            <input type="text" id="staffInput" placeholder="@kullaniciadi veya ID">
+            <input type="text" id="staffName" placeholder="Rozet Ünvanı (Örn: 💎 Kristal Muhafız)">
+            <button class="tactical-btn" onclick="addStaff()">Yetkiyi Mühürle</button>
         </div>
-        <div class="glass-container">
-            <div class="section-title">🛡️ Seçili Grubun Yetkilileri & Rozetleri</div>
+        <div class="hud-deck">
+            <div class="section-title">🛡️ Aktif Yetkililer</div>
             <div id="staffListContainer"><div class="loading">Yükleniyor...</div></div>
         </div>
     </div>
 
-    <!-- PORT 3: ÜYE İŞLEMLERİ -->
-    <div id="port-members" class="portal-section">
-        <div class="glass-container">
-            <div class="section-title">👥 Üye Portu & Otonom Müdahale</div>
+    <!-- DECK 3: TAKTİKSEL İŞLEM -->
+    <div id="deck-tactical" class="deck-section">
+        <div class="hud-deck">
+            <div class="section-title">⚡ Otonom Taktiksel Müdahale</div>
             <input type="text" id="memberTargetInput" placeholder="Kullanıcı ID veya @username">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px;">
-                <button class="apple-btn" style="background: var(--danger); color: #fff;" onclick="memberAction('ban')">Banla 🚫</button>
-                <button class="apple-btn" style="background: var(--success); color: #fff;" onclick="memberAction('unban')">Banı Kaldır ✅</button>
-                <button class="apple-btn" style="background: #e67e22; color: #fff;" onclick="memberAction('mute')">Sustur 🔇</button>
-                <button class="apple-btn" style="background: var(--info); color: #fff;" onclick="memberAction('unmute')">Susturmayı Aç 🔊</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
+                <button class="tactical-btn" style="background: var(--danger); color:#fff;" onclick="memberAction('ban')">Banla 🚫</button>
+                <button class="tactical-btn" style="background: var(--success); color:#fff;" onclick="memberAction('unban')">Ban Aç ✅</button>
+                <button class="tactical-btn" style="background: #e67e22; color:#fff;" onclick="memberAction('mute')">Mute 🔇</button>
+                <button class="tactical-btn" style="background: #3498db; color:#fff;" onclick="memberAction('unmute')">Unmute 🔊</button>
             </div>
         </div>
     </div>
 
-    <!-- PORT 4: GENEL LOGLAR -->
-    <div id="port-genlogs" class="portal-section">
-        <div class="glass-container">
-            <div class="section-title">📜 Şeffaf Akışlı Genel Loglar</div>
-            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+    <!-- DECK 4: SİSTEM LOGLARI -->
+    <div id="deck-logs" class="deck-section">
+        <div class="hud-deck">
+            <div class="section-title">📜 Şeffaf Zaman Akış Logları</div>
+            <div style="display: flex; gap: 6px; margin-bottom: 8px;">
                 <select id="logClearDays" style="margin-bottom:0;">
-                    <option value="1">Günlük Temizleme</option>
-                    <option value="7">Haftalık Temizleme</option>
-                    <option value="30">Aylık Temizleme</option>
+                    <option value="1">Günlük Temizlik</option>
+                    <option value="7">Haftalık Temizlik</option>
                     <option value="0">Tümünü Sil</option>
                 </select>
-                <button class="apple-btn" style="width: auto; padding: 0 14px; background: rgba(239,68,68,0.3); color: var(--danger); border: 1px solid var(--danger);" onclick="clearLogs()">Uygula 🗑️</button>
+                <button class="tactical-btn" style="width: auto; padding: 0 10px; background: rgba(239,68,68,0.3); color: var(--danger); border: 1px solid var(--danger);" onclick="clearLogs()">Temizle 🗑️</button>
             </div>
-            <div id="generalLogsContainer"><div class="loading">Loglar yükleniyor...</div></div>
+            <div id="generalLogsContainer"><div class="loading">Loglar akıyor...</div></div>
         </div>
     </div>
 
-    <!-- PORT 5: ADMIN AUDIT -->
-    <div id="port-adminlogs" class="portal-section">
-        <div class="glass-container">
-            <div class="section-title">⭐ Admin Denetim & Aktivite Logları</div>
-            <div id="adminLogsContainer"><div class="loading">Admin logları yükleniyor...</div></div>
-        </div>
-    </div>
-
-    <!-- PORT 6: GRUP & DUYURU -->
-    <div id="port-settings" class="portal-section">
-        <div class="glass-container">
-            <div class="section-title">⚙️ Camsı Gold Grup Ayarları</div>
-            
-            <div class="subsection-title">👋 Hoş Geldin Yapılandırması</div>
-            <textarea id="welcomeMsgInput" rows="2" placeholder="Grup karşılama metni..."></textarea>
+    <!-- DECK 5: MEKİK AYARLARI -->
+    <div id="deck-settings" class="deck-section">
+        <div class="hud-deck">
+            <div class="section-title">⚙️ Grup Protokolleri & Duyuru</div>
+            <textarea id="welcomeMsgInput" rows="2" placeholder="Karşılama metni..."></textarea>
             <input type="text" id="btnTextInput" placeholder="Buton Metni">
-            <input type="text" id="btnUrlInput" placeholder="Buton Linki (https://...)">
+            <input type="text" id="btnUrlInput" placeholder="Buton Linki (https://)">
             <input type="text" id="mediaUrlInput" placeholder="Medya URL (Opsiyonel)">
-
-            <div class="subsection-title">👑 Altın Standart Varsayılan Duyuru Butonu</div>
-            <input type="text" id="annBtnTextInput" placeholder="Duyuru Buton Metni">
-            <input type="text" id="annBtnUrlInput" placeholder="Duyuru Buton Linki">
-
-            <div class="subsection-title">⏳ Zamanlı Periyodik Duyuru Butonu</div>
-            <input type="text" id="schedBtnTextInput" placeholder="Zamanlı Buton Metni">
-            <input type="text" id="schedBtnUrlInput" placeholder="Zamanlı Buton Linki">
-
-            <button class="apple-btn" style="margin-top: 10px;" onclick="saveSettings()">Tüm Ayarları Kaydet</button>
+            <button class="tactical-btn" style="margin-top: 6px;" onclick="saveSettings()">Protokolleri Kaydet</button>
         </div>
     </div>
 
-    <!-- PORT 7: KATYA AI PORT (YAPAY ZEKA İLE SOHBET & RAPORLAMA) -->
-    <div id="port-aiport" class="portal-section">
-        <div class="glass-container">
-            <div class="section-title">🧠 Katya AI - Otonom Komuta & Rapor Asistanı</div>
-            <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px;">
-                Kraljica özel yetkisiyle Katya ile doğrudan konuşabilir; grupların güvenlik raporunu isteyebilir veya otonom komutlar verebilirsin.
+    <!-- DECK 6: JARVIS AI ÇEKİRDEĞİ -->
+    <div id="deck-jarvis" class="deck-section">
+        <div class="hud-deck">
+            <div class="section-title">🤖 Jarvis AI - Uzay Mekiği Komuta Asistanı</div>
+            <p style="font-size: 10px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.3;">
+                Kraljica komutunda çalışan Jarvis yapay zekası; ekosistemdeki tüm akışları denetler, taktiksel raporlar sunar ve anlık müdahale eder.
             </p>
-            <div class="chat-container">
-                <div class="chat-messages" id="chatMessages">
-                    <div class="chat-bubble ai">👑 Selamlar Kraljica! Ben Katya AI. 2100 Nöral ağlar aktif, gruplarımız tamamen güvende. Nasıl yardımcı olabilirim?</div>
+            <div class="jarvis-terminal">
+                <div class="jarvis-screen" id="jarvisScreen">
+                    <div class="jarvis-msg ai">⚜️ Jarvis sistemleri çevrimiçi, Kraljica. Nöral yörünge halkaları kilitlendi. Güvenlik seviyesi maksimum. Nasıl yardımcı olayım?</div>
                 </div>
-                <div class="chat-input-area">
-                    <input type="text" id="chatInput" placeholder="Katya'ya komut ver veya rapor iste..." onkeypress="handleChatKey(event)">
-                    <button class="apple-btn" style="width: 70px; padding: 0;" onclick="sendAiMessage()">Gönder</button>
+                <div class="jarvis-input-bar">
+                    <input type="text" id="jarvisInput" placeholder="Jarvis'e komut ver (Örn: Rapor ver, Flood temizle)..." onkeypress="handleJarvisKey(event)">
+                    <button class="tactical-btn" style="width: 65px; padding: 0; font-size: 10px;" onclick="sendJarvisCommand()">İlet</button>
                 </div>
             </div>
         </div>
@@ -293,10 +266,10 @@
         let user = tg.initDataUnsafe?.user || { id: 8245373459, first_name: "Breskavica", username: "breskavica" };
         let selectedChatId = 0; // 0 = Genel Hub
 
-        function switchPort(portName, evt) {
-            document.querySelectorAll('.portal-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.port-tab').forEach(el => el.classList.remove('active'));
-            document.getElementById('port-' + portName).classList.add('active');
+        function switchDeck(deckName, evt) {
+            document.querySelectorAll('.deck-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.deck-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('deck-' + deckName).classList.add('active');
             if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
         }
 
@@ -308,7 +281,7 @@
                 });
                 const data = await res.json();
                 if (!data.authorized) { 
-                    document.body.innerHTML = `<div style="text-align:center; padding:60px; color:var(--danger);"><h2>⛔ Yetkisiz Erişim!</h2></div>`; 
+                    document.body.innerHTML = `<div style="text-align:center; padding:60px; color:var(--danger);"><h2>⛔ YETKİSİZ ERİŞİM!</h2></div>`; 
                     return; 
                 }
                 const isFounder = String(user.id) === "8245373459" || data.is_founder;
@@ -327,26 +300,26 @@
 
                 if (chainContainer) {
                     let html = `
-                        <div class="group-node ${selectedChatId == 0 ? 'active-node' : ''}" onclick="selectGroupNode(0)">
-                            <div class="group-avatar"><span class="fallback-icon">👑</span></div>
-                            <div class="group-label">Genel Hub</div>
+                        <div class="orbit-node ${selectedChatId == 0 ? 'active-node' : ''}" onclick="selectGroupNode(0)">
+                            <div class="orbit-avatar"><span class="fallback-icon">👑</span></div>
+                            <div class="orbit-label">Genel Hub</div>
                         </div>
                     `;
 
                     groups.forEach((g, index) => {
                         const isActive = selectedChatId == g.chat_id;
-                        // Simülasyon: Kriz anında dairesel logonun kırmızıya dönüp büyümesi (.alarm-node)
+                        // Simülasyon: Kriz anında dairesel yörüngenin kırmızı alarm vermesi (.alarm-node)
                         const hasAlarm = (index === 1 && Math.random() > 0.7); 
                         
-                        let avatarContent = `<span class="fallback-icon">🛡️</span>`;
+                        let avatarContent = `<span class="fallback-icon">🪐</span>`;
                         if (g.photo_url) {
-                            avatarContent = `<img src="${g.photo_url}" alt="${g.title}" onerror="this.parentElement.innerHTML='<span class=\\'fallback-icon\\'>🛡️</span>'">`;
+                            avatarContent = `<img src="${g.photo_url}" alt="${g.title}" onerror="this.parentElement.innerHTML='<span class=\\'fallback-icon\\'>🪐</span>'">`;
                         }
                         
                         html += `
-                            <div class="group-node ${isActive ? 'active-node' : ''} ${hasAlarm ? 'alarm-node' : ''}" onclick="selectGroupNode(${g.chat_id})">
-                                <div class="group-avatar">${avatarContent}</div>
-                                <div class="group-label">${g.title || 'Grup'}</div>
+                            <div class="orbit-node ${isActive ? 'active-node' : ''} ${hasAlarm ? 'alarm-node' : ''}" onclick="selectGroupNode(${g.chat_id})">
+                                <div class="orbit-avatar">${avatarContent}</div>
+                                <div class="orbit-label">${g.title || 'Grup'}</div>
                             </div>
                         `;
                     });
@@ -372,33 +345,16 @@
                 const genRes = await fetch('/api/logs?filter=general&limit=50');
                 const genLogs = await genRes.json();
                 const genC = document.getElementById('generalLogsContainer');
-                genC.innerHTML = genLogs.length === 0 ? '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Log yok.</div>' : '';
+                genC.innerHTML = genLogs.length === 0 ? '<div style="font-size:10px; color:var(--text-muted); text-align:center;">Log akışı boş.</div>' : '';
                 genLogs.forEach(l => {
                     genC.innerHTML += `
                         <div class="log-box">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div><span class="action-tag tag-ban">${l.action_type}</span></div>
-                                <span style="font-size:10px; color:var(--text-muted);">${l.timestamp}</span>
+                                <span style="font-size:9px; color:var(--text-muted);">${l.timestamp}</span>
                             </div>
-                            <div style="margin-top:5px;">Hedef: <span class="selectable-text">@${l.username}</span> | ID: <span class="selectable-text">${l.target_id}</span></div>
-                            <div style="margin-top:4px; color:var(--text-muted);">${l.details}</div>
-                        </div>
-                    `;
-                });
-
-                const adminRes = await fetch('/api/logs?filter=admin&limit=50');
-                const adminLogs = await adminRes.json();
-                const adminC = document.getElementById('adminLogsContainer');
-                adminC.innerHTML = adminLogs.length === 0 ? '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Admin işlem kaydı yok.</div>' : '';
-                adminLogs.forEach(l => {
-                    adminC.innerHTML += `
-                        <div class="log-box" style="border-color: rgba(212,175,55,0.4);">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div><span class="action-tag tag-ann">${l.action_type}</span></div>
-                                <span style="font-size:10px; color:var(--text-muted);">${l.timestamp}</span>
-                            </div>
-                            <div style="margin-top:5px;">Yetkili: <span class="selectable-text">@${l.username}</span> | ID: <span class="selectable-text">${l.target_id}</span></div>
-                            <div style="margin-top:4px; color:var(--text-muted);">${l.details}</div>
+                            <div style="margin-top:4px;">Hedef: <span class="selectable-text">@${l.username}</span> | ID: <span class="selectable-text">${l.target_id}</span></div>
+                            <div style="margin-top:3px; color:var(--text-muted);">${l.details}</div>
                         </div>
                     `;
                 });
@@ -409,15 +365,15 @@
                 });
                 const staffs = await staffRes.json();
                 const staffC = document.getElementById('staffListContainer');
-                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Bu gruba ait yetkili yok.</div>' : '';
+                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:10px; color:var(--text-muted); text-align:center;">Bu yörüngede yetkili yok.</div>' : '';
                 staffs.forEach(s => {
                     staffC.innerHTML += `
                         <div class="item-row">
-                            <div><b>${s.full_name}</b> 👑<br><span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username}</span></div>
-                            <div style="display:flex; gap:6px;">
-                                <button onclick="toggleStaffPerm(${s.user_id}, 'can_ban')" style="background:${s.can_ban ? 'var(--success)' : 'var(--danger)'}; color:#fff; border:none; padding:5px 8px; border-radius:8px; font-size:10px; cursor:pointer;">Ban: ${s.can_ban ? 'AÇIK' : 'KAPALI'}</button>
-                                <button onclick="toggleStaffPerm(${s.user_id}, 'can_mute')" style="background:${s.can_mute ? 'var(--success)' : 'var(--danger)'}; color:#fff; border:none; padding:5px 8px; border-radius:8px; font-size:10px; cursor:pointer;">Mute: ${s.can_mute ? 'AÇIK' : 'KAPALI'}</button>
-                                <button onclick="removeStaff(${s.user_id})" style="background:#555; color:#fff; border:none; padding:5px 8px; border-radius:8px; font-size:10px; cursor:pointer;">Sil</button>
+                            <div><b>${s.full_name}</b> 👑<br><span style="font-size:9px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username}</span></div>
+                            <div style="display:flex; gap:4px;">
+                                <button onclick="toggleStaffPerm(${s.user_id}, 'can_ban')" style="background:${s.can_ban ? 'var(--success)' : 'var(--danger)'}; color:#fff; border:none; padding:4px 6px; border-radius:6px; font-size:9px; cursor:pointer;">Ban: ${s.can_ban ? 'AÇIK' : 'KAPALI'}</button>
+                                <button onclick="toggleStaffPerm(${s.user_id}, 'can_mute')" style="background:${s.can_mute ? 'var(--success)' : 'var(--danger)'}; color:#fff; border:none; padding:4px 6px; border-radius:6px; font-size:9px; cursor:pointer;">Mute: ${s.can_mute ? 'AÇIK' : 'KAPALI'}</button>
+                                <button onclick="removeStaff(${s.user_id})" style="background:#444; color:#fff; border:none; padding:4px 6px; border-radius:6px; font-size:9px; cursor:pointer;">Sil</button>
                             </div>
                         </div>
                     `;
@@ -436,7 +392,7 @@
             document.getElementById('staffInput').value = ''; 
             document.getElementById('staffName').value = ''; 
             loadData(); 
-            alert("✅ Yetkili gruba başarıyla mühürlendi!");
+            alert("✅ Yetkili yörüngeye mühürlendi!");
         }
 
         async function toggleStaffPerm(targetId, permField) {
@@ -448,7 +404,7 @@
         }
 
         async function removeStaff(targetId) {
-            if (!confirm("Yetkili kaydı gruptan silinsin mi?")) return;
+            if (!confirm("Yetkili kaydı silinsin mi?")) return;
             await fetch('/api/staff/remove', { 
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ user_id: user.id, chat_id: selectedChatId, target_id: targetId }) 
@@ -458,15 +414,15 @@
 
         async function memberAction(actionType) {
             const target = document.getElementById('memberTargetInput').value.trim();
-            if (!target) return alert("Kullanıcı ID veya username girin!");
-            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen yukarıdaki zincirden işlem yapılacak spesifik bir grup seçin!");
+            if (!target) return alert("Kullanıcı ID veya @username girin!");
+            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen yukarıdaki yörüngeden spesifik bir grup seçin!");
             const res = await fetch('/api/member/action', { 
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: selectedChatId }) 
             });
             const data = await res.json();
             if (data.success) { 
-                alert(`✅ İşlem uygulandı (${actionType.toUpperCase()})`); 
+                alert(`✅ İşlem tamamlandı (${actionType.toUpperCase()})`); 
                 document.getElementById('memberTargetInput').value = ''; 
                 loadData(); 
             } else { 
@@ -476,13 +432,13 @@
 
         async function clearLogs() {
             const days = parseInt(document.getElementById('logClearDays').value);
-            if (!confirm("Log temizleme kuralı uygulansın mı?")) return;
+            if (!confirm("Log temizliği yapılsın mı?")) return;
             await fetch('/api/logs/clear', { 
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ user_id: user.id, days: days }) 
             });
             loadData(); 
-            alert("✅ Log temizleme kuralı uygulandı!");
+            alert("✅ Temizlik tamamlandı!");
         }
 
         async function saveSettings() {
@@ -490,22 +446,14 @@
             const btnText = document.getElementById('btnTextInput').value.trim();
             const btnUrl = document.getElementById('btnUrlInput').value.trim();
             const mediaUrl = document.getElementById('mediaUrlInput').value.trim();
-            const annBtnText = document.getElementById('annBtnTextInput').value.trim();
-            const annBtnUrl = document.getElementById('annBtnUrlInput').value.trim();
-            const schedBtnText = document.getElementById('schedBtnTextInput').value.trim();
-            const schedBtnUrl = document.getElementById('schedBtnUrlInput').value.trim();
 
-            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen önce yukarıdaki zincirden bir grup seçin!");
+            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen önce yörüngeden bir grup seçin!");
 
             const body = { user_id: user.id, chat_id: selectedChatId };
             if (welcome) body.welcome_msg = welcome;
             if (btnText) body.btn_text = btnText;
             if (btnUrl) body.btn_url = btnUrl;
             if (mediaUrl) body.media_url = mediaUrl;
-            if (annBtnText) body.announcement_btn_text = annBtnText;
-            if (annBtnUrl) body.announcement_btn_url = annBtnUrl;
-            if (schedBtnText) body.scheduled_btn_text = schedBtnText;
-            if (schedBtnUrl) body.scheduled_btn_url = schedBtnUrl;
 
             const res = await fetch('/api/settings/update', { 
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, 
@@ -513,41 +461,41 @@
             });
             const data = await res.json();
             if (data.success) {
-                alert("⚜️ Seçilen grup için tüm ayarlar altın standartlarda kaydedildi!");
+                alert("⚜️ Protokoller altın standartlarda kaydedildi!");
             } else {
-                alert("❌ Hata: " + (data.error || "Ayarlar kaydedilemedi!"));
+                alert("❌ Hata: " + (data.error || "Kayıt başarısız!"));
             }
         }
 
-        // 🧠 KATYA AI SOHBET & RAPORLAMA MANTIĞI
-        function handleChatKey(e) {
-            if (e.key === 'Enter') sendAiMessage();
+        // 🤖 JARVIS AI SOHBET KOMUTA MERKEZİ
+        function handleJarvisKey(e) {
+            if (e.key === 'Enter') sendJarvisCommand();
         }
 
-        function sendAiMessage() {
-            const input = document.getElementById('chatInput');
+        function sendJarvisCommand() {
+            const input = document.getElementById('jarvisInput');
             const text = input.value.trim();
             if (!text) return;
 
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.innerHTML += `<div class="chat-bubble user">${text}</div>`;
+            const screen = document.getElementById('jarvisScreen');
+            screen.innerHTML += `<div class="jarvis-msg user">${text}</div>`;
             input.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            screen.scrollTop = screen.scrollHeight;
 
             setTimeout(() => {
-                let aiReply = "👑 Emrinizdeyim Kraljica! Nöral ağlar incelendi, ekosistem tamamen güvende.";
+                let aiReply = "⚜️ Komut işlendi Kraljica. Nöral kalkanlar kararlı.";
                 const lower = text.toLowerCase();
                 if (lower.includes('rapor') || lower.includes('durum')) {
-                    aiReply = "📊 **2100 Kraliyet Raporu:** Tüm grup zincirleri tarandı. Oto-ban koruması aktif, staff denetimleri kusursuz.";
+                    aiReply = "📊 **Jarvis Taktiksel Rapor:** Tüm yörünge halkaları taranıyor. Aktif tehdit yok, otonom savunma sistemi tam güçte çalışıyor.";
                 } else if (lower.includes('temizle') || lower.includes('flood')) {
-                    aiReply = "🛡️ Komut alındı! Kalkanlar tetiklendi, akıştaki tüm şüpheli zararlı hareketler bertaraf edildi.";
+                    aiReply = "🛡️ Acil protokol aktif! Akıştaki tüm şüpheli parazitler ve spam dalgaları engellendi.";
                 } else if (lower.includes('merhaba') || lower.includes('selam')) {
-                    aiReply = "Saygılarım Kraljica! Sizinle çalışmak bir onur.";
+                    aiReply = "Emrinizdeyim Kraljica. Mekiğin tüm kontrolü sizin elinizde.";
                 }
 
-                chatMessages.innerHTML += `<div class="chat-bubble ai">${aiReply}</div>`;
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 600);
+                screen.innerHTML += `<div class="jarvis-msg ai">${aiReply}</div>`;
+                screen.scrollTop = screen.scrollHeight;
+            }, 500);
         }
 
         verifyAccess();
