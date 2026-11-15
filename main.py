@@ -16,6 +16,7 @@ from telegram.ext import (
     CommandHandler,
     MessageHandler,
     ContextTypes,
+    ChatMemberHandler,
     filters
 )
 from telegram.request import HTTPXRequest
@@ -49,6 +50,26 @@ async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYP
     logger.error(f"Telegram Bot Hatası: {context.error}")
 
 # ==========================================
+# OTOMATİK GRUP ALGILAMA (AUTO-DISCOVERY)
+# ==========================================
+async def track_bot_group_join(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    result = update.my_chat_member
+    if not result: return
+    chat = update.effective_chat
+    new_status = result.new_chat_member.status
+    if new_status in ["member", "administrator"]:
+        try:
+            chat_info = await context.bot.get_chat(chat.id)
+            photo_url = ""
+            if chat_info.photo:
+                file_obj = await context.bot.get_file(chat_info.photo.small_file_id)
+                photo_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_obj.file_path}"
+            database.register_bot_group(chat.id, chat_info.title or "Yeni Grup", photo_url)
+            logger.info(f"✨ Yeni grup otomatik algılandı: {chat_info.title} (ID: {chat.id})")
+        except Exception as e:
+            logger.error(f"Grup otomatik kayıt hatası: {e}")
+
+# ==========================================
 # FASTAPI LİFE-SPAN (YAŞAM DÖNGÜSÜ & BOT BAŞLATICI)
 # ==========================================
 @asynccontextmanager
@@ -80,6 +101,7 @@ async def lifespan(app: FastAPI):
         for cmd, func in COMMAND_MAP.items():
             tg_application.add_handler(CommandHandler(cmd, func))
             
+        tg_application.add_handler(ChatMemberHandler(track_bot_group_join, ChatMemberHandler.MY_CHAT_MEMBER))
         tg_application.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, master_message_router))
         
         await tg_application.initialize()
@@ -125,9 +147,8 @@ async def api_clear_logs(request: Request):
         data = await request.json()
         user_id = int(data.get("user_id", 0))
         days = int(data.get("days", 0))
-        if not database.is_authorized_staff(user_id):
-            if str(user_id) != str(FOUNDER_ID).strip():
-                return {"success": False, "error": "Yetkisiz!"}
+        if not database.is_authorized_staff(user_id) and str(user_id) != str(FOUNDER_ID).strip():
+            return {"success": False, "error": "Yetkisiz!"}
         database.clear_logs_by_retention(days)
         return {"success": True}
     except Exception as e:
@@ -157,29 +178,32 @@ async def api_verify_admin(request: Request):
 async def api_get_staff_list(request: Request):
     data = await request.json()
     user_id = int(data.get("user_id", 0))
+    chat_id = int(data.get("chat_id", 0))
     if not database.is_authorized_staff(user_id) and str(user_id) != str(FOUNDER_ID).strip():
         return {"success": False, "error": "Yetkisiz!"}
-    return database.get_all_staff()
+    return database.get_all_staff(chat_id)
 
 @app.post("/api/staff/add")
 async def api_add_staff(request: Request):
     data = await request.json()
     user_id = int(data.get("user_id", 0))
+    chat_id = int(data.get("chat_id", 0))
     input_value = str(data.get("staff_input", "")).strip()
-    full_name = data.get("full_name", "Yetkili")
+    full_name = data.get("full_name", "💎 Yetkili")
     if not input_value: return {"success": False, "error": "Boş değer"}
     clean_val = input_value.lstrip("@").lower()
-    target_id = int(clean_val) if clean_val.isdigit() or (clean_val.startswith("-") and clean_val[1:].isdigit()) else (database.get_user_id_by_username(0, clean_val) or int(hashlib.md5(clean_val.encode()).hexdigest()[:8], 16))
-    database.add_staff_member(target_id, clean_val, full_name, user_id)
+    target_id = int(clean_val) if clean_val.isdigit() or (clean_val.startswith("-") and clean_val[1:].isdigit()) else (database.get_user_id_by_username(chat_id, clean_val) or int(hashlib.md5(clean_val.encode()).hexdigest()[:8], 16))
+    database.add_staff_member(target_id, clean_val, full_name, user_id, chat_id)
     return {"success": True}
 
 @app.post("/api/staff/toggle")
 async def api_toggle_staff_perm(request: Request):
     data = await request.json()
     target_id = int(data.get("target_id", 0))
+    chat_id = int(data.get("chat_id", 0))
     perm_field = str(data.get("perm", ""))
     if perm_field in ["can_ban", "can_mute"]:
-        new_val = database.toggle_staff_permission(target_id, perm_field)
+        new_val = database.toggle_staff_permission(target_id, chat_id, perm_field)
         return {"success": True, "new_val": new_val}
     return {"success": False}
 
@@ -187,7 +211,8 @@ async def api_toggle_staff_perm(request: Request):
 async def api_remove_staff(request: Request):
     data = await request.json()
     target_id = int(data.get("target_id", 0))
-    database.remove_staff_member(target_id)
+    chat_id = int(data.get("chat_id", 0))
+    database.remove_staff_member(target_id, chat_id)
     return {"success": True}
 
 @app.post("/api/member/action")
@@ -235,9 +260,10 @@ async def api_update_settings(request: Request):
         data = await request.json()
         user_id = int(data.get("user_id", 0))
         chat_id = int(data.get("chat_id", 0))
-        if not database.is_authorized_staff(user_id): return {"success": False, "error": "Yetkisiz!"}
+        if not database.is_authorized_staff(user_id) and str(user_id) != str(FOUNDER_ID).strip():
+            return {"success": False, "error": "Yetkisiz!"}
         if chat_id:
-            for key in ["welcome_msg", "btn_text", "btn_url", "media_url", "announcement_btn_text", "announcement_btn_url"]:
+            for key in ["welcome_msg", "btn_text", "btn_url", "media_url", "announcement_btn_text", "announcement_btn_url", "scheduled_btn_text", "scheduled_btn_url"]:
                 if key in data: database.update_group_setting(chat_id, key, data[key])
         return {"success": True}
     except Exception as e:
@@ -316,6 +342,11 @@ async def send_periodic_announcement(bot, chat_id, text, btn_text, btn_url, medi
         if not current_bot: return
         
         reply_markup = None
+        if not btn_text or not btn_url:
+            sched_settings = database.get_announcement_settings(chat_id)
+            if not btn_text: btn_text = sched_settings.get("scheduled_btn_text", "")
+            if not btn_url: btn_url = sched_settings.get("scheduled_btn_url", "")
+
         if btn_text and btn_url:
             clean_url = str(btn_url).strip()
             if clean_url.startswith(("http://", "https://", "tg://")) and " " not in clean_url and "\n" not in clean_url:
@@ -340,7 +371,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if chat_info.photo:
                 file_id = chat_info.photo.small_file_id
                 file_obj = await context.bot.get_file(file_id)
-                photo_url = file_obj.file_path
+                photo_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_obj.file_path}"
             database.register_bot_group(chat.id, chat.title or "Grup", photo_url)
         except Exception:
             database.register_bot_group(chat.id, chat.title or "Grup", "")
@@ -356,12 +387,14 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "- /butonmetni <yazı> - Hoş geldin butonu yazısı\n"
         "- /butonlinki <url> - Hoş geldin butonu linki\n"
         "- /duyuru <mesaj> - Duyuru gönder (Otomatik Pinlenir / Yanıtlanan görseli sabitler)\n"
-        "- /duyuru <mesaj> | <buton metni> | <link> - Özel butonlu duyuru (Görsele yanıtla atılırsa butonlu görseli pinler)\n"
+        "- /duyuru <mesaj> | <buton metni> | <link> - Özel butonlu duyuru\n"
         "- /duyurubutonmetni <yazı> - Varsayılan duyuru butonu yazısını ayarla\n"
         "- /duyurubutonlinki <url> - Varsayılan duyuru butonu linkini ayarla\n"
-        "- /zamanla <dakika> <mesaj> - Butonsuz periyodik duyuru başlat (Pinlenmez)\n"
-        "- /zamanla <dakika> | <mesaj> | <buton metni> | <link> - Butonlu periyodik duyuru başlat (Pinlenmez)\n"
-        "- /zamanladur veya /zamanla dur - Yanıtlanan zamanlanmış paylaşımı durdur\n"
+        "- /zamanlabutonmetin <yazı> - Zamanlı duyuru butonu yazısını ayarla\n"
+        "- /zamanlabutonlinki <url> - Zamanlı duyuru butonu linkini ayarla\n"
+        "- /zamanla <dakika> <mesaj> - Periyodik duyuru başlat\n"
+        "- /zamanla <dakika> | <mesaj> | <buton metni> | <link> - Özel butonlu periyodik duyuru\n"
+        "- /zamanladur veya /zamanla dur - Zamanlanmış paylaşımı durdur\n"
         "- /defol <kullanıcı> - Banla\n"
         "- /undefol <kullanıcı> - Ban kaldır\n"
         "- /itaat <kullanıcı> - Sustur\n"
@@ -420,8 +453,8 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     def_settings = database.get_announcement_settings(chat_id)
-    btn_text = def_settings.get("btn_text", "")
-    btn_url = def_settings.get("btn_url", "")
+    btn_text = def_settings.get("announcement_btn_text", def_settings.get("btn_text", ""))
+    btn_url = def_settings.get("announcement_btn_url", def_settings.get("btn_url", ""))
     msg_text = raw_text
 
     if "|" in raw_text:
@@ -467,6 +500,23 @@ async def cmd_duyurubutonlinki(update: Update, context: ContextTypes.DEFAULT_TYP
     if context.args:
         database.update_group_setting(update.effective_chat.id, "announcement_btn_url", context.args[0].strip())
         await send_auto_delete_message(context, update.effective_chat.id, "✅ Varsayılan duyuru buton linki güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_zamanlabutonmetin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    text = " ".join(context.args)
+    if text:
+        database.update_group_setting(update.effective_chat.id, "scheduled_btn_text", text)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Zamanlı duyuru buton metni güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_zamanlabutonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    if context.args:
+        database.update_group_setting(update.effective_chat.id, "scheduled_btn_url", context.args[0].strip())
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Zamanlı duyuru buton linki güncellendi!", 4)
     try: await update.message.delete()
     except Exception: pass
 
@@ -525,6 +575,12 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if not msg_text and reply:
         msg_text = reply.caption or reply.text or ""
+
+    # Eğer özel buton verilmemişse, veritabanındaki zamanlı duyuru varsayılan butonlarını al
+    if not btn_text or not btn_url:
+        sched_settings = database.get_announcement_settings(chat_id)
+        if not btn_text: btn_text = sched_settings.get("scheduled_btn_text", "")
+        if not btn_url: btn_url = sched_settings.get("scheduled_btn_url", "")
 
     job_id = hashlib.md5(f"{chat_id}_{minutes}_{msg_text[:20]}".encode()).hexdigest()
     scheduler.add_job(
@@ -663,6 +719,8 @@ COMMAND_MAP = {
     "duyuru": cmd_duyuru,
     "duyurubutonmetni": cmd_duyurubutonmetni,
     "duyurubutonlinki": cmd_duyurubutonlinki,
+    "zamanlabutonmetin": cmd_zamanlabutonmetin,
+    "zamanlabutonlinki": cmd_zamanlabutonlinki,
     "zamanla": cmd_zamanla,
     "zamanladur": cmd_zamanladur,
     "kilit": cmd_kilit,
@@ -685,7 +743,7 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
             photo_url = ""
             if chat_info.photo:
                 file_obj = await context.bot.get_file(chat_info.photo.small_file_id)
-                photo_url = file_obj.file_path
+                photo_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_obj.file_path}"
             database.register_bot_group(chat.id, chat.title or "Grup", photo_url)
         except Exception:
             database.register_bot_group(chat.id, chat.title or "Grup", "")
