@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 import httpx
@@ -132,6 +132,19 @@ if os.path.exists("public"):
 @app.get("/health")
 async def health_check():
     return HTMLResponse("GOLDEN_ENTERPRISE_FASTAPI_OK")
+
+@app.get("/api/proxy-image")
+async def proxy_image(url: str):
+    try:
+        if not url or not url.startswith("https://api.telegram.org/"):
+            return Response(status_code=400)
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(url, timeout=10.0)
+            if resp.status_code == 200:
+                return Response(content=resp.content, media_type=resp.headers.get("content-type", "image/jpeg"))
+        return Response(status_code=404)
+    except Exception:
+        return Response(status_code=500)
 
 @app.get("/api/stats")
 async def api_get_stats():
