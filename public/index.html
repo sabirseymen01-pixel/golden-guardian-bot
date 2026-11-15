@@ -4,78 +4,78 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Guardian | 2100 Camsı Kristal Command Hub</title>
+    <title>Golden Guardian | 2100 Gold Glass Command Hub</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.25);
-            --glass-border: rgba(255, 182, 193, 0.45);
-            --gold-glow: rgba(212, 175, 55, 0.7);
-            --pink-crystal: rgba(255, 105, 180, 0.6);
-            --danger-glow: rgba(255, 77, 77, 0.8);
-            --text-main: #2b2b2b;
-            --text-muted: #666666;
+            /* 👑 Lüks Gold & Şeffaf Camsı Palet */
+            --glass-bg: rgba(26, 22, 15, 0.65);
+            --glass-border: rgba(212, 175, 55, 0.45);
+            --glass-card: rgba(35, 30, 20, 0.55);
+            --gold-glow: rgba(212, 175, 55, 0.8);
+            --gold-shine: #f3e5ab;
             --accent-gold: #d4af37;
-            --accent-pink: #ff69b4;
+            --danger-glow: rgba(255, 77, 77, 0.9);
+            --text-main: #fcf8ee;
+            --text-muted: #d1c7b7;
             --danger: #ff4d4d;
             --success: #2ecc71;
             --warning: #f39c12;
-            --info: #3498db;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         
         html, body {
-            background-color: #fdf2f8 !important;
+            background-color: #0d0b07 !important;
             min-height: 100vh;
         }
 
         body {
-            background: linear-gradient(135deg, rgba(255,240,245,0.95) 0%, rgba(253,245,230,0.95) 50%, rgba(255,228,225,0.95) 100%), 
-                        radial-gradient(circle at 50% 10%, rgba(255,192,203,0.5) 0%, transparent 70%);
+            background: linear-gradient(135deg, rgba(20,16,10,0.96) 0%, rgba(10,8,5,0.98) 50%, rgba(25,20,12,0.96) 100%), 
+                        radial-gradient(circle at 50% 15%, rgba(212,175,55,0.2) 0%, transparent 70%);
             background-attachment: fixed; color: var(--text-main); padding: 14px; display: flex; flex-direction: column; overflow-x: hidden;
         }
 
-        /* 🧊 Camsı Berrak Konteynerler */
+        /* 🧊 Şeffaf Camsı Gold Konteynerler */
         .glass-container {
             background: var(--glass-bg);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
             padding: 16px;
             margin-bottom: 14px;
-            box-shadow: 0 10px 35px 0 rgba(255, 182, 193, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.6);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7), inset 0 0 25px rgba(212, 175, 55, 0.15);
         }
 
         .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 14px; }
-        .logo h1 { font-size: 15px; color: var(--accent-gold); font-weight: 800; text-shadow: 0 0 12px rgba(212,175,55,0.4); }
-        .badge { background: rgba(255, 105, 180, 0.25); color: #c2185b; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid rgba(255, 105, 180, 0.5); box-shadow: 0 0 12px rgba(255,105,180,0.3); }
+        .logo h1 { font-size: 15px; color: var(--gold-shine); font-weight: 800; text-shadow: 0 0 15px var(--gold-glow); display: flex; align-items: center; gap: 6px; }
+        .badge { background: rgba(212, 175, 55, 0.2); color: var(--gold-shine); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 900; border: 1px solid var(--gold-glow); box-shadow: 0 0 15px rgba(212,175,55,0.4); }
         
-        /* 🔗 AKIŞKAN DAİRESEL ZİNCİRSEL GRUP LOGO CAROUSEL */
-        .group-chain-section { text-align: center; margin-bottom: 14px; background: rgba(255, 255, 255, 0.3); }
-        .group-chain-title { font-size: 10px; color: var(--accent-pink); letter-spacing: 1.5px; margin-bottom: 10px; font-weight: 800; text-shadow: 0 0 8px rgba(255,105,180,0.4); }
-        .group-chain-wrapper { display: flex; justify-content: flex-start; gap: 16px; overflow-x: auto; padding: 8px 4px; scrollbar-width: none; animation: floatChain 6s ease-in-out infinite alternate; }
+        /* 🔗 SÜREKLİ AKIŞKAN DAİRESEL ZİNCİRSEL GRUP LOGO CAROUSEL */
+        .group-chain-section { text-align: center; margin-bottom: 14px; background: rgba(20, 16, 10, 0.45); }
+        .group-chain-title { font-size: 10px; color: var(--accent-gold); letter-spacing: 2px; margin-bottom: 10px; font-weight: 800; text-shadow: 0 0 10px var(--gold-glow); }
+        .group-chain-wrapper { display: flex; justify-content: flex-start; gap: 16px; overflow-x: auto; padding: 8px 4px; scrollbar-width: none; animation: floatChain 8s ease-in-out infinite alternate; }
         .group-chain-wrapper::-webkit-scrollbar { display: none; }
         
         @keyframes floatChain {
             0% { transform: translateX(0px); }
-            100% { transform: translateX(4px); }
+            100% { transform: translateX(6px); }
         }
 
         .group-node { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .group-node:hover { transform: scale(1.08); }
+        .group-node:hover { transform: scale(1.1); }
         .group-node:active { transform: scale(0.92); }
         
         .group-avatar {
-            width: 62px; height: 62px; border-radius: 50%; border: 2.5px solid var(--glass-border);
-            background: rgba(255, 255, 255, 0.6); display: flex; align-items: center; justify-content: center; overflow: hidden;
-            box-shadow: 0 6px 20px rgba(212,175,55,0.25), inset 0 0 12px rgba(255,255,255,0.8); transition: all 0.4s ease;
+            width: 64px; height: 64px; border-radius: 50%; border: 2.5px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.8), inset 0 0 15px rgba(212,175,55,0.3); transition: all 0.4s ease;
         }
         .group-node.active-node .group-avatar {
-            border-color: var(--accent-gold);
-            box-shadow: 0 0 25px var(--gold-glow), inset 0 0 15px rgba(212,175,55,0.7);
+            border-color: var(--gold-shine);
+            box-shadow: 0 0 30px var(--gold-glow), inset 0 0 20px rgba(212,175,55,0.7);
         }
-        /* 🚨 KRİTİK ALARM DURUMU: KIRMIZI BÜYÜYEN PALSING LOGO */
+        /* 🚨 KRİTİK ALARM DURUMU: KIRMIZI BÜYÜYEN PULSING LOGO */
         .group-node.alarm-node .group-avatar {
             border-color: var(--danger);
             box-shadow: 0 0 35px var(--danger-glow), inset 0 0 20px rgba(255,77,77,0.8);
@@ -83,77 +83,77 @@
         }
         @keyframes alarmPulse {
             0% { transform: scale(1); }
-            100% { transform: scale(1.12); }
+            100% { transform: scale(1.15); }
         }
 
         .group-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .group-avatar .fallback-icon { font-size: 24px; color: var(--accent-gold); }
-        .group-label { font-size: 11px; color: var(--text-main); margin-top: 6px; max-width: 74px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
-        .group-node.active-node .group-label { color: var(--accent-gold); font-weight: 900; text-shadow: 0 0 8px rgba(212,175,55,0.4); }
+        .group-avatar .fallback-icon { font-size: 26px; color: var(--accent-gold); }
+        .group-label { font-size: 11px; color: var(--text-muted); margin-top: 6px; max-width: 78px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
+        .group-node.active-node .group-label { color: var(--gold-shine); font-weight: 900; text-shadow: 0 0 8px var(--gold-glow); }
 
-        /* 🌸 PORT NAVİGASYON */
+        /* ⚜️ PORT NAVİGASYON */
         .port-nav { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 14px; scrollbar-width: none; }
         .port-nav::-webkit-scrollbar { display: none; }
         .port-tab {
             flex: 0 0 auto; text-align: center; padding: 10px 14px; font-size: 11px; font-weight: 700;
-            color: var(--text-muted); background: rgba(255, 255, 255, 0.35); border: 1px solid rgba(255, 255, 255, 0.6);
+            color: var(--text-muted); background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(212, 175, 55, 0.2);
             border-radius: 14px; cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(12px);
         }
         .port-tab.active {
-            background: linear-gradient(135deg, rgba(255,105,180,0.5) 0%, rgba(212,175,55,0.4) 100%);
-            color: #ad1457; border-color: var(--accent-pink); box-shadow: 0 0 18px rgba(255,105,180,0.4);
+            background: linear-gradient(135deg, rgba(212,175,55,0.45) 0%, rgba(170,119,28,0.35) 100%);
+            color: var(--gold-shine); border-color: var(--gold-shine); box-shadow: 0 0 20px var(--gold-glow);
             font-weight: 900;
         }
         
         .portal-section { display: none; opacity: 0; transform: translateY(10px); transition: opacity 0.4s ease, transform 0.4s ease; flex-direction: column; }
         .portal-section.active { display: flex; opacity: 1; transform: translateY(0); }
         
-        .section-title { font-size: 13px; font-weight: 800; margin-bottom: 12px; color: var(--accent-gold); display: flex; align-items: center; gap: 8px; text-shadow: 0 0 8px rgba(212,175,55,0.3); }
-        .subsection-title { font-size: 11px; font-weight: 800; color: #ad1457; margin: 12px 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,105,180,0.4); padding-bottom: 4px; }
+        .section-title { font-size: 13px; font-weight: 800; margin-bottom: 12px; color: var(--gold-shine); display: flex; align-items: center; gap: 8px; text-shadow: 0 0 10px var(--gold-glow); }
+        .subsection-title { font-size: 11px; font-weight: 800; color: var(--accent-gold); margin: 12px 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 4px; }
         
         input, select, textarea {
-            width: 100%; background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(255, 182, 193, 0.6);
-            border-radius: 14px; padding: 12px; color: #2b2b2b; font-size: 13px; outline: none; margin-bottom: 10px; backdrop-filter: blur(10px);
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.03);
+            width: 100%; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border);
+            border-radius: 14px; padding: 12px; color: #fff; font-size: 13px; outline: none; margin-bottom: 10px; backdrop-filter: blur(10px);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
         }
-        input::placeholder, textarea::placeholder { color: #777; }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent-pink); box-shadow: 0 0 12px rgba(255,105,180,0.5); background: rgba(255, 255, 255, 0.85); }
+        input::placeholder, textarea::placeholder { color: #888; }
+        input:focus, select:focus, textarea:focus { border-color: var(--gold-shine); box-shadow: 0 0 12px var(--gold-glow); background: rgba(0, 0, 0, 0.6); }
         
         .apple-btn {
-            width: 100%; background: linear-gradient(135deg, #d4af37 0%, #ff69b4 100%); color: #fff;
+            width: 100%; background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%); color: #000;
             border: none; padding: 12px; border-radius: 14px; font-weight: 900; font-size: 13px; cursor: pointer;
-            box-shadow: 0 5px 20px rgba(212,175,55,0.4); transition: transform 0.15s; text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+            box-shadow: 0 5px 20px rgba(212,175,55,0.4); transition: transform 0.15s; text-shadow: 0 1px 2px rgba(255,255,255,0.4);
         }
         .apple-btn:active { transform: scale(0.96); }
         
-        .item-row { background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 182, 193, 0.5); padding: 12px; border-radius: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
-        .log-box { background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 182, 193, 0.5); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; font-size: 11px; color: #333; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .item-row { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.25); padding: 12px; border-radius: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .log-box { background: rgba(0, 0, 0, 0.35); border: 1px solid var(--glass-border); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; font-size: 11px; color: var(--text-muted); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         
         .action-tag { font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 6px; display: inline-block; margin-right: 6px; }
-        .tag-ban { background: rgba(255, 77, 77, 0.25); color: #c62828; border: 1px solid rgba(255,77,77,0.5); }
-        .tag-mute { background: rgba(230, 126, 34, 0.25); color: #d84315; border: 1px solid rgba(230,126,34,0.5); }
-        .tag-warn { background: rgba(243, 156, 18, 0.25); color: #f57f17; border: 1px solid rgba(243,156,18,0.5); }
-        .tag-ann { background: rgba(255, 105, 180, 0.25); color: #ad1457; border: 1px solid rgba(255,105,180,0.5); }
-        .tag-sched { background: rgba(46, 204, 113, 0.25); color: #2e7d32; border: 1px solid rgba(46,204,113,0.5); }
+        .tag-ban { background: rgba(255, 77, 77, 0.25); color: var(--danger); border: 1px solid var(--danger); }
+        .tag-mute { background: rgba(230, 126, 34, 0.25); color: #e67e22; border: 1px solid #e67e22; }
+        .tag-warn { background: rgba(243, 156, 18, 0.25); color: var(--warning); border: 1px solid var(--warning); }
+        .tag-ann { background: rgba(52, 152, 219, 0.25); color: var(--info); border: 1px solid var(--info); }
+        .tag-sched { background: rgba(46, 204, 113, 0.25); color: var(--success); border: 1px solid var(--success); }
         
-        .selectable-text { user-select: all; -webkit-user-select: all; background: rgba(255, 255, 255, 0.75); padding: 3px 6px; border-radius: 6px; color: #ad1457; font-family: monospace; display: inline-block; margin-top: 3px; font-size: 10px; font-weight: 800; }
+        .selectable-text { user-select: all; -webkit-user-select: all; background: rgba(0,0,0,0.5); padding: 3px 6px; border-radius: 6px; color: var(--gold-shine); font-family: monospace; display: inline-block; margin-top: 3px; font-size: 10px; font-weight: 800; }
         .loading { text-align: center; color: var(--text-muted); padding: 20px; font-size: 12px; }
 
-        /* 🧠 KATYA AI SOHBET KUTUSU */
-        .chat-container { display: flex; flex-direction: column; height: 320px; background: rgba(255,255,255,0.4); border-radius: 16px; border: 1px solid var(--glass-border); overflow: hidden; }
+        /* 🤖 KATYA AI SOHBET KUTUSU */
+        .chat-container { display: flex; flex-direction: column; height: 320px; background: rgba(0,0,0,0.3); border-radius: 16px; border: 1px solid var(--glass-border); overflow: hidden; }
         .chat-messages { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 12px; line-height: 1.4; }
-        .chat-bubble.ai { background: rgba(255, 105, 180, 0.2); color: #880e4f; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid rgba(255,105,180,0.3); }
-        .chat-bubble.user { background: rgba(212, 175, 55, 0.25); color: #5d4037; align-self: flex-end; border-bottom-right-radius: 2px; border: 1px solid rgba(212,175,55,0.4); }
-        .chat-input-area { display: flex; padding: 8px; background: rgba(255,255,255,0.6); gap: 6px; border-top: 1px solid var(--glass-border); }
+        .chat-bubble.ai { background: rgba(212, 175, 55, 0.15); color: var(--gold-shine); align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid rgba(212,175,55,0.3); }
+        .chat-bubble.user { background: rgba(255, 255, 255, 0.1); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; border: 1px solid rgba(255,255,255,0.2); }
+        .chat-input-area { display: flex; padding: 8px; background: rgba(0,0,0,0.4); gap: 6px; border-top: 1px solid var(--glass-border); }
         .chat-input-area input { margin-bottom: 0; }
     </style>
 </head>
 <body>
 
     <div class="glass-container header">
-        <div class="logo"><h1>⚜️ Camsı Kristal Hub</h1></div>
-        <div class="badge" id="userRole">🌸 Kurucu 👑</div>
+        <div class="logo"><h1>⚜️ Golden Guardian Hub</h1></div>
+        <div class="badge" id="userRole">Kraljica 👑</div>
     </div>
 
     <!-- 🔗 AKIŞKAN DAİRESEL ZİNCİRSEL GRUP LOGO CAROUSEL -->
@@ -179,11 +179,11 @@
         <div class="glass-container">
             <div class="section-title">📊 2100 Otonom Sistem Durumu</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div style="background: rgba(255,255,255,0.4); padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border);">
+                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border);">
                     <div style="font-size: 10px; color: var(--text-muted);">TOPLAM İŞLEM</div>
-                    <div id="totalActions" style="font-size: 16px; font-weight: 900; color: var(--accent-pink);">-</div>
+                    <div id="totalActions" style="font-size: 16px; font-weight: 900; color: var(--gold-shine);">-</div>
                 </div>
-                <div style="background: rgba(255,255,255,0.4); padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border);">
+                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 14px; border: 1px solid var(--glass-border);">
                     <div style="font-size: 10px; color: var(--text-muted);">OTONOM ENGELLEMELER</div>
                     <div id="totalBans" style="font-size: 16px; font-weight: 900; color: var(--danger);">-</div>
                 </div>
@@ -196,7 +196,7 @@
         <div class="glass-container">
             <div class="section-title">👑 Grup Bazlı Granüler Yetki Matrisi</div>
             <input type="text" id="staffInput" placeholder="@kullaniciadi veya ID girin">
-            <input type="text" id="staffName" placeholder="Yetkili Ünvanı (Örn: 💎 Kristal Operatör)">
+            <input type="text" id="staffName" placeholder="Yetkili Ünvanı (Örn: 💎 Kristal Muhafız)">
             <button class="apple-btn" onclick="addStaff()">Gruba Yetkiyi Mühürle</button>
         </div>
         <div class="glass-container">
@@ -214,7 +214,7 @@
                 <button class="apple-btn" style="background: var(--danger); color: #fff;" onclick="memberAction('ban')">Banla 🚫</button>
                 <button class="apple-btn" style="background: var(--success); color: #fff;" onclick="memberAction('unban')">Banı Kaldır ✅</button>
                 <button class="apple-btn" style="background: #e67e22; color: #fff;" onclick="memberAction('mute')">Sustur 🔇</button>
-                <button class="apple-btn" style="background: #3498db; color: #fff;" onclick="memberAction('unmute')">Susturmayı Aç 🔊</button>
+                <button class="apple-btn" style="background: var(--info); color: #fff;" onclick="memberAction('unmute')">Susturmayı Aç 🔊</button>
             </div>
         </div>
     </div>
@@ -222,7 +222,7 @@
     <!-- PORT 4: GENEL LOGLAR -->
     <div id="port-genlogs" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">📜 Camsı Akışlı Genel Loglar</div>
+            <div class="section-title">📜 Şeffaf Akışlı Genel Loglar</div>
             <div style="display: flex; gap: 8px; margin-bottom: 10px;">
                 <select id="logClearDays" style="margin-bottom:0;">
                     <option value="1">Günlük Temizleme</option>
@@ -247,7 +247,7 @@
     <!-- PORT 6: GRUP & DUYURU -->
     <div id="port-settings" class="portal-section">
         <div class="glass-container">
-            <div class="section-title">⚙️ Camsı Pembe Grup Ayarları</div>
+            <div class="section-title">⚙️ Camsı Gold Grup Ayarları</div>
             
             <div class="subsection-title">👋 Hoş Geldin Yapılandırması</div>
             <textarea id="welcomeMsgInput" rows="2" placeholder="Grup karşılama metni..."></textarea>
@@ -255,7 +255,7 @@
             <input type="text" id="btnUrlInput" placeholder="Buton Linki (https://...)">
             <input type="text" id="mediaUrlInput" placeholder="Medya URL (Opsiyonel)">
 
-            <div class="subsection-title">🌸 Pink Kristal Varsayılan Duyuru Butonu</div>
+            <div class="subsection-title">👑 Altın Standart Varsayılan Duyuru Butonu</div>
             <input type="text" id="annBtnTextInput" placeholder="Duyuru Buton Metni">
             <input type="text" id="annBtnUrlInput" placeholder="Duyuru Buton Linki">
 
@@ -272,11 +272,11 @@
         <div class="glass-container">
             <div class="section-title">🧠 Katya AI - Otonom Komuta & Rapor Asistanı</div>
             <p style="font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px;">
-                Kurucu özel yetkisiyle Katya ile doğrudan konuşabilir; grupların güvenlik raporunu isteyebilir veya otonom komutlar verebilirsin.
+                Kraljica özel yetkisiyle Katya ile doğrudan konuşabilir; grupların güvenlik raporunu isteyebilir veya otonom komutlar verebilirsin.
             </p>
             <div class="chat-container">
                 <div class="chat-messages" id="chatMessages">
-                    <div class="chat-bubble ai">🌸 Selam Kurucum! Ben Katya AI. 2100 Nöral ağlar aktif, gruplarımız tamamen güvende. Nasıl yardımcı olabilirim?</div>
+                    <div class="chat-bubble ai">👑 Selamlar Kraljica! Ben Katya AI. 2100 Nöral ağlar aktif, gruplarımız tamamen güvende. Nasıl yardımcı olabilirim?</div>
                 </div>
                 <div class="chat-input-area">
                     <input type="text" id="chatInput" placeholder="Katya'ya komut ver veya rapor iste..." onkeypress="handleChatKey(event)">
@@ -311,9 +311,8 @@
                     document.body.innerHTML = `<div style="text-align:center; padding:60px; color:var(--danger);"><h2>⛔ Yetkisiz Erişim!</h2></div>`; 
                     return; 
                 }
-                // Founder ID ve rozet tanıması
                 const isFounder = String(user.id) === "8245373459" || data.is_founder;
-                document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (isFounder ? " 👑 İMMPARATOR" : " 🌸 OPERATÖR");
+                document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (isFounder ? " Kraljica 👑" : " 🛡️");
                 await loadGroups(); 
                 await loadData(); 
                 setInterval(loadData, 5000);
@@ -336,8 +335,8 @@
 
                     groups.forEach((g, index) => {
                         const isActive = selectedChatId == g.chat_id;
-                        // Örnek simülasyon: İlk grupta risk/kriz varsa .alarm-node eklenir (Dairesel kırmızı büyüme)
-                        const hasAlarm = (index === 1 && Math.random() > 0.6); 
+                        // Simülasyon: Kriz anında dairesel logonun kırmızıya dönüp büyümesi (.alarm-node)
+                        const hasAlarm = (index === 1 && Math.random() > 0.7); 
                         
                         let avatarContent = `<span class="fallback-icon">🛡️</span>`;
                         if (g.photo_url) {
@@ -393,7 +392,7 @@
                 adminC.innerHTML = adminLogs.length === 0 ? '<div style="font-size:11px; color:var(--text-muted); text-align:center;">Admin işlem kaydı yok.</div>' : '';
                 adminLogs.forEach(l => {
                     adminC.innerHTML += `
-                        <div class="log-box" style="border-color: rgba(255,105,180,0.5);">
+                        <div class="log-box" style="border-color: rgba(212,175,55,0.4);">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
                                 <div><span class="action-tag tag-ann">${l.action_type}</span></div>
                                 <span style="font-size:10px; color:var(--text-muted);">${l.timestamp}</span>
@@ -414,7 +413,7 @@
                 staffs.forEach(s => {
                     staffC.innerHTML += `
                         <div class="item-row">
-                            <div><b>${s.full_name}</b> 🌸<br><span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username}</span></div>
+                            <div><b>${s.full_name}</b> 👑<br><span style="font-size:10px; color:var(--text-muted);">ID: ${s.user_id} | @${s.username}</span></div>
                             <div style="display:flex; gap:6px;">
                                 <button onclick="toggleStaffPerm(${s.user_id}, 'can_ban')" style="background:${s.can_ban ? 'var(--success)' : 'var(--danger)'}; color:#fff; border:none; padding:5px 8px; border-radius:8px; font-size:10px; cursor:pointer;">Ban: ${s.can_ban ? 'AÇIK' : 'KAPALI'}</button>
                                 <button onclick="toggleStaffPerm(${s.user_id}, 'can_mute')" style="background:${s.can_mute ? 'var(--success)' : 'var(--danger)'}; color:#fff; border:none; padding:5px 8px; border-radius:8px; font-size:10px; cursor:pointer;">Mute: ${s.can_mute ? 'AÇIK' : 'KAPALI'}</button>
@@ -428,7 +427,7 @@
 
         async function addStaff() {
             const input = document.getElementById('staffInput').value.trim();
-            const name = document.getElementById('staffName').value.trim() || '🌸 Kristal Yetkili';
+            const name = document.getElementById('staffName').value.trim() || '👑 Kraliyet Muhafızı';
             if (!input) return alert("Değer girin!");
             await fetch('/api/staff/add', { 
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, 
@@ -514,7 +513,7 @@
             });
             const data = await res.json();
             if (data.success) {
-                alert("🌸 Seçilen grup için tüm ayarlar camsı pembe kristal standartlarında kaydedildi!");
+                alert("⚜️ Seçilen grup için tüm ayarlar altın standartlarda kaydedildi!");
             } else {
                 alert("❌ Hata: " + (data.error || "Ayarlar kaydedilemedi!"));
             }
@@ -535,16 +534,15 @@
             input.value = '';
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // Simüle edilmiş Katya AI yanıtı (2100 Akıllı Raporlama)
             setTimeout(() => {
-                let aiReply = "🌸 Nöral ağlar incelendi. Gruplarımızda olağan dışı bir tehdit tespit edilmedi Kurucum.";
+                let aiReply = "👑 Emrinizdeyim Kraljica! Nöral ağlar incelendi, ekosistem tamamen güvende.";
                 const lower = text.toLowerCase();
                 if (lower.includes('rapor') || lower.includes('durum')) {
-                    aiReply = "📊 **2100 Raporu:** Tüm gruplar aktif taramada. Oto-ban koruması kusursuz çalışıyor, staff yetkileri dengede.";
+                    aiReply = "📊 **2100 Kraliyet Raporu:** Tüm grup zincirleri tarandı. Oto-ban koruması aktif, staff denetimleri kusursuz.";
                 } else if (lower.includes('temizle') || lower.includes('flood')) {
-                    aiReply = "🛡️ Komut alındı! Nöral kalkanlar tetiklendi, akıştaki tüm şüpheli flood girişimleri engellendi.";
+                    aiReply = "🛡️ Komut alındı! Kalkanlar tetiklendi, akıştaki tüm şüpheli zararlı hareketler bertaraf edildi.";
                 } else if (lower.includes('merhaba') || lower.includes('selam')) {
-                    aiReply = "Emrinizdeyim Kurucum! Ekosistem tam denetimim altında.";
+                    aiReply = "Saygılarım Kraljica! Sizinle çalışmak bir onur.";
                 }
 
                 chatMessages.innerHTML += `<div class="chat-bubble ai">${aiReply}</div>`;
