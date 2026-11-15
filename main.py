@@ -107,7 +107,7 @@ async def lifespan(app: FastAPI):
         await tg_application.initialize()
         await tg_application.start()
         await tg_application.updater.start_polling(drop_pending_updates=True)
-        log_event("SYS", "Telegram Bot ve FastAPI (FastAPI + PTB) eşzamanlı aktif!")
+        log_event("SYS", "Telegram Bot ve FastAPI (2100 Nöral Çekirdek) eşzamanlı aktif!")
 
     yield
 
@@ -193,7 +193,7 @@ async def api_add_staff(request: Request):
     user_id = int(data.get("user_id", 0))
     chat_id = int(data.get("chat_id", 0))
     input_value = str(data.get("staff_input", "")).strip()
-    full_name = data.get("full_name", "💎 Yetkili")
+    full_name = data.get("full_name", "🌸 Kristal Yetkili")
     if not input_value: return {"success": False, "error": "Boş değer"}
     clean_val = input_value.lstrip("@").lower()
     target_id = int(clean_val) if clean_val.isdigit() or (clean_val.startswith("-") and clean_val[1:].isdigit()) else (database.get_user_id_by_username(chat_id, clean_val) or int(hashlib.md5(clean_val.encode()).hexdigest()[:8], 16))
@@ -393,7 +393,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     welcome_text = (
-        "🤖 Grup Yönetim & Golden Staff Güvenlik Botu\n\n"
+        "🤖 Grup Yönetim & 2100 Katya Güvenlik Botu\n\n"
         "📜 Yönetici Komutları:\n"
         "- /welcome <mesaj> - Hoş geldin mesajı\n"
         "- /butonmetni <yazı> - Hoş geldin butonu yazısı\n"
