@@ -1,477 +1,797 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Katya | 3D Spatial HUD Cockpit</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <style>
-        :root {
-            --space-black: #020100;
-            --hud-gold: #d4af37;
-            --gold-glow: #f8ecbe;
-            --danger-red: #ff3333;
-            --glass-panel: rgba(10, 8, 4, 0.90);
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: monospace; -webkit-tap-highlight-color: transparent; }
+import os
+import json
+import asyncio
+import logging
+import hashlib
+from datetime import datetime, timezone
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+import uvicorn
+import httpx
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, ChatPermissions
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    MessageHandler,
+    ContextTypes,
+    ChatMemberHandler,
+    filters
+)
+from telegram.request import HTTPXRequest
+from telegram.error import Conflict
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+import database
+try:
+    import config
+except ImportError:
+    config = None
+
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+BOT_TOKEN = (os.environ.get("BOT_TOKEN") or (config and getattr(config, "BOT_TOKEN", None)) or "").strip()
+FOUNDER_ID = (os.environ.get("FOUNDER_ID") or (config and getattr(config, "FOUNDER_ID", None)) or "8245373459").strip()
+
+EMERGENCY_LOCKDOWN = False
+BAD_WORDS = ["küfür1", "küfür2", "argo1"]
+scheduler = AsyncIOScheduler()
+tg_application = None
+
+def log_event(level: str, message: str):
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    print(f"[{timestamp}] [{level}] {message}", flush=True)
+
+async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if isinstance(context.error, Conflict):
+        return
+    logger.error(f"Telegram Bot Hatası: {context.error}")
+
+# ==========================================
+# 🔗 OTOMATİK GRUP ALGILAMA (AUTO-DISCOVERY)
+# ==========================================
+async def track_bot_group_join(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    result = update.my_chat_member
+    if not result: return
+    chat = update.effective_chat
+    new_status = result.new_chat_member.status
+    if new_status in ["member", "administrator"]:
+        try:
+            chat_info = await context.bot.get_chat(chat.id)
+            photo_url = ""
+            if chat_info.photo:
+                file_obj = await context.bot.get_file(chat_info.photo.small_file_id)
+                photo_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_obj.file_path}"
+            database.register_bot_group(chat.id, chat_info.title or "Yeni Grup", photo_url)
+            logger.info(f"✨ Yeni grup otomatik algılandı: {chat_info.title} (ID: {chat.id})")
+        except Exception as e:
+            logger.error(f"Grup otomatik kayıt hatası: {e}")
+
+# ==========================================
+# FASTAPI LİFE-SPAN (YAŞAM DÖNGÜSÜ & BOT BAŞLATICI)
+# ==========================================
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global tg_application
+    database.init_db()
+    if not scheduler.running:
+        scheduler.start()
+
+    saved_jobs = database.get_all_scheduled_jobs()
+    for job in saved_jobs:
+        try:
+            scheduler.add_job(
+                send_periodic_announcement,
+                'interval',
+                minutes=job["minutes"],
+                args=[None, job["chat_id"], job["msg_text"], job.get("btn_text", ""), job.get("btn_url", ""), job.get("media_url", "")],
+                id=job["job_id"],
+                replace_existing=True
+            )
+        except Exception as e:
+            logger.error(f"Kayıtlı görev yüklenemedi: {e}")
+
+    if BOT_TOKEN:
+        tg_application = ApplicationBuilder().token(BOT_TOKEN).request(HTTPXRequest(connect_timeout=30.0, read_timeout=30.0)).build()
+        tg_application.add_error_handler(global_error_handler)
         
-        html, body {
-            height: 100vh; width: 100vw; overflow: hidden; background-color: var(--space-black);
-        }
-
-        body {
-            background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.2) 0%, rgba(2, 1, 0, 0.98) 85%);
-            color: #fff; display: flex; flex-direction: column; justify-content: space-between;
-        }
-
-        /* 🌌 3D Uzay Kokpiti Tuvali (Three.js WebGL Viewport) */
-        #webgl-container {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none;
-        }
-
-        /* 🪞 Üst Komuta Çerçevesi (Holografik Header) */
-        .hud-header {
-            position: relative; z-index: 10; display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 12px; background: rgba(8, 6, 3, 0.85); backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(212,175,55,0.4); box-shadow: 0 5px 20px rgba(0,0,0,0.8);
-        }
-        .logo { font-size: 11px; color: var(--gold-glow); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 12px var(--hud-gold); }
-        .badge { background: rgba(212,175,55,0.25); color: var(--gold-glow); padding: 4px 10px; border-radius: 8px; font-size: 9px; border: 1px solid var(--hud-gold); font-weight: 900; }
-
-        /* 🪐 3D Yörünge ve Radar Paneli */
-        .cockpit-viewport {
-            position: relative; z-index: 10; flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 8px;
-        }
-
-        .radar-deck {
-            position: relative; width: 100%; height: 160px; display: flex; align-items: center; justify-content: center;
-            background: rgba(4, 3, 1, 0.75); border-radius: 50%; border: 1.5px solid rgba(212,175,55,0.5);
-            box-shadow: 0 0 40px rgba(212,175,55,0.2), inset 0 0 25px rgba(212,175,55,0.15);
-            backdrop-filter: blur(10px); margin: 0 auto; max-width: 320px;
-        }
+        for cmd, func in COMMAND_MAP.items():
+            tg_application.add_handler(CommandHandler(cmd, func))
+            
+        tg_application.add_handler(ChatMemberHandler(track_bot_group_join, ChatMemberHandler.MY_CHAT_MEMBER))
+        tg_application.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, master_message_router))
         
-        /* 🛡️ Merkez Katya Güvenlik Çekirdeği */
-        .katya-core {
-            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-            width: 50px; height: 50px; border-radius: 50%; background: radial-gradient(circle, #f8ecbe 0%, #d4af37 60%, #3a2e0f 100%);
-            border: 2px solid var(--gold-glow); display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 25px var(--hud-gold); z-index: 15; cursor: pointer;
-        }
-        .core-icon { font-size: 16px; }
-        .core-text { font-size: 6px; font-weight: 900; color: #000; text-transform: uppercase; margin-top: 1px; }
+        await tg_application.initialize()
+        await tg_application.start()
+        await tg_application.updater.start_polling(drop_pending_updates=True)
+        log_event("SYS", "Telegram Bot ve FastAPI (2100 Nöral Çekirdek) eşzamanlı aktif!")
 
-        .orbit-ring {
-            position: absolute; width: 100%; height: 100%; left: 0; top: 0; animation: orbitSpin 30s linear infinite;
-        }
-        @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    yield
 
-        .orbit-node {
-            position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 12;
-        }
-        .orbit-node-inner { display: flex; flex-direction: column; align-items: center; animation: counterSpin 30s linear infinite; }
-        @keyframes counterSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+    if tg_application:
+        await tg_application.updater.stop()
+        await tg_application.stop()
+        await tg_application.shutdown()
+    if scheduler.running:
+        scheduler.shutdown()
+    log_event("SYS", "Sunucu kapatıldı.")
 
-        .orbit-avatar {
-            width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--hud-gold);
-            background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 12px var(--hud-gold); transition: transform 0.3s ease;
-        }
-        .orbit-node:hover .orbit-avatar { transform: scale(1.2); border-color: #fff; box-shadow: 0 0 20px #fff; }
-        .orbit-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .orbit-label { font-size: 7px; color: #d4c8b0; background: rgba(0,0,0,0.9); padding: 1px 4px; border-radius: 4px; margin-top: 2px; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(212,175,55,0.3); }
+app = FastAPI(lifespan=lifespan)
 
-        /* 🪞 Holografik Modül Sekmeleri (Cam Paneller) */
-        .hud-nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 6px; }
-        .hud-tab {
-            background: rgba(15, 11, 6, 0.9); backdrop-filter: blur(20px);
-            border: 1px solid rgba(212, 175, 55, 0.45); color: #d4c8b0; padding: 8px 4px;
-            font-size: 8px; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(212, 175, 55, 0.15); transition: all 0.3s ease;
-        }
-        .hud-tab.active {
-            background: linear-gradient(135deg, rgba(212,175,55,0.6) 0%, rgba(170,119,28,0.5) 100%);
-            color: var(--gold-glow); border-color: var(--gold-glow); box-shadow: 0 0 20px var(--hud-gold), inset 0 0 12px rgba(212,175,55,0.4);
-        }
+# 🌐 STATİK DOSYA BAĞLANTISI (Public klasörünün garantili sunumu)
+if os.path.exists("public"):
+    app.mount("/static", StaticFiles(directory="public"), name="static")
 
-        /* 🎛️ Ana Holografik İçerik Ekranı */
-        .hud-viewport {
-            background: var(--glass-panel); backdrop-filter: blur(25px); border: 1.5px solid var(--hud-gold);
-            border-radius: 12px; padding: 10px; overflow-y: auto; max-height: 230px; margin-top: 6px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(212,175,55,0.12);
-        }
-        .mod-section { display: none; flex-direction: column; gap: 6px; }
-        .mod-section.active { display: flex; }
+# ==========================================
+# STAFF & ADMIN API ROTALARI (FASTAPI)
+# ==========================================
 
-        .section-title { font-size: 9px; font-weight: 900; color: var(--gold-glow); border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 3px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+@app.get("/health")
+async def health_check():
+    return HTMLResponse("GOLDEN_ENTERPRISE_FASTAPI_OK")
 
-        input, select, textarea {
-            width: 100%; background: rgba(0,0,0,0.85); border: 1px solid rgba(212,175,55,0.4);
-            border-radius: 6px; padding: 7px; color: #fff; font-size: 9px; outline: none; margin-bottom: 5px;
-        }
-        input:focus { border-color: var(--gold-glow); box-shadow: 0 0 8px var(--hud-gold); }
+@app.get("/api/stats")
+async def api_get_stats():
+    return database.get_bot_statistics()
 
-        .cyber-btn {
-            width: 100%; background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%); color: #000;
-            border: none; padding: 8px; border-radius: 6px; font-weight: 900; font-size: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .cyber-btn:active { transform: scale(0.97); }
+@app.get("/api/logs")
+async def api_get_logs(filter: str = "all", limit: int = 100):
+    try:
+        logs = database.get_recent_logs(limit=limit, log_filter=filter)
+        return logs
+    except Exception as e:
+        return []
 
-        .item-row { background: rgba(0,0,0,0.65); border: 1px solid rgba(212,175,55,0.25); padding: 6px; border-radius: 6px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 8px; }
-        .log-box { background: rgba(0,0,0,0.75); border: 1px solid rgba(212,175,55,0.3); padding: 6px; border-radius: 6px; margin-bottom: 4px; font-size: 7px; color: #d4c8b0; }
+@app.post("/api/logs/clear")
+async def api_clear_logs(request: Request):
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        days = int(data.get("days", 0))
+        if not database.is_authorized_staff(user_id) and str(user_id) != str(FOUNDER_ID).strip():
+            return {"success": False, "error": "Yetkisiz!"}
+        database.clear_logs_by_retention(days)
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
-        /* Katya AI Terminali */
-        .katya-box { display: flex; flex-direction: column; height: 140px; background: rgba(0,0,0,0.95); border-radius: 6px; border: 1px solid var(--hud-gold); overflow: hidden; }
-        .katya-screen { flex: 1; padding: 6px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; font-size: 8px; }
-        .j-msg { max-width: 85%; padding: 5px 7px; border-radius: 5px; line-height: 1.2; }
-        .j-msg.ai { background: rgba(212,175,55,0.18); color: var(--gold-glow); border: 1px solid rgba(212,175,55,0.45); align-self: flex-start; }
-        .j-msg.user { background: rgba(255,255,255,0.1); color: #fff; align-self: flex-end; }
-        .j-input-bar { display: flex; padding: 4px; background: #000; border-top: 1px solid var(--hud-gold); gap: 4px; }
-        .j-input-bar input { margin-bottom: 0; }
-    </style>
-</head>
-<body>
+@app.get("/api/admin-stats")
+async def api_get_admin_stats():
+    return database.get_admin_performance_stats()
 
-    <!-- 🌌 Arka Plan 3D Uzay Kokpiti Simülasyonu -->
-    <div id="webgl-container"></div>
+@app.get("/api/groups")
+async def api_get_groups():
+    return database.get_bot_groups()
 
-    <!-- Üst Komuta Çerçevesi -->
-    <div class="hud-header">
-        <div class="logo">⚜️ GOLDEN KATYA 3D HUD</div>
-        <div class="badge" id="userRole">Kraljica 👑</div>
-    </div>
+@app.post("/api/verify-admin")
+async def api_verify_admin(request: Request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    if str(user_id) == str(FOUNDER_ID).strip():
+        return {"authorized": True, "is_founder": True}
+    if database.is_authorized_staff(user_id):
+        return {"authorized": True, "is_founder": False, "permissions": database.get_staff_permissions(user_id)}
+    if not FOUNDER_ID:
+        return {"authorized": True, "is_founder": True}
+    return {"authorized": False}
 
-    <!-- Kokpit Arayüz Alanı -->
-    <div class="cockpit-viewport">
-        <!-- 🪐 3D Yörünge Radar Halkası -->
-        <div class="radar-deck">
-            <div class="katya-core" onclick="selectGroupNode(0)" title="Genel Hub">
-                <div class="core-icon">⚜️</div>
-                <div class="core-text">Katya</div>
-            </div>
-            <div class="orbit-ring" id="radarNodesRing">
-                <!-- Dinamik Dönen Düğümler -->
-            </div>
-        </div>
+@app.post("/api/staff/list")
+async def api_get_staff_list(request: Request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    chat_id = int(data.get("chat_id", 0))
+    if not database.is_authorized_staff(user_id) and str(user_id) != str(FOUNDER_ID).strip():
+        return {"success": False, "error": "Yetkisiz!"}
+    return database.get_all_staff(chat_id)
 
-        <!-- 🪞 Dokunmatik Şeffaf Cam Sekmeler -->
-        <div class="hud-nav">
-            <div class="hud-tab active" onclick="switchMod('telemetry', event)">Telemetri</div>
-            <div class="hud-tab" onclick="switchMod('staff', event)">Staff Matrisi</div>
-            <div class="hud-tab" onclick="switchMod('tactical', event)">Taktiksel</div>
-            <div class="hud-tab" onclick="switchMod('logs', event)">Loglar</div>
-            <div class="hud-tab" onclick="switchMod('settings', event)">Protokoller</div>
-            <div class="hud-tab" onclick="switchMod('jarvis', event)">🤖 Katya AI</div>
-        </div>
+@app.post("/api/staff/add")
+async def api_add_staff(request: Request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    chat_id = int(data.get("chat_id", 0))
+    input_value = str(data.get("staff_input", "")).strip()
+    full_name = data.get("full_name", "🌸 Kristal Yetkili")
+    if not input_value: return {"success": False, "error": "Boş değer"}
+    clean_val = input_value.lstrip("@").lower()
+    target_id = int(clean_val) if clean_val.isdigit() or (clean_val.startswith("-") and clean_val[1:].isdigit()) else (database.get_user_id_by_username(chat_id, clean_val) or int(hashlib.md5(clean_val.encode()).hexdigest()[:8], 16))
+    database.add_staff_member(target_id, clean_val, full_name, user_id, chat_id)
+    return {"success": True}
 
-        <!-- 🎛️ Holografik İçerik Paneli -->
-        <div class="hud-viewport">
-            <!-- TELEMETRİ -->
-            <div id="mod-telemetry" class="mod-section active">
-                <div class="section-title">📊 Komuta Telemetrisi</div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                    <div style="background: rgba(0,0,0,0.65); padding: 8px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.35);">
-                        <div style="font-size: 7px; color: #d4c8b0;">TOPLAM İŞLEM</div>
-                        <div id="totalActions" style="font-size: 13px; font-weight: 900; color: var(--gold-glow);">-</div>
-                    </div>
-                    <div style="background: rgba(0,0,0,0.65); padding: 8px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.35);">
-                        <div style="font-size: 7px; color: #d4c8b0;">OTONOM BLOKE</div>
-                        <div id="totalBans" style="font-size: 13px; font-weight: 900; color: var(--danger-red);">-</div>
-                    </div>
-                </div>
-            </div>
+@app.post("/api/staff/toggle")
+async def api_toggle_staff_perm(request: Request):
+    data = await request.json()
+    target_id = int(data.get("target_id", 0))
+    chat_id = int(data.get("chat_id", 0))
+    perm_field = str(data.get("perm", ""))
+    if perm_field in ["can_ban", "can_mute"]:
+        new_val = database.toggle_staff_permission(target_id, chat_id, perm_field)
+        return {"success": True, "new_val": new_val}
+    return {"success": False}
 
-            <!-- STAFF -->
-            <div id="mod-staff" class="mod-section">
-                <div class="section-title">👑 Yetki Matrisi</div>
-                <input type="text" id="staffInput" placeholder="@kullaniciadi veya ID">
-                <input type="text" id="staffName" placeholder="Rozet Ünvanı (Örn: 💎 Kristal)">
-                <button class="cyber-btn" onclick="addStaff()">Mühürle</button>
-                <div id="staffListContainer" style="max-height: 90px; overflow-y: auto; margin-top: 4px;"><div style="font-size:8px;">Yükleniyor...</div></div>
-            </div>
+@app.post("/api/staff/remove")
+async def api_remove_staff(request: Request):
+    data = await request.json()
+    target_id = int(data.get("target_id", 0))
+    chat_id = int(data.get("chat_id", 0))
+    database.remove_staff_member(target_id, chat_id)
+    return {"success": True}
 
-            <!-- TAKTİKSEL -->
-            <div id="mod-tactical" class="mod-section">
-                <div class="section-title">⚡ Taktiksel Müdahale</div>
-                <input type="text" id="memberTargetInput" placeholder="Kullanıcı ID veya @username">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-                    <button class="cyber-btn" style="background: var(--danger-red); color:#fff;" onclick="memberAction('ban')">Banla 🚫</button>
-                    <button class="cyber-btn" style="background: #2ecc71; color:#fff;" onclick="memberAction('unban')">Ban Aç ✅</button>
-                    <button class="cyber-btn" style="background: #e67e22; color:#fff;" onclick="memberAction('mute')">Mute 🔇</button>
-                    <button class="cyber-btn" style="background: #3498db; color:#fff;" onclick="memberAction('unmute')">Unmute 🔊</button>
-                </div>
-            </div>
-
-            <!-- LOGLAR -->
-            <div id="mod-logs" class="mod-section">
-                <div class="section-title">📜 Zaman Akış Logları</div>
-                <div style="display: flex; gap: 5px; margin-bottom: 5px;">
-                    <select id="logClearDays" style="margin-bottom:0;"><option value="1">Günlük</option><option value="7">Haftalık</option><option value="0">Tümünü Sil</option></select>
-                    <button class="cyber-btn" style="width: auto; background: rgba(255,51,51,0.3); color: var(--danger-red); border: 1px solid var(--danger-red);" onclick="clearLogs()">Temizle</button>
-                </div>
-                <div id="generalLogsContainer" style="max-height: 100px; overflow-y: auto;"><div style="font-size:8px;">Loglar akıyor...</div></div>
-            </div>
-
-            <!-- PROTOKOLLER -->
-            <div id="mod-settings" class="mod-section">
-                <div class="section-title">⚙️ Protokoller</div>
-                <textarea id="welcomeMsgInput" rows="2" placeholder="Karşılama metni..."></textarea>
-                <input type="text" id="btnTextInput" placeholder="Buton Metni">
-                <input type="text" id="btnUrlInput" placeholder="Buton Linki (https://)">
-                <button class="cyber-btn" onclick="saveSettings()">Kaydet</button>
-            </div>
-
-            <!-- KATYA AI -->
-            <div id="mod-jarvis" class="mod-section" style="height: 100%;">
-                <div class="katya-box">
-                    <div class="katya-screen" id="jarvisScreen">
-                        <div class="j-msg ai">⚜️ Katya 3D kokpit motoru aktif, Kraljica. Komut bekliyorum.</div>
-                    </div>
-                    <div class="j-input-bar">
-                        <input type="text" id="jarvisInput" placeholder="Katya'ya komut ver..." onkeypress="handleJarvisKey(event)">
-                        <button class="cyber-btn" style="width: 50px; padding: 0; font-size: 7px;" onclick="sendJarvisCommand()">İlet</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // 🌌 THREE.JS 3D UZAY KOKPİT ARKA PLAN MOTORU
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('webgl-container').appendChild(renderer.domElement);
-
-        // Altın Tozu / Yıldız Alanı Parçacıkları (Starfield)
-        const particlesCount = 400;
-        const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(particlesCount * 3);
-
-        for (let i = 0; i < particlesCount * 3; i += 3) {
-            positions[i] = (Math.random() - 0.5) * 15;
-            positions[i + 1] = (Math.random() - 0.5) * 15;
-            positions[i + 2] = (Math.random() - 0.5) * 15;
-        }
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const material = new THREE.PointsMaterial({ color: 0xd4af37, size: 0.04, transparent: true, opacity: 0.8 });
-        const starField = new THREE.Points(geometry, material);
-        scene.add(starField);
-
-        camera.position.z = 5;
-
-        function animate3D() {
-            requestAnimationFrame(animate3D);
-            starField.rotation.y += 0.001;
-            starField.rotation.x += 0.0005;
-            renderer.render(scene, camera);
-        }
-        animate3D();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // TELEGRAM WEB APP & KONTROL MİMARİSİ
-        const tg = window.Telegram.WebApp;
-        try { tg.ready(); tg.expand(); } catch(e) {}
+@app.post("/api/member/action")
+async def api_member_action(request: Request):
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        target_input = str(data.get("target", "")).strip()
+        action = str(data.get("action", "")).strip()
+        chat_id = int(data.get("chat_id", 0))
         
-        let user = tg.initDataUnsafe?.user || { id: 8245373459, first_name: "Breskavica", username: "breskavica" };
-        let selectedChatId = 0;
+        is_founder = str(user_id) == str(FOUNDER_ID).strip()
+        if not is_founder and not database.is_authorized_staff(user_id):
+            return {"success": False, "error": "Yetkisiz!"}
 
-        function switchMod(modName, evt) {
-            document.querySelectorAll('.mod-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.hud-tab').forEach(el => el.classList.remove('active'));
-            document.getElementById('mod-' + modName).classList.add('active');
-            if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
-        }
+        if not tg_application or not tg_application.bot:
+            return {"success": False, "error": "Bot aktif değil!"}
 
-        async function verifyAccess() {
-            try {
-                const res = await fetch('/api/verify-admin', { 
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ user_id: user.id }) 
-                });
-                const data = await res.json();
-                if (!data.authorized) { document.body.innerHTML = `<div style="text-align:center; padding:50px; color:red;"><h2>⛔ YETKİSİZ ERİŞİM!</h2></div>`; return; }
-                const isFounder = String(user.id) === "8245373459" || data.is_founder;
-                document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (isFounder ? " Kraljica 👑" : " 🛡️");
-                await loadGroups(); 
-                await loadData(); 
-                setInterval(loadData, 5000);
-            } catch (e) {}
-        }
+        bot = tg_application.bot
+        clean_target = target_input.lstrip("@").lower()
+        target_id = int(clean_target) if clean_target.isdigit() or (clean_target.startswith("-") and clean_target[1:].isdigit()) else database.get_user_id_by_username(chat_id, clean_target)
+        if not target_id: return {"success": False, "error": "Kullanıcı bulunamadı!"}
 
-        async function loadGroups() {
-            try {
-                const res = await fetch('/api/groups');
-                const groups = await res.json();
-                const ringContainer = document.getElementById('radarNodesRing');
+        if chat_id:
+            if action == "ban":
+                await bot.ban_chat_member(chat_id=chat_id, user_id=target_id)
+                database.log_action(chat_id, "BAN", target_id, clean_target, f"Üye Portundan banlandı (ID: {target_id})")
+            elif action == "unban":
+                await bot.unban_chat_member(chat_id=chat_id, user_id=target_id, only_if_banned=True)
+                database.log_action(chat_id, "UNBAN", target_id, clean_target, f"Üye Portundan banı kaldırıldı (ID: {target_id})")
+            elif action == "mute":
+                await bot.restrict_chat_member(chat_id=chat_id, user_id=target_id, permissions=ChatPermissions(can_send_messages=False))
+                database.log_action(chat_id, "MUTE", target_id, clean_target, f"Üye Portundan susturuldu (ID: {target_id})")
+            elif action == "unmute":
+                perms = ChatPermissions(can_send_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True)
+                await bot.restrict_chat_member(chat_id=chat_id, user_id=target_id, permissions=perms)
+                database.log_action(chat_id, "UNMUTE", target_id, clean_target, f"Üye Portundan susturması kaldırıldı (ID: {target_id})")
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
-                if (ringContainer) {
-                    let html = '';
-                    const radius = 62; 
+@app.post("/api/settings/update")
+async def api_update_settings(request: Request):
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        chat_id = int(data.get("chat_id", 0))
+        if not database.is_authorized_staff(user_id) and str(user_id) != str(FOUNDER_ID).strip():
+            return {"success": False, "error": "Yetkisiz!"}
+        if chat_id:
+            for key in ["welcome_msg", "btn_text", "btn_url", "media_url", "announcement_btn_text", "announcement_btn_url", "scheduled_btn_text", "scheduled_btn_url"]:
+                if key in data: database.update_group_setting(chat_id, key, data[key])
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
-                    groups.forEach((g, index) => {
-                        const angle = (index / groups.length) * 2 * Math.PI;
-                        const x = Math.cos(angle) * radius;
-                        const y = Math.sin(angle) * radius;
-                        const isActive = selectedChatId == g.chat_id;
-
-                        let avatar = `<span style="font-size:14px;">🛡️</span>`;
-                        if (g.photo_url) {
-                            avatar = `<img src="${g.photo_url}" onerror="this.parentElement.innerHTML='🛡️'">`;
-                        }
-
-                        html += `
-                            <div class="orbit-node ${isActive ? 'active' : ''}" 
-                                 style="transform: translate(-50%, -50%) translate(${x}px, ${y}px);" 
-                                 onclick="selectGroupNode(${g.chat_id})">
-                                <div class="orbit-node-inner">
-                                    <div class="orbit-avatar">${avatar}</div>
-                                    <div class="orbit-label">${g.title || 'Grup'}</div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    ringContainer.innerHTML = html;
-                }
-            } catch (e) {}
-        }
-
-        function selectGroupNode(chatId) {
-            selectedChatId = chatId;
-            loadGroups();
-            loadData();
-        }
-
-        async function loadData() {
-            try {
-                const statsRes = await fetch('/api/stats');
-                const stats = await statsRes.json();
-                document.getElementById('totalActions').innerText = stats.total_actions || 0;
-                const bd = stats.action_breakdown || {};
-                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['AUTO_BAN'] || 0);
-
-                const genRes = await fetch('/api/logs?filter=general&limit=30');
-                const genLogs = await genRes.json();
-                const genC = document.getElementById('generalLogsContainer');
-                genC.innerHTML = genLogs.length === 0 ? '<div style="font-size:8px; color:#d4c8b0;">Log akışı boş.</div>' : '';
-                genLogs.forEach(l => {
-                    genC.innerHTML += `
-                        <div class="log-box">
-                            <div style="display:flex; justify-content:space-between;">
-                                <span style="color:var(--danger-red); font-weight:900;">${l.action_type}</span>
-                                <span style="font-size:6px;">${l.timestamp}</span>
-                            </div>
-                            <div>Hedef: <span style="color:var(--gold-glow);">@${l.username || l.target_id}</span></div>
-                        </div>
-                    `;
-                });
-
-                const staffRes = await fetch('/api/staff/list', { 
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ user_id: user.id, chat_id: selectedChatId }) 
-                });
-                const staffs = await staffRes.json();
-                const staffC = document.getElementById('staffListContainer');
-                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:8px; color:#d4c8b0;">Bu yörüngede yetkili yok.</div>' : '';
+# 💎 GARANTİLİ KÖK DİZİN (INDEX.HTML) SUNUMU
+@app.get("/", response_class=HTMLResponse)
+async def handle_root():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    paths_to_check = [
+        os.path.join(base_dir, "public", "index.html"),
+        os.path.join(base_dir, "index.html")
+    ]
+    
+    for path in paths_to_check:
+        if os.path.exists(path):
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    return HTMLResponse(content=f.read(), headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
+            except Exception as e:
+                logger.error(f"HTML okuma hatası ({path}): {e}")
                 
-                staffs.forEach(s => {
-                    const sName = s.full_name || s.name || s.first_name || "Muhafız";
-                    const sUser = s.username ? `@${s.username}` : (s.user_id ? `ID: ${s.user_id}` : "Kayıtlı Yetkili");
-                    const targetId = s.user_id || s.id || 0;
+    return HTMLResponse(content=f"Index dosyası (public/index.html) bulunamadı! Temel dizin: {base_dir}", status_code=500)
 
-                    staffC.innerHTML += `
-                        <div class="item-row">
-                            <div><b>${sName}</b><br><span style="font-size:6px; color:#d4c8b0;">${sUser}</span></div>
-                            <button onclick="removeStaff(${targetId})" style="background:#444; color:#fff; border:none; padding:2px 5px; border-radius:3px; font-size:6px; cursor:pointer;">Sil</button>
-                        </div>
-                    `;
-                });
-            } catch (e) {}
-        }
+# ==========================================
+# TELEGRAM BOT KOMUTLARI & YÖNETİM
+# ==========================================
 
-        async function addStaff() {
-            const input = document.getElementById('staffInput').value.trim();
-            const name = document.getElementById('staffName').value.trim() || '👑 Muhafız';
-            if (!input) return alert("Değer girin!");
-            await fetch('/api/staff/add', { 
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ user_id: user.id, chat_id: selectedChatId, staff_input: input, full_name: name }) 
-            });
-            document.getElementById('staffInput').value = ''; 
-            document.getElementById('staffName').value = ''; 
-            loadData(); 
-            alert("✅ Yetkili mühürlendi!");
-        }
+async def _delete_after_delay(context, chat_id, message_id, delay=5):
+    await asyncio.sleep(delay)
+    try: await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+    except Exception: pass
 
-        async function removeStaff(targetId) {
-            if (!confirm("Silinsin mi?")) return;
-            await fetch('/api/staff/remove', { 
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ user_id: user.id, chat_id: selectedChatId, target_id: targetId }) 
-            });
-            loadData();
-        }
+async def send_auto_delete_message(context, chat_id, text, delay=5):
+    try:
+        msg = await context.bot.send_message(chat_id=chat_id, text=text)
+        asyncio.create_task(_delete_after_delay(context, chat_id, msg.message_id, delay))
+    except Exception as e: logger.error(f"Mesaj hatası: {e}")
 
-        async function memberAction(actionType) {
-            const target = document.getElementById('memberTargetInput').value.trim();
-            if (!target) return alert("Kullanıcı ID veya @username girin!");
-            if (!selectedChatId) return alert("Lütfen yörüngeden bir grup seçin!");
-            const res = await fetch('/api/member/action', { 
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: selectedChatId }) 
-            });
-            const data = await res.json();
-            if (data.success) { alert(`✅ İşlem tamamlandı`); document.getElementById('memberTargetInput').value = ''; loadData(); } 
-            else { alert("❌ Hata: " + (data.error || 'Yetkisiz!')); }
-        }
+async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
+    chat_id = update.effective_chat.id
+    user = update.effective_user
+    if not user: return False
+    if str(user.id) == str(FOUNDER_ID).strip(): return True
+    if database.is_authorized_staff(user.id): return True
+    if update.effective_chat.type in ["group", "supergroup"]:
+        try:
+            member = await context.bot.get_chat_member(chat_id, user.id)
+            if member.status in ["administrator", "creator"]: return True
+        except Exception: pass
+    else: return True
+    await send_auto_delete_message(context, chat_id, "❌ Bu komutu kullanmak için yetkiniz yok!")
+    return False
 
-        async function clearLogs() {
-            if (!confirm("Temizlensin mi?")) return;
-            await fetch('/api/logs/clear', { 
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ user_id: user.id, days: parseInt(document.getElementById('logClearDays').value) }) 
-            });
-            loadData(); 
-        }
+async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    if update.message and update.message.reply_to_message:
+        target = update.message.reply_to_message.from_user
+        if target and target.username: database.save_user(chat_id, target.id, target.username.lower())
+        return target
+    if context.args:
+        clean_arg = context.args[0].strip().lstrip("@").lower()
+        if clean_arg.isdigit() or (clean_arg.startswith("-") and clean_arg[1:].isdigit()):
+            try:
+                member = await context.bot.get_chat_member(chat_id, int(clean_arg))
+                return member.user
+            except Exception:
+                class TempUser:
+                    def __init__(self, uid): self.id, self.full_name, self.username = uid, f"Kullanıcı_{uid}", f"id_{uid}"
+                return TempUser(int(clean_arg))
+        else:
+            db_uid = database.get_user_id_by_username(chat_id, clean_arg) or database.get_user_id_by_username(0, clean_arg)
+            if db_uid:
+                try: return (await context.bot.get_chat_member(chat_id, db_uid)).user
+                except Exception: pass
+            class UsernameTarget:
+                def __init__(self, uname): self.id, self.full_name, self.username = f"@{uname}", f"@{uname}", uname
+            return UsernameTarget(clean_arg)
+    return None
 
-        async function saveSettings() {
-            const welcome = document.getElementById('welcomeMsgInput').value.trim();
-            const btnText = document.getElementById('btnTextInput').value.trim();
-            const btnUrl = document.getElementById('btnUrlInput').value.trim();
-            if (!selectedChatId) return alert("Grup seçin!");
-            await fetch('/api/settings/update', { 
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ user_id: user.id, chat_id: selectedChatId, welcome_msg: welcome, btn_text: btnText, btn_url: btnUrl }) 
-            });
-            alert("⚜️ Kaydedildi!");
-        }
+async def send_periodic_announcement(bot, chat_id, text, btn_text, btn_url, media_url):
+    try:
+        current_bot = bot or (tg_application and tg_application.bot)
+        if not current_bot: return
+        
+        reply_markup = None
+        if not btn_text or not btn_url:
+            sched_settings = database.get_announcement_settings(chat_id)
+            if not btn_text: btn_text = sched_settings.get("scheduled_btn_text", "")
+            if not btn_url: btn_url = sched_settings.get("scheduled_btn_url", "")
 
-        function handleJarvisKey(e) { if (e.key === 'Enter') sendJarvisCommand(); }
+        if btn_text and btn_url:
+            clean_url = str(btn_url).strip()
+            if clean_url.startswith(("http://", "https://", "tg://")) and " " not in clean_url and "\n" not in clean_url:
+                reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=clean_url)]])
+            elif " " not in clean_url and "\n" not in clean_url:
+                clean_url = "https://" + clean_url
+                reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=clean_url)]])
 
-        function sendJarvisCommand() {
-            const input = document.getElementById('jarvisInput');
-            const text = input.value.trim();
-            if (!text) return;
-            const screen = document.getElementById('jarvisScreen');
-            screen.innerHTML += `<div class="j-msg user">${text}</div>`;
-            input.value = '';
-            screen.scrollTop = screen.scrollHeight;
-            setTimeout(() => {
-                let reply = "⚜️ Katya 3D kalkanları kararlı, Kraljica.";
-                if (text.toLowerCase().includes('rapor')) reply = "📊 Katya Uzay Taraması: Tüm yörüngeler temiz, savunma hatları tam güçte.";
-                screen.innerHTML += `<div class="j-msg ai">${reply}</div>`;
-                screen.scrollTop = screen.scrollHeight;
-            }, 400);
-        }
+        if media_url:
+            await current_bot.send_photo(chat_id=chat_id, photo=media_url, caption=text, reply_markup=reply_markup)
+        else:
+            await current_bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup)
+    except Exception as e:
+        logger.error(f"Zamanlı duyuru gönderme hatası: {e}")
 
-        verifyAccess();
-    </script>
-</body>
-</html>
+async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat = update.effective_chat
+    if chat.type in ["group", "supergroup"]:
+        try:
+            chat_info = await context.bot.get_chat(chat.id)
+            photo_url = ""
+            if chat_info.photo:
+                file_id = chat_info.photo.small_file_id
+                file_obj = await context.bot.get_file(file_id)
+                photo_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_obj.file_path}"
+            database.register_bot_group(chat.id, chat.title or "Grup", photo_url)
+        except Exception:
+            database.register_bot_group(chat.id, chat.title or "Grup", "")
+
+        try: await update.message.delete()
+        except Exception: pass
+        return
+
+    welcome_text = (
+        "🤖 Grup Yönetim & 2100 Katya Güvenlik Botu\n\n"
+        "📜 Yönetici Komutları:\n"
+        "- /welcome <mesaj> - Hoş geldin mesajı\n"
+        "- /butonmetni <yazı> - Hoş geldin butonu yazısı\n"
+        "- /butonlinki <url> - Hoş geldin butonu linki\n"
+        "- /duyuru <mesaj> - Duyuru gönder (Otomatik Pinlenir / Yanıtlanan görseli sabitler)\n"
+        "- /duyuru <mesaj> | <buton metni> | <link> - Özel butonlu duyuru\n"
+        "- /duyurubutonmetni <yazı> - Varsayılan duyuru butonu yazısını ayarla\n"
+        "- /duyurubutonlinki <url> - Varsayılan duyuru butonu linkini ayarla\n"
+        "- /zamanlabutonmetin <yazı> - Zamanlı duyuru butonu yazısını ayarla\n"
+        "- /zamanlabutonlinki <url> - Zamanlı duyuru butonu linkini ayarla\n"
+        "- /zamanla <dakika> <mesaj> - Periyodik duyuru başlat\n"
+        "- /zamanla <dakika> | <mesaj> | <buton metni> | <link> - Özel butonlu periyodik duyuru\n"
+        "- /zamanladur veya /zamanla dur - Zamanlanmış paylaşımı durdur\n"
+        "- /defol <kullanıcı> - Banla\n"
+        "- /undefol <kullanıcı> - Ban kaldır\n"
+        "- /itaat <kullanıcı> - Sustur\n"
+        "- /unitaat <kullanıcı> - Susturma kaldır\n"
+        "- /uyari <kullanıcı> - Uyarı ver (3 uyarıda otomatik banlar)\n"
+        "- /unuyari <kullanıcı> - Uyarı sıfırla\n\n"
+        "⚜️ Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸"
+    )
+    web_app_url = os.environ.get("WEBAPP_URL", "https://golden-guardian-bot.onrender.com/")
+    keyboard = [[InlineKeyboardButton(text="🛡️ Paneli Aç", web_app=WebAppInfo(url=web_app_url))]]
+    await update.message.reply_text(welcome_text, reply_markup=InlineKeyboardMarkup(keyboard))
+
+async def cmd_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    text = " ".join(context.args)
+    if text: 
+        database.update_group_setting(update.effective_chat.id, "welcome_msg", text)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin mesajı güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_butonmetni(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    text = " ".join(context.args)
+    if text: 
+        database.update_group_setting(update.effective_chat.id, "btn_text", text)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin buton metni güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_butonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    if context.args: 
+        database.update_group_setting(update.effective_chat.id, "btn_url", context.args[0].strip())
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin buton linki güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    reply = update.message.reply_to_message
+    raw_text = update.message.text.partition(" ")[2].strip()
+
+    photo_file_id = None
+    if reply:
+        if reply.photo:
+            photo_file_id = reply.photo[-1].file_id
+        if not raw_text:
+            raw_text = reply.caption or reply.text or ""
+
+    if not raw_text and not photo_file_id:
+        await send_auto_delete_message(context, chat_id, "❌ Duyuru metni veya görsel belirtmelisiniz!", 4)
+        try: await update.message.delete()
+        except Exception: pass
+        return
+
+    def_settings = database.get_announcement_settings(chat_id)
+    btn_text = def_settings.get("announcement_btn_text", def_settings.get("btn_text", ""))
+    btn_url = def_settings.get("announcement_btn_url", def_settings.get("btn_url", ""))
+    msg_text = raw_text
+
+    if "|" in raw_text:
+        parts = [p.strip() for p in raw_text.split("|")]
+        msg_text = parts[0]
+        if len(parts) > 1 and parts[1]: btn_text = parts[1]
+        if len(parts) > 2 and parts[2]: btn_url = parts[2]
+
+    reply_markup = None
+    if btn_text and btn_url:
+        clean_url = str(btn_url).strip()
+        if not clean_url.startswith(("http://", "https://", "tg://")):
+            clean_url = "https://" + clean_url
+        if " " not in clean_url and "\n" not in clean_url:
+            reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=clean_url)]])
+
+    try:
+        if photo_file_id:
+            sent_msg = await context.bot.send_photo(chat_id=chat_id, photo=photo_file_id, caption=msg_text, reply_markup=reply_markup)
+        else:
+            sent_msg = await context.bot.send_message(chat_id=chat_id, text=msg_text, reply_markup=reply_markup)
+
+        await context.bot.pin_chat_message(chat_id=chat_id, message_id=sent_msg.message_id, disable_notification=False)
+        admin_user = update.effective_user.username or update.effective_user.first_name
+        database.log_action(chat_id, "ANNOUNCEMENT", 0, f"@{admin_user}", f"Duyuru gönderildi: {msg_text[:30]}...")
+    except Exception as e:
+        logger.error(f"Duyuru gönderme hatası: {e}")
+
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_duyurubutonmetni(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    text = " ".join(context.args)
+    if text:
+        database.update_group_setting(update.effective_chat.id, "announcement_btn_text", text)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Varsayılan duyuru buton metni güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_duyurubutonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    if context.args:
+        database.update_group_setting(update.effective_chat.id, "announcement_btn_url", context.args[0].strip())
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Varsayılan duyuru buton linki güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_zamanlabutonmetin(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    text = " ".join(context.args)
+    if text:
+        database.update_group_setting(update.effective_chat.id, "scheduled_btn_text", text)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Zamanlı duyuru buton metni güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_zamanlabutonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    if context.args:
+        database.update_group_setting(update.effective_chat.id, "scheduled_btn_url", context.args[0].strip())
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Zamanlı duyuru buton linki güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_zamanladur(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    job_to_remove = database.get_latest_scheduled_job(chat_id)
+
+    if job_to_remove:
+        job_id = job_to_remove["job_id"]
+        try: scheduler.remove_job(job_id)
+        except Exception: pass
+        database.remove_scheduled_job_db(job_id)
+        admin_user = update.effective_user.username or update.effective_user.first_name
+        database.log_action(chat_id, "SCHEDULE_STOP", 0, f"@{admin_user}", "Periyodik duyuru durduruldu.")
+        await send_auto_delete_message(context, chat_id, "🛑 Periyodik duyuru durduruldu!", 5)
+    else:
+        await send_auto_delete_message(context, chat_id, "❌ Aktif periyodik duyuru bulunamadı!", 5)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    reply = update.message.reply_to_message
+    raw_args = update.message.text.partition(" ")[2].strip()
+
+    if raw_args.lower().startswith("dur"):
+        return await cmd_zamanladur(update, context)
+
+    media_url = ""
+    if reply and reply.photo:
+        media_url = reply.photo[-1].file_id
+
+    btn_text, btn_url, minutes, msg_text = "", "", 0, ""
+    if "|" in raw_args:
+        parts = [p.strip() for p in raw_args.split("|")]
+        try: minutes = int(parts[0])
+        except ValueError:
+            await send_auto_delete_message(context, chat_id, "❌ Dakika sayısal olmalıdır!", 5)
+            try: await update.message.delete()
+            except Exception: pass
+            return
+        msg_text = parts[1] if len(parts) > 1 else ""
+        btn_text = parts[2] if len(parts) > 2 else ""
+        btn_url = parts[3] if len(parts) > 3 else ""
+    else:
+        parts = raw_args.split(maxsplit=1)
+        if not parts or not parts[0].isdigit():
+            await send_auto_delete_message(context, chat_id, "❌ Format: /zamanla <dakika> <mesaj>", 6)
+            try: await update.message.delete()
+            except Exception: pass
+            return
+        minutes = int(parts[0])
+        msg_text = parts[1] if len(parts) > 1 else ""
+
+    if not msg_text and reply:
+        msg_text = reply.caption or reply.text or ""
+
+    if not btn_text or not btn_url:
+        sched_settings = database.get_announcement_settings(chat_id)
+        if not btn_text: btn_text = sched_settings.get("scheduled_btn_text", "")
+        if not btn_url: btn_url = sched_settings.get("scheduled_btn_url", "")
+
+    job_id = hashlib.md5(f"{chat_id}_{minutes}_{msg_text[:20]}".encode()).hexdigest()
+    scheduler.add_job(
+        send_periodic_announcement,
+        'interval',
+        minutes=minutes,
+        args=[context.bot, chat_id, msg_text, btn_text, btn_url, media_url],
+        id=job_id,
+        replace_existing=True
+    )
+
+    database.save_scheduled_job(job_id, chat_id, minutes, msg_text, btn_text, btn_url, media_url)
+    admin_user = update.effective_user.username or update.effective_user.first_name
+    database.log_action(chat_id, "SCHEDULE_START", 0, f"@{admin_user}", f"Her {minutes} dakikada bir duyuru başlatıldı.")
+    await send_auto_delete_message(context, chat_id, f"✅ Her {minutes} dakikada bir paylaşılacak görev başlatıldı!", 5)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_kilit(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    if context.args:
+        action = context.args[0].lower()
+        try:
+            if action in ["kapat", "kilit"]:
+                await context.bot.set_chat_permissions(chat_id=chat_id, permissions=ChatPermissions(can_send_messages=False))
+                await send_auto_delete_message(context, chat_id, "🔒 Sohbet kilitlendi!", 4)
+            elif action in ["ac", "aç"]:
+                await context.bot.set_chat_permissions(chat_id=chat_id, permissions=ChatPermissions(can_send_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True))
+                await send_auto_delete_message(context, chat_id, "🔓 Sohbet kilidi açıldı!", 4)
+        except Exception as e: logger.error(f"Kilit hatası: {e}")
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    user = await get_target_user(update, context)
+    if user:
+        try:
+            await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+            uname = getattr(user, 'username', str(user.id))
+            admin_uname = update.effective_user.username or update.effective_user.first_name
+            database.log_action(chat_id, "BAN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} tarafından banlandı.")
+            await send_auto_delete_message(context, chat_id, f"🚫 @{uname} gruptan banlandı!", 5)
+        except Exception as e: logger.error(f"Ban hatası: {e}")
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    user = await get_target_user(update, context)
+    if user:
+        try:
+            await context.bot.unban_chat_member(chat_id=chat_id, user_id=user.id, only_if_banned=True)
+            uname = getattr(user, 'username', str(user.id))
+            admin_uname = update.effective_user.username or update.effective_user.first_name
+            database.log_action(chat_id, "UNBAN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} banı kaldırdı.")
+            await send_auto_delete_message(context, chat_id, f"✅ @{uname} banı kaldırıldı!", 5)
+        except Exception as e: logger.error(f"Unban hatası: {e}")
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    user = await get_target_user(update, context)
+    if user:
+        try:
+            await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=ChatPermissions(can_send_messages=False))
+            uname = getattr(user, 'username', str(user.id))
+            admin_uname = update.effective_user.username or update.effective_user.first_name
+            database.log_action(chat_id, "MUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} susturdu.")
+            await send_auto_delete_message(context, chat_id, f"🔇 @{uname} susturuldu!", 5)
+        except Exception as e: logger.error(f"Mute hatası: {e}")
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    user = await get_target_user(update, context)
+    if user:
+        try:
+            perms = ChatPermissions(can_send_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True)
+            await context.bot.restrict_chat_member(chat_id=chat_id, user_id=user.id, permissions=perms)
+            uname = getattr(user, 'username', str(user.id))
+            admin_uname = update.effective_user.username or update.effective_user.first_name
+            database.log_action(chat_id, "UNMUTE", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} susturmayı kaldırdı.")
+            await send_auto_delete_message(context, chat_id, f"🔊 @{uname} susturması kaldırıldı!", 5)
+        except Exception as e: logger.error(f"Unmute hatası: {e}")
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_uyari(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    user = await get_target_user(update, context)
+    if user:
+        uname = getattr(user, 'username', str(user.id))
+        admin_uname = update.effective_user.username or update.effective_user.first_name
+        current_warns = database.add_warning(user.id)
+        if current_warns >= 3:
+            try:
+                await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+                database.reset_warnings(user.id)
+                database.log_action(chat_id, "BAN", user.id, f"@{uname} (ID: {user.id})", f"3 uyarı sınırını aştığı için otomatik banlandı.")
+                await send_auto_delete_message(context, chat_id, f"🚫 @{uname} 3 uyarıyı aştığı için otomatik banlandı!", 6)
+            except Exception as e: logger.error(f"Otomatik ban hatası: {e}")
+        else:
+            database.log_action(chat_id, "WARN", user.id, f"@{uname} (ID: {user.id})", f"Admin @{admin_uname} uyarı verdi ({current_warns}/3).")
+            await send_auto_delete_message(context, chat_id, f"⚠️ @{uname} uyarıldı! ({current_warns}/3)", 5)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_unuyari(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    chat_id = update.effective_chat.id
+    user = await get_target_user(update, context)
+    if user: 
+        uname = getattr(user, 'username', str(user.id))
+        admin_uname = update.effective_user.username or update.effective_user.first_name
+        database.reset_warnings(user.id)
+        database.log_action(chat_id, "UNWARN", user.id, f"@{uname} (ID: {user.id})", f"Admin uyarıları sıfırladı.")
+        await send_auto_delete_message(context, chat_id, f"✅ @{uname} uyarıları sıfırlandı!", 5)
+    try: await update.message.delete()
+    except Exception: pass
+
+COMMAND_MAP = {
+    "start": cmd_start,
+    "help": cmd_start,
+    "welcome": cmd_welcome,
+    "butonmetni": cmd_butonmetni,
+    "butonlinki": cmd_butonlinki,
+    "duyuru": cmd_duyuru,
+    "duyurubutonmetni": cmd_duyurubutonmetni,
+    "duyurubutonlinki": cmd_duyurubutonlinki,
+    "zamanlabutonmetin": cmd_zamanlabutonmetin,
+    "zamanlabutonlinki": cmd_zamanlabutonlinki,
+    "zamanla": cmd_zamanla,
+    "zamanladur": cmd_zamanladur,
+    "kilit": cmd_kilit,
+    "defol": cmd_defol,
+    "undefol": cmd_undefol,
+    "itaat": cmd_itaat,
+    "unitaat": cmd_unitaat,
+    "uyari": cmd_uyari,
+    "warn": cmd_uyari,
+    "unuyari": cmd_unuyari,
+    "unwarn": cmd_unuyari,
+}
+
+async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not update.message: return
+    user, chat, chat_id = update.effective_user, update.effective_chat, update.effective_chat.id
+    if chat.type in ["group", "supergroup"]:
+        try:
+            chat_info = await context.bot.get_chat(chat.id)
+            photo_url = ""
+            if chat_info.photo:
+                file_obj = await context.bot.get_file(chat_info.photo.small_file_id)
+                photo_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_obj.file_path}"
+            database.register_bot_group(chat.id, chat.title or "Grup", photo_url)
+        except Exception:
+            database.register_bot_group(chat.id, chat.title or "Grup", "")
+
+    if user and user.username: database.save_user(chat_id, user.id, user.username.lower())
+
+    text = (update.message.text or update.message.caption or "").strip()
+    if not text: return
+
+    lower_first_word = text.split()[0].lower()
+    if lower_first_word in ["/uyarı", "/uyari"]:
+        context.args = text.split()[1:]
+        return await cmd_uyari(update, context)
+    elif lower_first_word in ["/unuyarı", "/unuyari"]:
+        context.args = text.split()[1:]
+        return await cmd_unuyari(update, context)
+
+    if chat.type in ["group", "supergroup"]:
+        is_admin = False
+        if user:
+            try:
+                member = await context.bot.get_chat_member(chat_id, user.id)
+                if member.status in ["administrator", "creator"] or database.is_authorized_staff(user.id): is_admin = True
+            except Exception: pass
+        if not is_admin:
+            lower_text = text.lower()
+            has_link = any(p in lower_text for p in ["http://", "https://", "t.me/", "telegram.me/", "www.", "joinchat"])
+            has_bad_words = any(w in lower_text for w in BAD_WORDS)
+            if has_link or has_bad_words:
+                try:
+                    await update.message.delete()
+                    if user:
+                        await context.bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+                        uname_str = f"@{user.username}" if user.username else str(user.id)
+                        database.log_action(chat_id, "AUTO_BAN", user.id, f"{uname_str} (ID: {user.id})", "Yasaklı içerik (otomatik ban).")
+                except Exception as e: logger.error(f"Filtre hatası: {e}")
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
