@@ -271,14 +271,21 @@ async def api_update_settings(request: Request):
 
 @app.get("/", response_class=HTMLResponse)
 async def handle_root():
-    for path in ["public/index.html", "index.html"]:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    paths_to_check = [
+        os.path.join(base_dir, "public", "index.html"),
+        os.path.join(base_dir, "index.html")
+    ]
+    
+    for path in paths_to_check:
         if os.path.exists(path):
             try:
                 with open(path, "r", encoding="utf-8") as f:
                     return HTMLResponse(content=f.read(), headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
             except Exception as e:
-                pass
-    return HTMLResponse(content="Index dosyası (public/index.html) bulunamadı!", status_code=500)
+                logger.error(f"HTML okuma hatası ({path}): {e}")
+                
+    return HTMLResponse(content=f"Index dosyası (public/index.html) bulunamadı! Temel dizin: {base_dir}", status_code=500)
 
 # ==========================================
 # TELEGRAM BOT KOMUTLARI & YÖNETİM
@@ -576,7 +583,6 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not msg_text and reply:
         msg_text = reply.caption or reply.text or ""
 
-    # Eğer özel buton verilmemişse, veritabanındaki zamanlı duyuru varsayılan butonlarını al
     if not btn_text or not btn_url:
         sched_settings = database.get_announcement_settings(chat_id)
         if not btn_text: btn_text = sched_settings.get("scheduled_btn_text", "")
