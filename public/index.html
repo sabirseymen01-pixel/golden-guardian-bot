@@ -4,148 +4,148 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Katya | 3D Perspective Cockpit</title>
+    <title>Golden Katya | AAA Simulation Cockpit</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Babylon.js 3D Oyun Motoru ve GUI Kütüphaneleri -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
     <style>
         :root {
-            --space-black: #020100;
+            --space-black: #010100;
             --hud-gold: #d4af37;
             --gold-glow: #f8ecbe;
             --danger-red: #ff3333;
-            --success-green: #2ecc71;
-            --glass-panel: rgba(10, 8, 4, 0.90);
-            --border-gold: rgba(212, 175, 55, 0.65);
+            --glass-panel: rgba(12, 8, 3, 0.85);
+            --border-gold: rgba(212, 175, 55, 0.7);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: monospace; -webkit-tap-highlight-color: transparent; }
         
         html, body {
             height: 100vh; width: 100vw; overflow: hidden; background-color: var(--space-black);
-            perspective: 1200px;
         }
 
         body {
-            background: radial-gradient(circle at 50% 30%, rgba(212, 175, 55, 0.25) 0%, rgba(2, 1, 0, 0.98) 85%);
-            color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 4px;
+            background: radial-gradient(circle at 50% 40%, rgba(212, 175, 55, 0.3) 0%, rgba(1, 1, 0, 0.99) 85%);
+            display: flex; flex-direction: column; justify-content: space-between; padding: 6px;
         }
 
-        /* 🌌 Arka Plan 3D Uzay Kokpiti (Three.js WebGL) */
-        #webgl-container {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none;
+        /* Babylon.js 3D Sahne Tuvali */
+        #renderCanvas {
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; outline: none; touch-action: none;
         }
 
-        /* Üst Komuta Header */
+        /* Üst Komuta Çubuğu (Holografik Header) */
         .hud-header {
             position: relative; z-index: 10; display: flex; justify-content: space-between; align-items: center;
-            padding: 4px 8px; background: rgba(8, 6, 3, 0.85); backdrop-filter: blur(15px); border-radius: 6px;
-            border: 1.5px solid var(--border-gold); box-shadow: 0 4px 15px rgba(0,0,0,0.85), inset 0 0 10px rgba(212,175,55,0.2);
+            padding: 6px 10px; background: rgba(8, 6, 2, 0.92); backdrop-filter: blur(20px); border-radius: 8px;
+            border: 1.5px solid var(--border-gold); box-shadow: 0 5px 25px rgba(0,0,0,0.95), inset 0 0 12px rgba(212,175,55,0.25);
         }
-        .logo { font-size: 9px; color: var(--gold-glow); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px var(--hud-gold); }
-        .badge { background: rgba(212,175,55,0.25); color: var(--gold-glow); padding: 2px 6px; border-radius: 4px; font-size: 7px; border: 1px solid var(--hud-gold); font-weight: 900; }
+        .logo { font-size: 10px; color: var(--gold-glow); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 12px var(--hud-gold); }
+        .badge { background: rgba(212,175,55,0.3); color: var(--gold-glow); padding: 3px 8px; border-radius: 6px; font-size: 8px; border: 1px solid var(--hud-gold); font-weight: 900; }
 
-        /* 🪐 MERKEZİ DÖNEN RADAR KONSOLU */
+        /* Merkezi Dönen Yörünge Radar Çemberi */
         .radar-deck {
-            position: relative; z-index: 10; width: 100%; height: 90px; display: flex; align-items: center; justify-content: center;
-            background: rgba(4, 3, 1, 0.85); border-radius: 50%; border: 1.5px solid var(--border-gold);
-            box-shadow: 0 0 25px rgba(212,175,55,0.25), inset 0 0 15px rgba(212,175,55,0.18);
-            margin: 2px auto; max-width: 250px;
+            position: relative; z-index: 10; width: 100%; height: 120px; display: flex; align-items: center; justify-content: center;
+            background: rgba(4, 3, 1, 0.88); border-radius: 50%; border: 2px solid var(--border-gold);
+            box-shadow: 0 0 35px rgba(212,175,55,0.35), inset 0 0 20px rgba(212,175,55,0.25);
+            margin: 4px auto; max-width: 270px;
         }
         
         .katya-core {
             position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-            width: 36px; height: 36px; border-radius: 50%; background: radial-gradient(circle, #f8ecbe 0%, #d4af37 60%, #3a2e0f 100%);
+            width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle, #f8ecbe 0%, #d4af37 60%, #3a2e0f 100%);
             border: 2px solid var(--gold-glow); display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 12px var(--hud-gold); z-index: 15; cursor: pointer;
+            box-shadow: 0 0 20px var(--hud-gold); z-index: 15; cursor: pointer;
         }
-        .core-icon { font-size: 12px; }
-        .core-text { font-size: 5px; font-weight: 900; color: #000; text-transform: uppercase; }
+        .core-icon { font-size: 15px; }
+        .core-text { font-size: 6px; font-weight: 900; color: #000; text-transform: uppercase; }
 
         .orbit-ring {
-            position: absolute; width: 100%; height: 100%; left: 0; top: 0; animation: orbitSpin 30s linear infinite;
+            position: absolute; width: 100%; height: 100%; left: 0; top: 0; animation: orbitSpin 35s linear infinite;
         }
         @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .orbit-node {
             position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 12;
         }
-        .orbit-node-inner { display: flex; flex-direction: column; align-items: center; animation: counterSpin 30s linear infinite; }
+        .orbit-node-inner { display: flex; flex-direction: column; align-items: center; animation: counterSpin 35s linear infinite; }
         @keyframes counterSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
 
         .orbit-avatar {
-            width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--hud-gold);
+            width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--hud-gold);
             background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 6px var(--hud-gold);
+            box-shadow: 0 0 10px var(--hud-gold);
         }
         .orbit-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .orbit-label { font-size: 5px; color: #d4c8b0; background: rgba(0,0,0,0.9); padding: 1px 3px; border-radius: 3px; margin-top: 1px; max-width: 45px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(212,175,55,0.3); }
+        .orbit-label { font-size: 6px; color: #d4c8b0; background: rgba(0,0,0,0.95); padding: 1px 4px; border-radius: 3px; margin-top: 2px; max-width: 55px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border: 1px solid rgba(212,175,55,0.4); }
 
-        /* 🪞 3D PERSPEKTİFTE AÇILI SÜZÜLEN HOLOGRAFİK PENCERELER */
+        /* 🪞 Yüksek Grafikli Kokpit Pencereleri (Glassmorphism & Depth) */
         .cockpit-grid {
-            position: relative; z-index: 10; flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 6px; margin-top: 2px; overflow: hidden;
-            transform: rotateX(6deg) perspective(800px); /* Derinlik ve Açı Efekti */
+            position: relative; z-index: 10; flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; margin-top: 4px; overflow: hidden;
+            transform: perspective(1000px) rotateX(5deg);
         }
 
         .hud-panel {
-            background: var(--glass-panel); backdrop-filter: blur(20px);
-            border: 1.5px solid var(--border-gold); border-radius: 8px; padding: 5px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.95), inset 0 0 12px rgba(212, 175, 55, 0.15);
+            background: var(--glass-panel); backdrop-filter: blur(25px);
+            border: 1.5px solid var(--border-gold); border-radius: 10px; padding: 8px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.95), inset 0 0 18px rgba(212, 175, 55, 0.2);
             position: relative; display: flex; flex-direction: column; overflow: hidden;
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
         }
         .hud-panel:hover {
             transform: scale(1.02);
-            box-shadow: 0 12px 35px rgba(212,175,55,0.3), inset 0 0 18px rgba(212,175,55,0.3);
+            box-shadow: 0 18px 45px rgba(212,175,55,0.35), inset 0 0 25px rgba(212,175,55,0.4);
         }
         .hud-panel::before {
-            content: ""; position: absolute; top: -1px; left: -1px; width: 4px; height: 4px;
-            border-top: 1.5px solid var(--gold-glow); border-left: 1.5px solid var(--gold-glow);
+            content: ""; position: absolute; top: -1px; left: -1px; width: 6px; height: 6px;
+            border-top: 2px solid var(--gold-glow); border-left: 2px solid var(--gold-glow);
         }
         .hud-panel::after {
-            content: ""; position: absolute; bottom: -1px; right: -1px; width: 4px; height: 4px;
-            border-bottom: 1.5px solid var(--gold-glow); border-right: 1.5px solid var(--gold-glow);
+            content: ""; position: absolute; bottom: -1px; right: -1px; width: 6px; height: 6px;
+            border-bottom: 2px solid var(--gold-glow); border-right: 2px solid var(--gold-glow);
         }
 
-        .panel-title { font-size: 7px; font-weight: 900; color: var(--gold-glow); border-bottom: 1px solid rgba(212,175,55,0.35); padding-bottom: 2px; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .panel-body { flex: 1; overflow-y: auto; font-size: 7px; display: flex; flex-direction: column; gap: 3px; scrollbar-width: none; }
+        .panel-title { font-size: 8px; font-weight: 900; color: var(--gold-glow); border-bottom: 1px solid rgba(212,175,55,0.4); padding-bottom: 3px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .panel-body { flex: 1; overflow-y: auto; font-size: 8px; display: flex; flex-direction: column; gap: 5px; scrollbar-width: none; }
         .panel-body::-webkit-scrollbar { display: none; }
 
         input, select, textarea {
-            width: 100%; background: rgba(0,0,0,0.88); border: 1px solid rgba(212,175,55,0.45);
-            border-radius: 3px; padding: 3px; color: #fff; font-size: 7px; outline: none; margin-bottom: 2px;
+            width: 100%; background: rgba(0,0,0,0.92); border: 1px solid rgba(212,175,55,0.55);
+            border-radius: 5px; padding: 5px; color: #fff; font-size: 8px; outline: none; margin-bottom: 4px;
         }
-        input:focus { border-color: var(--gold-glow); box-shadow: 0 0 5px var(--gold-glow); }
+        input:focus { border-color: var(--gold-glow); box-shadow: 0 0 8px var(--gold-glow); }
 
         .cyber-btn {
             width: 100%; background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%); color: #000;
-            border: none; padding: 4px; border-radius: 3px; font-weight: 900; font-size: 6px; cursor: pointer; text-transform: uppercase;
+            border: none; padding: 6px; border-radius: 5px; font-weight: 900; font-size: 7px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px;
         }
-        .cyber-btn:active { transform: scale(0.97); }
+        .cyber-btn:active { transform: scale(0.96); }
 
-        .item-row { background: rgba(0,0,0,0.65); border: 1px solid rgba(212,175,55,0.25); padding: 3px; border-radius: 3px; display: flex; justify-content: space-between; align-items: center; font-size: 6px; }
-        .log-box { background: rgba(0,0,0,0.75); border: 1px solid rgba(212,175,55,0.3); padding: 3px; border-radius: 3px; font-size: 6px; color: #d4c8b0; }
+        .item-row { background: rgba(0,0,0,0.75); border: 1px solid rgba(212,175,55,0.35); padding: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 7px; }
+        .log-box { background: rgba(0,0,0,0.85); border: 1px solid rgba(212,175,55,0.4); padding: 5px; border-radius: 5px; font-size: 7px; color: #d4c8b0; }
 
         /* Katya AI Terminal Paneli */
-        .katya-box { display: flex; flex-direction: column; height: 100%; background: rgba(0,0,0,0.92); border-radius: 3px; overflow: hidden; border: 1px solid rgba(212,175,55,0.3); }
-        .katya-screen { flex: 1; padding: 2px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; font-size: 6px; }
-        .j-msg { max-width: 90%; padding: 2px 4px; border-radius: 3px; line-height: 1.2; }
-        .j-msg.ai { background: rgba(212,175,55,0.18); color: var(--gold-glow); border: 1px solid rgba(212,175,55,0.45); align-self: flex-start; }
-        .j-msg.user { background: rgba(255,255,255,0.1); color: #fff; align-self: flex-end; }
-        .j-input-bar { display: flex; padding: 2px; background: #000; border-top: 1px solid var(--hud-gold); gap: 2px; }
+        .katya-box { display: flex; flex-direction: column; height: 100%; background: rgba(0,0,0,0.95); border-radius: 5px; overflow: hidden; border: 1px solid rgba(212,175,55,0.35); }
+        .katya-screen { flex: 1; padding: 4px; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; font-size: 7px; }
+        .j-msg { max-width: 90%; padding: 3px 6px; border-radius: 4px; line-height: 1.3; }
+        .j-msg.ai { background: rgba(212,175,55,0.2); color: var(--gold-glow); border: 1px solid rgba(212,175,55,0.5); align-self: flex-start; }
+        .j-msg.user { background: rgba(255,255,255,0.12); color: #fff; align-self: flex-end; }
+        .j-input-bar { display: flex; padding: 3px; background: #000; border-top: 1px solid var(--hud-gold); gap: 3px; }
         .j-input-bar input { margin-bottom: 0; }
     </style>
 </head>
 <body>
 
-    <!-- 🌌 Three.js 3D Arka Plan Motoru -->
-    <div id="webgl-container"></div>
+    <!-- Babylon.js 3D Oyun Motoru Tuvali -->
+    <canvas id="renderCanvas"></canvas>
 
     <!-- Üst Header -->
     <div class="hud-header">
-        <div class="logo">⚜️ KATYA 3D PERSPECTIVE HUD</div>
+        <div class="logo">⚜️ KATYA AAA COCKPIT</div>
         <div class="badge" id="userRole">Kraljica 👑</div>
     </div>
 
-    <!-- 🪐 Merkez Dönen Yörünge Halkası -->
+    <!-- Merkezi Dönen Yörünge Halkası -->
     <div class="radar-deck" id="radarContainer">
         <div class="katya-core" onclick="selectGroupNode(0)" title="Genel Hub">
             <div class="core-icon">⚜️</div>
@@ -154,21 +154,21 @@
         <div class="orbit-ring" id="radarNodesRing"></div>
     </div>
 
-    <!-- 🪞 3D Açılı Süzülen Çoklu Holografik Pencere Izgarası -->
+    <!-- 🪞 Yüksek Grafikli Çoklu Holografik Pencereler -->
     <div class="cockpit-grid">
         
         <!-- PENCERE 1: TELEMETRİ -->
         <div class="hud-panel">
             <div class="panel-title">📊 Telemetri</div>
             <div class="panel-body">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px;">
-                    <div style="background: rgba(0,0,0,0.6); padding: 4px; border-radius: 3px; border: 1px solid rgba(212,175,55,0.3);">
-                        <div style="font-size: 5px; color: #d4c8b0;">İŞLEM</div>
-                        <div id="totalActions" style="font-size: 10px; font-weight: 900; color: var(--gold-glow);">-</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                    <div style="background: rgba(0,0,0,0.7); padding: 6px; border-radius: 4px; border: 1px solid rgba(212,175,55,0.35);">
+                        <div style="font-size: 6px; color: #d4c8b0;">İŞLEM</div>
+                        <div id="totalActions" style="font-size: 11px; font-weight: 900; color: var(--gold-glow);">-</div>
                     </div>
-                    <div style="background: rgba(0,0,0,0.6); padding: 4px; border-radius: 3px; border: 1px solid rgba(212,175,55,0.3);">
-                        <div style="font-size: 5px; color: #d4c8b0;">BLOKE</div>
-                        <div id="totalBans" style="font-size: 10px; font-weight: 900; color: var(--danger-red);">-</div>
+                    <div style="background: rgba(0,0,0,0.7); padding: 6px; border-radius: 4px; border: 1px solid rgba(212,175,55,0.35);">
+                        <div style="font-size: 6px; color: #d4c8b0;">BLOKE</div>
+                        <div id="totalBans" style="font-size: 11px; font-weight: 900; color: var(--danger-red);">-</div>
                     </div>
                 </div>
             </div>
@@ -181,7 +181,7 @@
                 <input type="text" id="staffInput" placeholder="@username/ID">
                 <input type="text" id="staffName" placeholder="Rozet Ünvanı">
                 <button class="cyber-btn" onclick="addStaff()">Mühürle</button>
-                <div id="staffListContainer" style="margin-top: 1px;"><div style="font-size:5px; color:#d4c8b0;">Yükleniyor...</div></div>
+                <div id="staffListContainer" style="margin-top: 2px;"><div style="font-size:6px; color:#d4c8b0;">Yükleniyor...</div></div>
             </div>
         </div>
 
@@ -190,11 +190,11 @@
             <div class="panel-title">⚡ Taktiksel & Log</div>
             <div class="panel-body">
                 <input type="text" id="memberTargetInput" placeholder="Hedef ID/@username">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 2px;">
-                    <button class="cyber-btn" style="background: var(--danger-red); color:#fff; padding:2px;" onclick="memberAction('ban')">Banla 🚫</button>
-                    <button class="cyber-btn" style="background: var(--success-green); color:#fff; padding:2px;" onclick="memberAction('unban')">Aç ✅</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-bottom: 3px;">
+                    <button class="cyber-btn" style="background: var(--danger-red); color:#fff; padding:3px;" onclick="memberAction('ban')">Banla 🚫</button>
+                    <button class="cyber-btn" style="background: var(--success-green); color:#fff; padding:3px;" onclick="memberAction('unban')">Aç ✅</button>
                 </div>
-                <div id="generalLogsContainer"><div style="font-size:5px; color:#d4c8b0;">Loglar akıyor...</div></div>
+                <div id="generalLogsContainer"><div style="font-size:6px; color:#d4c8b0;">Loglar akıyor...</div></div>
             </div>
         </div>
 
@@ -204,11 +204,11 @@
             <div class="panel-body" style="padding:0;">
                 <div class="katya-box">
                     <div class="katya-screen" id="katyaScreen">
-                        <div class="j-msg ai">⚜️ 3D Kokpit panelleri aktif, Kraljica.</div>
+                        <div class="j-msg ai">⚜️ AAA Simülasyon motoru aktif, Kraljica.</div>
                     </div>
                     <div class="j-input-bar">
                         <input type="text" id="katyaInput" placeholder="Komut ver..." onkeypress="handleKatyaKey(event)">
-                        <button class="cyber-btn" style="width: 30px; padding: 0; font-size: 5px;" onclick="sendKatyaCommand()">İlet</button>
+                        <button class="cyber-btn" style="width: 35px; padding: 0; font-size: 6px;" onclick="sendKatyaCommand()">İlet</button>
                     </div>
                 </div>
             </div>
@@ -217,40 +217,49 @@
     </div>
 
     <script>
-        // 🌌 Three.js 3D Uzay Kokpiti Arka Plan Motoru
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('webgl-container').appendChild(renderer.domElement);
+        // 🎮 Babylon.js AAA 3D Oyun Motoru Başlatıcı
+        const canvas = document.getElementById("renderCanvas");
+        const engine = new BABYLON.Engine(canvas, true);
 
-        const particlesCount = 350;
-        const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(particlesCount * 3);
-        for (let i = 0; i < particlesCount * 3; i += 3) {
-            positions[i] = (Math.random() - 0.5) * 14;
-            positions[i + 1] = (Math.random() - 0.5) * 14;
-            positions[i + 2] = (Math.random() - 0.5) * 14;
-        }
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const material = new THREE.PointsMaterial({ color: 0xd4af37, size: 0.035, transparent: true, opacity: 0.8 });
-        const starField = new THREE.Points(geometry, material);
-        scene.add(starField);
-        camera.position.z = 4;
+        const createScene = function () {
+            const scene = new BABYLON.Scene();
+            scene.clearColor = new BABYLON.Color4(0.01, 0.005, 0, 1);
 
-        function animate3D() {
-            requestAnimationFrame(animate3D);
-            starField.rotation.y += 0.0008;
-            starField.rotation.x += 0.0004;
-            renderer.render(scene, camera);
-        }
-        animate3D();
+            // Uzay Kokpiti Kamerası
+            const camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2.5, 15, BABYLON.Vector3.Zero(), scene);
+            camera.inputs.clear(); // Sabit kokpit açısı için fare kontrolünü kilitliyoruz
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+            // Sinematik Işıklandırma ve Altın Parlama Efekti (Glow Layer)
+            const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+            light.intensity = 0.8;
+
+            const glowLayer = new BABYLON.GlowLayer("glow", scene, { blurKernelSize: 32 });
+            glowLayer.intensity = 0.9; // Altın neon hatlara gerçek oyun motoru parlaması verir
+
+            // 3D Altın Yıldız Tozu / Parçacık Evreni
+            const particleSystem = new BABYLON.ParticleSystem("stars", 600, scene);
+            particleSystem.particleTexture = new BABYLON.Texture("https://www.babylonjs.com/assets/flare.png", scene);
+            particleSystem.emitter = BABYLON.Vector3.Zero();
+            particleSystem.minEmitBox = new BABYLON.Vector3(-20, -20, -20);
+            particleSystem.maxEmitBox = new BABYLON.Vector3(20, 20, 20);
+            particleSystem.color1 = new BABYLON.Color4(0.83, 0.68, 0.21, 1); // Altın sarısı
+            particleSystem.color2 = new BABYLON.Color4(1, 0.95, 0.74, 1);
+            particleSystem.sizeStart = 0.05;
+            particleSystem.sizeEnd = 0.01;
+            particleSystem.emitRate = 30;
+            particleSystem.start();
+
+            // Arka plan evren dönüş animasyonu
+            scene.registerBeforeRender(() => {
+                particleSystem.emitter.y += 0.001;
+            });
+
+            return scene;
+        };
+
+        const scene = createScene();
+        engine.runRenderLoop(() => { scene.render(); });
+        window.addEventListener("resize", () => { engine.resize(); });
 
         // TELEGRAM & API KONTROL MİMARİSİ
         const tg = window.Telegram.WebApp;
@@ -283,7 +292,7 @@
 
                 if (ringContainer) {
                     let html = '';
-                    const radius = 42; 
+                    const radius = 45; 
                     groups.forEach((g, index) => {
                         const angle = (index / groups.length) * 2 * Math.PI;
                         const x = Math.cos(angle) * radius;
@@ -292,7 +301,6 @@
 
                         let avatar = `<span style="font-size:10px;">🛡️</span>`;
                         if (g.photo_url) {
-                            // CORS ve Token patlamasını önleyen Backend Proxy Köprüsü
                             const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(g.photo_url)}`;
                             avatar = `<img src="${proxyUrl}" onerror="this.parentElement.innerHTML='🛡️'">`;
                         }
@@ -330,7 +338,7 @@
                 const genRes = await fetch('/api/logs?filter=general&limit=15');
                 const genLogs = await genRes.json();
                 const genC = document.getElementById('generalLogsContainer');
-                genC.innerHTML = genLogs.length === 0 ? '<div style="font-size:5px; color:#d4c8b0;">Log yok.</div>' : '';
+                genC.innerHTML = genLogs.length === 0 ? '<div style="font-size:6px; color:#d4c8b0;">Log yok.</div>' : '';
                 genLogs.forEach(l => {
                     genC.innerHTML += `<div class="log-box"><b>${l.action_type}</b>: @${l.username || l.target_id}</div>`;
                 });
@@ -341,7 +349,7 @@
                 });
                 const staffs = await staffRes.json();
                 const staffC = document.getElementById('staffListContainer');
-                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:5px; color:#d4c8b0;">Yetkili yok.</div>' : '';
+                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:6px; color:#d4c8b0;">Yetkili yok.</div>' : '';
                 
                 staffs.forEach(s => {
                     const sName = s.full_name || s.name || s.first_name || "Muhafız";
@@ -349,7 +357,7 @@
                     staffC.innerHTML += `
                         <div class="item-row">
                             <span><b>${sName}</b></span>
-                            <button onclick="removeStaff(${targetId})" style="background:#444; color:#fff; border:none; padding:1px 2px; font-size:5px; cursor:pointer;">Sil</button>
+                            <button onclick="removeStaff(${targetId})" style="background:#444; color:#fff; border:none; padding:1px 3px; font-size:6px; cursor:pointer;">Sil</button>
                         </div>
                     `;
                 });
@@ -403,8 +411,8 @@
             input.value = '';
             screen.scrollTop = screen.scrollHeight;
             setTimeout(() => {
-                let reply = "⚜️ 3D Perspektif kokpit panelleri aktif, Kraljica.";
-                if (text.toLowerCase().includes('rapor')) reply = "📊 Sistemler tam güçte.";
+                let reply = "⚜️ Babylon.js AAA simülasyon motoru aktif, Kraljica.";
+                if (text.toLowerCase().includes('rapor')) reply = "📊 Sistemler tam güçte, glow kalkanları tam.";
                 screen.innerHTML += `<div class="j-msg ai">${reply}</div>`;
                 screen.scrollTop = screen.scrollHeight;
             }, 400);
