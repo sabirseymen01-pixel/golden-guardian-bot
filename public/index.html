@@ -9,9 +9,9 @@
     <style>
         :root {
             --space-bg: #070604;
-            --glass-deck: rgba(20, 16, 10, 0.75);
-            --glass-border: rgba(212, 175, 55, 0.4);
-            --gold-glow: rgba(212, 175, 55, 0.7);
+            --glass-deck: rgba(20, 16, 10, 0.85);
+            --glass-border: rgba(212, 175, 55, 0.45);
+            --gold-glow: rgba(212, 175, 55, 0.75);
             --gold-shine: #f3e5ab;
             --accent-gold: #d4af37;
             --danger-glow: rgba(255, 77, 77, 0.9);
@@ -20,6 +20,7 @@
             --danger: #ff4d4d;
             --success: #2ecc71;
             --warning: #f39c12;
+            --info: #3498db;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; -webkit-tap-highlight-color: transparent; }
         
@@ -30,21 +31,21 @@
         }
 
         body {
-            background: radial-gradient(circle at 50% 20%, rgba(35,28,15,0.9) 0%, rgba(7,6,4,0.98) 70%),
-                        linear-gradient(135deg, #070604 0%, #120e07 100%);
+            background: radial-gradient(circle at 50% 15%, rgba(40,32,18,0.95) 0%, rgba(7,6,4,0.99) 80%),
+                        linear-gradient(135deg, #070604 0%, #141008 100%);
             background-attachment: fixed; color: var(--text-main); padding: 12px; display: flex; flex-direction: column;
         }
 
-        /* 🚀 Mekik HUD Konteynerleri */
+        /* 🚀 Kokpit HUD Konteynerleri */
         .hud-deck {
             background: var(--glass-deck);
             backdrop-filter: blur(40px);
             -webkit-backdrop-filter: blur(40px);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
+            border-radius: 22px;
             padding: 14px;
             margin-bottom: 12px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(212, 175, 55, 0.1);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.85), inset 0 0 25px rgba(212, 175, 55, 0.12);
             position: relative;
         }
         .hud-deck::after {
@@ -54,12 +55,12 @@
 
         .header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; }
         .logo h1 { font-size: 13px; color: var(--gold-shine); font-weight: 800; letter-spacing: 1px; text-shadow: 0 0 12px var(--gold-glow); display: flex; align-items: center; gap: 6px; }
-        .badge { background: rgba(212, 175, 55, 0.15); color: var(--gold-shine); padding: 5px 10px; border-radius: 14px; font-size: 10px; font-weight: 900; border: 1px solid var(--gold-glow); box-shadow: 0 0 12px rgba(212,175,55,0.3); }
+        .badge { background: rgba(212, 175, 55, 0.2); color: var(--gold-shine); padding: 5px 12px; border-radius: 14px; font-size: 10px; font-weight: 900; border: 1px solid var(--gold-glow); box-shadow: 0 0 15px rgba(212,175,55,0.4); }
 
-        /* 🪐 1. KONSEPT: DAİRESEL YÖRÜNGE GRUP ZİNCİRİ (ORBITAL RING) */
+        /* 🪐 ORBİTAL ZİNCİR (Gerçek Profil Fotoğrafları ve İsimler) */
         .orbital-ring-section { text-align: center; }
         .hud-title { font-size: 9px; color: var(--accent-gold); letter-spacing: 2px; margin-bottom: 10px; font-weight: 800; text-transform: uppercase; text-shadow: 0 0 8px var(--gold-glow); }
-        .orbital-wrapper { display: flex; justify-content: flex-start; gap: 14px; overflow-x: auto; padding: 6px; scrollbar-width: none; }
+        .orbital-wrapper { display: flex; justify-content: flex-start; gap: 16px; overflow-x: auto; padding: 8px 4px; scrollbar-width: none; }
         .orbital-wrapper::-webkit-scrollbar { display: none; }
         
         .orbit-node { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -67,19 +68,19 @@
         .orbit-node:active { transform: scale(0.92); }
         
         .orbit-avatar {
-            width: 58px; height: 58px; border-radius: 50%; border: 2px solid var(--glass-border);
-            background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.9), inset 0 0 12px rgba(212,175,55,0.3); transition: all 0.4s ease;
+            width: 62px; height: 62px; border-radius: 50%; border: 2.5px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.8); display: flex; align-items: center; justify-content: center; overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.9), inset 0 0 15px rgba(212,175,55,0.4); transition: all 0.4s ease;
             position: relative;
         }
         .orbit-node.active-node .orbit-avatar {
             border-color: var(--gold-shine);
-            box-shadow: 0 0 25px var(--gold-glow), inset 0 0 15px rgba(212,175,55,0.7);
+            box-shadow: 0 0 30px var(--gold-glow), inset 0 0 20px rgba(212,175,55,0.8);
         }
-        /* 🚨 ALARM DURUMUNDA KIRMIZI PALSING HALKA */
+        /* 🚨 KRİTİK ALARM: KIRMIZI PALSING HALKA */
         .orbit-node.alarm-node .orbit-avatar {
             border-color: var(--danger);
-            box-shadow: 0 0 35px var(--danger-glow), inset 0 0 20px rgba(255,77,77,0.8);
+            box-shadow: 0 0 35px var(--danger-glow), inset 0 0 20px rgba(255,77,77,0.9);
             animation: alarmPulse 0.9s infinite alternate;
         }
         @keyframes alarmPulse {
@@ -88,21 +89,21 @@
         }
 
         .orbit-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .orbit-avatar .fallback-icon { font-size: 22px; color: var(--accent-gold); }
-        .orbit-label { font-size: 10px; color: var(--text-muted); margin-top: 5px; max-width: 68px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
-        .orbit-node.active-node .orbit-label { color: var(--gold-shine); font-weight: 900; text-shadow: 0 0 6px var(--gold-glow); }
+        .orbit-avatar .fallback-icon { font-size: 24px; color: var(--accent-gold); }
+        .orbit-label { font-size: 10px; color: var(--text-muted); margin-top: 6px; max-width: 76px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 700; }
+        .orbit-node.active-node .orbit-label { color: var(--gold-shine); font-weight: 900; text-shadow: 0 0 8px var(--gold-glow); }
 
-        /* 🧭 MEKİK KONTROL SEKMELERİ */
+        /* 🧭 KONTROL SEKMELERİ */
         .deck-nav { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px; scrollbar-width: none; }
         .deck-nav::-webkit-scrollbar { display: none; }
         .deck-tab {
-            flex: 0 0 auto; text-align: center; padding: 8px 12px; font-size: 10px; font-weight: 800;
+            flex: 0 0 auto; text-align: center; padding: 9px 13px; font-size: 10px; font-weight: 800;
             color: var(--text-muted); background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.2);
             border-radius: 12px; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase;
         }
         .deck-tab.active {
-            background: linear-gradient(135deg, rgba(212,175,55,0.4) 0%, rgba(170,119,28,0.3) 100%);
-            color: var(--gold-shine); border-color: var(--gold-shine); box-shadow: 0 0 15px var(--gold-glow);
+            background: linear-gradient(135deg, rgba(212,175,55,0.45) 0%, rgba(170,119,28,0.35) 100%);
+            color: var(--gold-shine); border-color: var(--gold-shine); box-shadow: 0 0 18px var(--gold-glow);
         }
         
         .deck-section { display: none; opacity: 0; transform: translateY(8px); transition: opacity 0.3s ease, transform 0.3s ease; flex-direction: column; }
@@ -114,7 +115,7 @@
             width: 100%; background: rgba(0, 0, 0, 0.5); border: 1px solid var(--glass-border);
             border-radius: 12px; padding: 10px; color: #fff; font-size: 12px; outline: none; margin-bottom: 8px;
         }
-        input:focus, select:focus, textarea:focus { border-color: var(--gold-shine); box-shadow: 0 0 10px var(--gold-glow); }
+        input:focus, select:focus, textarea:focus { border-color: var(--gold-shine); box-shadow: 0 0 12px var(--gold-glow); }
         
         .tactical-btn {
             width: 100%; background: linear-gradient(135deg, #d4af37 0%, #aa771c 100%); color: #000;
@@ -123,23 +124,23 @@
         }
         .tactical-btn:active { transform: scale(0.96); }
 
-        .item-row { background: rgba(0,0,0,0.3); border: 1px solid rgba(212, 175, 55, 0.2); padding: 10px; border-radius: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
-        .log-box { background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); padding: 8px 10px; border-radius: 10px; margin-bottom: 6px; font-size: 10px; color: var(--text-muted); }
+        .item-row { background: rgba(0,0,0,0.35); border: 1px solid rgba(212, 175, 55, 0.25); padding: 10px; border-radius: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+        .log-box { background: rgba(0, 0, 0, 0.45); border: 1px solid var(--glass-border); padding: 8px 10px; border-radius: 10px; margin-bottom: 6px; font-size: 10px; color: var(--text-muted); }
         
         .action-tag { font-size: 8px; font-weight: 800; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-right: 4px; }
         .tag-ban { background: rgba(255, 77, 77, 0.25); color: var(--danger); border: 1px solid var(--danger); }
         .tag-mute { background: rgba(230, 126, 34, 0.25); color: #e67e22; border: 1px solid #e67e22; }
         .tag-ann { background: rgba(52, 152, 219, 0.25); color: var(--info); border: 1px solid var(--info); }
         
-        .selectable-text { user-select: all; background: rgba(0,0,0,0.6); padding: 2px 5px; border-radius: 4px; color: var(--gold-shine); font-family: monospace; font-size: 9px; }
+        .selectable-text { user-select: all; background: rgba(0,0,0,0.65); padding: 2px 5px; border-radius: 4px; color: var(--gold-shine); font-family: monospace; font-size: 9px; }
 
-        /* 🤖 3. KONSEPT: JARVIS AI TACTICAL CORE (SESLİ/YAZILI OTONOM KONTROL) */
-        .jarvis-terminal { display: flex; flex-direction: column; height: 300px; background: rgba(0,0,0,0.45); border-radius: 14px; border: 1px solid var(--glass-border); overflow: hidden; }
+        /* 🤖 JARVIS ÇEKİRDEĞİ (Merkezi AI) */
+        .jarvis-terminal { display: flex; flex-direction: column; height: 300px; background: rgba(0,0,0,0.5); border-radius: 14px; border: 1px solid var(--glass-border); overflow: hidden; }
         .jarvis-screen { flex: 1; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 11px; }
         .jarvis-msg { max-width: 85%; padding: 9px 12px; border-radius: 10px; line-height: 1.4; }
-        .jarvis-msg.ai { background: rgba(212, 175, 55, 0.15); color: var(--gold-shine); align-self: flex-start; border: 1px solid rgba(212,175,55,0.3); }
+        .jarvis-msg.ai { background: rgba(212, 175, 55, 0.15); color: var(--gold-shine); align-self: flex-start; border: 1px solid rgba(212,175,55,0.35); }
         .jarvis-msg.user { background: rgba(255,255,255,0.08); color: #fff; align-self: flex-end; border: 1px solid rgba(255,255,255,0.2); }
-        .jarvis-input-bar { display: flex; padding: 6px; background: rgba(0,0,0,0.6); gap: 6px; border-top: 1px solid var(--glass-border); }
+        .jarvis-input-bar { display: flex; padding: 6px; background: rgba(0,0,0,0.7); gap: 6px; border-top: 1px solid var(--glass-border); }
         .jarvis-input-bar input { margin-bottom: 0; }
     </style>
 </head>
@@ -150,7 +151,7 @@
         <div class="badge" id="userRole">Kraljica 👑</div>
     </div>
 
-    <!-- 🪐 1. KONSEPT: ORBİTAL DAİRESEL ZİNCİR (GROUP RING) -->
+    <!-- 🪐 ORBİTAL ZİNCİR (Gerçek Profil Fotoğrafları ve İsimler) -->
     <div class="hud-deck orbital-ring-section">
         <div class="hud-title">🪐 Yörüngesel Ekosistem Halkaları</div>
         <div class="orbital-wrapper" id="groupChainContainer">
@@ -172,11 +173,11 @@
         <div class="hud-deck">
             <div class="section-title">📊 Mekik Durum & Nöral Telemetri</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);">
+                <div style="background: rgba(0,0,0,0.35); padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);">
                     <div style="font-size: 9px; color: var(--text-muted);">TOPLAM İŞLEM</div>
                     <div id="totalActions" style="font-size: 15px; font-weight: 900; color: var(--gold-shine);">-</div>
                 </div>
-                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);">
+                <div style="background: rgba(0,0,0,0.35); padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border);">
                     <div style="font-size: 9px; color: var(--text-muted);">OTONOM BLOKE</div>
                     <div id="totalBans" style="font-size: 15px; font-weight: 900; color: var(--danger);">-</div>
                 </div>
@@ -240,7 +241,7 @@
         </div>
     </div>
 
-    <!-- DECK 6: JARVIS AI ÇEKİRDEĞİ -->
+    <!-- DECK 6: JARVIS ÇEKİRDEĞİ (AI) -->
     <div id="deck-jarvis" class="deck-section">
         <div class="hud-deck">
             <div class="section-title">🤖 Jarvis AI - Uzay Mekiği Komuta Asistanı</div>
@@ -308,12 +309,11 @@
 
                     groups.forEach((g, index) => {
                         const isActive = selectedChatId == g.chat_id;
-                        // Simülasyon: Kriz anında dairesel yörüngenin kırmızı alarm vermesi (.alarm-node)
                         const hasAlarm = (index === 1 && Math.random() > 0.7); 
                         
-                        let avatarContent = `<span class="fallback-icon">🪐</span>`;
+                        let avatarContent = `<span class="fallback-icon">🛡️</span>`;
                         if (g.photo_url) {
-                            avatarContent = `<img src="${g.photo_url}" alt="${g.title}" onerror="this.parentElement.innerHTML='<span class=\\'fallback-icon\\'>🪐</span>'">`;
+                            avatarContent = `<img src="${g.photo_url}" alt="${g.title}" onerror="this.parentElement.innerHTML='<span class=\\'fallback-icon\\'>🛡️</span>'">`;
                         }
                         
                         html += `
@@ -467,7 +467,7 @@
             }
         }
 
-        // 🤖 JARVIS AI SOHBET KOMUTA MERKEZİ
+        // 🤖 JARVIS ÇEKİRDEĞİ (AI)
         function handleJarvisKey(e) {
             if (e.key === 'Enter') sendJarvisCommand();
         }
