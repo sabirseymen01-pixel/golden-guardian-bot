@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Jarvis | Cyber-HUD Command Deck</title>
+    <title>Golden Jarvis | Neural Chain HUD</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --hud-bg: #040302;
-            --panel-glass: rgba(14, 11, 7, 0.84);
-            --hud-border: rgba(212, 175, 55, 0.55);
-            --gold-glow: rgba(212, 175, 55, 0.9);
+            --space-bg: #030201;
+            --hud-glass: rgba(14, 11, 7, 0.90);
+            --hud-border: rgba(212, 175, 55, 0.6);
+            --gold-glow: rgba(212, 175, 55, 0.95);
             --gold-shine: #f8ecbe;
             --accent-gold: #d4af37;
             --danger-glow: rgba(255, 50, 50, 0.95);
@@ -21,20 +21,18 @@
             --success: #2ecc71;
             --info: #3498db;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', Courier, monospace, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: monospace; -webkit-tap-highlight-color: transparent; }
         
         html, body {
             min-height: 100vh;
             overflow-x: hidden;
-            background-color: var(--hud-bg);
+            background-color: var(--space-bg);
         }
 
-        /* 🌌 Şeffaf Gold Uzay Arka Planı (Nebula & Starlight) */
         body {
             background: 
-                radial-gradient(circle at 50% 15%, rgba(212, 175, 55, 0.25) 0%, transparent 60%),
-                radial-gradient(circle at 20% 85%, rgba(180, 110, 20, 0.2) 0%, transparent 70%),
-                linear-gradient(135deg, #050403 0%, #120e06 50%, #030201 100%);
+                radial-gradient(circle at 50% 10%, rgba(212, 175, 55, 0.22) 0%, transparent 60%),
+                linear-gradient(135deg, #050403 0%, #100c05 50%, #020100 100%);
             background-attachment: fixed;
             color: var(--text-main);
             padding: 10px;
@@ -42,56 +40,65 @@
             flex-direction: column;
         }
 
-        /* 🪞 Holografik Taktiksel HUD Panelleri (Köşe Nişangah Çizgileriyle) */
-        .hud-terminal {
-            background: var(--panel-glass);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+        /* Holografik Cam Paneller */
+        .hud-panel {
+            background: var(--hud-glass);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             border: 1px solid var(--hud-border);
-            border-radius: 14px;
+            border-radius: 16px;
             padding: 12px;
             margin-bottom: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85), inset 0 0 20px rgba(212, 175, 55, 0.15);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(212, 175, 55, 0.15);
             position: relative;
         }
-        /* Köşe Tekno-Nişangahlar */
-        .hud-terminal::before {
+        .hud-panel::before {
             content: ""; position: absolute; top: -1px; left: -1px; width: 8px; height: 8px;
             border-top: 2px solid var(--gold-shine); border-left: 2px solid var(--gold-shine);
         }
-        .hud-terminal::after {
+        .hud-panel::after {
             content: ""; position: absolute; bottom: -1px; right: -1px; width: 8px; height: 8px;
             border-bottom: 2px solid var(--gold-shine); border-right: 2px solid var(--gold-shine);
         }
 
-        /* Üst Header */
         .hud-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px; }
         .logo h1 { font-size: 11px; color: var(--gold-shine); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 12px var(--gold-glow); text-transform: uppercase; }
         .badge { background: rgba(212, 175, 55, 0.25); color: var(--gold-shine); padding: 4px 10px; border-radius: 10px; font-size: 9px; font-weight: 900; border: 1px solid var(--gold-glow); box-shadow: 0 0 12px rgba(212,175,55,0.4); }
 
-        /* 🪐 MERKEZİ HOLOGRAFİK YÖRÜNGE HALKASI (RADAR KONSOLU) */
-        .radar-deck { text-align: center; background: rgba(10, 8, 5, 0.9); border: 1.5px solid var(--hud-border); }
-        .radar-title { font-size: 9px; color: var(--accent-gold); letter-spacing: 2px; margin-bottom: 8px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 8px var(--gold-glow); display: flex; align-items: center; justify-content: center; gap: 6px; }
+        /* ⛓️ 1. KONSEPT: GERÇEK BİRBİRİNE BAĞLI ZİNCİR (NEURAL CHAIN RINGS) */
+        .chain-deck { text-align: center; background: rgba(8, 6, 4, 0.95); border: 2px solid var(--hud-border); position: relative; overflow: hidden; }
+        .chain-title { font-size: 9px; color: var(--accent-gold); letter-spacing: 2px; margin-bottom: 12px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 8px var(--gold-glow); }
         
-        .radar-grid { display: flex; justify-content: flex-start; gap: 12px; overflow-x: auto; padding: 6px 2px; scrollbar-width: none; }
-        .radar-grid::-webkit-scrollbar { display: none; }
+        /* Yatay Zincir Akışı ve Arkadaki Enerji Çizgisi */
+        .chain-wrapper { 
+            display: flex; justify-content: flex-start; gap: 20px; overflow-x: auto; padding: 10px 6px; 
+            scrollbar-width: none; position: relative; 
+        }
+        .chain-wrapper::-webkit-scrollbar { display: none; }
         
-        .radar-node { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .radar-node:hover { transform: scale(1.1); }
+        /* Düğümleri birbirine bağlayan arka plandکار enerji hattı */
+        .chain-wrapper::before {
+            content: ""; position: absolute; top: 38px; left: 10px; right: 10px; height: 2px;
+            background: linear-gradient(90deg, var(--accent-gold), var(--gold-shine), var(--accent-gold));
+            box-shadow: 0 0 10px var(--gold-glow); z-index: 1;
+        }
+
+        .chain-node { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative; z-index: 2; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .chain-node:hover { transform: scale(1.12); }
         
-        .radar-avatar {
-            width: 56px; height: 56px; border-radius: 50%; border: 2px solid rgba(212, 175, 55, 0.6);
+        .chain-avatar {
+            width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--hud-border);
             background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden;
-            box-shadow: 0 0 15px rgba(0,0,0,0.9), inset 0 0 12px rgba(212,175,55,0.5); transition: all 0.4s ease;
+            box-shadow: 0 0 20px rgba(0,0,0,0.9), inset 0 0 15px rgba(212,175,55,0.6); transition: all 0.4s ease;
         }
-        .radar-node.active-node .radar-avatar {
+        .chain-node.active-node .chain-avatar {
             border-color: var(--gold-shine);
-            box-shadow: 0 0 25px var(--gold-glow), inset 0 0 18px var(--gold-shine);
+            box-shadow: 0 0 30px var(--gold-glow), inset 0 0 20px var(--gold-shine);
         }
-        /* Alarm Durumu: Kırmızı Pulsing Hologram */
-        .radar-node.alarm-node .radar-avatar {
+        /* 🚨 Alarm Anı: Kırmızı Titreşimli Pulsing Halka */
+        .chain-node.alarm-node .chain-avatar {
             border-color: var(--danger);
-            box-shadow: 0 0 30px var(--danger-glow), inset 0 0 18px rgba(255,77,77,0.8);
+            box-shadow: 0 0 35px var(--danger-glow), inset 0 0 20px rgba(255,77,77,0.9);
             animation: alarmPulse 0.8s infinite alternate;
         }
         @keyframes alarmPulse {
@@ -99,12 +106,18 @@
             100% { transform: scale(1.18); }
         }
 
-        .radar-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .radar-avatar .fallback-icon { font-size: 20px; color: var(--accent-gold); }
-        .radar-label { font-size: 9px; color: var(--text-muted); margin-top: 5px; max-width: 70px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 800; }
-        .radar-node.active-node .radar-label { color: var(--gold-shine); font-weight: 900; text-shadow: 0 0 6px var(--gold-glow); }
+        .chain-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .chain-avatar .fallback-icon { font-size: 22px; color: var(--accent-gold); }
+        
+        /* Kesilmeyen, Alt Alta Yazılabilen Akıllı İsim Etiketi */
+        .chain-label { 
+            font-size: 9px; color: var(--text-muted); margin-top: 6px; width: 75px; 
+            text-align: center; word-break: break-word; display: -webkit-box; 
+            -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 800; line-height: 1.2;
+        }
+        .chain-node.active-node .chain-label { color: var(--gold-shine); font-weight: 900; text-shadow: 0 0 6px var(--gold-glow); }
 
-        /* 🧭 KONTROL MODÜLLERİ (HUD Tab Butonları) */
+        /* 🧭 MODÜL SEKMELERİ */
         .module-nav { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 10px; scrollbar-width: none; }
         .module-nav::-webkit-scrollbar { display: none; }
         .mod-tab {
@@ -123,7 +136,7 @@
         .section-title { font-size: 10px; font-weight: 900; margin-bottom: 8px; color: var(--gold-shine); display: flex; align-items: center; gap: 6px; text-shadow: 0 0 6px var(--gold-glow); text-transform: uppercase; letter-spacing: 1px; }
         
         input, select, textarea {
-            width: 100%; background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(212, 175, 55, 0.4);
+            width: 100%; background: rgba(0, 0, 0, 0.75); border: 1px solid rgba(212, 175, 55, 0.4);
             border-radius: 8px; padding: 9px; color: #fff; font-size: 11px; outline: none; margin-bottom: 8px; font-family: monospace;
         }
         input:focus, select:focus, textarea:focus { border-color: var(--gold-shine); box-shadow: 0 0 10px var(--gold-glow); }
@@ -136,7 +149,7 @@
         .cyber-btn:active { transform: scale(0.96); }
 
         .item-row { background: rgba(0,0,0,0.5); border: 1px solid rgba(212, 175, 55, 0.25); padding: 8px; border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 10px; }
-        .log-box { background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(212, 175, 55, 0.35); padding: 8px; border-radius: 8px; margin-bottom: 6px; font-size: 9px; color: var(--text-muted); }
+        .log-box { background: rgba(0,0,0,0.6); border: 1px solid rgba(212, 175, 55, 0.35); padding: 8px; border-radius: 8px; margin-bottom: 6px; font-size: 9px; color: var(--text-muted); }
         
         .action-tag { font-size: 7px; font-weight: 900; padding: 2px 5px; border-radius: 3px; display: inline-block; margin-right: 4px; text-transform: uppercase; }
         .tag-ban { background: rgba(255, 77, 77, 0.25); color: var(--danger); border: 1px solid var(--danger); }
@@ -145,7 +158,7 @@
         .selectable-text { user-select: all; background: rgba(0,0,0,0.8); padding: 2px 4px; border-radius: 3px; color: var(--gold-shine); font-family: monospace; font-size: 9px; }
 
         /* 🤖 JARVIS AI HOLOGRAFİK TERMİNALİ */
-        .jarvis-deck { display: flex; flex-direction: column; height: 270px; background: rgba(0,0,0,0.7); border-radius: 10px; border: 1px solid rgba(212, 175, 55, 0.4); overflow: hidden; }
+        .jarvis-deck { display: flex; flex-direction: column; height: 270px; background: rgba(0,0,0,0.75); border-radius: 10px; border: 1px solid rgba(212, 175, 55, 0.4); overflow: hidden; }
         .jarvis-screen { flex: 1; padding: 8px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; font-size: 10px; }
         .jarvis-msg { max-width: 85%; padding: 8px 10px; border-radius: 8px; line-height: 1.4; }
         .jarvis-msg.ai { background: rgba(212, 175, 55, 0.18); color: var(--gold-shine); align-self: flex-start; border: 1px solid rgba(212,175,55,0.45); }
@@ -156,16 +169,16 @@
 </head>
 <body>
 
-    <div class="hud-terminal hud-header">
+    <div class="hud-panel hud-header">
         <div class="logo"><h1>⚜️ GOLDEN JARVIS HUD</h1></div>
         <div class="badge" id="userRole">Kraljica 👑</div>
     </div>
 
-    <!-- 🪐 MERKEZİ HOLOGRAFİK RADAR (Yörüngesel Ekosistem Halkaları) -->
-    <div class="hud-terminal radar-deck">
-        <div class="radar-title"><span>📡</span> Yörüngesel Ekosistem Halkaları</div>
-        <div class="radar-grid" id="groupChainContainer">
-            <!-- Dinamik yörünge düğümleri -->
+    <!-- ⛓️ NEURAL CHAIN (Birbirine Enerji Hatlarıyla Bağlı Halkasal Zincir) -->
+    <div class="hud-panel chain-deck">
+        <div class="chain-title"><span>⚡</span> Nöral Ekosistem Zinciri</div>
+        <div class="chain-wrapper" id="groupChainContainer">
+            <!-- Dinamik zincir düğümleri -->
         </div>
     </div>
 
@@ -180,7 +193,7 @@
 
     <!-- MODÜL 1: TELEMETRİ -->
     <div id="mod-telemetry" class="mod-section active">
-        <div class="hud-terminal">
+        <div class="hud-panel">
             <div class="section-title">📊 Sistem Durumu & Telemetri</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                 <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.3);">
@@ -197,13 +210,13 @@
 
     <!-- MODÜL 2: STAFF MATRİSİ -->
     <div id="mod-staff" class="mod-section">
-        <div class="hud-terminal">
+        <div class="hud-panel">
             <div class="section-title">👑 Granüler Yetki Matrisi</div>
             <input type="text" id="staffInput" placeholder="@kullaniciadi veya ID">
             <input type="text" id="staffName" placeholder="Rozet Ünvanı (Örn: 💎 Kristal Muhafız)">
             <button class="cyber-btn" onclick="addStaff()">Yetkiyi Mühürle</button>
         </div>
-        <div class="hud-terminal">
+        <div class="hud-panel">
             <div class="section-title">🛡️ Aktif Yetkililer</div>
             <div id="staffListContainer"><div class="loading">Yükleniyor...</div></div>
         </div>
@@ -211,7 +224,7 @@
 
     <!-- MODÜL 3: TAKTİKSEL İŞLEM -->
     <div id="mod-tactical" class="mod-section">
-        <div class="hud-terminal">
+        <div class="hud-panel">
             <div class="section-title">⚡ Otonom Taktiksel Müdahale</div>
             <input type="text" id="memberTargetInput" placeholder="Kullanıcı ID veya @username">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
@@ -225,7 +238,7 @@
 
     <!-- MODÜL 4: SİSTEM LOGLARI -->
     <div id="mod-logs" class="mod-section">
-        <div class="hud-terminal">
+        <div class="hud-panel">
             <div class="section-title">📜 Şeffaf Zaman Akış Logları</div>
             <div style="display: flex; gap: 6px; margin-bottom: 8px;">
                 <select id="logClearDays" style="margin-bottom:0;">
@@ -241,7 +254,7 @@
 
     <!-- MODÜL 5: MEKİK AYARLARI -->
     <div id="mod-settings" class="mod-section">
-        <div class="hud-terminal">
+        <div class="hud-panel">
             <div class="section-title">⚙️ Grup Protokolleri & Duyuru</div>
             <textarea id="welcomeMsgInput" rows="2" placeholder="Karşılama metni..."></textarea>
             <input type="text" id="btnTextInput" placeholder="Buton Metni">
@@ -253,14 +266,14 @@
 
     <!-- MODÜL 6: JARVIS AI ÇEKİRDEĞİ -->
     <div id="mod-jarvis" class="mod-section">
-        <div class="hud-terminal">
+        <div class="hud-panel">
             <div class="section-title">🤖 Jarvis AI - Komuta Asistanı</div>
             <p style="font-size: 9px; color: var(--text-muted); margin-bottom: 8px; line-height: 1.3;">
                 Kraljica komutunda çalışan Jarvis yapay zekası; ekosistemdeki tüm akışları denetler, taktiksel raporlar sunar ve anlık müdahale eder.
             </p>
             <div class="jarvis-deck">
                 <div class="jarvis-screen" id="jarvisScreen">
-                    <div class="jarvis-msg ai">⚜️ Jarvis sistemleri çevrimiçi, Kraljica. Komuta konsolu kilitlendi. Güvenlik seviyesi maksimum. Nasıl yardımcı olayım?</div>
+                    <div class="jarvis-msg ai">⚜️ Jarvis sistemleri çevrimiçi, Kraljica. Zincir bağlantıları aktif. Güvenlik seviyesi maksimum. Nasıl yardımcı olayım?</div>
                 </div>
                 <div class="jarvis-input-bar">
                     <input type="text" id="jarvisInput" placeholder="Jarvis'e komut ver..." onkeypress="handleJarvisKey(event)">
@@ -311,9 +324,9 @@
 
                 if (chainContainer) {
                     let html = `
-                        <div class="radar-node ${selectedChatId == 0 ? 'active-node' : ''}" onclick="selectGroupNode(0)">
-                            <div class="radar-avatar"><span class="fallback-icon">👑</span></div>
-                            <div class="radar-label">Genel Hub</div>
+                        <div class="chain-node ${selectedChatId == 0 ? 'active-node' : ''}" onclick="selectGroupNode(0)">
+                            <div class="chain-avatar"><span class="fallback-icon">👑</span></div>
+                            <div class="chain-label">Genel Hub</div>
                         </div>
                     `;
 
@@ -327,9 +340,9 @@
                         }
                         
                         html += `
-                            <div class="radar-node ${isActive ? 'active-node' : ''} ${hasAlarm ? 'alarm-node' : ''}" onclick="selectGroupNode(${g.chat_id})">
-                                <div class="radar-avatar">${avatarContent}</div>
-                                <div class="radar-label">${g.title || 'Grup'}</div>
+                            <div class="chain-node ${isActive ? 'active-node' : ''} ${hasAlarm ? 'alarm-node' : ''}" onclick="selectGroupNode(${g.chat_id})">
+                                <div class="chain-avatar">${avatarContent}</div>
+                                <div class="chain-label">${g.title || 'Grup'}</div>
                             </div>
                         `;
                     });
@@ -375,7 +388,7 @@
                 });
                 const staffs = await staffRes.json();
                 const staffC = document.getElementById('staffListContainer');
-                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:9px; color:var(--text-muted); text-align:center;">Bu yörüngede yetkili yok.</div>' : '';
+                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:9px; color:var(--text-muted); text-align:center;">Bu zincirde yetkili yok.</div>' : '';
                 staffs.forEach(s => {
                     staffC.innerHTML += `
                         <div class="item-row">
@@ -402,7 +415,7 @@
             document.getElementById('staffInput').value = ''; 
             document.getElementById('staffName').value = ''; 
             loadData(); 
-            alert("✅ Yetkili yörüngeye mühürlendi!");
+            alert("✅ Yetkili zincire mühürlendi!");
         }
 
         async function toggleStaffPerm(targetId, permField) {
@@ -425,7 +438,7 @@
         async function memberAction(actionType) {
             const target = document.getElementById('memberTargetInput').value.trim();
             if (!target) return alert("Kullanıcı ID veya @username girin!");
-            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen yukarıdaki radar panelinden spesifik bir grup seçin!");
+            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen yukarıdaki zincirden spesifik bir grup seçin!");
             const res = await fetch('/api/member/action', { 
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: selectedChatId }) 
@@ -457,7 +470,7 @@
             const btnUrl = document.getElementById('btnUrlInput').value.trim();
             const mediaUrl = document.getElementById('mediaUrlInput').value.trim();
 
-            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen önce radar konsolundan bir grup seçin!");
+            if (!selectedChatId || selectedChatId == 0) return alert("Lütfen önce zincirden bir grup seçin!");
 
             const body = { user_id: user.id, chat_id: selectedChatId };
             if (welcome) body.welcome_msg = welcome;
@@ -493,10 +506,10 @@
             screen.scrollTop = screen.scrollHeight;
 
             setTimeout(() => {
-                let aiReply = "⚜️ Komut işlendi Kraljica. Holografik kalkanlar kararlı.";
+                let aiReply = "⚜️ Komut işlendi Kraljica. Nöral zincir kalkanları kararlı.";
                 const lower = text.toLowerCase();
                 if (lower.includes('rapor') || lower.includes('durum')) {
-                    aiReply = "📊 **Jarvis Taktiksel Rapor:** Radar konsolu tarandı. Aktif tehdit yok, otonom savunma sistemi tam güçte çalışıyor.";
+                    aiReply = "📊 **Jarvis Taktiksel Rapor:** Nöral zincir halkaları taranıyor. Aktif tehdit yok, otonom savunma sistemi tam güçte çalışıyor.";
                 } else if (lower.includes('temizle') || lower.includes('flood')) {
                     aiReply = "🛡️ Acil protokol aktif! Akıştaki tüm şüpheli parazitler ve spam dalgaları engellendi.";
                 } else if (lower.includes('merhaba') || lower.includes('selam')) {
