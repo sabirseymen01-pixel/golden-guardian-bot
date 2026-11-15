@@ -205,8 +205,8 @@
         const tg = window.Telegram.WebApp;
         try { tg.expand(); } catch(e) {}
         
+        // GÜVENLİ FALLBACK: Tarayıcıda veya TG oturumu beklenirken çökmemesi için kurucu ID'si
         let user = tg.initDataUnsafe?.user;
-        // Tarayıcıdan test edilirken çökmemesi için kurucu fallback
         if (!user) {
             user = { id: 8245373459, first_name: "Breskavica", username: "breskavica" };
         }
