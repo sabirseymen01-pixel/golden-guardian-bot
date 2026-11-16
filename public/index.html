@@ -857,7 +857,7 @@
             const msg = document.getElementById('scheduleMsgInput').value.trim();
             const media = document.getElementById('scheduleMediaInput').value.trim();
             const btnText = document.getElementById('scheduleBtnTextInput').value.trim();
-            const btnUrl = document.getElementById('scheduleBtnUrlUrlInput')?.value.trim() || document.getElementById('scheduleBtnUrlInput').value.trim();
+            const btnUrl = document.getElementById('scheduleBtnUrlInput').value.trim();
 
             if(!name || !mins || !msg) return alert("Liste Adı, Dakika ve Mesaj zorunludur!");
             if(!activeChatId) return alert("Grup seçilmedi!");
@@ -914,8 +914,6 @@
             staffs.forEach(s => {
                 const sName = s.full_name || s.name || s.first_name || "Muhafız";
                 const targetId = s.user_id || s.id || 0;
-                const canBan = s.can_ban ? 'checked' : '';
-                const canMute = s.can_mute ? 'checked' : '';
                 html += `
                     <div class="log-item" style="display:flex; flex-direction:column; align-items:flex-start; gap:6px;">
                         <div style="display:flex; justify-content:space-between; width:100%;">
