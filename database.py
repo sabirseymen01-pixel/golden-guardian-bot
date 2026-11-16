@@ -14,6 +14,7 @@ staff_col = db["staff"]
 settings_col = db["group_settings"]
 groups_col = db["bot_groups"]
 scheduled_jobs_col = db["scheduled_jobs"]
+templates_col = db["templates"]
 
 def init_db():
     try:
@@ -22,6 +23,7 @@ def init_db():
         settings_col.create_index("chat_id", unique=True)
         groups_col.create_index("chat_id", unique=True)
         scheduled_jobs_col.create_index("job_id", unique=True)
+        templates_col.create_index([("chat_id", 1), ("template_id", 1)], unique=True)
     except Exception:
         pass
 
@@ -80,9 +82,9 @@ def get_recent_logs(limit=100, log_filter="all"):
     try:
         query = {}
         if log_filter == "admin":
-            query["action_type"] = {"$in": ["BAN", "MUTE", "VOICE_MUTE", "VOICE_UNMUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN", "SCHEDULE_START", "SCHEDULE_STOP", "ANNOUNCEMENT"]}
+            query["action_type"] = {"$in": ["BAN", "MUTE", "VOICE_MUTE", "VOICE_UNMUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN", "SCHEDULE_START", "SCHEDULE_STOP", "ANNOUNCEMENT", "SAVE_ANN_TEMPLATE", "SAVE_SCH_TEMPLATE", "DELETE_TEMPLATE"]}
         elif log_filter == "general":
-            query["action_type"] = {"$nin": ["BAN", "MUTE", "VOICE_MUTE", "VOICE_UNMUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN", "SCHEDULE_START", "SCHEDULE_STOP", "ANNOUNCEMENT"]}
+            query["action_type"] = {"$nin": ["BAN", "MUTE", "VOICE_MUTE", "VOICE_UNMUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN", "SCHEDULE_START", "SCHEDULE_STOP", "ANNOUNCEMENT", "SAVE_ANN_TEMPLATE", "SAVE_SCH_TEMPLATE", "DELETE_TEMPLATE"]}
             
         rows = list(logs_col.find(query, {"_id": 0, "datetime_obj": 0}).sort("_id", -1).limit(limit))
         return rows
@@ -111,7 +113,7 @@ def get_bot_statistics():
 def get_admin_performance_stats():
     try:
         pipeline = [
-            {"$match": {"action_type": {"$in": ["BAN", "MUTE", "VOICE_MUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN", "SCHEDULE_START", "SCHEDULE_STOP", "ANNOUNCEMENT"]}}},
+            {"$match": {"action_type": {"$in": ["BAN", "MUTE", "VOICE_MUTE", "WEB_BAN", "WEB_MUTE", "UNBAN", "UNMUTE", "WARN", "SCHEDULE_START", "SCHEDULE_STOP", "ANNOUNCEMENT", "SAVE_ANN_TEMPLATE", "SAVE_SCH_TEMPLATE", "DELETE_TEMPLATE"]}}},
             {"$group": {"_id": "$username", "count": {"$sum": 1}}},
             {"$sort": {"count": -1}},
             {"$limit": 10}
@@ -186,7 +188,6 @@ def is_authorized_staff(user_id, chat_id=0):
             query["chat_id"] = int(chat_id)
         res = staff_col.find_one(query)
         if res: return True
-        # Eğer özel grup bazlı bulunamazsa genel yetkiye de bakabilir
         return staff_col.find_one({"user_id": int(user_id)}) is not None
     except Exception:
         return False
@@ -335,3 +336,56 @@ def find_scheduled_job_by_text(chat_id, text_snippet):
         })
     except Exception:
         return None
+
+# --- MASTER-DETAIL ŞABLONLAR (PERSISTENT MONGODB) ---
+def get_group_templates(chat_id):
+    try:
+        rows = list(templates_col.find({"chat_id": int(chat_id)}, {"_id": 0}))
+        announcements = []
+        schedules = []
+        for r in rows:
+            item = {
+                "id": r.get("template_id"),
+                "name": r.get("name"),
+                "msg": r.get("msg"),
+                "media": r.get("media", ""),
+                "btnText": r.get("btn_text", ""),
+                "btnUrl": r.get("btn_url", "")
+            }
+            if r.get("type") == "schedule":
+                item["mins"] = r.get("mins", 60)
+                schedules.append(item)
+            else:
+                announcements.append(item)
+        return {"announcements": announcements, "schedules": schedules}
+    except Exception:
+        return {"announcements": [], "schedules": []}
+
+def save_template_db(chat_id, template_type, name, msg, media, btn_text, btn_url, mins=0, template_id=None):
+    try:
+        t_id = int(template_id) if template_id else int(datetime.datetime.now().timestamp() * 1000)
+        templates_col.update_one(
+            {"chat_id": int(chat_id), "template_id": t_id},
+            {"$set": {
+                "chat_id": int(chat_id),
+                "template_id": t_id,
+                "type": template_type,
+                "name": name,
+                "msg": msg,
+                "media": media,
+                "btn_text": btn_text,
+                "btn_url": btn_url,
+                "mins": int(mins)
+            }},
+            upsert=True
+        )
+        return t_id
+    except Exception:
+        return None
+
+def database_delete_template_db(chat_id, template_id):
+    try:
+        templates_col.delete_one({"chat_id": int(chat_id), "template_id": int(template_id)})
+        return True
+    except Exception:
+        return False
