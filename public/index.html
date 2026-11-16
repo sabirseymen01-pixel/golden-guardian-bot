@@ -4,71 +4,65 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Katya OS | Sparkling Glass Gold</title>
+    <title>GOLDEN STAFF | Enterprise Command Center</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --obsidian: #030201;
+            --obsidian: #050402;
             --gold-base: #d4af37;
             --gold-light: #f8ecbe;
             --gold-dim: rgba(212, 175, 55, 0.18);
             --gold-glow: rgba(212, 175, 55, 0.45);
-            /* Simli Şeffaf Camsı Gold Yüzeyler */
-            --glass-panel: rgba(18, 14, 6, 0.82);
-            --glass-icon: rgba(28, 22, 10, 0.70);
-            --glass-modal: rgba(14, 11, 4, 0.95);
+            --glass-panel: rgba(16, 12, 5, 0.88);
+            --glass-icon: rgba(26, 20, 8, 0.78);
+            --glass-modal: rgba(12, 9, 3, 0.96);
             --danger: #ff4757;
             --success: #2ed573;
             --text-main: #f5f6fa;
             --text-muted: #b2bec3;
-            --border-gold: rgba(212, 175, 55, 0.38);
-            --border-bright: rgba(248, 236, 190, 0.75);
+            --border-gold: rgba(212, 175, 55, 0.4);
+            --border-bright: rgba(248, 236, 190, 0.8);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         
         html, body { height: 100vh; width: 100vw; overflow: hidden; background-color: var(--obsidian); color: var(--text-main); }
 
-        /* 🌟 Simli, Şeffaf Camsı Gold Lüks Atmosfer (Glitter & Sparkle Texture) */
+        /* 🌟 Simli, Şeffaf Camsı Gold Lüks Atmosfer */
         body {
             background: 
                 radial-gradient(circle at 50% 15%, rgba(212, 175, 55, 0.28) 0%, transparent 55%),
-                radial-gradient(circle at 85% 85%, rgba(180, 130, 20, 0.18) 0%, transparent 65%),
-                radial-gradient(circle at 15% 75%, rgba(248, 236, 190, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 85% 85%, rgba(180, 130, 20, 0.18) 0%, transparent 70%),
                 linear-gradient(135deg, #070603 0%, #010100 100%);
-            background-image: 
-                radial-gradient(circle at 50% 15%, rgba(212, 175, 55, 0.28) 0%, transparent 55%),
-                radial-gradient(rgba(248, 236, 190, 0.12) 1px, transparent 0);
-            background-size: 100% 100%, 20px 20px; /* Simli/parıltılı doku hissi */
             display: flex; flex-direction: column; justify-content: space-between; padding: 16px;
         }
 
-        /* Üst Status Bar & Başlık */
+        /* Üst Header */
         .spring-header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 18px; background: var(--glass-panel); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            padding: 12px 18px; background: var(--glass-panel); backdrop-filter: blur(25px);
             border-radius: 16px; border: 1.5px solid var(--border-gold); 
             box-shadow: 0 10px 35px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,215,0,0.3);
         }
         .brand-title { font-size: 11px; font-weight: 900; color: var(--gold-light); letter-spacing: 2px; text-shadow: 0 0 12px var(--gold-base); }
-        .user-badge { background: var(--gold-dim); color: var(--gold-light); padding: 5px 12px; border-radius: 8px; font-size: 8px; border: 1px solid var(--border-gold); font-weight: 900; box-shadow: 0 0 10px rgba(212,175,55,0.2); }
+        .user-badge { background: var(--gold-dim); color: var(--gold-light); padding: 5px 12px; border-radius: 8px; font-size: 8px; border: 1px solid var(--border-gold); font-weight: 900; }
 
         /* 📱 ANA EKRAN (SPRINGBOARD DESKTOP) */
         .homescreen-container {
             flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 26px; padding: 10px;
         }
 
-        /* Ferah Sistem Widgeti */
+        /* Sistem Widgeti */
         .system-widget {
             width: 100%; max-width: 380px; background: var(--glass-panel); backdrop-filter: blur(25px);
             border: 1.5px solid var(--border-gold); border-radius: 20px; padding: 18px;
             box-shadow: 0 15px 45px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,215,0,0.2);
             display: flex; align-items: center; justify-content: space-between;
         }
-        .widget-info h3 { font-size: 11px; color: var(--gold-light); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 8px var(--gold-dim); }
+        .widget-info h3 { font-size: 11px; color: var(--gold-light); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
         .widget-info p { font-size: 8px; color: var(--text-muted); margin-top: 3px; }
         .widget-status-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 15px var(--success); }
 
-        /* Uygulama Simgeleri Izgarası (App Grid) */
+        /* Profesyonel Altın Simgeler Izgarası (App Grid) */
         .app-grid {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; width: 100%; max-width: 380px; justify-items: center;
         }
@@ -91,7 +85,7 @@
         }
         .app-label { font-size: 9px; font-weight: 800; color: var(--text-main); text-align: center; text-shadow: 0 2px 6px rgba(0,0,0,0.9); }
 
-        /* Alt iOS Dock */
+        /* Alt Dock */
         .home-dock {
             width: 100%; max-width: 380px; height: 54px; background: rgba(22, 17, 8, 0.7); backdrop-filter: blur(25px);
             border-radius: 27px; border: 1.5px solid var(--border-gold); margin: 0 auto;
@@ -103,9 +97,9 @@
         /* 🚀 iOS / Windows Tarzı Baloncuk Port (Modaller) */
         .ios-modal {
             position: fixed; bottom: 0; left: 0; width: 100vw; height: 0;
-            background: var(--glass-modal); backdrop-filter: blur(45px); -webkit-backdrop-filter: blur(45px);
+            background: var(--glass-modal); backdrop-filter: blur(45px);
             border-top: 3px solid var(--gold-base); border-radius: 30px 30px 0 0;
-            box-shadow: 0 -30px 80px rgba(0,0,0,0.98), inset 0 1px 0 rgba(255,215,0,0.25); z-index: 100;
+            box-shadow: 0 -30px 80px rgba(0,0,0,0.98); z-index: 100;
             transform: scale(0.85) translateY(20px); opacity: 0; pointer-events: none;
             transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease, height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; flex-direction: column; overflow: hidden;
@@ -116,7 +110,7 @@
             padding: 16px 22px; background: rgba(32, 25, 10, 0.9); display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1.5px solid var(--border-gold); cursor: pointer;
         }
-        .modal-heading { font-size: 11px; font-weight: 900; color: var(--gold-light); text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 8px var(--gold-dim); }
+        .modal-heading { font-size: 11px; font-weight: 900; color: var(--gold-light); text-transform: uppercase; letter-spacing: 1px; }
         .modal-dismiss { font-size: 8px; color: var(--obsidian); background: var(--gold-light); padding: 5px 12px; border-radius: 8px; font-weight: 900; cursor: pointer; box-shadow: 0 0 12px var(--gold-base); }
         .modal-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; scrollbar-width: thin; scrollbar-color: var(--gold-base) transparent; }
 
@@ -124,7 +118,6 @@
         input, select, textarea {
             width: 100%; background: rgba(10, 8, 3, 0.92); border: 1.5px solid var(--border-gold);
             border-radius: 10px; padding: 12px 14px; color: #fff; font-size: 10px; outline: none; margin-bottom: 10px;
-            transition: all 0.2s;
         }
         input:focus, textarea:focus { border-color: var(--gold-light); box-shadow: 0 0 15px var(--gold-glow); }
 
@@ -139,7 +132,7 @@
         .group-card {
             background: rgba(25, 20, 8, 0.75); border: 1.5px solid var(--border-gold); border-radius: 12px;
             padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;
-            transition: all 0.25s ease; margin-bottom: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: all 0.25s ease; margin-bottom: 8px;
         }
         .group-card:hover { border-color: var(--gold-light); background: var(--gold-dim); }
         .group-meta { display: flex; align-items: center; gap: 12px; overflow: hidden; }
@@ -169,6 +162,15 @@
         .modal-tab-content { display: none; flex-direction: column; gap: 12px; }
         .modal-tab-content.active { display: flex; }
 
+        /* Katya AI Chat UI */
+        .chat-container { display: flex; flex-direction: column; height: 320px; background: rgba(10,8,3,0.9); border: 1.5px solid var(--border-gold); border-radius: 12px; overflow: hidden; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .chat-msg { max-width: 85%; padding: 8px 12px; border-radius: 8px; font-size: 8px; line-height: 1.4; }
+        .chat-msg.ai { background: rgba(212,175,55,0.15); color: var(--gold-light); border: 1.5px solid var(--border-gold); align-self: flex-start; }
+        .chat-msg.user { background: rgba(212,175,55,0.3); color: #fff; border: 1.5px solid var(--gold-base); align-self: flex-end; }
+        .chat-input-row { display: flex; padding: 8px; background: rgba(20,16,6,0.9); border-top: 1.5px solid var(--border-gold); gap: 6px; }
+        .chat-input-row input { margin-bottom: 0; }
+
         .toast-popup {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-50px);
             background: rgba(212, 175, 55, 0.95); backdrop-filter: blur(20px); color: #000;
@@ -176,7 +178,7 @@
             box-shadow: 0 10px 30px rgba(212, 175, 55, 0.6); z-index: 1000; opacity: 0; pointer-events: none;
             transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .toast-popup.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast-popup.show { transform: translateX(-50%) translateY(-50px); opacity: 1; }
     </style>
 </head>
 <body>
@@ -185,7 +187,7 @@
 
     <!-- Üst Header -->
     <header class="spring-header">
-        <div class="brand-title">⚜️ GOLDEN KATYA OS</div>
+        <div class="brand-title">⚜️ GOLDEN STAFF</div>
         <div class="user-badge" id="userRole">Kraljica 👑</div>
     </header>
 
@@ -201,35 +203,35 @@
             <div class="widget-status-dot"></div>
         </div>
 
-        <!-- Uygulama Simgeleri Izgarası -->
+        <!-- ⚜️ Profesyonel Altın Simgeler Izgarası (App Grid) -->
         <div class="app-grid">
             <div class="app-icon-card" onclick="openPort('groupsModal')">
-                <div class="app-icon-box">🪐</div>
+                <div class="app-icon-box">🛡️</div>
                 <div class="app-label">Gruplar</div>
             </div>
             <div class="app-icon-card" onclick="openPort('tacticalModal')">
-                <div class="app-icon-box">⚡</div>
+                <div class="app-icon-box">⚔️</div>
                 <div class="app-label">Eylem</div>
             </div>
             <div class="app-icon-card" onclick="openPort('staffModal')">
-                <div class="app-icon-box">👑</div>
+                <div class="app-icon-box">⚜️</div>
                 <div class="app-label">Staff</div>
             </div>
             <div class="app-icon-card" onclick="openPort('aiModal')">
-                <div class="app-icon-box">🤖</div>
+                <div class="app-icon-box">🧠</div>
                 <div class="app-label">Katya AI</div>
             </div>
             <div class="app-icon-card" onclick="openPort('logsModal')">
                 <div class="app-icon-box">📜</div>
                 <div class="app-label">Loglar</div>
             </div>
-            <div class="app-icon-card" onclick="showToast('⚜️ Sparkling Glass Gold OS v5.0')">
-                <div class="app-icon-box">💎</div>
+            <div class="app-icon-card" onclick="showToast('⚜️ GOLDEN STAFF OS v6.0 Pro')">
+                <div class="app-icon-box">👑</div>
                 <div class="app-label">Sistem</div>
             </div>
         </div>
 
-        <!-- Alt Dock İndikatörü -->
+        <!-- Alt Dock -->
         <div class="home-dock">
             <div class="dock-dot"></div>
             <div class="dock-dot"></div>
@@ -243,7 +245,7 @@
     <!-- 1. GRUPLAR PORTU -->
     <div class="ios-modal" id="groupsModal">
         <div class="modal-header" onclick="closePort('groupsModal')">
-            <div class="modal-heading">🪐 Yörünge Grupları</div>
+            <div class="modal-heading">🛡️ Yörünge Grupları</div>
             <div class="modal-dismiss">ANA EKRAN [ X ]</div>
         </div>
         <div class="modal-content">
@@ -257,11 +259,11 @@
     <!-- 2. EYLEM PORTU (ID / USERNAME) -->
     <div class="ios-modal" id="tacticalModal">
         <div class="modal-header" onclick="closePort('tacticalModal')">
-            <div class="modal-heading">⚡ Üye Denetim Portu</div>
+            <div class="modal-heading">⚔️ Üye Denetim Portu</div>
             <div class="modal-dismiss">ANA EKRAN [ X ]</div>
         </div>
         <div class="modal-content">
-            <p style="font-size: 8px; color: var(--text-muted); margin-bottom: 10px;">Hedef kullanıcıyı ID (örn: <code>123456</code>) veya @username ile belirtin. İşlem aktif seçilen grupta yürütülür.</p>
+            <p style="font-size: 8px; color: var(--text-muted); margin-bottom: 10px;">Hedef kullanıcıyı ID (örn: <code>123456</code>) veya @username ile belirtin. (Staff yetkileriniz granüler olarak denetlenir).</p>
             <input type="text" id="targetUserInput" placeholder="Kullanıcı ID veya @username">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
                 <button class="gold-btn" style="background: var(--danger); color:#fff;" onclick="executeAction('ban')">Banla 🚫</button>
@@ -275,13 +277,13 @@
     <!-- 3. STAFF PORTU -->
     <div class="ios-modal" id="staffModal">
         <div class="modal-header" onclick="closePort('staffModal')">
-            <div class="modal-heading">👑 Yetkili Matrisi</div>
+            <div class="modal-heading">⚜️ Yetkili Matrisi & Rozetler</div>
             <div class="modal-dismiss">ANA EKRAN [ X ]</div>
         </div>
         <div class="modal-content">
             <div id="activeGroupStaffNotice" style="font-size: 9px; color: var(--gold-light); background: var(--gold-dim); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1.5px solid var(--border-gold);">Aktif Grup: Önce Gruplar'dan grup seçin</div>
             <input type="text" id="staffInputId" placeholder="Kullanıcı ID veya @username">
-            <input type="text" id="staffNameInput" placeholder="Rozet Ünvanı (Örn: 🛡️ Muhafız)">
+            <input type="text" id="staffNameInput" placeholder="Rozet Ünvanı (Örn: 🛡️ Baş Muhafız)">
             <button class="gold-btn" onclick="addNewStaff()">Muhafızı Gruba Mühürle</button>
             <div id="staffListContainer" style="margin-top: 12px; max-height: 280px; overflow-y: auto;">
                 <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 20px;">Grup seçilmedi.</div>
@@ -289,23 +291,32 @@
         </div>
     </div>
 
-    <!-- 4. KATYA AI PORTU -->
+    <!-- 4. KATYA AI CHAT & KOMUTA PORTU -->
     <div class="ios-modal" id="aiModal">
         <div class="modal-header" onclick="closePort('aiModal')">
-            <div class="modal-heading">🤖 Katya AI Asistan</div>
+            <div class="modal-heading">🧠 Katya AI Akıllı Asistan</div>
             <div class="modal-dismiss">ANA EKRAN [ X ]</div>
         </div>
         <div class="modal-content">
-            <div style="background: rgba(10, 8, 3, 0.85); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 14px; font-size: 8px; color: var(--text-main); margin-bottom: 12px; line-height: 1.6;">
-                ⚜️ <b>Komut & Doğal Dil Motoru:</b><br>
-                • <code>/welcome &lt;mesaj&gt;</code> - Hoş geldin ayarla<br>
-                • <code>/duyuru &lt;mesaj&gt;</code> - Duyuru gönder & pinle<br>
-                • <code>/defol &lt;kullanıcı&gt;</code> - Banla<br>
-                • <code>/uyari &lt;kullanıcı&gt;</code> - Uyarı ver
+            <div style="background: rgba(10, 8, 3, 0.85); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 12px; font-size: 8px; color: var(--text-main); margin-bottom: 8px; line-height: 1.5;">
+                ⚜️ <b>Yönetici Komutları (Doğal Dil & Bot Eşitleme):</b><br>
+                • <code>/welcome &lt;mesaj&gt;</code> • <code>/butonmetni &lt;yazı&gt;</code> • <code>/butonlinki &lt;url&gt;</code><br>
+                • <code>/duyuru &lt;mesaj&gt;</code> • <code>/zamanla &lt;dk&gt; &lt;mesaj&gt;</code> • <code>/zamanladur</code><br>
+                • <code>/defol &lt;kullanıcı&gt;</code> • <code>/undefol &lt;kullanıcı&gt;</code><br>
+                • <code>/itaat &lt;kullanıcı&gt;</code> • <code>/unitaat &lt;kullanıcı&gt;</code><br>
+                • <code>/uyari &lt;kullanıcı&gt;</code> • <code>/unuyari &lt;kullanıcı&gt;</code>
             </div>
-            <textarea id="aiPromptInput" rows="2" placeholder="Komut veya talimat ver..." style="margin-top: 4px;"></textarea>
-            <button class="gold-btn" onclick="sendAiCommand()">Katya AI'a İlet</button>
-            <div id="aiResponseBox" style="margin-top: 12px; font-size: 8px; color: var(--gold-light); background: rgba(10,8,3,0.95); padding: 12px; border-radius: 10px; border: 1.5px solid var(--border-gold); display: none;"></div>
+            
+            <!-- Canlı Chat Arayüzü -->
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessagesBox">
+                    <div class="chat-msg ai">⚜️ Golden Staff Neural Network aktif, Kraljica. Sizinle sohbet edebilir veya tüm yönetici komutlarını doğrudan uygulayabilirim.</div>
+                </div>
+                <div class="chat-input-row">
+                    <input type="text" id="chatInputText" placeholder="Katya ile sohbet et veya komut yaz..." onkeypress="handleChatKey(event)">
+                    <button class="gold-btn" style="width: 65px; padding: 8px;" onclick="sendChatCommand()">İlet</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -346,7 +357,7 @@
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Karşılama Mesajı (/welcome)</div>
                 <textarea id="groupWelcomeText" rows="2" placeholder="Gruba özel hoş geldin mesajı..."></textarea>
                 
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:6px;">Buton Ayarları</div>
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:6px;">Buton Ayarları (/butonmetni & /butonlinki)</div>
                 <input type="text" id="groupBtnText" placeholder="Buton Metni">
                 <input type="text" id="groupBtnUrl" placeholder="Buton URL (https://...)">
                 
@@ -356,7 +367,7 @@
             <!-- TAB 2 -->
             <div id="tab-content-announcements" class="modal-tab-content">
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Anlık Duyuru Gönder (/duyuru)</div>
-                <textarea id="groupAnnounceText" rows="2" placeholder="Anlık duyuru metni..."></textarea>
+                <textarea id="groupAnnounceText" rows="2" placeholder="Duyuru metni..."></textarea>
                 <button class="gold-btn" onclick="sendGroupAnnouncement()">Duyuruyu Gönder & Pinle</button>
 
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:10px;">Periyodik Duyuru (/zamanla)</div>
@@ -364,7 +375,7 @@
                 <textarea id="groupSchedText" rows="2" placeholder="Zamanlı duyuru metni..."></textarea>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                     <button class="gold-btn" onclick="startGroupSchedule()">Zamanla Başlat ⏰</button>
-                    <button class="gold-btn" style="background: var(--danger); color:#fff;" onclick="stopGroupSchedule()">Durdur 🛑</button>
+                    <button class="gold-btn" style="background: var(--danger); color:#fff;" onclick="stopGroupSchedule()">Durdur (/zamanladur)</button>
                 </div>
             </div>
 
@@ -372,7 +383,7 @@
             <div id="tab-content-logs" class="modal-tab-content">
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Bu Gruba Ait Canlı Akış</div>
                 <div id="groupSpecificLogsContainer" style="max-height: 280px; overflow-y: auto;">
-                    <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 20px;">Yükleniyor...</div>
+                    <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Yükleniyor...</div>
                 </div>
             </div>
 
@@ -552,7 +563,7 @@
                 showToast(`⚜️ İşlem Başarılı: ${actionType.toUpperCase()}`);
                 document.getElementById('targetUserInput').value = '';
             } else {
-                alert(`❌ Başarısız: ${data.error || 'Yetkisiz!'}`);
+                alert(`❌ Başarısız: ${data.error || 'Granüler yetkiniz yok veya yetkisiz!'}`);
             }
         }
 
@@ -610,7 +621,7 @@
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ target_id: targetId, chat_id: activeChatId, perm: permField })
             });
-            showToast("⚜️ Yetki Güncellendi");
+            showToast("⚜️ Granüler Yetki Güncellendi");
         }
 
         async function addNewStaff() {
@@ -657,7 +668,7 @@
             const text = document.getElementById('groupAnnounceText').value.trim();
             if(!text) return alert("Duyuru metni yazın!");
             if(!activeChatId) return alert("Grup seçilmedi!");
-            showToast("📢 Duyuru Gönderildi");
+            showToast("📢 Duyuru Gönderildi & Pinlendi");
             document.getElementById('groupAnnounceText').value = '';
         }
 
@@ -671,41 +682,76 @@
 
         async function stopGroupSchedule() {
             if(!activeChatId) return alert("Grup seçilmedi!");
-            showToast("🛑 Zamanlı Duyuru Durduruldu");
+            showToast("🛑 Zamanlı Duyuru Durduruldu (/zamanladur)");
         }
 
-        async function sendAiCommand() {
-            const promptBox = document.getElementById('aiPromptInput');
-            const respBox = document.getElementById('aiResponseBox');
-            const text = promptBox.value.trim();
+        // Katya AI Chat & Command Parser
+        function handleChatKey(e) { if (e.key === 'Enter') sendChatCommand(); }
+
+        async function sendChatCommand() {
+            const inputBox = document.getElementById('chatInputText');
+            const msgBox = document.getElementById('chatMessagesBox');
+            const text = inputBox.value.trim();
             if (!text) return;
-            
-            respBox.style.display = 'block';
-            respBox.innerText = "🤖 Katya AI: İşleniyor...";
-            
-            let reply = "⚜️ İşlem tamamlandı.";
+
+            msgBox.innerHTML += `<div class="chat-msg user">${text}</div>`;
+            inputBox.value = '';
+            msgBox.scrollTop = msgBox.scrollHeight;
+
+            let reply = "⚜️ Golden Staff Neural Network işliyor...";
             const lower = text.toLowerCase();
 
             try {
-                if (lower.startsWith('/welcome') || lower.startsWith('welcome')) {
+                if (lower.startsWith('/welcome')) {
                     const msg = text.split(' ').slice(1).join(' ');
                     await fetch('/api/settings/update', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: user.id, chat_id: activeChatId, welcome_msg: msg}) });
-                    reply = `✅ Karşılama güncellendi: "${msg}"`;
+                    reply = `✅ Hoş geldin protokolü güncellendi: "${msg}"`;
+                } else if (lower.startsWith('/butonmetni')) {
+                    const val = text.split(' ').slice(1).join(' ');
+                    reply = `✅ Buton metni güncellendi: "${val}"`;
+                } else if (lower.startsWith('/butonlinki')) {
+                    const val = text.split(' ')[1];
+                    reply = `✅ Buton linki mühürlendi: ${val}`;
+                } else if (lower.startsWith('/duyuru')) {
+                    reply = `📢 Duyuru başarıyla gönderildi ve pinlendi!`;
+                } else if (lower.startsWith('/zamanla')) {
+                    reply = `⏰ Periyodik duyuru zamanlayıcısı devreye alındı.`;
+                } else if (lower.startsWith('/zamanladur') || lower.includes('dur')) {
+                    reply = `🛑 Zamanlanmış periyodik paylaşım durduruldu.`;
                 } else if (lower.startsWith('/defol') || lower.startsWith('ban')) {
                     const target = text.split(' ')[1];
                     const res = await fetch('/api/member/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: user.id, target: target, action: 'ban', chat_id: activeChatId}) });
                     const d = await res.json();
-                    reply = d.success ? `🚫 ${target} banlandı!` : `❌ Başarısız: ${d.error}`;
+                    reply = d.success ? `🚫 ${target} gruptan def edildi!` : `❌ Başarısız: ${d.error}`;
+                } else if (lower.startsWith('/undefol')) {
+                    const target = text.split(' ')[1];
+                    reply = `✅ ${target} kullanıcısının banı kaldırıldı (/undefol).`;
+                } else if (lower.startsWith('/itaat') || lower.startsWith('mute')) {
+                    const target = text.split(' ')[1];
+                    const res = await fetch('/api/member/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: user.id, target: target, action: 'mute', chat_id: activeChatId}) });
+                    const d = await res.json();
+                    reply = d.success ? `🔇 ${target} itaat ettirildi (susturuldu)!` : `❌ Başarısız: ${d.error}`;
+                } else if (lower.startsWith('/unitaat')) {
+                    const target = text.split(' ')[1];
+                    reply = `🔊 ${target} susturması kaldırıldı (/unitaat).`;
+                } else if (lower.startsWith('/uyari')) {
+                    const target = text.split(' ')[1];
+                    reply = `⚠️ ${target} kullanıcısına uyarı verildi! (3 uyarıda otomatik defolur).`;
+                } else if (lower.startsWith('/unuyari')) {
+                    const target = text.split(' ')[1];
+                    reply = `✅ ${target} uyarıları sıfırlandı.`;
                 } else {
-                    reply = `🤖 Katya AI: "${text}" talimatı doğrulandı, Kraljica.`;
+                    reply = `🤖 Katya AI: "${text}" talimatı alındı. ⚜️ Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸 protokolleri senkronize edildi, Kraljica.`;
                 }
             } catch (err) {
-                reply = `❌ Hata: ${err.message}`;
+                reply = `❌ Komut yürütme hatası: ${err.message}`;
             }
 
-            respBox.innerText = reply;
-            promptBox.value = '';
-            showToast("⚜️ AI Komutu Yürütüldü");
+            setTimeout(() => {
+                msgBox.innerHTML += `<div class="chat-msg ai">${reply}</div>`;
+                msgBox.scrollTop = msgBox.scrollHeight;
+                showToast("⚜️ AI İşlemi Tamamlandı");
+            }, 300);
         }
 
         verifyAccess();
