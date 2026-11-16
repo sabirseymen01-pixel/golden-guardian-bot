@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GOLDEN STAFF | Master-Detail Command Suite</title>
+    <title>GOLDEN STAFF | Master-Detail Enterprise Suite</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -186,7 +186,7 @@
         
         <div class="system-widget">
             <div class="widget-info">
-                <h3>Otonom Kalkan & Master List Aktif</h3>
+                <h3>Otonom Kalkan & Log Motoru Aktif</h3>
                 <p id="widgetGroupCount">Yörünge taranıyor...</p>
             </div>
             <div class="widget-status-dot" id="wsStatusDot"></div>
@@ -335,8 +335,9 @@
             <div class="modal-dismiss">ANA EKRAN [ X ]</div>
         </div>
         <div class="modal-content">
-            <div id="globalLogsContainer" style="max-height: 450px; overflow-y: auto;">
-                <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 25px;">Canlı log akışı bekleniyor...</div>
+            <button class="gold-btn" style="margin-bottom: 8px; padding: 8px; font-size: 7px;" onclick="loadGlobalLogs()">🔄 Logları Yenile</button>
+            <div id="globalLogsContainer" style="max-height: 400px; overflow-y: auto;">
+                <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 25px;">Loglar yükleniyor...</div>
             </div>
         </div>
     </div>
@@ -467,7 +468,7 @@
         let activeGroupTitle = "";
         let globalGroupsCache = [];
         let ws;
-        let groupListData = {}; // { chatId: { announcements: [...], schedules: [...] } }
+        let groupListData = {};
 
         function triggerHaptic(style = 'medium', type = 'impact') {
             try {
@@ -500,6 +501,40 @@
             toast.classList.add('show');
             triggerHaptic('success', 'notification');
             setTimeout(() => { toast.classList.remove('show'); }, 2500);
+        }
+
+        // Güçlendirilmiş Canlı Log Yükleme Fonksiyonu
+        async function loadGlobalLogs() {
+            const container = document.getElementById('globalLogsContainer');
+            if(!container) return;
+            container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 25px;">Loglar yükleniyor...</div>`;
+            
+            try {
+                const res = await fetch('/api/logs?filter=general&limit=40');
+                if (!res.ok) throw new Error('Log endpoint yanıt vermedi');
+                const logs = await res.json();
+                
+                if (!Array.isArray(logs) || logs.length === 0) {
+                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 25px;">Henüz sistem log kaydı bulunmuyor.</div>`;
+                    return;
+                }
+                let html = '';
+                logs.forEach(l => {
+                    html += `
+                        <div class="log-item">
+                            <div>
+                                <span class="log-action">${l.action_type || 'BİLGİ'}</span>
+                                <div style="margin-top: 3px; color: var(--gold-light);">Hedef: @${l.username || l.target_id || 'Sistem'}</div>
+                                <div style="font-size: 7px; color: #ccc; margin-top: 2px;">${l.details || ''}</div>
+                            </div>
+                            <span class="log-time">${l.timestamp || ''}</span>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = `<div style="font-size: 8px; color: var(--danger); text-align: center; padding: 25px;">Log bağlantısı başarısız oldu. Lütfen yenileyin.</div>`;
+            }
         }
 
         function initWebSocket() {
@@ -580,6 +615,7 @@
                 await loadAllGroups();
                 await loadGlobalLogs();
                 initWebSocket();
+                setInterval(loadGlobalLogs, 10000);
             } catch (e) {}
         }
 
@@ -610,11 +646,11 @@
                     avatar = `<img src="${proxyUrl}" onerror="this.parentElement.innerHTML='🛡️'">`;
                 }
                 html += `
-                    <div class="group-card ${isSelected ? 'active' : ''}" onclick="openGroupDetail(${g.chat_id}, '${encodeURIComponent(g.title || 'Grup')}')">
+                    <div class="group-card ${isSelected ? 'active' : ''}" onclick="openGroupDetail(${g.chat_id}, '${encodeURIComponent(g.title || 'Golden Staff Group')}')">
                         <div class="group-meta">
                             <div class="group-avatar">${avatar}</div>
                             <div>
-                                <div class="group-title">${g.title || 'Grup'}</div>
+                                <div class="group-title">${g.title || 'Golden Staff Group'}</div>
                                 <div class="group-id-sub">ID: ${g.chat_id}</div>
                             </div>
                         </div>
@@ -660,7 +696,6 @@
         function renderGroupLists() {
             const data = groupListData[activeChatId] || { announcements: [], schedules: [] };
             
-            // Duyuru Listesi (Sadece Liste Adı görünür, tıklayınca Edit açılır)
             const annContainer = document.getElementById('groupAnnouncementsList');
             if(data.announcements.length === 0) {
                 annContainer.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 10px;">Kayıtlı duyuru şablonu yok.</div>`;
@@ -680,7 +715,6 @@
                 annContainer.innerHTML = html;
             }
 
-            // Zamanlama Listesi (Sadece Liste Adı görünür, tıklayınca Edit açılır)
             const schContainer = document.getElementById('groupSchedulesList');
             if(data.schedules.length === 0) {
                 schContainer.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 10px;">Zamanlanmış paylaşım yok.</div>`;
@@ -701,7 +735,6 @@
             }
         }
 
-        // --- MASTER-DETAIL EDIT MODAL HANDLERS ---
         function openEditAnnouncement(id) {
             const item = groupListData[activeChatId].announcements.find(x => x.id === id);
             if(!item) return;
@@ -843,34 +876,6 @@
 
             renderGroupLists();
             showToast(`⏰ Zamanlama Listeye Eklendi: ${name} (/zamanla)`);
-        }
-
-        async function loadGlobalLogs() {
-            try {
-                const res = await fetch('/api/logs?filter=general&limit=35');
-                const logs = await res.json();
-                const container = document.getElementById('globalLogsContainer');
-                if(!container) return;
-                
-                if (logs.length === 0) {
-                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 25px;">Log yok.</div>`;
-                    return;
-                }
-                let html = '';
-                logs.forEach(l => {
-                    html += `
-                        <div class="log-item">
-                            <div>
-                                <span class="log-action">${l.action_type}</span>
-                                <div style="margin-top: 3px; color: var(--gold-light);">Hedef: @${l.username || l.target_id}</div>
-                                <div style="font-size: 7px; color: #ccc; margin-top: 2px;">${l.details || ''}</div>
-                            </div>
-                            <span class="log-time">${l.timestamp}</span>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            } catch (e) {}
         }
 
         async function executeAction(actionType) {
