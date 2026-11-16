@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Katya | Professional Cyber-Luxury HUD</title>
+    <title>Golden Katya | Professional HUD Deck</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
@@ -17,9 +17,9 @@
             --gold-glow: #f8ecbe;
             --danger-red: #ff3333;
             --success-green: #2ecc71;
-            --glass-panel: rgba(14, 4, 22, 0.92);
-            --border-cyber: rgba(185, 103, 255, 0.4);
-            --border-gold: rgba(212, 175, 55, 0.55);
+            --glass-panel: rgba(14, 4, 22, 0.94);
+            --border-cyber: rgba(185, 103, 255, 0.45);
+            --border-gold: rgba(212, 175, 55, 0.65);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: monospace; -webkit-tap-highlight-color: transparent; }
         
@@ -27,14 +27,14 @@
             height: 100vh; width: 100vw; overflow: hidden; background-color: var(--space-black);
         }
 
-        /* 🌸 Profesyonel Pembe-Mor ve Asil Altın Işıltılı Atmosfer */
+        /* 🌸 Profesyonel Pembe-Mor ve Altın Atmosfer */
         body {
             background: 
-                radial-gradient(circle at 50% 10%, rgba(212, 175, 55, 0.15) 0%, transparent 45%),
-                radial-gradient(circle at 85% 85%, rgba(185, 103, 255, 0.22) 0%, transparent 55%),
-                radial-gradient(circle at 15% 75%, rgba(255, 42, 133, 0.18) 0%, transparent 55%),
+                radial-gradient(circle at 50% 10%, rgba(212, 175, 55, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 85% 85%, rgba(185, 103, 255, 0.25) 0%, transparent 60%),
+                radial-gradient(circle at 15% 75%, rgba(255, 42, 133, 0.22) 0%, transparent 60%),
                 linear-gradient(135deg, #08010e 0%, #020004 100%);
-            color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 6px;
+            color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 8px;
         }
 
         #webgl-container {
@@ -44,65 +44,72 @@
         /* Üst Komuta Header */
         .hud-header {
             position: relative; z-index: 10; display: flex; justify-content: space-between; align-items: center;
-            padding: 6px 12px; background: rgba(12, 3, 20, 0.9); backdrop-filter: blur(20px); border-radius: 10px;
-            border: 1.5px solid var(--border-gold); box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            padding: 8px 14px; background: rgba(12, 3, 20, 0.92); backdrop-filter: blur(20px); border-radius: 10px;
+            border: 1.5px solid var(--border-gold); box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
         }
-        .logo { font-size: 10px; color: var(--gold-glow); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px var(--gold-accent); }
-        .badge { background: rgba(212, 175, 55, 0.2); color: var(--gold-glow); padding: 3px 8px; border-radius: 6px; font-size: 8px; border: 1px solid var(--gold-accent); font-weight: 900; }
+        .logo { font-size: 11px; color: var(--gold-glow); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 12px var(--gold-accent); }
+        .badge { background: rgba(212, 175, 55, 0.25); color: var(--gold-glow); padding: 4px 10px; border-radius: 6px; font-size: 8px; border: 1px solid var(--gold-accent); font-weight: 900; }
 
-        /* 🪐 Pürüzsüz Dönen Yörünge Radar Konsolu */
+        /* 🪐 BÜYÜTÜLMÜŞ VE PROFESYONEL RADAR KONSOLU */
         .radar-deck {
-            position: relative; z-index: 10; width: 100%; height: 150px; display: flex; align-items: center; justify-content: center;
-            background: rgba(6, 1, 10, 0.85); border-radius: 50%; border: 1.5px dashed var(--gold-accent);
-            box-shadow: 0 0 30px rgba(255, 42, 133, 0.15), inset 0 0 20px rgba(212, 175, 55, 0.15);
-            margin: 4px auto; max-width: 300px;
+            position: relative; z-index: 10; width: 100%; height: 195px; display: flex; align-items: center; justify-content: center;
+            background: rgba(6, 1, 10, 0.88); border-radius: 50%; border: 2px solid var(--gold-accent);
+            box-shadow: 0 0 40px rgba(255, 42, 133, 0.2), inset 0 0 25px rgba(212, 175, 55, 0.2);
+            margin: 6px auto; max-width: 340px;
         }
         
+        /* ⚜️ Merkezde Şık ve Profesyonel "KATYA" Çekirdeği */
         .katya-core {
             position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-            width: 46px; height: 46px; border-radius: 50%; background: radial-gradient(circle, var(--gold-glow) 0%, var(--gold-accent) 60%, #3a2e0f 100%);
-            border: 2px solid var(--hud-glow); display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 20px var(--gold-accent); z-index: 15; cursor: pointer;
+            width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle, var(--gold-glow) 0%, var(--gold-accent) 65%, #2a1f05 100%);
+            border: 2.5px solid var(--hud-glow); display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 0 25px var(--gold-accent), inset 0 0 10px rgba(255,255,255,0.5); z-index: 25; cursor: pointer;
+            transition: transform 0.3s ease;
         }
-        .core-icon { font-size: 14px; }
-        .core-text { font-size: 5px; font-weight: 900; color: #000; text-transform: uppercase; }
+        .katya-core:active { transform: translate(-50%, -50%) scale(0.95); }
+        .core-icon { font-size: 18px; text-shadow: 0 0 5px rgba(0,0,0,0.8); }
+        .core-text { font-size: 8px; font-weight: 900; color: #000; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
 
+        /* Pürüzsüz Yörünge Halkası */
         .orbit-ring {
-            position: absolute; width: 100%; height: 100%; left: 0; top: 0; animation: orbitSpin 40s linear infinite;
+            position: absolute; width: 100%; height: 100%; left: 0; top: 0; pointer-events: none;
+            animation: orbitSpin 50s linear infinite;
         }
         @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .orbit-node {
-            position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 12;
-            transition: transform 0.3s ease;
+            position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 20;
+            pointer-events: auto; transition: transform 0.3s ease;
         }
-        .orbit-node-inner { display: flex; flex-direction: column; align-items: center; animation: counterSpin 40s linear infinite; }
+        .orbit-node-inner { display: flex; flex-direction: column; align-items: center; animation: counterSpin 50s linear infinite; }
         @keyframes counterSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
 
         .orbit-avatar {
-            width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--gold-accent);
+            width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold-accent);
             background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 10px var(--gold-accent); transition: all 0.3s ease;
+            box-shadow: 0 0 12px var(--gold-accent); transition: all 0.3s ease;
         }
-        .orbit-node.active .orbit-avatar { border-color: var(--hud-pink); box-shadow: 0 0 20px var(--hud-pink); transform: scale(1.15); }
+        .orbit-node:hover .orbit-avatar, .orbit-node.active .orbit-avatar {
+            border-color: var(--hud-pink); box-shadow: 0 0 22px var(--hud-pink); transform: scale(1.15);
+        }
         
-        /* Uyarı / Admin Etiketi Aldığında Büyüme ve Pulsing Efekti */
+        /* Uyarı / Warning Durumunda Büyüme ve Alarm Efekti */
         .orbit-node.warning .orbit-avatar {
-            border-color: var(--danger-red); box-shadow: 0 0 25px var(--danger-red);
+            border-color: var(--danger-red); box-shadow: 0 0 30px var(--danger-red);
             animation: warningPulse 1s infinite alternate;
         }
         @keyframes warningPulse {
             0% { transform: scale(1); }
-            100% { transform: scale(1.25); }
+            100% { transform: scale(1.3); }
         }
 
         .orbit-avatar img { width: 100%; height: 100%; object-fit: cover; }
         
-        /* Tam Grup Adı Görüntüleme */
+        /* Tam Grup Adı Kesilmeden Okunur */
         .orbit-label {
             font-size: 7px; color: var(--gold-glow); background: rgba(10, 2, 16, 0.95); padding: 2px 6px; border-radius: 4px;
-            margin-top: 2px; max-width: 95px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-            border: 1px solid var(--gold-accent); box-shadow: 0 0 6px rgba(212, 175, 55, 0.4); text-align: center;
+            margin-top: 3px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            border: 1px solid var(--gold-accent); box-shadow: 0 0 8px rgba(212, 175, 55, 0.4); text-align: center;
         }
 
         /* 🪞 Yumuşak Geçişli Sekmeler */
@@ -112,7 +119,7 @@
         .hud-nav::-webkit-scrollbar { display: none; }
         .hud-tab {
             flex: 1; background: rgba(20, 6, 32, 0.85); backdrop-filter: blur(15px);
-            border: 1px solid var(--border-cyber); color: #d4c8b0; padding: 8px 6px;
+            border: 1px solid var(--border-cyber); color: #d4c8b0; padding: 9px 6px;
             font-size: 8px; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.6); transition: all 0.3s ease; white-space: nowrap;
         }
@@ -124,10 +131,10 @@
         /* 🎛️ Ana İçerik Viewport */
         .hud-viewport {
             position: relative; z-index: 10; flex: 1; background: var(--glass-panel); backdrop-filter: blur(25px);
-            border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 10px; overflow-y: auto; margin-top: 4px;
+            border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 12px; overflow-y: auto; margin-top: 6px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(212, 175, 55, 0.1);
         }
-        .mod-section { display: none; flex-direction: column; gap: 6px; animation: fadeIn 0.4s ease; }
+        .mod-section { display: none; flex-direction: column; gap: 8px; animation: fadeIn 0.4s ease; }
         .mod-section.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -135,19 +142,19 @@
 
         input, select, textarea {
             width: 100%; background: rgba(5, 1, 10, 0.9); border: 1px solid var(--border-cyber);
-            border-radius: 6px; padding: 7px; color: #fff; font-size: 9px; outline: none; margin-bottom: 5px;
+            border-radius: 6px; padding: 8px; color: #fff; font-size: 9px; outline: none; margin-bottom: 6px;
         }
         input:focus { border-color: var(--gold-accent); box-shadow: 0 0 8px var(--gold-accent); }
 
         .cyber-btn {
             width: 100%; background: linear-gradient(135deg, var(--gold-accent) 0%, var(--hud-pink) 100%); color: #000;
-            border: none; padding: 8px; border-radius: 6px; font-weight: 900; font-size: 8px; cursor: pointer; text-transform: uppercase;
+            border: none; padding: 9px; border-radius: 6px; font-weight: 900; font-size: 8px; cursor: pointer; text-transform: uppercase;
             box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
         }
         .cyber-btn:active { transform: scale(0.97); }
 
-        .item-row { background: rgba(12, 3, 20, 0.8); border: 1px solid rgba(185, 103, 255, 0.3); padding: 6px; border-radius: 6px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 8px; }
-        .log-box { background: rgba(10, 2, 16, 0.85); border: 1px solid rgba(255, 42, 133, 0.3); padding: 6px; border-radius: 6px; margin-bottom: 4px; font-size: 7px; color: var(--gold-glow); }
+        .item-row { background: rgba(12, 3, 20, 0.8); border: 1px solid rgba(185, 103, 255, 0.3); padding: 7px; border-radius: 6px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 8px; }
+        .log-box { background: rgba(10, 2, 16, 0.85); border: 1px solid rgba(255, 42, 133, 0.3); padding: 7px; border-radius: 6px; margin-bottom: 4px; font-size: 7px; color: var(--gold-glow); }
 
         /* 🚀 Gruba Özel Kayan Cam Port (Group Drawer) */
         .group-drawer {
@@ -193,11 +200,11 @@
         <div class="badge" id="userRole">Kraljica 👑</div>
     </div>
 
-    <!-- 🪐 Yörünge Radar Konsolu -->
+    <!-- 🪐 Büyütülmüş ve Merkezinde KATYA Yazan Radar Konsolu -->
     <div class="radar-deck" id="radarContainer">
         <div class="katya-core" onclick="toggleAiDrawer()" title="Katya AI Portunu Aç">
-            <div class="core-icon">🤖</div>
-            <div class="core-text">AI Port</div>
+            <div class="core-icon">⚜️</div>
+            <div class="core-text">KATYA</div>
         </div>
         <div class="orbit-ring" id="radarNodesRing"></div>
     </div>
@@ -228,7 +235,7 @@
                 </div>
             </div>
             <div style="font-size: 7px; color: #d4c8b0; margin-top: 8px; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px;">
-                💡 <b>İpucu:</b> Yukarıdaki yörünge radarından herhangi bir gruba tıklayarak <b>o gruba özel yönetim portunu</b> açabilir, ayarları yapılandırabilirsin!
+                💡 <b>İpucu:</b> Yukarıdaki yörünge çemberinden herhangi bir gruba tıklayarak <b>o gruba özel komuta portunu</b> açabilir ve anlık olarak yönetebilirsin!
             </div>
         </div>
 
@@ -238,7 +245,7 @@
             <input type="text" id="staffInput" placeholder="@username veya ID">
             <input type="text" id="staffName" placeholder="Rozet Ünvanı (Örn: 💎 Kristal)">
             <button class="cyber-btn" onclick="addStaff()">Mühürle</button>
-            <div id="staffListContainer" style="max-height: 120px; overflow-y: auto; margin-top: 4px;"><div style="font-size:8px;">Yükleniyor...</div></div>
+            <div id="staffListContainer" style="max-height: 140px; overflow-y: auto; margin-top: 4px;"><div style="font-size:8px;">Yükleniyor...</div></div>
         </div>
 
         <!-- TAKTİKSEL -->
@@ -260,13 +267,13 @@
                 <select id="logClearDays" style="margin-bottom:0;"><option value="1">Günlük</option><option value="7">Haftalık</option><option value="0">Tümünü Sil</option></select>
                 <button class="cyber-btn" style="width: auto; background: rgba(212,175,55,0.3); color: var(--gold-glow); border: 1px solid var(--gold-accent);" onclick="clearLogs()">Temizle</button>
             </div>
-            <div id="generalLogsContainer" style="max-height: 130px; overflow-y: auto;"><div style="font-size:8px;">Loglar akıyor...</div></div>
+            <div id="generalLogsContainer" style="max-height: 140px; overflow-y: auto;"><div style="font-size:8px;">Loglar akıyor...</div></div>
         </div>
 
         <!-- PROTOKOLLER -->
         <div id="mod-settings" class="mod-section">
             <div class="section-title">⚙️ Genel Protokoller</div>
-            <p style="font-size: 7px; color: #d4c8b0; margin-bottom: 6px;">Genel varsayılan ayarlar. Belirli bir grubu yapılandırmak için yörüngeden o gruba tıklayın.</p>
+            <p style="font-size: 7px; color: #d4c8b0; margin-bottom: 6px;">Global varsayılan ayarlar. Belirli bir grubu yapılandırmak için yörüngeden o gruba tıklayın.</p>
             <textarea id="welcomeMsgInput" rows="2" placeholder="Global Karşılama metni..."></textarea>
             <input type="text" id="btnTextInput" placeholder="Global Buton Metni">
             <input type="text" id="btnUrlInput" placeholder="Global Buton Linki (https://)">
@@ -351,7 +358,7 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // DRAWER KONTROL FONKSİYONLARI
+        // DRAWER KONTROLÜ
         function toggleAiDrawer() {
             const drawer = document.getElementById('aiDrawer');
             drawer.classList.toggle('open');
@@ -406,17 +413,15 @@
 
                 if (ringContainer) {
                     let html = '';
-                    const radius = 55; 
+                    const radius = 72; // Büyüyen radar için yörünge yarıçapı
                     groups.forEach((g, index) => {
                         const angle = (index / groups.length) * 2 * Math.PI;
                         const x = Math.cos(angle) * radius;
                         const y = Math.sin(angle) * radius;
                         const isActive = selectedChatId == g.chat_id;
-                        
-                        // Örnek: Eğer grupta alarm veya warning durumu varsa warning sınıfı eklenir (büyüme efekti)
                         const hasWarning = (g.has_warning || false);
 
-                        let avatar = `<span style="font-size:12px;">🛡️</span>`;
+                        let avatar = `<span style="font-size:14px;">🛡️</span>`;
                         if (g.photo_url) {
                             const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(g.photo_url)}`;
                             avatar = `<img src="${proxyUrl}" onerror="this.parentElement.innerHTML='🛡️'">`;
@@ -442,7 +447,6 @@
             selectedChatId = chatId;
             selectedGroupTitle = decodeURIComponent(encodedTitle);
             
-            // Gruba özel portu otomatik aç
             document.getElementById('selectedGroupFullName').innerText = selectedGroupTitle;
             document.getElementById('selectedGroupId').innerText = "ID: " + chatId;
             toggleGroupDrawer();
