@@ -4,151 +4,174 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Katya | Enterprise Console</title>
+    <title>Golden Katya | Cyber-Luxury Gold Console</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-base: #08060c;
-            --bg-surface: #120d1c;
-            --card-bg: #1a1228;
-            --gold: #d4af37;
+            --obsidian: #050402;
+            --gold-base: #d4af37;
             --gold-light: #f8ecbe;
-            --gold-dim: rgba(212, 175, 55, 0.2);
+            --gold-dim: rgba(212, 175, 55, 0.18);
+            --gold-glow: rgba(212, 175, 55, 0.45);
+            --glass-panel: rgba(15, 12, 5, 0.82);
+            --glass-dock: rgba(20, 16, 7, 0.78);
             --danger: #ff4757;
             --success: #2ed573;
-            --text-main: #f1f2f6;
-            --text-muted: #8c96a5;
-            --border-subtle: rgba(212, 175, 55, 0.25);
-            --border-active: rgba(212, 175, 55, 0.7);
+            --text-main: #f5f6fa;
+            --text-muted: #b2bec3;
+            --border-gold: rgba(212, 175, 55, 0.4);
+            --border-bright: rgba(248, 236, 190, 0.7);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        html, body { height: 100vh; width: 100vw; overflow: hidden; background-color: var(--bg-base); color: var(--text-main); }
+        html, body { height: 100vh; width: 100vw; overflow: hidden; background-color: var(--obsidian); color: var(--text-main); }
 
-        /* 🌌 Göz Yormayan Sakin, Lüks ve Asil Gold Atmosfer */
+        /* 🌟 Simli, Şeffaf Camsı Gold Lüks Atmosfer */
         body {
             background: 
-                radial-gradient(circle at 50% 10%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
-                linear-gradient(135deg, #0b0813 0%, #050308 100%);
+                radial-gradient(circle at 50% 15%, rgba(212, 175, 55, 0.22) 0%, transparent 60%),
+                radial-gradient(circle at 90% 85%, rgba(180, 130, 20, 0.15) 0%, transparent 70%),
+                radial-gradient(circle at 10% 80%, rgba(248, 236, 190, 0.12) 0%, transparent 60%),
+                linear-gradient(135deg, #090703 0%, #020201 100%);
             display: flex; flex-direction: column; justify-content: space-between; padding: 10px;
         }
 
-        /* Üst Header */
+        /* Üst Header - Camsı Altın Tasarım */
         .hud-header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 16px; background: var(--bg-surface);
-            border-radius: 12px; border: 1px solid var(--border-subtle); box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            padding: 10px 16px; background: var(--glass-panel); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-radius: 14px; border: 1px solid var(--border-gold); box-shadow: 0 8px 32px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,215,0,0.25);
         }
-        .brand-title { font-size: 11px; font-weight: 800; color: var(--gold-light); letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
-        .user-badge { background: var(--gold-dim); color: var(--gold-light); padding: 4px 10px; border-radius: 6px; font-size: 8px; border: 1px solid var(--border-subtle); font-weight: 800; }
+        .brand-title { font-size: 11px; font-weight: 900; color: var(--gold-light); letter-spacing: 2px; text-shadow: 0 0 10px var(--gold-base); display: flex; align-items: center; gap: 6px; }
+        .user-badge { background: var(--gold-dim); color: var(--gold-light); padding: 4px 10px; border-radius: 8px; font-size: 8px; border: 1px solid var(--border-gold); font-weight: 900; }
 
         /* Ana İçerik Viewport */
         .app-viewport {
-            flex: 1; overflow-y: auto; margin: 10px 0 70px 0; display: flex; flex-direction: column; gap: 10px;
-            scrollbar-width: thin; scrollbar-color: var(--gold) var(--bg-surface);
+            flex: 1; overflow-y: auto; margin: 10px 0 75px 0; display: flex; flex-direction: column; gap: 12px;
+            scrollbar-width: thin; scrollbar-color: var(--gold-base) rgba(0,0,0,0.3);
         }
         .app-viewport::-webkit-scrollbar { width: 4px; }
-        .app-viewport::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+        .app-viewport::-webkit-scrollbar-thumb { background: var(--gold-base); border-radius: 4px; }
 
-        .app-section { display: none; flex-direction: column; gap: 10px; animation: fadeIn 0.25s ease; }
+        .app-section { display: none; flex-direction: column; gap: 12px; animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .app-section.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Camsı Gold Kartlar */
         .gold-card {
-            background: var(--card-bg); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            background: var(--glass-panel); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid var(--border-gold); border-radius: 14px; padding: 14px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,215,0,0.15);
         }
         .section-title {
-            font-size: 9px; font-weight: 800; color: var(--gold-light); text-transform: uppercase;
-            border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px; margin-bottom: 10px;
-            letter-spacing: 0.8px; display: flex; justify-content: space-between; align-items: center;
+            font-size: 10px; font-weight: 900; color: var(--gold-light); text-transform: uppercase;
+            border-bottom: 1px solid var(--border-gold); padding-bottom: 6px; margin-bottom: 10px;
+            letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* 📱 iOS Tarzı Şeffaf Dock (Görev Çubuğu) */
+        /* 📱 iOS Tarzı Şeffaf Kaydırılabilir Camsı Dock (Görev Çubuğu) */
         .ios-dock {
             position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
-            width: 94%; max-width: 440px; height: 60px;
-            background: rgba(18, 13, 28, 0.88); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border-radius: 16px; border: 1px solid var(--border-subtle);
-            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+            width: 94%; max-width: 440px; height: 64px;
+            background: var(--glass-dock); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px);
+            border-radius: 18px; border: 1px solid var(--border-bright);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.3);
             display: flex; align-items: center; justify-content: space-around; padding: 0 6px; z-index: 90;
         }
         .dock-item {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; padding: 6px 12px; border-radius: 10px; transition: all 0.2s ease; color: var(--text-muted);
+            cursor: pointer; padding: 6px 12px; border-radius: 12px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); color: var(--text-muted);
         }
-        .dock-item span:first-child { font-size: 15px; }
-        .dock-item span:last-child { font-size: 6px; font-weight: 700; margin-top: 2px; text-transform: uppercase; }
-        .dock-item:hover, .dock-item.active { color: var(--gold-light); background: var(--gold-dim); }
+        .dock-item span:first-child { font-size: 16px; transition: transform 0.2s; }
+        .dock-item span:last-child { font-size: 6px; font-weight: 800; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .dock-item:hover, .dock-item.active { color: var(--gold-light); background: var(--gold-dim); transform: translateY(-3px); text-shadow: 0 0 10px var(--gold-base); }
+        .dock-item.active span:first-child { transform: scale(1.15); }
 
-        /* Grup Listesi Kartları */
+        /* Grup Kartları */
         .group-card {
-            background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 10px;
+            background: rgba(25, 20, 8, 0.65); border: 1px solid var(--border-gold); border-radius: 10px;
             padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
         }
-        .group-card:hover { border-color: var(--border-active); background: rgba(212,175,55,0.03); }
+        .group-card:hover { border-color: var(--gold-light); background: var(--gold-dim); transform: translateX(2px); }
+        .group-card:active { transform: scale(0.98); }
         .group-meta { display: flex; align-items: center; gap: 10px; overflow: hidden; }
-        .group-avatar { width: 34px; height: 34px; border-radius: 50%; background: #000; border: 1px solid var(--gold); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .group-avatar { width: 36px; height: 36px; border-radius: 50%; background: #000; border: 1.5px solid var(--gold-base); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px var(--gold-dim); }
         .group-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .group-details { overflow: hidden; }
-        .group-title { font-size: 9px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .group-title { font-size: 10px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .group-id-sub { font-size: 7px; color: var(--text-muted); }
 
         /* Form Elemanları & Butonlar */
         input, select, textarea {
-            width: 100%; background: var(--bg-base); border: 1px solid var(--border-subtle);
-            border-radius: 8px; padding: 9px 12px; color: #fff; font-size: 9px; outline: none; margin-bottom: 8px;
+            width: 100%; background: rgba(8, 6, 2, 0.85); border: 1px solid var(--border-gold);
+            border-radius: 8px; padding: 10px 12px; color: #fff; font-size: 9px; outline: none; margin-bottom: 8px;
+            transition: all 0.2s;
         }
-        input:focus, textarea:focus { border-color: var(--gold); box-shadow: 0 0 6px rgba(212,175,55,0.25); }
+        input:focus, textarea:focus { border-color: var(--gold-light); box-shadow: 0 0 10px var(--gold-glow); }
 
         .gold-btn {
-            width: 100%; background: linear-gradient(135deg, var(--gold) 0%, #b8972a 100%); color: #000;
-            border: none; padding: 9px 14px; border-radius: 8px; font-weight: 800; font-size: 8px; cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); transition: transform 0.1s;
+            width: 100%; background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-base) 100%); color: #000;
+            border: none; padding: 10px 14px; border-radius: 8px; font-weight: 900; font-size: 9px; cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.35); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .gold-btn:active { transform: scale(0.98); }
+        .gold-btn:active { transform: scale(0.96); box-shadow: 0 2px 10px rgba(212, 175, 55, 0.5); }
 
-        /* 🌸 iOS Tarzı Baloncuk Modal (Grup Portu) */
+        /* 🌸 iOS Tarzı Baloncuk Açılış Animasyonlu Camsı Port (Modal) */
         .ios-modal {
             position: fixed; bottom: 0; left: 0; width: 100vw; height: 0;
-            background: var(--bg-surface); backdrop-filter: blur(30px);
-            border-top: 2px solid var(--gold); border-radius: 20px 20px 0 0;
-            box-shadow: 0 -15px 40px rgba(0,0,0,0.8); z-index: 100;
-            transform: scale(0.9); opacity: 0; pointer-events: none;
-            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.25s ease, height 0.35s ease;
+            background: rgba(18, 14, 6, 0.94); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px);
+            border-top: 2.5px solid var(--gold-base); border-radius: 24px 24px 0 0;
+            box-shadow: 0 -20px 60px rgba(0,0,0,0.9); z-index: 100;
+            transform: scale(0.85) translateY(20px); opacity: 0; pointer-events: none;
+            transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease, height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; flex-direction: column; overflow: hidden;
         }
-        .ios-modal.open { height: 85vh; transform: scale(1); opacity: 1; pointer-events: auto; }
+        .ios-modal.open {
+            height: 85vh; transform: scale(1) translateY(0); opacity: 1; pointer-events: auto;
+        }
 
         .modal-header {
-            padding: 12px 16px; background: var(--card-bg); display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border-subtle); cursor: pointer;
+            padding: 14px 18px; background: rgba(30, 24, 10, 0.85); display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-gold); cursor: pointer;
         }
-        .modal-heading { font-size: 9px; font-weight: 800; color: var(--gold-light); text-transform: uppercase; }
-        .modal-dismiss { font-size: 8px; color: var(--gold); background: var(--gold-dim); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-subtle); font-weight: 800; cursor: pointer; }
-        .modal-content { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .modal-heading { font-size: 10px; font-weight: 900; color: var(--gold-light); text-transform: uppercase; letter-spacing: 1px; }
+        .modal-dismiss { font-size: 8px; color: var(--obsidian); background: var(--gold-light); padding: 4px 10px; border-radius: 6px; font-weight: 900; cursor: pointer; box-shadow: 0 0 10px var(--gold-base); }
+        .modal-content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; scrollbar-color: var(--gold-base) transparent; }
 
-        /* Log Listesi Stili */
+        /* Log ve Tablo Stilleri */
         .log-item {
-            background: var(--bg-base); border-left: 3px solid var(--gold); padding: 8px 10px;
-            border-radius: 6px; margin-bottom: 6px; font-size: 8px; border-top: 1px solid var(--border-subtle);
-            border-right: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);
+            background: rgba(10, 8, 3, 0.8); border-left: 3px solid var(--gold-base); padding: 9px 12px;
+            border-radius: 8px; margin-bottom: 6px; font-size: 8px; border-top: 1px solid var(--border-gold);
+            border-right: 1px solid var(--border-gold); border-bottom: 1px solid var(--border-gold);
         }
         .log-time { font-size: 6px; color: var(--text-muted); float: right; }
-        .log-action { color: var(--gold-light); font-weight: 700; text-transform: uppercase; }
+        .log-action { color: var(--gold-light); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Granüler Haklar Switch */
-        .switch-row { display: flex; justify-content: space-between; align-items: center; background: var(--bg-base); padding: 6px 10px; border-radius: 6px; font-size: 8px; margin-bottom: 4px; border: 1px solid var(--border-subtle); }
-        .switch { position: relative; display: inline-block; width: 28px; height: 14px; }
+        /* Granüler Haklar Switch (Toggle) */
+        .switch-row { display: flex; justify-content: space-between; align-items: center; background: rgba(8, 6, 2, 0.7); padding: 8px 12px; border-radius: 8px; font-size: 8px; margin-bottom: 6px; border: 1px solid var(--border-gold); }
+        .switch { position: relative; display: inline-block; width: 32px; height: 18px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .2s; border-radius: 14px; }
-        .slider:before { position: absolute; content: ""; height: 10px; width: 10px; left: 2px; bottom: 2px; background-color: white; transition: .2s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--gold); }
-        input:checked + .slider:before { transform: translateX(14px); }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #222; transition: .3s; border-radius: 18px; border: 1px solid var(--border-gold); }
+        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px; background-color: var(--gold-light); transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--gold-base); }
+        input:checked + .slider:before { transform: translateX(14px); background-color: #000; }
+
+        /* Havalı İşlem Toast Bildirimi */
+        .toast-popup {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-50px);
+            background: rgba(212, 175, 55, 0.95); backdrop-filter: blur(20px); color: #000;
+            padding: 10px 20px; border-radius: 10px; font-size: 9px; font-weight: 900; text-transform: uppercase;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5); z-index: 1000; opacity: 0; pointer-events: none;
+            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast-popup.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
+
+    <!-- Havalı Toast Bildirimi -->
+    <div class="toast-popup" id="toastPopup">⚜️ İŞLEM TAMAMLANDI</div>
 
     <!-- Üst Header -->
     <header class="hud-header">
@@ -164,8 +187,8 @@
             <div class="gold-card">
                 <div class="section-title"><span>🪐 Bağlı Yörünge Grupları</span><span id="groupCount">0 Aktif</span></div>
                 <input type="text" id="groupSearchInput" placeholder="Grup adı veya ID ile ara..." oninput="filterGroups()" style="margin-bottom: 10px;">
-                <div id="groupsListContainer" style="display: flex; flex-direction: column; gap: 6px;">
-                    <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Gruplar yükleniyor...</div>
+                <div id="groupsListContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 20px;">Gruplar yükleniyor...</div>
                 </div>
             </div>
         </div>
@@ -174,9 +197,9 @@
         <div id="sec-tactical" class="app-section">
             <div class="gold-card">
                 <div class="section-title"><span>⚡ Üye Denetim Portu (ID / Username)</span><span>Hızlı Eylem</span></div>
-                <p style="font-size: 7px; color: var(--text-muted); margin-bottom: 8px;">Yönetmek istediğiniz hedef kullanıcıyı ID veya @username ile belirtin ve aktif grup üzerinde eylemi gerçekleştirin.</p>
+                <p style="font-size: 7px; color: var(--text-muted); margin-bottom: 10px;">Yönetmek istediğiniz hedef kullanıcıyı ID veya @username ile belirtin ve aktif grup üzerinde hızlı eylem gerçekleştirin.</p>
                 <input type="text" id="targetUserInput" placeholder="Kullanıcı ID veya @username (Örn: 12345678 veya @ahmet)">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px;">
                     <button class="gold-btn" style="background: var(--danger); color:#fff;" onclick="executeAction('ban')">Banla 🚫</button>
                     <button class="gold-btn" style="background: var(--success); color:#000;" onclick="executeAction('unban')">Ban Aç ✅</button>
                     <button class="gold-btn" style="background: #e67e22; color:#fff;" onclick="executeAction('mute')">Mute 🔇</button>
@@ -189,13 +212,13 @@
         <div id="sec-staff" class="app-section">
             <div class="gold-card">
                 <div class="section-title"><span>👑 Yetkili Matrisi & Granüler Haklar</span><span>Grup Bazlı</span></div>
-                <p style="font-size: 7px; color: var(--text-muted); margin-bottom: 6px;">Lütfen yetkili eklemek veya düzenlemek için önce 'Gruplar' sekmesinden bir grup seçin.</p>
-                <div id="activeGroupStaffNotice" style="font-size: 8px; color: var(--gold-light); background: var(--gold-dim); padding: 6px; border-radius: 6px; margin-bottom: 8px;">Aktif Grup: Genel / Seçilmedi</div>
+                <p style="font-size: 7px; color: var(--text-muted); margin-bottom: 8px;">Lütfen yetkili eklemek veya granüler hakları düzenlemek için önce 'Gruplar' sekmesinden bir grup seçin.</p>
+                <div id="activeGroupStaffNotice" style="font-size: 8px; color: var(--gold-light); background: var(--gold-dim); padding: 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--border-gold);">Aktif Grup: Seçilmedi</div>
                 <input type="text" id="staffInputId" placeholder="Kullanıcı @username veya ID">
                 <input type="text" id="staffNameInput" placeholder="Rozet Ünvanı (Örn: 🛡️ Muhafız)">
                 <button class="gold-btn" onclick="addNewStaff()">Muhafızı Bu Gruba Mühürle</button>
-                <div id="staffListContainer" style="margin-top: 10px; max-height: 220px; overflow-y: auto;">
-                    <div style="font-size: 8px; color: var(--text-muted);">Yetkililer yükleniyor...</div>
+                <div id="staffListContainer" style="margin-top: 10px; max-height: 240px; overflow-y: auto;">
+                    <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Yetkililer yükleniyor...</div>
                 </div>
             </div>
         </div>
@@ -204,7 +227,7 @@
         <div id="sec-ai" class="app-section">
             <div class="gold-card">
                 <div class="section-title"><span>🤖 Katya AI Akıllı Asistan</span><span style="color:var(--success);">Aktif Koruma</span></div>
-                <div style="background: var(--bg-base); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px; font-size: 8px; color: var(--text-main); margin-bottom: 8px; line-height: 1.4;">
+                <div style="background: rgba(10, 8, 3, 0.7); border: 1px solid var(--border-gold); border-radius: 8px; padding: 10px; font-size: 8px; color: var(--text-main); margin-bottom: 10px; line-height: 1.5;">
                     ⚜️ <b>Yönetici Komutları Asistanı:</b><br>
                     • <code>/welcome &lt;mesaj&gt;</code> - Hoş geldin ayarla<br>
                     • <code>/duyuru &lt;mesaj&gt;</code> - Duyuru gönder & pinle<br>
@@ -213,7 +236,7 @@
                 </div>
                 <textarea id="aiPromptInput" rows="2" placeholder="Komut veya talimat ver..." style="margin-top: 4px;"></textarea>
                 <button class="gold-btn" onclick="sendAiCommand()">Katya AI'a İlet</button>
-                <div id="aiResponseBox" style="margin-top: 8px; font-size: 8px; color: var(--gold-light); background: var(--bg-base); padding: 8px; border-radius: 6px; display: none;"></div>
+                <div id="aiResponseBox" style="margin-top: 10px; font-size: 8px; color: var(--gold-light); background: rgba(10,8,3,0.9); padding: 10px; border-radius: 6px; border: 1px solid var(--border-gold); display: none;"></div>
             </div>
         </div>
 
@@ -221,8 +244,8 @@
         <div id="sec-logs" class="app-section">
             <div class="gold-card">
                 <div class="section-title"><span>📜 Genel Canlı Log Akışı</span><span style="font-size: 6px; color:var(--success);">● Realtime</span></div>
-                <div id="globalLogsContainer" style="max-height: 380px; overflow-y: auto;">
-                    <div style="font-size: 8px; color: var(--text-muted);">Loglar akıyor...</div>
+                <div id="globalLogsContainer" style="max-height: 400px; overflow-y: auto;">
+                    <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 20px;">Loglar akıyor...</div>
                 </div>
             </div>
         </div>
@@ -260,21 +283,21 @@
             <div class="modal-dismiss">KAPAT [ X ]</div>
         </div>
         <div class="modal-content">
-            <div style="background: var(--gold-dim); border: 1px solid var(--border-subtle); padding: 10px; border-radius: 8px;">
-                <div style="font-size: 7px; color: var(--gold-light);">SEÇİLEN AKTİF GRUP</div>
-                <div id="modalGroupFullName" style="font-size: 10px; font-weight: 800; color: #fff; margin-top: 2px;">-</div>
-                <div id="modalGroupId" style="font-size: 7px; color: var(--text-muted); margin-top: 1px;">ID: -</div>
+            <div style="background: var(--gold-dim); border: 1px solid var(--border-gold); padding: 12px; border-radius: 10px;">
+                <div style="font-size: 7px; color: var(--gold-light);">SEÇİLEN AKTİF YÖRÜNGE GRUBU</div>
+                <div id="modalGroupFullName" style="font-size: 11px; font-weight: 900; color: #fff; margin-top: 3px;">-</div>
+                <div id="modalGroupId" style="font-size: 7px; color: var(--text-muted); margin-top: 2px;">ID: -</div>
             </div>
 
-            <div class="section-title" style="margin-top: 4px;">Grup Karşılama Protokolü (/welcome)</div>
+            <div class="section-title" style="margin-top: 6px;">Grup Karşılama Protokolü (/welcome)</div>
             <textarea id="groupWelcomeText" rows="2" placeholder="Gruba özel hoş geldin mesajı..."></textarea>
             <input type="text" id="groupBtnText" placeholder="Buton Metni (/butonmetni)">
             <input type="text" id="groupBtnUrl" placeholder="Buton URL (/butonlinki)">
             <button class="gold-btn" onclick="saveGroupSettings()">Grup Protokolünü Mühürle</button>
 
-            <div class="section-title" style="margin-top: 8px;">Gruba Özel Log Akışı</div>
-            <div id="groupSpecificLogsContainer" style="max-height: 160px; overflow-y: auto;">
-                <div style="font-size: 8px; color: var(--text-muted);">Yükleniyor...</div>
+            <div class="section-title" style="margin-top: 12px;">Gruba Özel Log Akışı</div>
+            <div id="groupSpecificLogsContainer" style="max-height: 180px; overflow-y: auto;">
+                <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Yükleniyor...</div>
             </div>
         </div>
     </div>
@@ -287,6 +310,16 @@
         let activeChatId = 0;
         let activeGroupTitle = "";
         let globalGroupsCache = [];
+
+        // Havalı Bildirim Toast Efekti
+        function showToast(message) {
+            const toast = document.getElementById('toastPopup');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
 
         function switchSection(secName, evt) {
             document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
@@ -339,7 +372,7 @@
             document.getElementById('groupCount').innerText = groups.length + " Aktif";
 
             if (groups.length === 0) {
-                container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Grup bulunamadı.</div>`;
+                container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 20px;">Grup bulunamadı.</div>`;
                 return;
             }
 
@@ -360,7 +393,7 @@
                                 <div class="group-id-sub">ID: ${g.chat_id}</div>
                             </div>
                         </div>
-                        <div style="font-size: 8px; color: var(--gold-light); font-weight: 700;">YÖNET ›</div>
+                        <div style="font-size: 8px; color: var(--gold-light); font-weight: 800;">YÖNET ›</div>
                     </div>
                 `;
             });
@@ -394,7 +427,7 @@
             logs.filter(l => l.chat_id == chatId || true).forEach(l => {
                 lHtml += `<div class="log-item"><span class="log-time">${l.timestamp}</span><span class="log-action">${l.action_type}</span>: @${l.username || l.target_id}</div>`;
             });
-            groupLogContainer.innerHTML = lHtml || '<div style="font-size:8px; color:var(--text-muted);">Bu gruba ait özel log yok.</div>';
+            groupLogContainer.innerHTML = lHtml || '<div style="font-size:8px; color:var(--text-muted); text-align:center; padding:10px;">Bu gruba ait özel log yok.</div>';
             
             loadAllGroups();
             loadStaffList();
@@ -406,7 +439,7 @@
                 const logs = await res.json();
                 const container = document.getElementById('globalLogsContainer');
                 if (logs.length === 0) {
-                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Log yok.</div>`;
+                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 20px;">Log yok.</div>`;
                     return;
                 }
                 let html = '';
@@ -435,7 +468,7 @@
             });
             const data = await res.json();
             if (data.success) {
-                alert(`✅ Eylem uygulandı: ${actionType}`);
+                showToast(`⚜️ Eylem Uygulandı: ${actionType.toUpperCase()}`);
                 document.getElementById('targetUserInput').value = '';
             } else {
                 alert(`❌ Başarısız: ${data.error || 'Yetkisiz!'}`);
@@ -448,7 +481,7 @@
                 if (!container) return;
 
                 if (!activeChatId) {
-                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align:center; padding:10px;">Granüler hakları düzenlemek için önce 'Gruplar' sekmesinden bir grup seçmelisiniz.</div>`;
+                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align:center; padding:15px;">Granüler hakları düzenlemek için önce 'Gruplar' sekmesinden bir grup seçmelisiniz.</div>`;
                     return;
                 }
 
@@ -459,7 +492,7 @@
                 const staffs = await res.json();
                 
                 if (staffs.length === 0) {
-                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted);">Bu grupta kayıtlı özel yetkili yok.</div>`;
+                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align:center; padding:15px;">Bu grupta kayıtlı özel yetkili yok.</div>`;
                     return;
                 }
                 let html = '';
@@ -470,10 +503,10 @@
                     const canMute = s.can_mute ? 'checked' : '';
 
                     html += `
-                        <div class="gold-card" style="padding: 8px; margin-bottom: 6px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                <span style="font-size:9px; font-weight:800; color:var(--gold-light);">${sName} (ID: ${targetId})</span>
-                                <button class="gold-btn" style="width: auto; background: var(--danger); color:#fff; padding: 2px 6px; font-size:6px;" onclick="removeStaffMember(${targetId})">Sil</button>
+                        <div class="gold-card" style="padding: 10px; margin-bottom: 8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span style="font-size:9px; font-weight:900; color:var(--gold-light);">${sName} (ID: ${targetId})</span>
+                                <button class="gold-btn" style="width: auto; background: var(--danger); color:#fff; padding: 3px 8px; font-size:6px;" onclick="removeStaffMember(${targetId})">Sil</button>
                             </div>
                             <div class="switch-row">
                                 <span>Ban Yetkisi (can_ban)</span>
@@ -496,6 +529,7 @@
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ target_id: targetId, chat_id: activeChatId, perm: permField })
             });
+            showToast("⚜️ Yetki Mühürlendi");
         }
 
         async function addNewStaff() {
@@ -511,7 +545,7 @@
             document.getElementById('staffInputId').value = '';
             document.getElementById('staffNameInput').value = '';
             loadStaffList();
-            alert("✅ Yetkili gruba mühürlendi!");
+            showToast("⚜️ Muhafız Eklendi");
         }
 
         async function removeStaffMember(targetId) {
@@ -521,6 +555,7 @@
                 body: JSON.stringify({ user_id: user.id, chat_id: activeChatId, target_id: targetId })
             });
             loadStaffList();
+            showToast("⚜️ Yetkili Kaldırıldı");
         }
 
         async function saveGroupSettings() {
@@ -533,7 +568,7 @@
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: user.id, chat_id: activeChatId, welcome_msg: welcome, btn_text: btnText, btn_url: btnUrl })
             });
-            alert(`⚜️ ${activeGroupTitle} protokolleri mühürlendi!`);
+            showToast(`⚜️ ${activeGroupTitle} Mühürlendi`);
             toggleGroupModal();
         }
 
@@ -568,6 +603,7 @@
 
             respBox.innerText = reply;
             promptBox.value = '';
+            showToast("⚜️ AI Komutu Yürütüldü");
         }
 
         verifyAccess();
