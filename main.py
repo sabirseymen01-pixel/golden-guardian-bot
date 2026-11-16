@@ -41,6 +41,10 @@ BAD_WORDS = ["küfür1", "küfür2", "argo1"]
 scheduler = AsyncIOScheduler()
 tg_application = None
 
+# Bellek içi şablon depolama (Master-Detail Liste & Edit Portu için)
+# Format: { chat_id: { "announcements": [...], "schedules": [...] } }
+GROUP_TEMPLATES = {}
+
 def log_event(level: str, message: str):
     timestamp = datetime.now().strftime("%H:%M:%S")
     print(f"[{timestamp}] [{level}] {message}", flush=True)
@@ -283,6 +287,85 @@ async def api_update_settings(request: Request):
             for key in ["welcome_msg", "btn_text", "btn_url", "media_url", "announcement_btn_text", "announcement_btn_url", "scheduled_btn_text", "scheduled_btn_url"]:
                 if key in data: database.update_group_setting(chat_id, key, data[key])
         return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+# ==========================================
+# 📋 MASTER-DETAIL ŞABLON YÖNETİMİ API ROTALARI
+# ==========================================
+from pydantic import BaseModel
+from typing import Optional
+
+class TemplateData(BaseModel):
+    user_id: int
+    chat_id: int
+    name: str # Zorunlu Liste Adı
+    msg: str
+    media: Optional[str] = ""
+    btn_text: Optional[str] = ""
+    btn_url: Optional[str] = ""
+    mins: Optional[int] = 0
+
+@app.post("/api/templates/list")
+async def api_list_templates(request: Request):
+    try:
+        data = await request.json()
+        chat_id = int(data.get("chat_id", 0))
+        if chat_id not in GROUP_TEMPLATES:
+            GROUP_TEMPLATES[chat_id] = {
+                "announcements": [{"id": 1, "name": "Örnek Duyuru", "msg": "Örnek içerik", "media": "", "btnText": "", "btnUrl": ""}],
+                "schedules": [{"id": 1, "name": "Örnek Zamanlama", "mins": 60, "msg": "Periyodik içerik", "media": "", "btnText": "", "btnUrl": ""}]
+            }
+        return GROUP_TEMPLATES[chat_id]
+    except Exception as e:
+        return {"announcements": [], "schedules": []}
+
+@app.post("/api/templates/save-announcement")
+async def api_save_announcement(data: TemplateData):
+    try:
+        is_founder = str(data.user_id) == str(FOUNDER_ID).strip()
+        if not database.is_authorized_staff(data.user_id) and not is_founder:
+            return {"success": False, "error": "Yetkisiz!"}
+        
+        if data.chat_id not in GROUP_TEMPLATES:
+            GROUP_TEMPLATES[data.chat_id] = {"announcements": [], "schedules": []}
+            
+        item = {
+            "id": int(datetime.now().timestamp() * 1000),
+            "name": data.name,
+            "msg": data.msg,
+            "media": data.media,
+            "btnText": data.btn_text,
+            "btnUrl": data.btn_url
+        }
+        GROUP_TEMPLATES[data.chat_id]["announcements"].append(item)
+        database.log_action(data.chat_id, "SAVE_ANN_TEMPLATE", data.user_id, "Admin", f"Duyuru şablonu mühürlendi: {data.name}")
+        return {"success": True, "message": f"Duyuru şablonu mühürlendi: {data.name}"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/templates/save-schedule")
+async def api_save_schedule(data: TemplateData):
+    try:
+        is_founder = str(data.user_id) == str(FOUNDER_ID).strip()
+        if not database.is_authorized_staff(data.user_id) and not is_founder:
+            return {"success": False, "error": "Yetkisiz!"}
+            
+        if data.chat_id not in GROUP_TEMPLATES:
+            GROUP_TEMPLATES[data.chat_id] = {"announcements": [], "schedules": []}
+            
+        item = {
+            "id": int(datetime.now().timestamp() * 1000),
+            "name": data.name,
+            "mins": data.mins or 60,
+            "msg": data.msg,
+            "media": data.media,
+            "btnText": data.btn_text,
+            "btnUrl": data.btn_url
+        }
+        GROUP_TEMPLATES[data.chat_id]["schedules"].append(item)
+        database.log_action(data.chat_id, "SAVE_SCH_TEMPLATE", data.user_id, "Admin", f"Zamanlama şablonu mühürlendi: {data.name} ({data.mins} dk)")
+        return {"success": True, "message": f"Zamanlama şablonu mühürlendi: {data.name}"}
     except Exception as e:
         return {"success": False, "error": str(e)}
 
