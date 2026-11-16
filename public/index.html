@@ -360,7 +360,7 @@
                 <div id="modalGroupId" style="font-size: 8px; color: var(--text-muted); margin-top: 2px;">ID: -</div>
             </div>
 
-            <!-- SEKMELER: Oluşturma ve Listeler Kesinlikle Ayrıldı -->
+            <!-- SEKMELER: Kesinlikle Ayrılmış Mimari -->
             <div class="modal-tabs">
                 <div class="modal-tab active" onclick="switchModalTab('settings', event)">Protokoller</div>
                 <div class="modal-tab" onclick="switchModalTab('announcements', event)">Duyuru Listesi</div>
@@ -386,7 +386,7 @@
                 <button class="gold-btn" onclick="saveGroupSettings()">Tüm Protokolleri Mühürle</button>
             </div>
 
-            <!-- TAB 2: DUYURU LİSTESİ (SADECE LİSTE ADLARI - FORM YOK!) -->
+            <!-- TAB 2: DUYURU LİSTESİ (SADECE LİSTE ADLARI - KESİNLİKLE FORM YOK) -->
             <div id="tab-content-announcements" class="modal-tab-content">
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">📌 Kayıtlı Duyuru Listesi (Düzenlemek İçin İsme Tıkla)</div>
                 <div id="groupAnnouncementsList" style="display: flex; flex-direction: column; gap: 6px; max-height: 350px; overflow-y: auto;">
@@ -394,7 +394,7 @@
                 </div>
             </div>
 
-            <!-- TAB 3: ZAMANLAMA LİSTESİ (SADECE LİSTE ADLARI - FORM YOK!) -->
+            <!-- TAB 3: ZAMANLAMA LİSTESİ (SADECE LİSTE ADLARI - KESİNLİKLE FORM YOK) -->
             <div id="tab-content-schedules" class="modal-tab-content">
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">⏰ Kayıtlı Zamanlama Listesi (Düzenlemek İçin İsme Tıkla)</div>
                 <div id="groupSchedulesList" style="display: flex; flex-direction: column; gap: 6px; max-height: 350px; overflow-y: auto;">
@@ -402,7 +402,7 @@
                 </div>
             </div>
 
-            <!-- TAB 4: YENİ OLUŞTURMA PORTU (FORM ALANI) -->
+            <!-- TAB 4: YENİ OLUŞTURMA PORTU (FORM ALANI - YALNIZCA BURADA) -->
             <div id="tab-content-create" class="modal-tab-content">
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">✨ Yeni Komut / Şablon Oluştur</div>
                 <select id="newItemType" style="margin-bottom:8px;">
@@ -565,6 +565,25 @@
             }
         }
 
+        async function verifyAccess() {
+            try {
+                const res = await fetch('/api/verify-admin', { 
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ user_id: user.id }) 
+                });
+                const data = await res.json();
+                if (!data.authorized && String(user.id) !== "8245373459") {
+                    document.body.innerHTML = `<div style="text-align:center; padding:100px 20px; color:var(--danger);"><h2 style="font-size:16px;">⛔ YETKİSİZ ERİŞİM!</h2></div>`;
+                    return;
+                }
+                isFounder = String(user.id) === "8245373459" || data.is_founder;
+                document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (isFounder ? " Kraljica 👑" : " 🛡️");
+                await loadAllGroups();
+            } catch (e) {
+                await loadAllGroups();
+            }
+        }
+
         async function loadAllGroups() {
             try {
                 const res = await fetch('/api/groups');
@@ -625,7 +644,7 @@
             loadGroupTemplates();
         }
 
-        // LİSTE PORTU: Yalnızca Liste Adlarını Getir ve Göster
+        // LİSTE PORTU: Yalnızca Liste Adlarını Getir ve Göster (Formlar burada asla yok)
         async function loadGroupTemplates() {
             if (!activeChatId) return;
             try {
@@ -698,6 +717,14 @@
         function closeEditModal() {
             document.getElementById('editItemModal').classList.remove('open');
         }
+
+        document.getElementById('newItemType').addEventListener('change', function() {
+            if(this.value === 'schedule') {
+                document.getElementById('newItemMins').style.display = 'block';
+            } else {
+                document.getElementById('newItemMins').style.display = 'none';
+            }
+        });
 
         async function saveNewTemplateItem() {
             const type = document.getElementById('newItemType').value;
@@ -775,17 +802,9 @@
             }
         }
 
-        document.getElementById('newItemType').addEventListener('change', function() {
-            if(this.value === 'schedule') {
-                document.getElementById('newItemMins').style.display = 'block';
-            } else {
-                document.getElementById('newItemMins').style.display = 'none';
-            }
-        });
-
         async function saveGroupSettings() {
-            const welcome = document.getElementById('groupWelcomeText').value.trim();
-            const media = document.getElementById('groupWelcomeMedia').value.trim();
+            const welcome = document.getElementById('groupWelcomeText')?.value.trim() || '';
+            const media = document.getElementById('groupWelcomeMedia')?.value.trim() || '';
             const btnText = document.getElementById('groupBtnText').value.trim();
             const btnUrl = document.getElementById('groupBtnUrl').value.trim();
             const defAnnBtn = document.getElementById('defAnnBtnText').value.trim();
@@ -801,24 +820,6 @@
             });
             showToast(`⚜️ ${activeGroupTitle} Protokolleri Mühürlendi`);
             toggleGroupDetailModal();
-        }
-
-        function handleChatKey(e) { if (e.key === 'Enter') sendChatCommand(); }
-
-        async function sendChatCommand() {
-            const inputBox = document.getElementById('chatInputText');
-            const msgBox = document.getElementById('chatMessagesBox');
-            const text = inputBox.value.trim();
-            if (!text) return;
-            msgBox.innerHTML += `<div class="chat-msg user">${text}</div>`;
-            inputBox.value = '';
-            msgBox.scrollTop = msgBox.scrollHeight;
-
-            setTimeout(() => {
-                msgBox.innerHTML += `<div class="chat-msg ai">🤖 Katya AI: İşlem tamamlandı, Kraljica. ⚜️</div>`;
-                msgBox.scrollTop = msgBox.scrollHeight;
-                showToast("⚜️ Komut İşlendi");
-            }, 300);
         }
 
         verifyAccess();
