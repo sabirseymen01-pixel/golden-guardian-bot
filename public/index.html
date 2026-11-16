@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GOLDEN STAFF | Ultimate Command Suite</title>
+    <title>GOLDEN STAFF | Ultimate List & Command Suite</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -58,7 +58,6 @@
         .widget-info p { font-size: 8px; color: var(--text-muted); margin-top: 3px; }
         .widget-status-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 15px var(--success); }
 
-        /* 6'lı Vektörel Simgeler Izgarası */
         .app-grid {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; width: 100%; max-width: 380px; justify-items: center;
         }
@@ -91,7 +90,6 @@
         }
         .dock-dot { width: 6px; height: 6px; background: var(--gold-base); border-radius: 50%; opacity: 0.9; box-shadow: 0 0 8px var(--gold-base); }
 
-        /* Modallar */
         .ios-modal {
             position: fixed; bottom: 0; left: 0; width: 100vw; height: 0;
             background: var(--glass-modal); backdrop-filter: blur(45px);
@@ -146,6 +144,7 @@
         .log-item {
             background: rgba(12, 10, 4, 0.9); border-left: 3.5px solid var(--gold-base); padding: 10px 14px;
             border-radius: 8px; margin-bottom: 8px; font-size: 8px; border: 1.5px solid var(--border-gold);
+            display: flex; justify-content: space-between; align-items: center;
         }
         .log-time { font-size: 6px; color: var(--text-muted); float: right; }
         .log-action { color: var(--gold-light); font-weight: 900; text-transform: uppercase; }
@@ -205,50 +204,44 @@
         <!-- Sistem Widgeti -->
         <div class="system-widget">
             <div class="widget-info">
-                <h3>Otonom Kalkan & WebSocket Aktif</h3>
-                <p id="widgetGroupCount">Canlı bağlantı kuruluyor...</p>
+                <h3>Otonom Kalkan & Listeler Aktif</h3>
+                <p id="widgetGroupCount">Yörünge taranıyor...</p>
             </div>
             <div class="widget-status-dot" id="wsStatusDot"></div>
         </div>
 
-        <!-- ⚜️ Lüks Vektörel Altın Simgeler Izgarası (App Grid) -->
+        <!-- ⚜️ 6'lı Vektörel Simgeler Izgarası -->
         <div class="app-grid">
-            <!-- Gruplar (Kalkan) -->
             <div class="app-icon-card" onclick="openPort('groupsModal')">
                 <div class="app-icon-box">
                     <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
                 </div>
                 <div class="app-label">Gruplar</div>
             </div>
-            <!-- Eylem (Kılıç) -->
             <div class="app-icon-card" onclick="openPort('tacticalModal')">
                 <div class="app-icon-box">
                     <svg viewBox="0 0 24 24"><path d="M6.92 5H5l9 9-2 2-9-9v1.92l7.08 7.08L14 20.92V19l-7.08-7.08zM19 3l-4.5 4.5 2 2L21 5l-2-2z"/></svg>
                 </div>
                 <div class="app-label">Eylem</div>
             </div>
-            <!-- Staff (Arma) -->
             <div class="app-icon-card" onclick="openPort('staffModal')">
                 <div class="app-icon-box">
                     <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.07 2.75z"/></svg>
                 </div>
                 <div class="app-label">Staff</div>
             </div>
-            <!-- Skor & Rozet (Kupa) -->
             <div class="app-icon-card" onclick="openPort('leaderboardModal')">
                 <div class="app-icon-box">
                     <svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.92V19H7v2h10v-2h-3.01v-3.16c1.63-.29 2.98-1.42 3.61-2.92C19.08 10.63 21 8.55 21 6V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg>
                 </div>
                 <div class="app-label">Skor & Rozet</div>
             </div>
-            <!-- Katya AI (Beyin) -->
             <div class="app-icon-card" onclick="openPort('aiModal')">
                 <div class="app-icon-box">
                     <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19h3.58c1.23.63 2.65 1 4.07 1 4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7zm1-11h-2v3H8v2h3v3h2v-3h3v-2h-3z"/></svg>
                 </div>
                 <div class="app-label">Katya AI</div>
             </div>
-            <!-- Loglar (Parşömen) -->
             <div class="app-icon-card" onclick="openPort('logsModal')">
                 <div class="app-icon-box">
                     <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
@@ -289,7 +282,7 @@
             <div class="modal-dismiss">ANA EKRAN [ X ]</div>
         </div>
         <div class="modal-content">
-            <p style="font-size: 8px; color: var(--text-muted); margin-bottom: 10px;">Hedef kullanıcıyı ID veya @username ile belirtin. (Staff granüler yetkileriniz anlık denetlenir).</p>
+            <p style="font-size: 8px; color: var(--text-muted); margin-bottom: 10px;">Hedef kullanıcıyı ID veya @username ile belirtin.</p>
             <input type="text" id="targetUserInput" placeholder="Kullanıcı ID veya @username">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
                 <button class="gold-btn" style="background: var(--danger); color:#fff;" onclick="executeAction('ban')">Banla 🚫</button>
@@ -347,9 +340,7 @@
         </div>
         <div class="modal-content">
             <div style="background: rgba(10, 8, 3, 0.85); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 12px; font-size: 8px; color: var(--text-main); margin-bottom: 8px; line-height: 1.5;">
-                ⚜️ <b>Yönetici Komutları (Doğal Dil & Bot Eşitleme):</b><br>
-                • <code>/welcome &lt;mesaj&gt;</code> • <code>/duyuru &lt;mesaj&gt;</code> • <code>/zamanla &lt;dk&gt; &lt;mesaj&gt;</code><br>
-                • <code>/defol &lt;kullanıcı&gt;</code> • <code>/itaat &lt;kullanıcı&gt;</code> • <code>/uyari &lt;kullanıcı&gt;</code>
+                ⚜️ <b>Yönetici Komutları:</b> /welcome, /duyuru, /zamanla, /defol, /itaat, /uyari vb.
             </div>
             <div class="chat-container">
                 <div class="chat-messages" id="chatMessagesBox">
@@ -366,7 +357,7 @@
     <!-- 6. LOGLAR PORTU -->
     <div class="ios-modal" id="logsModal">
         <div class="modal-header" onclick="closePort('logsModal')">
-            <div class="modal-heading">📜 Canlı Denetim Logları (WebSocket)</div>
+            <div class="modal-heading">📜 Canlı Denetim Logları</div>
             <div class="modal-dismiss">ANA EKRAN [ X ]</div>
         </div>
         <div class="modal-content">
@@ -376,7 +367,7 @@
         </div>
     </div>
 
-    <!-- ================= 🚀 GRUBA ÖZEL PORT (DETAY MODAL & GÖRSEL/BUTON YÖNETİCİSİ) ================= -->
+    <!-- ================= 🚀 GRUBA ÖZEL PORT (İSİMLİ LİSTE, MEDYA, BUTON & ZAMANLAMA YÖNETİCİSİ) ================= -->
     <div class="ios-modal" id="groupDetailModal">
         <div class="modal-header" onclick="toggleGroupDetailModal()">
             <div class="modal-heading" id="modalGroupName">Grup Komuta Portu</div>
@@ -391,64 +382,62 @@
 
             <div class="modal-tabs">
                 <div class="modal-tab active" onclick="switchModalTab('settings', event)">Protokoller</div>
-                <div class="modal-tab" onclick="switchModalTab('announcements', event)">Duyurular</div>
-                <div class="modal-tab" onclick="switchModalTab('schedules', event)">Zamanlama</div>
+                <div class="modal-tab" onclick="switchModalTab('announcements', event)">Duyuru Listesi</div>
+                <div class="modal-tab" onclick="switchModalTab('schedules', event)">Zamanlama Listesi</div>
                 <div class="modal-tab" onclick="switchModalTab('logs', event)">Grup Logları</div>
             </div>
 
             <!-- TAB 1: PROTOKOLLER & VARSAYILANLAR -->
             <div id="tab-content-settings" class="modal-tab-content active">
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Karşılama Ayarları (/welcome)</div>
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Karşılama Mesajı & Medya (/welcome)</div>
                 <textarea id="groupWelcomeText" rows="2" placeholder="Hoş geldin mesajı..."></textarea>
-                <input type="text" id="groupWelcomeMedia" placeholder="Karşılama Görsel/Video URL (Boş bırakılabilir)">
+                <input type="text" id="groupWelcomeMedia" placeholder="Karşılama Medya Fotoğraf/Video URL (Boş bırakılabilir)">
                 
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:6px;">Varsayılan Duyuru Butonları (/duyurubutonmetni & /linki)</div>
-                <input type="text" id="defAnnouncementBtnText" placeholder="Varsayılan Duyuru Buton Metni">
-                <input type="text" id="defAnnouncementBtnUrl" placeholder="Varsayılan Duyuru Buton Linki (https://...)">
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:6px;">Buton Varsayılanları (/butonmetni & /butonlinki)</div>
+                <input type="text" id="groupBtnText" placeholder="Hoş geldin Buton Metni">
+                <input type="text" id="groupBtnUrl" placeholder="Hoş geldin Buton Linki (https://...)">
 
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:6px;">Varsayılan Zamanlı Butonlar (/zamanlabutonmetin & /linki)</div>
-                <input type="text" id="defScheduleBtnText" placeholder="Varsayılan Zamanlı Buton Metni">
-                <input type="text" id="defScheduleBtnUrl" placeholder="Varsayılan Zamanlı Buton Linki (https://...)">
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:6px;">Duyuru Buton Varsayılanları (/duyurubutonmetni & /linki)</div>
+                <input type="text" id="defAnnBtnText" placeholder="Varsayılan Duyuru Buton Metni">
+                <input type="text" id="defAnnBtnUrl" placeholder="Varsayılan Duyuru Buton Linki">
+
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:6px;">Zamanlı Buton Varsayılanları (/zamanlabutonmetin & /linki)</div>
+                <input type="text" id="defSchBtnText" placeholder="Varsayılan Zamanlı Buton Metni">
+                <input type="text" id="defSchBtnUrl" placeholder="Varsayılan Zamanlı Buton Linki">
                 
                 <button class="gold-btn" onclick="saveGroupSettings()">Tüm Protokolleri Mühürle</button>
             </div>
 
-            <!-- TAB 2: DUYURULAR (ANLIK & BUTONLU) -->
+            <!-- TAB 2: DUYURU LİSTESİ & OLUŞTURMA (İSİMLİ) -->
             <div id="tab-content-announcements" class="modal-tab-content">
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Anlık Duyuru Oluştur & Gönder (/duyuru)</div>
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Yeni Duyuru Şablonu Oluştur (/duyuru)</div>
+                <input type="text" id="announcementNameInput" placeholder="Liste Adı / Şablon Başlığı (Örn: VIP Kripto Duyurusu)">
                 <textarea id="announcementMsgInput" rows="2" placeholder="Duyuru metni..."></textarea>
-                <input type="text" id="announcementMediaInput" placeholder="Medya / Görsel URL (Varsa giriniz)">
-                <input type="text" id="announcementCustomBtnText" placeholder="Özel Buton Metni (Opsiyonel)">
-                <input type="text" id="announcementCustomBtnUrl" placeholder="Özel Buton Linki (Opsiyonel)">
-                <div style="display: flex; gap: 8px;">
-                    <button class="gold-btn" onclick="createAndSendAnnouncement()">Duyuruyu Gönder & Pinle 📌</button>
-                    <button class="gold-btn" style="background: #3498db; color:#fff;" onclick="saveAnnouncementDraft()">Taslak Kaydet 📝</button>
-                </div>
+                <input type="text" id="announcementMediaInput" placeholder="Görsel / Video URL (Opsiyonel)">
+                <input type="text" id="announcementBtnTextInput" placeholder="Özel Buton Metni (Boş bırakılırsa varsayılan kullanılır)">
+                <input type="text" id="announcementBtnUrlInput" placeholder="Özel Buton Linki (Boş bırakılırsa varsayılan kullanılır)">
+                <button class="gold-btn" onclick="saveAnnouncementItem()">Duyuruyu Listeye Kaydet 📝</button>
 
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:10px;">Duyuru Listesi (Seç & Düzenle)</div>
-                <div id="announcementListContainer" style="display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto;">
-                    <div class="log-item"><b>[VIP Kripto]</b>: Katılmak için tıklayın <button style="float:right; font-size:6px; background:var(--gold-base); border:none; padding:2px 6px; border-radius:4px; font-weight:900;" onclick="editAnnouncement(1)">Düzenle</button></div>
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:10px;">Bu Grubun Kayıtlı Duyuru Listesi</div>
+                <div id="groupAnnouncementsList" style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto;">
+                    <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 10px;">Kayıtlı duyuru şablonu yok.</div>
                 </div>
             </div>
 
-            <!-- TAB 3: ZAMANLANMIŞ PAYLAŞIMLAR LİSTESİ -->
+            <!-- TAB 3: ZAMANLAMA LİSTESİ & OLUŞTURMA (İSİMLİ) -->
             <div id="tab-content-schedules" class="modal-tab-content">
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Zamanlanmış Periyodik Duyurular (/zamanla)</div>
-                <input type="text" id="scheduleNameInput" placeholder="Paylaşım Başlığı / İsmi (Örn: Sabah Bülteni)">
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Yeni Zamanlı Periyodik Duyuru Oluştur (/zamanla)</div>
+                <input type="text" id="scheduleNameInput" placeholder="Liste Adı / Başlık (Örn: Sabah Bülteni)">
                 <input type="number" id="scheduleMinutesInput" placeholder="Dakika Aralığı (Örn: 60)">
-                <textarea id="scheduleMsgInput" rows="2" placeholder="Zamanlanmış paylaşım mesajı..."></textarea>
-                <input type="text" id="scheduleMediaInput" placeholder="Medya / Görsel URL (Opsiyonel)">
-                <input type="text" id="scheduleBtnText" placeholder="Özel Buton Metni">
-                <input type="text" id="scheduleBtnUrl" placeholder="Özel Buton Linki">
-                
-                <div style="display: flex; gap: 8px;">
-                    <button class="gold-btn" onclick="saveNewSchedule()">Zamanlamayı Başlat ⏰</button>
-                    <button class="gold-btn" style="background: var(--danger); color:#fff;" onclick="stopActiveSchedule()">Durdur (/zamanladur) 🛑</button>
-                </div>
+                <textarea id="scheduleMsgInput" rows="2" placeholder="Zamanlı duyuru metni..."></textarea>
+                <input type="text" id="scheduleMediaInput" placeholder="Görsel / Video URL (Opsiyonel)">
+                <input type="text" id="scheduleBtnTextInput" placeholder="Özel Buton Metni">
+                <input type="text" id="scheduleBtnUrlInput" placeholder="Özel Buton Linki">
+                <button class="gold-btn" onclick="saveScheduleItem()">Zamanlamayı Listeye Ekle ⏰</button>
 
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:10px;">Aktif Zamanlayıcı Listesi (Düzenle / Sil)</div>
-                <div id="scheduleListContainer" style="display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto;">
-                    <div class="log-item"><b>⏰ Sabah Bülteni (Her 60 dk)</b> <button style="float:right; font-size:6px; background:var(--danger); color:#fff; border:none; padding:2px 6px; border-radius:4px; font-weight:900;" onclick="deleteSchedule(1)">Sil</button></div>
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:10px;">Bu Grubun Aktif Zamanlama Listesi (/zamanladur)</div>
+                <div id="groupSchedulesList" style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto;">
+                    <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 10px;">Zamanlanmış paylaşım yok.</div>
                 </div>
             </div>
 
@@ -474,7 +463,9 @@
         let globalGroupsCache = [];
         let ws;
 
-        // 🌊 Dokunmatik Ripple Efekti
+        // In-memory group specific lists database representation
+        let groupListData = {}; // { chatId: { announcements: [...], schedules: [...] } }
+
         document.addEventListener('click', function (e) {
             const target = e.target.closest('.gold-btn, .app-icon-card, .group-card');
             if (!target) return;
@@ -521,10 +512,12 @@
             const item = document.createElement('div');
             item.className = 'log-item';
             item.innerHTML = `
+                <div>
+                    <span class="log-action">${l.action_type}</span>
+                    <div style="margin-top: 3px; color: var(--gold-light);">Hedef: @${l.username || l.target_id}</div>
+                    <div style="font-size: 7px; color: #ccc; margin-top: 2px;">${l.details || ''}</div>
+                </div>
                 <span class="log-time">${l.timestamp || 'Şimdi'}</span>
-                <span class="log-action">${l.action_type}</span>
-                <div style="margin-top: 3px; color: var(--gold-light);">Hedef: @${l.username || l.target_id}</div>
-                <div style="font-size: 7px; color: #ccc; margin-top: 2px;">${l.details || ''}</div>
             `;
             container.prepend(item);
         }
@@ -628,10 +621,142 @@
             document.getElementById('modalGroupName').innerText = activeGroupTitle;
             document.getElementById('modalGroupFullName').innerText = activeGroupTitle;
             document.getElementById('modalGroupId').innerText = "ID: " + chatId;
-            document.getElementById('activeGroupStaffNotice').innerText = "Aktif Grup: " + activeGroupTitle;
             
+            if(!groupListData[chatId]) {
+                groupListData[chatId] = {
+                    announcements: [
+                        { id: 1, name: "VIP Kripto Duyurusu", msg: "Özel kanalımıza katılın!", media: "", btnText: "Katıl", btnUrl: "https://t.me" }
+                    ],
+                    schedules: [
+                        { id: 1, name: "Sabah Bülteni", mins: 60, msg: "Günün özeti yayında!", media: "", btnText: "İncele", btnUrl: "https://t.me" }
+                    ]
+                };
+            }
+
             document.getElementById('groupDetailModal').classList.add('open');
+            renderGroupLists();
             loadStaffList();
+        }
+
+        function renderGroupLists() {
+            const data = groupListData[activeChatId] || { announcements: [], schedules: [] };
+            
+            // Render Announcements
+            const annContainer = document.getElementById('groupAnnouncementsList');
+            if(data.announcements.length === 0) {
+                annContainer.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 10px;">Kayıtlı duyuru şablonu yok.</div>`;
+            } else {
+                let html = '';
+                data.announcements.forEach((item, idx) => {
+                    html += `
+                        <div class="log-item">
+                            <div>
+                                <b style="color:var(--gold-light); font-size:9px;">[${item.name}]</b><br>
+                                <span style="font-size:7px; color:#ccc;">${item.msg.substring(0, 30)}...</span>
+                            </div>
+                            <div style="display:flex; gap:4px;">
+                                <button class="gold-btn" style="padding:3px 6px; font-size:6px; width:auto;" onclick="sendSpecificAnnouncement(${item.id})">Gönder 📌</button>
+                                <button class="gold-btn" style="background:var(--danger); color:#fff; padding:3px 6px; font-size:6px; width:auto;" onclick="deleteAnnouncement(${item.id})">Sil</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                annContainer.innerHTML = html;
+            }
+
+            // Render Schedules
+            const schContainer = document.getElementById('groupSchedulesList');
+            if(data.schedules.length === 0) {
+                schContainer.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 10px;">Zamanlanmış paylaşım yok.</div>`;
+            } else {
+                let html = '';
+                data.schedules.forEach((item, idx) => {
+                    html += `
+                        <div class="log-item">
+                            <div>
+                                <b style="color:var(--gold-light); font-size:9px;">⏰ ${item.name} (${item.mins} dk)</b><br>
+                                <span style="font-size:7px; color:#ccc;">${item.msg.substring(0, 30)}...</span>
+                            </div>
+                            <div style="display:flex; gap:4px;">
+                                <button class="gold-btn" style="background:var(--danger); color:#fff; padding:3px 6px; font-size:6px; width:auto;" onclick="deleteSchedule(${item.id})">Durdur 🛑</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                schContainer.innerHTML = html;
+            }
+        }
+
+        async function saveAnnouncementItem() {
+            const name = document.getElementById('announcementNameInput').value.trim();
+            const msg = document.getElementById('announcementMsgInput').value.trim();
+            const media = document.getElementById('announcementMediaInput').value.trim();
+            const btnText = document.getElementById('announcementBtnTextInput').value.trim();
+            const btnUrl = document.getElementById('announcementBtnUrlInput').value.trim();
+
+            if(!name || !msg) return alert("Liste Adı ve Duyuru Metni zorunludur!");
+            if(!activeChatId) return alert("Grup seçilmedi!");
+
+            if(!groupListData[activeChatId]) groupListData[activeChatId] = { announcements: [], schedules: [] };
+            
+            groupListData[activeChatId].announcements.push({
+                id: Date.now(), name, msg, media, btnText, btnUrl
+            });
+
+            document.getElementById('announcementNameInput').value = '';
+            document.getElementById('announcementMsgInput').value = '';
+            document.getElementById('announcementMediaInput').value = '';
+            document.getElementById('announcementBtnTextInput').value = '';
+            document.getElementById('announcementBtnUrlInput').value = '';
+
+            renderGroupLists();
+            showToast(`⚜️ Duyuru Listeye Eklendi: ${name}`);
+        }
+
+        function sendSpecificAnnouncement(id) {
+            const item = groupListData[activeChatId].announcements.find(x => x.id === id);
+            if(!item) return;
+            showToast(`📢 "${item.name}" Duyurusu Pinlenerek Gönderildi! (/duyuru)`);
+        }
+
+        function deleteAnnouncement(id) {
+            groupListData[activeChatId].announcements = groupListData[activeChatId].announcements.filter(x => x.id !== id);
+            renderGroupLists();
+            showToast("🗑️ Duyuru Listeden Silindi");
+        }
+
+        async function saveScheduleItem() {
+            const name = document.getElementById('scheduleNameInput').value.trim();
+            const mins = document.getElementById('scheduleMinutesInput').value.trim();
+            const msg = document.getElementById('scheduleMsgInput').value.trim();
+            const media = document.getElementById('scheduleMediaInput').value.trim();
+            const btnText = document.getElementById('scheduleBtnTextInput').value.trim();
+            const btnUrl = document.getElementById('scheduleBtnUrlInput').value.trim();
+
+            if(!name || !mins || !msg) return alert("Başlık, Dakika ve Mesaj zorunludur!");
+            if(!activeChatId) return alert("Grup seçilmedi!");
+
+            if(!groupListData[activeChatId]) groupListData[activeChatId] = { announcements: [], schedules: [] };
+
+            groupListData[activeChatId].schedules.push({
+                id: Date.now(), name, mins, msg, media, btnText, btnUrl
+            });
+
+            document.getElementById('scheduleNameInput').value = '';
+            document.getElementById('scheduleMinutesInput').value = '';
+            document.getElementById('scheduleMsgInput').value = '';
+            document.getElementById('scheduleMediaInput').value = '';
+            document.getElementById('scheduleBtnTextInput').value = '';
+            document.getElementById('scheduleBtnUrlInput').value = '';
+
+            renderGroupLists();
+            showToast(`⏰ Zamanlama Listeye Eklendi: ${name} (/zamanla)`);
+        }
+
+        function deleteSchedule(id) {
+            groupListData[activeChatId].schedules = groupListData[activeChatId].schedules.filter(x => x.id !== id);
+            renderGroupLists();
+            showToast("🛑 Zamanlayıcı Durduruldu ve Silindi (/zamanladur)");
         }
 
         async function loadGlobalLogs() {
@@ -649,10 +774,12 @@
                 logs.forEach(l => {
                     html += `
                         <div class="log-item">
+                            <div>
+                                <span class="log-action">${l.action_type}</span>
+                                <div style="margin-top: 3px; color: var(--gold-light);">Hedef: @${l.username || l.target_id}</div>
+                                <div style="font-size: 7px; color: #ccc; margin-top: 2px;">${l.details || ''}</div>
+                            </div>
                             <span class="log-time">${l.timestamp}</span>
-                            <span class="log-action">${l.action_type}</span>
-                            <div style="margin-top: 3px; color: var(--gold-light);">Hedef: @${l.username || l.target_id}</div>
-                            <div style="font-size: 7px; color: #ccc; margin-top: 2px;">${l.details || ''}</div>
                         </div>
                     `;
                 });
@@ -752,61 +879,21 @@
         async function saveGroupSettings() {
             const welcome = document.getElementById('groupWelcomeText').value.trim();
             const media = document.getElementById('groupWelcomeMedia').value.trim();
-            const defAnnBtn = document.getElementById('defAnnouncementBtnText').value.trim();
-            const defAnnUrl = document.getElementById('defAnnouncementBtnUrl').value.trim();
-            const defSchBtn = document.getElementById('defScheduleBtnText').value.trim();
-            const defSchUrl = document.getElementById('defScheduleBtnUrl').value.trim();
+            const btnText = document.getElementById('groupBtnText').value.trim();
+            const btnUrl = document.getElementById('groupBtnUrl').value.trim();
+            const defAnnBtn = document.getElementById('defAnnBtnText').value.trim();
+            const defAnnUrl = document.getElementById('defAnnBtnUrl').value.trim();
+            const defSchBtn = document.getElementById('defSchBtnText').value.trim();
+            const defSchUrl = document.getElementById('defSchBtnUrl').value.trim();
+
             if (!activeChatId) return alert("Grup seçilmedi!");
             
             await fetch('/api/settings/update', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, chat_id: activeChatId, welcome_msg: welcome, media_url: media, def_ann_btn: defAnnBtn, def_ann_url: defAnnUrl, def_sch_btn: defSchBtn, def_sch_url: defSchUrl })
+                body: JSON.stringify({ user_id: user.id, chat_id: activeChatId, welcome_msg: welcome, media_url: media, btn_text: btnText, btn_url: btnUrl, def_ann_btn: defAnnBtn, def_ann_url: defAnnUrl, def_sch_btn: defSchBtn, def_sch_url: defSchUrl })
             });
             showToast(`⚜️ ${activeGroupTitle} Protokolleri Mühürlendi`);
             toggleGroupDetailModal();
-        }
-
-        async function createAndSendAnnouncement() {
-            const text = document.getElementById('announcementMsgInput').value.trim();
-            const media = document.getElementById('announcementMediaInput').value.trim();
-            const btnText = document.getElementById('announcementCustomBtnText').value.trim();
-            const btnUrl = document.getElementById('announcementCustomBtnUrl').value.trim();
-            if(!text) return alert("Duyuru metni yazın!");
-            if(!activeChatId) return alert("Grup seçilmedi!");
-            showToast("📢 Duyuru Gönderildi & Pinlendi (/duyuru)");
-            document.getElementById('announcementMsgInput').value = '';
-            document.getElementById('announcementMediaInput').value = '';
-            document.getElementById('announcementCustomBtnText').value = '';
-            document.getElementById('announcementCustomBtnUrl').value = '';
-        }
-
-        function saveAnnouncementDraft() {
-            showToast("📝 Taslak başarıyla kaydedildi.");
-        }
-
-        function editAnnouncement(id) {
-            showToast(`✏️ Duyuru #${id} düzenleme moduna alındı.`);
-        }
-
-        async function saveNewSchedule() {
-            const name = document.getElementById('scheduleNameInput').value.trim();
-            const mins = document.getElementById('scheduleMinutesInput').value.trim();
-            const text = document.getElementById('scheduleMsgInput').value.trim();
-            if(!name || !mins || !text) return alert("Başlık, dakika ve mesaj zorunludur!");
-            if(!activeChatId) return alert("Grup seçilmedi!");
-            showToast(`⏰ Zamanlama Başlatıldı: ${name} (${mins} dk) (/zamanla)`);
-            document.getElementById('scheduleNameInput').value = '';
-            document.getElementById('scheduleMinutesInput').value = '';
-            document.getElementById('scheduleMsgInput').value = '';
-        }
-
-        async function stopActiveSchedule() {
-            if(!activeChatId) return alert("Grup seçilmedi!");
-            showToast("🛑 Zamanlanmış paylaşım durduruldu (/zamanladur).");
-        }
-
-        function deleteSchedule(id) {
-            showToast(`🗑️ Zamanlayıcı silindi.`);
         }
 
         function handleChatKey(e) { if (e.key === 'Enter') sendChatCommand(); }
@@ -825,20 +912,20 @@
 
             try {
                 if (lower.startsWith('/welcome')) {
-                    reply = `✅ Hoş geldin protokolü AI üzerinden güncellendi.`;
+                    reply = `✅ Hoş geldin protokolü güncellendi.`;
                 } else if (lower.startsWith('/duyuru')) {
-                    reply = `📢 Duyuru AI tarafından gruba işlendi ve pinlendi!`;
+                    reply = `📢 Butonlu/Görsel duyuru gruba pinlenerek gönderildi!`;
                 } else if (lower.startsWith('/zamanla')) {
-                    reply = `⏰ Zamanlı paylaşım AI tarafından başlatıldı.`;
+                    reply = `⏰ Periyodik duyuru zamanlayıcısı başlatıldı.`;
                 } else if (lower.startsWith('/zamanladur')) {
-                    reply = `🛑 Zamanlayıcı AI tarafından durduruldu.`;
+                    reply = `🛑 Zamanlayıcı durduruldu.`;
                 } else if (lower.startsWith('/defol') || lower.startsWith('ban')) {
                     const target = text.split(' ')[1];
                     const res = await fetch('/api/member/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: user.id, target: target, action: 'ban', chat_id: activeChatId}) });
                     const d = await res.json();
                     reply = d.success ? `🚫 ${target} gruptan def edildi!` : `❌ Başarısız: ${d.error}`;
                 } else {
-                    reply = `🤖 Katya AI: "${text}" talimatı doğrulandı, Kraljica. ⚜️ Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸`;
+                    reply = `🤖 Katya AI: "${text}" talimatı doğrulandı, Kraljica. ⚜️ Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾🇦 🇷🇸`;
                 }
             } catch (err) {
                 reply = `❌ Hata: ${err.message}`;
