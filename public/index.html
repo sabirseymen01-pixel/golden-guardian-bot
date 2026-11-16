@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GOLDEN STAFF | Ultimate List & Command Suite</title>
+    <title>GOLDEN STAFF | Tactile Luxury OS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -13,7 +13,7 @@
             --gold-light: #f8ecbe;
             --gold-dim: rgba(212, 175, 55, 0.22);
             --gold-glow: rgba(212, 175, 55, 0.55);
-            --glass-panel: rgba(16, 12, 5, 0.92);
+            --glass-panel: rgba(16, 12, 5, 0.90);
             --glass-icon: rgba(26, 20, 8, 0.82);
             --glass-modal: rgba(12, 9, 3, 0.98);
             --danger: #ff4757;
@@ -58,26 +58,28 @@
         .widget-info p { font-size: 8px; color: var(--text-muted); margin-top: 3px; }
         .widget-status-dot { width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 15px var(--success); }
 
+        /* 📱 iOS Tarzı Yaylanma Efektli Uygulama Simgeleri (Spring Physics) */
         .app-grid {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; width: 100%; max-width: 380px; justify-items: center;
         }
 
         .app-icon-card {
             display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;
-            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative; overflow: hidden;
         }
-        .app-icon-card:active { transform: scale(0.92); }
+        .app-icon-card:active { transform: scale(0.88); }
 
         .app-icon-box {
             width: 66px; height: 66px; background: var(--glass-icon); backdrop-filter: blur(30px);
             border-radius: 18px; border: 1.5px solid var(--border-gold);
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 10px 25px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,215,0,0.4);
-            transition: all 0.3s ease; position: relative;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;
         }
         .app-icon-card:hover .app-icon-box {
             border-color: var(--gold-light); box-shadow: 0 0 25px var(--gold-glow), inset 0 1px 0 rgba(255,255,255,0.6);
+            transform: translateY(-3px);
         }
         .app-icon-box svg { width: 28px; height: 28px; fill: var(--gold-light); filter: drop-shadow(0 0 5px var(--gold-base)); }
         .app-label { font-size: 8px; font-weight: 800; color: var(--text-main); text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }
@@ -90,12 +92,13 @@
         }
         .dock-dot { width: 6px; height: 6px; background: var(--gold-base); border-radius: 50%; opacity: 0.9; box-shadow: 0 0 8px var(--gold-base); }
 
+        /* 🚀 iOS Baloncuk Yaylanma Animasyonlu Modaller */
         .ios-modal {
             position: fixed; bottom: 0; left: 0; width: 100vw; height: 0;
             background: var(--glass-modal); backdrop-filter: blur(45px);
             border-top: 3px solid var(--gold-base); border-radius: 30px 30px 0 0;
             box-shadow: 0 -30px 80px rgba(0,0,0,0.98); z-index: 100;
-            transform: scale(0.85) translateY(20px); opacity: 0; pointer-events: none;
+            transform: scale(0.85) translateY(30px); opacity: 0; pointer-events: none;
             transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease, height 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; flex-direction: column; overflow: hidden;
         }
@@ -106,35 +109,39 @@
             border-bottom: 1.5px solid var(--border-gold); cursor: pointer;
         }
         .modal-heading { font-size: 11px; font-weight: 900; color: var(--gold-light); text-transform: uppercase; letter-spacing: 1px; }
-        .modal-dismiss { font-size: 8px; color: var(--obsidian); background: var(--gold-light); padding: 5px 12px; border-radius: 8px; font-weight: 900; cursor: pointer; box-shadow: 0 0 12px var(--gold-base); }
+        .modal-dismiss { font-size: 8px; color: var(--obsidian); background: var(--gold-light); padding: 5px 12px; border-radius: 8px; font-weight: 900; cursor: pointer; box-shadow: 0 0 12px var(--gold-base); transition: transform 0.2s; }
+        .modal-dismiss:active { transform: scale(0.9); }
         .modal-content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; scrollbar-width: thin; scrollbar-color: var(--gold-base) transparent; }
 
         input, select, textarea {
             width: 100%; background: rgba(10, 8, 3, 0.92); border: 1.5px solid var(--border-gold);
             border-radius: 10px; padding: 12px 14px; color: #fff; font-size: 10px; outline: none; margin-bottom: 10px;
+            transition: all 0.2s ease;
         }
-        input:focus, textarea:focus { border-color: var(--gold-light); box-shadow: 0 0 15px var(--gold-glow); }
+        input:focus, textarea:focus { border-color: var(--gold-light); box-shadow: 0 0 15px var(--gold-glow); transform: translateY(-1px); }
 
         .gold-btn {
             position: relative; overflow: hidden; width: 100%;
             background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-base) 100%); color: #000;
             border: none; padding: 12px 16px; border-radius: 10px; font-weight: 900; font-size: 9px; cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 5px 22px rgba(212, 175, 55, 0.4); transition: transform 0.2s;
+            box-shadow: 0 5px 22px rgba(212, 175, 55, 0.4); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .gold-btn:active { transform: scale(0.96); }
+        .gold-btn:active { transform: scale(0.94); }
 
+        /* 🌊 Dokunmatik Ripple (Altın Işık Dalgası) Efekti */
         .ripple-effect {
             position: absolute; border-radius: 50%; transform: scale(0);
-            background: rgba(255, 255, 255, 0.6); animation: rippleAnim 0.6s linear; pointer-events: none;
+            background: rgba(255, 235, 150, 0.7); animation: rippleAnim 0.55s linear; pointer-events: none;
         }
-        @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+        @keyframes rippleAnim { to { transform: scale(4.5); opacity: 0; } }
 
         .group-card {
             background: rgba(25, 20, 8, 0.75); border: 1.5px solid var(--border-gold); border-radius: 12px;
             padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;
             transition: all 0.25s ease; margin-bottom: 8px;
         }
-        .group-card:hover { border-color: var(--gold-light); background: var(--gold-dim); }
+        .group-card:hover { border-color: var(--gold-light); background: var(--gold-dim); transform: translateX(2px); }
+        .group-card:active { transform: scale(0.98); }
         .group-meta { display: flex; align-items: center; gap: 12px; overflow: hidden; }
         .group-avatar { width: 42px; height: 42px; border-radius: 50%; background: #000; border: 1.5px solid var(--gold-base); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 0 10px var(--gold-dim); }
         .group-avatar img { width: 100%; height: 100%; object-fit: cover; }
@@ -158,12 +165,11 @@
         input:checked + .slider:before { transform: translateX(16px); background-color: #000; }
 
         .modal-tabs { display: flex; gap: 6px; margin-bottom: 4px; }
-        .modal-tab { flex: 1; background: rgba(10,8,3,0.8); border: 1.5px solid var(--border-gold); color: var(--text-muted); padding: 9px; font-size: 7px; font-weight: 800; border-radius: 8px; text-align: center; cursor: pointer; text-transform: uppercase; }
+        .modal-tab { flex: 1; background: rgba(10,8,3,0.8); border: 1.5px solid var(--border-gold); color: var(--text-muted); padding: 9px; font-size: 7px; font-weight: 800; border-radius: 8px; text-align: center; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
         .modal-tab.active { background: var(--gold-dim); color: var(--gold-light); border-color: var(--gold-base); box-shadow: 0 0 10px var(--gold-dim); }
         .modal-tab-content { display: none; flex-direction: column; gap: 12px; }
         .modal-tab-content.active { display: flex; }
 
-        .founder-panel { background: rgba(212,175,55,0.08); border: 1.5px dashed var(--gold-base); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
         .leaderboard-row { display: flex; justify-content: space-between; align-items: center; background: rgba(20,16,6,0.8); border: 1.5px solid var(--border-gold); padding: 10px 14px; border-radius: 10px; margin-bottom: 6px; }
         .rank-badge { font-weight: 900; font-size: 11px; color: var(--gold-light); width: 24px; }
 
@@ -187,7 +193,7 @@
 </head>
 <body>
 
-    <div class="toast-popup" id="toastPopup">⚜️ GOLDEN STAFF AKTİF</div>
+    <div class="toast-popup" id="toastPopup">⚜️ TACTICAL FEEDBACK ACTIVE</div>
 
     <!-- Üst Header -->
     <header class="spring-header">
@@ -198,13 +204,13 @@
         <div class="user-badge" id="userRole">Kraljica 👑</div>
     </header>
 
-    <!-- 📱 TELEFON ANA EKRANI (SPRINGBOARD DESKTOP) -->
+    <!-- 📱 TELEFON ANA EKRANI -->
     <main class="homescreen-container">
         
         <!-- Sistem Widgeti -->
         <div class="system-widget">
             <div class="widget-info">
-                <h3>Otonom Kalkan & Listeler Aktif</h3>
+                <h3>Otonom Kalkan & Haptic Aktif</h3>
                 <p id="widgetGroupCount">Yörünge taranıyor...</p>
             </div>
             <div class="widget-status-dot" id="wsStatusDot"></div>
@@ -261,7 +267,6 @@
 
     <!-- ================= 🚀 MODAL PORTLAR ================= -->
 
-    <!-- 1. GRUPLAR PORTU -->
     <div class="ios-modal" id="groupsModal">
         <div class="modal-header" onclick="closePort('groupsModal')">
             <div class="modal-heading">🛡️ Yörünge Grupları</div>
@@ -275,7 +280,6 @@
         </div>
     </div>
 
-    <!-- 2. EYLEM PORTU -->
     <div class="ios-modal" id="tacticalModal">
         <div class="modal-header" onclick="closePort('tacticalModal')">
             <div class="modal-heading">⚔️ Üye Denetim Portu</div>
@@ -293,7 +297,6 @@
         </div>
     </div>
 
-    <!-- 3. STAFF PORTU -->
     <div class="ios-modal" id="staffModal">
         <div class="modal-header" onclick="closePort('staffModal')">
             <div class="modal-heading">⚜️ Yetkili Matrisi & Rozetler</div>
@@ -310,7 +313,6 @@
         </div>
     </div>
 
-    <!-- 4. LİDERLİK PORTU -->
     <div class="ios-modal" id="leaderboardModal">
         <div class="modal-header" onclick="closePort('leaderboardModal')">
             <div class="modal-heading">🏆 Muhafız Skor & Liderlik Tablosu</div>
@@ -332,7 +334,6 @@
         </div>
     </div>
 
-    <!-- 5. KATYA AI PORTU -->
     <div class="ios-modal" id="aiModal">
         <div class="modal-header" onclick="closePort('aiModal')">
             <div class="modal-heading">🧠 Katya AI Akıllı Asistan</div>
@@ -354,7 +355,6 @@
         </div>
     </div>
 
-    <!-- 6. LOGLAR PORTU -->
     <div class="ios-modal" id="logsModal">
         <div class="modal-header" onclick="closePort('logsModal')">
             <div class="modal-heading">📜 Canlı Denetim Logları</div>
@@ -367,7 +367,7 @@
         </div>
     </div>
 
-    <!-- ================= 🚀 GRUBA ÖZEL PORT (İSİMLİ LİSTE, MEDYA, BUTON & ZAMANLAMA YÖNETİCİSİ) ================= -->
+    <!-- ================= 🚀 GRUBA ÖZEL PORT ================= -->
     <div class="ios-modal" id="groupDetailModal">
         <div class="modal-header" onclick="toggleGroupDetailModal()">
             <div class="modal-heading" id="modalGroupName">Grup Komuta Portu</div>
@@ -387,15 +387,14 @@
                 <div class="modal-tab" onclick="switchModalTab('logs', event)">Grup Logları</div>
             </div>
 
-            <!-- TAB 1: PROTOKOLLER & VARSAYILANLAR -->
             <div id="tab-content-settings" class="modal-tab-content active">
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Karşılama Mesajı & Medya (/welcome)</div>
                 <textarea id="groupWelcomeText" rows="2" placeholder="Hoş geldin mesajı..."></textarea>
-                <input type="text" id="groupWelcomeMedia" placeholder="Karşılama Medya Fotoğraf/Video URL (Boş bırakılabilir)">
+                <input type="text" id="groupWelcomeMedia" placeholder="Karşılama Medya Fotoğraf/Video URL">
                 
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:6px;">Buton Varsayılanları (/butonmetni & /butonlinki)</div>
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:6px;">Buton Varsayılanları (/butonmetni & /linki)</div>
                 <input type="text" id="groupBtnText" placeholder="Hoş geldin Buton Metni">
-                <input type="text" id="groupBtnUrl" placeholder="Hoş geldin Buton Linki (https://...)">
+                <input type="text" id="groupBtnUrl" placeholder="Hoş geldin Buton Linki">
 
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:6px;">Duyuru Buton Varsayılanları (/duyurubutonmetni & /linki)</div>
                 <input type="text" id="defAnnBtnText" placeholder="Varsayılan Duyuru Buton Metni">
@@ -408,14 +407,13 @@
                 <button class="gold-btn" onclick="saveGroupSettings()">Tüm Protokolleri Mühürle</button>
             </div>
 
-            <!-- TAB 2: DUYURU LİSTESİ & OLUŞTURMA (İSİMLİ) -->
             <div id="tab-content-announcements" class="modal-tab-content">
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Yeni Duyuru Şablonu Oluştur (/duyuru)</div>
-                <input type="text" id="announcementNameInput" placeholder="Liste Adı / Şablon Başlığı (Örn: VIP Kripto Duyurusu)">
+                <input type="text" id="announcementNameInput" placeholder="Liste Adı / Şablon Başlığı (Örn: VIP Kripto)">
                 <textarea id="announcementMsgInput" rows="2" placeholder="Duyuru metni..."></textarea>
                 <input type="text" id="announcementMediaInput" placeholder="Görsel / Video URL (Opsiyonel)">
-                <input type="text" id="announcementBtnTextInput" placeholder="Özel Buton Metni (Boş bırakılırsa varsayılan kullanılır)">
-                <input type="text" id="announcementBtnUrlInput" placeholder="Özel Buton Linki (Boş bırakılırsa varsayılan kullanılır)">
+                <input type="text" id="announcementBtnTextInput" placeholder="Özel Buton Metni">
+                <input type="text" id="announcementBtnUrlInput" placeholder="Özel Buton Linki">
                 <button class="gold-btn" onclick="saveAnnouncementItem()">Duyuruyu Listeye Kaydet 📝</button>
 
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:10px;">Bu Grubun Kayıtlı Duyuru Listesi</div>
@@ -424,7 +422,6 @@
                 </div>
             </div>
 
-            <!-- TAB 3: ZAMANLAMA LİSTESİ & OLUŞTURMA (İSİMLİ) -->
             <div id="tab-content-schedules" class="modal-tab-content">
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Yeni Zamanlı Periyodik Duyuru Oluştur (/zamanla)</div>
                 <input type="text" id="scheduleNameInput" placeholder="Liste Adı / Başlık (Örn: Sabah Bülteni)">
@@ -441,7 +438,6 @@
                 </div>
             </div>
 
-            <!-- TAB 4: GRUP LOGLARI -->
             <div id="tab-content-logs" class="modal-tab-content">
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Bu Gruba Ait Canlı Akış</div>
                 <div id="groupSpecificLogsContainer" style="max-height: 280px; overflow-y: auto;">
@@ -462,13 +458,26 @@
         let activeGroupTitle = "";
         let globalGroupsCache = [];
         let ws;
+        let groupListData = {};
 
-        // In-memory group specific lists database representation
-        let groupListData = {}; // { chatId: { announcements: [...], schedules: [...] } }
+        // 📳 Telegram Native Taptic Engine & Haptic Feedback Entegrasyonu
+        function triggerHaptic(style = 'medium', type = 'impact') {
+            try {
+                if (window.Telegram?.WebApp?.HapticFeedback) {
+                    if (type === 'impact') window.Telegram.WebApp.HapticFeedback.impactOccurred(style);
+                    else if (type === 'notification') window.Telegram.WebApp.HapticFeedback.notificationOccurred(style);
+                    else if (type === 'selection') window.Telegram.WebApp.HapticFeedback.selectionChanged();
+                }
+            } catch(e) {}
+        }
 
+        // 🌊 Dokunmatik Ripple (Altın Işık Dalgası) & Haptic Tetikleyici
         document.addEventListener('click', function (e) {
-            const target = e.target.closest('.gold-btn, .app-icon-card, .group-card');
+            const target = e.target.closest('.gold-btn, .app-icon-card, .group-card, .modal-tab, .modal-dismiss');
             if (!target) return;
+            
+            triggerHaptic('light', 'impact');
+
             const circle = document.createElement('span');
             circle.classList.add('ripple-effect');
             const diameter = Math.max(target.clientWidth, target.clientHeight);
@@ -477,13 +486,14 @@
             circle.style.left = `${e.clientX - target.getBoundingClientRect().left - radius}px`;
             circle.style.top = `${e.clientY - target.getBoundingClientRect().top - radius}px`;
             target.appendChild(circle);
-            setTimeout(() => circle.remove(), 600);
+            setTimeout(() => circle.remove(), 550);
         });
 
         function showToast(message) {
             const toast = document.getElementById('toastPopup');
             toast.innerText = message;
             toast.classList.add('show');
+            triggerHaptic('success', 'notification');
             setTimeout(() => { toast.classList.remove('show'); }, 2500);
         }
 
@@ -523,6 +533,7 @@
         }
 
         function openPort(modalId) {
+            triggerHaptic('medium', 'impact');
             document.getElementById(modalId).classList.add('open');
             if(modalId === 'groupsModal') loadAllGroups();
             if(modalId === 'logsModal') loadGlobalLogs();
@@ -530,14 +541,17 @@
         }
 
         function closePort(modalId) {
+            triggerHaptic('light', 'impact');
             document.getElementById(modalId).classList.remove('open');
         }
 
         function toggleGroupDetailModal() {
+            triggerHaptic('light', 'impact');
             document.getElementById('groupDetailModal').classList.toggle('open');
         }
 
         function switchModalTab(tabName, evt) {
+            triggerHaptic('selection');
             document.querySelectorAll('.modal-tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.modal-tab').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-content-' + tabName).classList.add('active');
@@ -641,13 +655,12 @@
         function renderGroupLists() {
             const data = groupListData[activeChatId] || { announcements: [], schedules: [] };
             
-            // Render Announcements
             const annContainer = document.getElementById('groupAnnouncementsList');
             if(data.announcements.length === 0) {
                 annContainer.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 10px;">Kayıtlı duyuru şablonu yok.</div>`;
             } else {
                 let html = '';
-                data.announcements.forEach((item, idx) => {
+                data.announcements.forEach((item) => {
                     html += `
                         <div class="log-item">
                             <div>
@@ -664,13 +677,12 @@
                 annContainer.innerHTML = html;
             }
 
-            // Render Schedules
             const schContainer = document.getElementById('groupSchedulesList');
             if(data.schedules.length === 0) {
                 schContainer.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 10px;">Zamanlanmış paylaşım yok.</div>`;
             } else {
                 let html = '';
-                data.schedules.forEach((item, idx) => {
+                data.schedules.forEach((item) => {
                     html += `
                         <div class="log-item">
                             <div>
@@ -792,6 +804,7 @@
             if (!target) return alert("Hedef kullanıcı (@username veya ID) girin!");
             if (!activeChatId) return alert("Lütfen önce bir grup seçin!");
             
+            triggerHaptic('heavy', 'impact');
             const res = await fetch('/api/member/action', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: activeChatId })
@@ -845,6 +858,7 @@
 
         async function toggleStaffPerm(targetId, permField) {
             if (!activeChatId) return;
+            triggerHaptic('light', 'impact');
             await fetch('/api/staff/toggle', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ target_id: targetId, chat_id: activeChatId, perm: permField })
@@ -888,6 +902,7 @@
 
             if (!activeChatId) return alert("Grup seçilmedi!");
             
+            triggerHaptic('medium', 'impact');
             await fetch('/api/settings/update', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: user.id, chat_id: activeChatId, welcome_msg: welcome, media_url: media, btn_text: btnText, btn_url: btnUrl, def_ann_btn: defAnnBtn, def_ann_url: defAnnUrl, def_sch_btn: defSchBtn, def_sch_url: defSchUrl })
@@ -925,7 +940,7 @@
                     const d = await res.json();
                     reply = d.success ? `🚫 ${target} gruptan def edildi!` : `❌ Başarısız: ${d.error}`;
                 } else {
-                    reply = `🤖 Katya AI: "${text}" talimatı doğrulandı, Kraljica. ⚜️ Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾🇦 🇷🇸`;
+                    reply = `🤖 Katya AI: "${text}" talimatı doğrulandı, Kraljica. ⚜️ Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸`;
                 }
             } catch (err) {
                 reply = `❌ Hata: ${err.message}`;
