@@ -41,10 +41,6 @@ BAD_WORDS = ["küfür1", "küfür2", "argo1"]
 scheduler = AsyncIOScheduler()
 tg_application = None
 
-# Bellek içi şablon depolama (Master-Detail Liste & Edit Portu için)
-# Format: { chat_id: { "announcements": [...], "schedules": [...] } }
-GROUP_TEMPLATES = {}
-
 def log_event(level: str, message: str):
     timestamp = datetime.now().strftime("%H:%M:%S")
     print(f"[{timestamp}] [{level}] {message}", flush=True)
@@ -305,18 +301,14 @@ class TemplateData(BaseModel):
     btn_text: Optional[str] = ""
     btn_url: Optional[str] = ""
     mins: Optional[int] = 0
+    template_id: Optional[int] = None
 
 @app.post("/api/templates/list")
 async def api_list_templates(request: Request):
     try:
         data = await request.json()
         chat_id = int(data.get("chat_id", 0))
-        if chat_id not in GROUP_TEMPLATES:
-            GROUP_TEMPLATES[chat_id] = {
-                "announcements": [{"id": 1, "name": "Örnek Duyuru", "msg": "Örnek içerik", "media": "", "btnText": "", "btnUrl": ""}],
-                "schedules": [{"id": 1, "name": "Örnek Zamanlama", "mins": 60, "msg": "Periyodik içerik", "media": "", "btnText": "", "btnUrl": ""}]
-            }
-        return GROUP_TEMPLATES[chat_id]
+        return database.get_group_templates(chat_id)
     except Exception as e:
         return {"announcements": [], "schedules": []}
 
@@ -327,18 +319,7 @@ async def api_save_announcement(data: TemplateData):
         if not database.is_authorized_staff(data.user_id) and not is_founder:
             return {"success": False, "error": "Yetkisiz!"}
         
-        if data.chat_id not in GROUP_TEMPLATES:
-            GROUP_TEMPLATES[data.chat_id] = {"announcements": [], "schedules": []}
-            
-        item = {
-            "id": int(datetime.now().timestamp() * 1000),
-            "name": data.name,
-            "msg": data.msg,
-            "media": data.media,
-            "btnText": data.btn_text,
-            "btnUrl": data.btn_url
-        }
-        GROUP_TEMPLATES[data.chat_id]["announcements"].append(item)
+        database.save_template_db(data.chat_id, "announcement", data.name, data.msg, data.media, data.btn_text, data.btn_url, 0, data.template_id)
         database.log_action(data.chat_id, "SAVE_ANN_TEMPLATE", data.user_id, "Admin", f"Duyuru şablonu mühürlendi: {data.name}")
         return {"success": True, "message": f"Duyuru şablonu mühürlendi: {data.name}"}
     except Exception as e:
@@ -351,21 +332,27 @@ async def api_save_schedule(data: TemplateData):
         if not database.is_authorized_staff(data.user_id) and not is_founder:
             return {"success": False, "error": "Yetkisiz!"}
             
-        if data.chat_id not in GROUP_TEMPLATES:
-            GROUP_TEMPLATES[data.chat_id] = {"announcements": [], "schedules": []}
-            
-        item = {
-            "id": int(datetime.now().timestamp() * 1000),
-            "name": data.name,
-            "mins": data.mins or 60,
-            "msg": data.msg,
-            "media": data.media,
-            "btnText": data.btn_text,
-            "btnUrl": data.btn_url
-        }
-        GROUP_TEMPLATES[data.chat_id]["schedules"].append(item)
+        database.save_template_db(data.chat_id, "schedule", data.name, data.msg, data.media, data.btn_text, data.btn_url, data.mins, data.template_id)
         database.log_action(data.chat_id, "SAVE_SCH_TEMPLATE", data.user_id, "Admin", f"Zamanlama şablonu mühürlendi: {data.name} ({data.mins} dk)")
         return {"success": True, "message": f"Zamanlama şablonu mühürlendi: {data.name}"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/templates/delete")
+async def api_delete_template(request: Request):
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        chat_id = int(data.get("chat_id", 0))
+        template_id = data.get("template_id")
+        
+        is_founder = str(user_id) == str(FOUNDER_ID).strip()
+        if not database.is_authorized_staff(user_id) and not is_founder:
+            return {"success": False, "error": "Yetkisiz!"}
+            
+        database.database_delete_template_db(chat_id, template_id)
+        database.log_action(chat_id, "DELETE_TEMPLATE", user_id, "Admin", f"Şablon silindi (ID: {template_id})")
+        return {"success": True}
     except Exception as e:
         return {"success": False, "error": str(e)}
 
@@ -588,6 +575,10 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.pin_chat_message(chat_id=chat_id, message_id=sent_msg.message_id, disable_notification=False)
         admin_user = update.effective_user.username or update.effective_user.first_name
         database.log_action(chat_id, "ANNOUNCEMENT", 0, f"@{admin_user}", f"Duyuru gönderildi: {msg_text[:30]}...")
+
+        # 🚀 CHAT'TEN ATILAN DUYURUYU OTOMATİK LİSTEYE KAYDET
+        auto_name = f"Chat Duyurusu: {msg_text[:20]}..." if msg_text else f"Chat Duyurusu {datetime.now().strftime('%H:%M')}"
+        database.save_template_db(chat_id, "announcement", auto_name, msg_text, photo_file_id or "", btn_text, btn_url, 0)
     except Exception as e:
         logger.error(f"Duyuru gönderme hatası: {e}")
 
@@ -700,6 +691,11 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     database.save_scheduled_job(job_id, chat_id, minutes, msg_text, btn_text, btn_url, media_url)
+    
+    # 🚀 CHAT'TEN BAŞLATILAN ZAMANLAMAYI OTOMATİK LİSTEYE KAYDET
+    auto_name = f"Chat Zamanlı ({minutes}dk): {msg_text[:15]}..." if msg_text else f"Periyodik {minutes}dk"
+    database.save_template_db(chat_id, "schedule", auto_name, msg_text, media_url, btn_text, btn_url, minutes)
+
     admin_user = update.effective_user.username or update.effective_user.first_name
     database.log_action(chat_id, "SCHEDULE_START", 0, f"@{admin_user}", f"Her {minutes} dakikada bir duyuru başlatıldı.")
     await send_auto_delete_message(context, chat_id, f"✅ Her {minutes} dakikada bir paylaşılacak görev başlatıldı!", 5)
@@ -838,7 +834,7 @@ COMMAND_MAP = {
     "uyari": cmd_uyari,
     "warn": cmd_uyari,
     "unuyari": cmd_unuyari,
-    "unwarn": cmd_unuyari,
+    "unwarn": cmd_uyari,
 }
 
 async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
