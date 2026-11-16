@@ -4,163 +4,146 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Katya | iOS Enterprise Console</title>
+    <title>Golden Katya | Enterprise Console</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --obsidian: #030106;
-            --surface: #0b0212;
-            --card-bg: #140522;
-            --crystal-pink: #ff2a85;
-            --crystal-glow: #ff71ce;
-            --purple-neon: #b967ff;
+            --bg-base: #08060c;
+            --bg-surface: #120d1c;
+            --card-bg: #1a1228;
             --gold: #d4af37;
-            --gold-glow: #f8ecbe;
-            --danger: #ff3333;
+            --gold-light: #f8ecbe;
+            --gold-dim: rgba(212, 175, 55, 0.2);
+            --danger: #ff4757;
             --success: #2ed573;
             --text-main: #f1f2f6;
-            --text-muted: #a4b0be;
-            --glass-dock: rgba(18, 5, 30, 0.78);
-            --border-gold: rgba(212, 175, 55, 0.5);
-            --border-pink: rgba(255, 42, 133, 0.5);
+            --text-muted: #8c96a5;
+            --border-subtle: rgba(212, 175, 55, 0.25);
+            --border-active: rgba(212, 175, 55, 0.7);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        html, body { height: 100vh; width: 100vw; overflow: hidden; background-color: var(--obsidian); color: var(--text-main); }
+        html, body { height: 100vh; width: 100vw; overflow: hidden; background-color: var(--bg-base); color: var(--text-main); }
 
-        /* 🌌 Gold & Cyber-Luxury Pembe-Mor Uyumlu Atmosfer */
+        /* 🌌 Göz Yormayan Sakin, Lüks ve Asil Gold Atmosfer */
         body {
             background: 
-                radial-gradient(circle at 50% 10%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 85% 85%, rgba(185, 103, 255, 0.2) 0%, transparent 60%),
-                radial-gradient(circle at 15% 75%, rgba(255, 42, 133, 0.18) 0%, transparent 60%),
-                linear-gradient(135deg, #07010d 0%, #020003 100%);
+                radial-gradient(circle at 50% 10%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
+                linear-gradient(135deg, #0b0813 0%, #050308 100%);
             display: flex; flex-direction: column; justify-content: space-between; padding: 10px;
         }
 
-        /* Üst Header - Gold & Kristal Dokunuş */
+        /* Üst Header */
         .hud-header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 14px; background: rgba(12, 3, 20, 0.7); backdrop-filter: blur(25px);
-            border-radius: 14px; border: 1.5px solid var(--border-gold); box-shadow: 0 0 25px rgba(212, 175, 55, 0.2);
+            padding: 10px 16px; background: var(--bg-surface);
+            border-radius: 12px; border: 1px solid var(--border-subtle); box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
-        .brand-title {
-            font-size: 12px; font-weight: 900; color: var(--gold-glow);
-            letter-spacing: 1.5px; text-shadow: 0 0 10px var(--gold);
-            display: flex; align-items: center; gap: 6px;
-        }
-        .user-badge {
-            background: rgba(212, 175, 55, 0.2); color: var(--gold-glow);
-            padding: 4px 10px; border-radius: 8px; font-size: 8px; border: 1px solid var(--gold); font-weight: 900;
-        }
+        .brand-title { font-size: 11px; font-weight: 800; color: var(--gold-light); letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
+        .user-badge { background: var(--gold-dim); color: var(--gold-light); padding: 4px 10px; border-radius: 6px; font-size: 8px; border: 1px solid var(--border-subtle); font-weight: 800; }
 
         /* Ana İçerik Viewport */
         .app-viewport {
-            flex: 1; overflow-y: auto; margin: 8px 0 70px 0; display: flex; flex-direction: column; gap: 10px;
-            scrollbar-width: none;
+            flex: 1; overflow-y: auto; margin: 10px 0 70px 0; display: flex; flex-direction: column; gap: 10px;
+            scrollbar-width: thin; scrollbar-color: var(--gold) var(--bg-surface);
         }
-        .app-viewport::-webkit-scrollbar { display: none; }
+        .app-viewport::-webkit-scrollbar { width: 4px; }
+        .app-viewport::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
 
-        .app-section { display: none; flex-direction: column; gap: 10px; animation: fadeIn 0.3s ease; }
+        .app-section { display: none; flex-direction: column; gap: 10px; animation: fadeIn 0.25s ease; }
         .app-section.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
 
         .gold-card {
-            background: var(--card-bg); border: 1px solid var(--border-gold); border-radius: 14px; padding: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+            background: var(--card-bg); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 14px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
         }
         .section-title {
-            font-size: 10px; font-weight: 900; color: var(--gold-glow); text-transform: uppercase;
-            border-bottom: 1px solid var(--border-gold); padding-bottom: 6px; margin-bottom: 8px;
-            letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center;
+            font-size: 9px; font-weight: 800; color: var(--gold-light); text-transform: uppercase;
+            border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px; margin-bottom: 10px;
+            letter-spacing: 0.8px; display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* 📱 iOS Tarzı Şeffaf Kaydırılabilir Dock (Görev Çubuğu) */
+        /* 📱 iOS Tarzı Şeffaf Dock (Görev Çubuğu) */
         .ios-dock {
             position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
             width: 94%; max-width: 440px; height: 60px;
-            background: var(--glass-dock); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
-            border-radius: 20px; border: 1px solid var(--border-gold);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.2);
+            background: rgba(18, 13, 28, 0.88); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-radius: 16px; border: 1px solid var(--border-subtle);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.8);
             display: flex; align-items: center; justify-content: space-around; padding: 0 6px; z-index: 90;
         }
         .dock-item {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; padding: 6px 10px; border-radius: 12px; transition: all 0.25s ease; color: var(--text-muted);
+            cursor: pointer; padding: 6px 12px; border-radius: 10px; transition: all 0.2s ease; color: var(--text-muted);
         }
-        .dock-item span:first-child { font-size: 16px; }
-        .dock-item span:last-child { font-size: 6px; font-weight: 800; margin-top: 2px; text-transform: uppercase; }
-        .dock-item:hover, .dock-item.active {
-            color: var(--gold-glow); background: rgba(212, 175, 55, 0.15); transform: translateY(-3px);
-            text-shadow: 0 0 10px var(--gold);
-        }
+        .dock-item span:first-child { font-size: 15px; }
+        .dock-item span:last-child { font-size: 6px; font-weight: 700; margin-top: 2px; text-transform: uppercase; }
+        .dock-item:hover, .dock-item.active { color: var(--gold-light); background: var(--gold-dim); }
 
-        /* Grup Kartları */
+        /* Grup Listesi Kartları */
         .group-card {
-            background: rgba(20, 5, 34, 0.9); border: 1px solid var(--border-gold); border-radius: 10px;
-            padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+            background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 10px;
+            padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;
             transition: all 0.2s;
         }
-        .group-card:active { transform: scale(0.98); }
-        .group-card.active { border-color: var(--crystal-pink); box-shadow: 0 0 15px rgba(255,42,133,0.3); }
-        
+        .group-card:hover { border-color: var(--border-active); background: rgba(212,175,55,0.03); }
         .group-meta { display: flex; align-items: center; gap: 10px; overflow: hidden; }
-        .group-avatar { width: 36px; height: 36px; border-radius: 50%; background: #000; border: 1.5px solid var(--gold); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .group-avatar { width: 34px; height: 34px; border-radius: 50%; background: #000; border: 1px solid var(--gold); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .group-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .group-details { overflow: hidden; }
-        .group-title { font-size: 9px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .group-title { font-size: 9px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .group-id-sub { font-size: 7px; color: var(--text-muted); }
 
         /* Form Elemanları & Butonlar */
         input, select, textarea {
-            width: 100%; background: rgba(5, 1, 10, 0.9); border: 1px solid var(--border-gold);
-            border-radius: 8px; padding: 10px; color: #fff; font-size: 9px; outline: none; margin-bottom: 6px;
+            width: 100%; background: var(--bg-base); border: 1px solid var(--border-subtle);
+            border-radius: 8px; padding: 9px 12px; color: #fff; font-size: 9px; outline: none; margin-bottom: 8px;
         }
-        input:focus { border-color: var(--gold); box-shadow: 0 0 10px var(--gold); }
+        input:focus, textarea:focus { border-color: var(--gold); box-shadow: 0 0 6px rgba(212,175,55,0.25); }
 
         .gold-btn {
-            width: 100%; background: linear-gradient(135deg, var(--gold) 0%, var(--crystal-pink) 100%); color: #000;
-            border: none; padding: 10px; border-radius: 8px; font-weight: 900; font-size: 9px; cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            width: 100%; background: linear-gradient(135deg, var(--gold) 0%, #b8972a 100%); color: #000;
+            border: none; padding: 9px 14px; border-radius: 8px; font-weight: 800; font-size: 8px; cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); transition: transform 0.1s;
         }
         .gold-btn:active { transform: scale(0.98); }
 
-        /* 🌸 iOS Baloncuk Mimarisi (Spring Popover Animation) */
-        .ios-bubble-modal {
+        /* 🌸 iOS Tarzı Baloncuk Modal (Grup Portu) */
+        .ios-modal {
             position: fixed; bottom: 0; left: 0; width: 100vw; height: 0;
-            background: rgba(14, 4, 24, 0.96); backdrop-filter: blur(40px);
-            border-top: 2px solid var(--gold); border-radius: 24px 24px 0 0;
-            box-shadow: 0 -20px 60px rgba(0,0,0,0.9); z-index: 100;
-            transform: scale(0.85); opacity: 0; pointer-events: none;
-            transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease, height 0.4s ease;
+            background: var(--bg-surface); backdrop-filter: blur(30px);
+            border-top: 2px solid var(--gold); border-radius: 20px 20px 0 0;
+            box-shadow: 0 -15px 40px rgba(0,0,0,0.8); z-index: 100;
+            transform: scale(0.9); opacity: 0; pointer-events: none;
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.25s ease, height 0.35s ease;
             display: flex; flex-direction: column; overflow: hidden;
         }
-        .ios-bubble-modal.open {
-            height: 84vh; transform: scale(1); opacity: 1; pointer-events: auto;
-        }
+        .ios-modal.open { height: 85vh; transform: scale(1); opacity: 1; pointer-events: auto; }
 
         .modal-header {
-            padding: 14px 18px; background: rgba(25, 5, 40, 0.9); display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border-gold); cursor: pointer;
+            padding: 12px 16px; background: var(--card-bg); display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-subtle); cursor: pointer;
         }
-        .modal-heading { font-size: 10px; font-weight: 900; color: var(--gold-glow); text-transform: uppercase; }
-        .modal-dismiss { font-size: 8px; color: var(--gold); background: rgba(212,175,55,0.15); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--gold); font-weight: 900; cursor: pointer; }
-        .modal-content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+        .modal-heading { font-size: 9px; font-weight: 800; color: var(--gold-light); text-transform: uppercase; }
+        .modal-dismiss { font-size: 8px; color: var(--gold); background: var(--gold-dim); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border-subtle); font-weight: 800; cursor: pointer; }
+        .modal-content { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* Log ve Tablo Stilleri */
+        /* Log Listesi Stili */
         .log-item {
-            background: rgba(8, 2, 14, 0.9); border-left: 3px solid var(--gold); padding: 8px 10px;
-            border-radius: 6px; margin-bottom: 6px; font-size: 8px;
+            background: var(--bg-base); border-left: 3px solid var(--gold); padding: 8px 10px;
+            border-radius: 6px; margin-bottom: 6px; font-size: 8px; border-top: 1px solid var(--border-subtle);
+            border-right: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);
         }
         .log-time { font-size: 6px; color: var(--text-muted); float: right; }
-        .log-action { color: var(--gold-glow); font-weight: 800; text-transform: uppercase; }
+        .log-action { color: var(--gold-light); font-weight: 700; text-transform: uppercase; }
 
-        /* Toggle Checkbox Switch (Granüler Yetkiler İçin) */
-        .switch-row { display: flex; justify-content: space-between; align-items: center; background: rgba(10,2,16,0.6); padding: 6px 10px; border-radius: 6px; font-size: 8px; margin-bottom: 4px; border: 1px solid rgba(212,175,55,0.2); }
-        .switch { position: relative; display: inline-block; width: 30px; height: 16px; }
+        /* Granüler Haklar Switch */
+        .switch-row { display: flex; justify-content: space-between; align-items: center; background: var(--bg-base); padding: 6px 10px; border-radius: 6px; font-size: 8px; margin-bottom: 4px; border: 1px solid var(--border-subtle); }
+        .switch { position: relative; display: inline-block; width: 28px; height: 14px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border-radius: 16px; }
-        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 2px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .2s; border-radius: 14px; }
+        .slider:before { position: absolute; content: ""; height: 10px; width: 10px; left: 2px; bottom: 2px; background-color: white; transition: .2s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--gold); }
         input:checked + .slider:before { transform: translateX(14px); }
     </style>
@@ -169,29 +152,30 @@
 
     <!-- Üst Header -->
     <header class="hud-header">
-        <div class="brand-title">⚜️ GOLDEN KATYA IOS</div>
+        <div class="brand-title">⚜️ GOLDEN KATYA CONSOLE</div>
         <div class="user-badge" id="userRole">Kraljica 👑</div>
     </header>
 
     <!-- Ana İçerik Viewport -->
     <main class="app-viewport">
         
-        <!-- 1. SEKME: GRUPLAR -->
+        <!-- 1. SEKME: GRUPLAR LİSTESİ -->
         <div id="sec-groups" class="app-section active">
             <div class="gold-card">
                 <div class="section-title"><span>🪐 Bağlı Yörünge Grupları</span><span id="groupCount">0 Aktif</span></div>
+                <input type="text" id="groupSearchInput" placeholder="Grup adı veya ID ile ara..." oninput="filterGroups()" style="margin-bottom: 10px;">
                 <div id="groupsListContainer" style="display: flex; flex-direction: column; gap: 6px;">
                     <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Gruplar yükleniyor...</div>
                 </div>
             </div>
         </div>
 
-        <!-- 2. SEKME: TAKTİKSEL EYLEMLER -->
+        <!-- 2. SEKME: ÜYE DENETİM & ARAMA PORTU -->
         <div id="sec-tactical" class="app-section">
             <div class="gold-card">
-                <div class="section-title"><span>⚡ Üye Eylem Portu</span><span>Güvenli Mod</span></div>
-                <p style="font-size: 7px; color: var(--text-muted); margin-bottom: 8px;">Aşağıdan hedef kullanıcıyı belirtin ve seçili grup üzerinde eylemi gerçekleştirin.</p>
-                <input type="text" id="targetUserInput" placeholder="Kullanıcı ID veya @username">
+                <div class="section-title"><span>⚡ Üye Denetim Portu (ID / Username)</span><span>Hızlı Eylem</span></div>
+                <p style="font-size: 7px; color: var(--text-muted); margin-bottom: 8px;">Yönetmek istediğiniz hedef kullanıcıyı ID veya @username ile belirtin ve aktif grup üzerinde eylemi gerçekleştirin.</p>
+                <input type="text" id="targetUserInput" placeholder="Kullanıcı ID veya @username (Örn: 12345678 veya @ahmet)">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
                     <button class="gold-btn" style="background: var(--danger); color:#fff;" onclick="executeAction('ban')">Banla 🚫</button>
                     <button class="gold-btn" style="background: var(--success); color:#000;" onclick="executeAction('unban')">Ban Aç ✅</button>
@@ -205,29 +189,35 @@
         <div id="sec-staff" class="app-section">
             <div class="gold-card">
                 <div class="section-title"><span>👑 Yetkili Matrisi & Granüler Haklar</span><span>Grup Bazlı</span></div>
-                <input type="text" id="staffInputId" placeholder="@username veya ID">
+                <p style="font-size: 7px; color: var(--text-muted); margin-bottom: 6px;">Lütfen yetkili eklemek veya düzenlemek için önce 'Gruplar' sekmesinden bir grup seçin.</p>
+                <div id="activeGroupStaffNotice" style="font-size: 8px; color: var(--gold-light); background: var(--gold-dim); padding: 6px; border-radius: 6px; margin-bottom: 8px;">Aktif Grup: Genel / Seçilmedi</div>
+                <input type="text" id="staffInputId" placeholder="Kullanıcı @username veya ID">
                 <input type="text" id="staffNameInput" placeholder="Rozet Ünvanı (Örn: 🛡️ Muhafız)">
-                <button class="gold-btn" onclick="addNewStaff()">Muhafızı Mühürle</button>
+                <button class="gold-btn" onclick="addNewStaff()">Muhafızı Bu Gruba Mühürle</button>
                 <div id="staffListContainer" style="margin-top: 10px; max-height: 220px; overflow-y: auto;">
-                    <div style="font-size: 8px; color: var(--text-muted);">Önce bir grup seçin veya yetkililer yükleniyor...</div>
+                    <div style="font-size: 8px; color: var(--text-muted);">Yetkililer yükleniyor...</div>
                 </div>
             </div>
         </div>
 
-        <!-- 4. SEKME: KATYA AI ASİSTAN & DENETÇİ -->
+        <!-- 4. SEKME: KATYA AI ASİSTAN -->
         <div id="sec-ai" class="app-section">
             <div class="gold-card">
-                <div class="section-title"><span>🤖 Katya AI Asistan & Denetçi</span><span style="color:var(--success);">Aktif Koruma</span></div>
-                <div id="aiAuditFeed" style="background: rgba(212,175,55,0.08); border: 1px solid var(--gold); border-radius: 8px; padding: 8px; font-size: 8px; color: var(--gold-glow); margin-bottom: 8px;">
-                    🛡️ <b>AI Güvenlik Raporu:</b> Tüm yörünge grupları izleniyor. Staff yetki suistimali tespit edilmedi. Sistem kararlı.
+                <div class="section-title"><span>🤖 Katya AI Akıllı Asistan</span><span style="color:var(--success);">Aktif Koruma</span></div>
+                <div style="background: var(--bg-base); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 10px; font-size: 8px; color: var(--text-main); margin-bottom: 8px; line-height: 1.4;">
+                    ⚜️ <b>Yönetici Komutları Asistanı:</b><br>
+                    • <code>/welcome &lt;mesaj&gt;</code> - Hoş geldin ayarla<br>
+                    • <code>/duyuru &lt;mesaj&gt;</code> - Duyuru gönder & pinle<br>
+                    • <code>/defol &lt;kullanıcı&gt;</code> - Kullanıcıyı banla<br>
+                    • <code>/itaat &lt;kullanıcı&gt;</code> - Kullanıcıyı sustur
                 </div>
-                <textarea id="aiPromptInput" rows="2" placeholder="Katya'ya talimat ver (Örn: /welcome Merhaba, /defol @kullanici)..." style="margin-top: 4px;"></textarea>
+                <textarea id="aiPromptInput" rows="2" placeholder="Komut veya talimat ver..." style="margin-top: 4px;"></textarea>
                 <button class="gold-btn" onclick="sendAiCommand()">Katya AI'a İlet</button>
-                <div id="aiResponseBox" style="margin-top: 8px; font-size: 8px; color: var(--gold-glow); background: rgba(0,0,0,0.5); padding: 8px; border-radius: 6px; display: none;"></div>
+                <div id="aiResponseBox" style="margin-top: 8px; font-size: 8px; color: var(--gold-light); background: var(--bg-base); padding: 8px; border-radius: 6px; display: none;"></div>
             </div>
         </div>
 
-        <!-- 5. SEKME: GENEL LOGLAR -->
+        <!-- 5. SEKME: LOGLAR -->
         <div id="sec-logs" class="app-section">
             <div class="gold-card">
                 <div class="section-title"><span>📜 Genel Canlı Log Akışı</span><span style="font-size: 6px; color:var(--success);">● Realtime</span></div>
@@ -239,7 +229,7 @@
 
     </main>
 
-    <!-- 📱 iOS Tarzı Şeffaf Kaydırılabilir Görev Çubuğu (Dock) -->
+    <!-- 📱 iOS Tarzı Şeffaf Görev Çubuğu (Dock) -->
     <nav class="ios-dock">
         <div class="dock-item active" onclick="switchSection('groups', event)">
             <span>🪐</span>
@@ -255,7 +245,7 @@
         </div>
         <div class="dock-item" onclick="switchSection('ai', event)">
             <span>🤖</span>
-            <span>Katya AI</span>
+            <span>AI</span>
         </div>
         <div class="dock-item" onclick="switchSection('logs', event)">
             <span>📜</span>
@@ -264,15 +254,15 @@
     </nav>
 
     <!-- 🚀 GRUBA ÖZEL BALONCUK PORTU (GROUP MODAL) -->
-    <div class="ios-bubble-modal" id="groupModal">
+    <div class="ios-modal" id="groupModal">
         <div class="modal-header" onclick="toggleGroupModal()">
             <div class="modal-heading" id="modalGroupName">Grup Komuta Portu</div>
             <div class="modal-dismiss">KAPAT [ X ]</div>
         </div>
         <div class="modal-content">
-            <div style="background: rgba(212,175,55,0.1); border: 1px solid var(--gold); padding: 10px; border-radius: 8px;">
-                <div style="font-size: 7px; color: var(--gold-glow);">SEÇİLEN AKTİF GRUP</div>
-                <div id="modalGroupFullName" style="font-size: 10px; font-weight: 900; color: #fff; margin-top: 2px;">-</div>
+            <div style="background: var(--gold-dim); border: 1px solid var(--border-subtle); padding: 10px; border-radius: 8px;">
+                <div style="font-size: 7px; color: var(--gold-light);">SEÇİLEN AKTİF GRUP</div>
+                <div id="modalGroupFullName" style="font-size: 10px; font-weight: 800; color: #fff; margin-top: 2px;">-</div>
                 <div id="modalGroupId" style="font-size: 7px; color: var(--text-muted); margin-top: 1px;">ID: -</div>
             </div>
 
@@ -296,8 +286,8 @@
         let user = tg.initDataUnsafe?.user || { id: 8245373459, first_name: "Breskavica", username: "breskavica" };
         let activeChatId = 0;
         let activeGroupTitle = "";
+        let globalGroupsCache = [];
 
-        // Sekme Geçişleri
         function switchSection(secName, evt) {
             document.querySelectorAll('.app-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.dock-item').forEach(el => el.classList.remove('active'));
@@ -314,7 +304,6 @@
             modal.classList.toggle('open');
         }
 
-        // Yetkilendirme Kontrolü (Sadece Founder & Yetkili)
         async function verifyAccess() {
             try {
                 const res = await fetch('/api/verify-admin', { 
@@ -323,7 +312,7 @@
                 });
                 const data = await res.json();
                 if (!data.authorized) {
-                    document.body.innerHTML = `<div style="text-align:center; padding:80px 20px; color:var(--danger);"><h2 style="font-size:16px;">⛔ YETKİSİZ ERİŞİM!</h2><p style="font-size:10px; color:#fff; margin-top:10px;">Bu konsol yalnızca Founder ve yetkili muhafızlar içindir.</p></div>`;
+                    document.body.innerHTML = `<div style="text-align:center; padding:80px 20px; color:var(--danger);"><h2 style="font-size:16px;">⛔ YETKİSİZ ERİŞİM!</h2><p style="font-size:10px; color:#fff; margin-top:10px;">Bu konsol yalnızca yetkili muhafızlar içindir.</p></div>`;
                     return;
                 }
                 const isFounder = String(user.id) === "8245373459" || data.is_founder;
@@ -337,45 +326,55 @@
             }
         }
 
-        // Grupları Yükle
         async function loadAllGroups() {
             try {
                 const res = await fetch('/api/groups');
-                const groups = await res.json();
-                const container = document.getElementById('groupsListContainer');
-                document.getElementById('groupCount').innerText = groups.length + " Aktif";
-
-                if (groups.length === 0) {
-                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Henüz aktif bot grubu algılanmadı.</div>`;
-                    return;
-                }
-
-                let html = '';
-                groups.forEach(g => {
-                    const isSelected = activeChatId == g.chat_id;
-                    let avatar = `🛡️`;
-                    if (g.photo_url) {
-                        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(g.photo_url)}`;
-                        avatar = `<img src="${proxyUrl}" onerror="this.parentElement.innerHTML='🛡️'">`;
-                    }
-                    html += `
-                        <div class="group-card ${isSelected ? 'active' : ''}" onclick="openGroupModal(${g.chat_id}, '${encodeURIComponent(g.title || 'Grup')}')">
-                            <div class="group-meta">
-                                <div class="group-avatar">${avatar}</div>
-                                <div class="group-details">
-                                    <div class="group-title">${g.title || 'Grup'}</div>
-                                    <div class="group-id-sub">ID: ${g.chat_id}</div>
-                                </div>
-                            </div>
-                            <div style="font-size: 8px; color: var(--gold-glow); font-weight: 800;">YÖNET ›</div>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
+                globalGroupsCache = await res.json();
+                renderGroupList(globalGroupsCache);
             } catch (e) {}
         }
 
-        // Gruba Özel Baloncuk Portunu Aç
+        function renderGroupList(groups) {
+            const container = document.getElementById('groupsListContainer');
+            document.getElementById('groupCount').innerText = groups.length + " Aktif";
+
+            if (groups.length === 0) {
+                container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Grup bulunamadı.</div>`;
+                return;
+            }
+
+            let html = '';
+            groups.forEach(g => {
+                const isSelected = activeChatId == g.chat_id;
+                let avatar = `🛡️`;
+                if (g.photo_url) {
+                    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(g.photo_url)}`;
+                    avatar = `<img src="${proxyUrl}" onerror="this.parentElement.innerHTML='🛡️'">`;
+                }
+                html += `
+                    <div class="group-card ${isSelected ? 'active' : ''}" onclick="openGroupModal(${g.chat_id}, '${encodeURIComponent(g.title || 'Grup')}')">
+                        <div class="group-meta">
+                            <div class="group-avatar">${avatar}</div>
+                            <div class="group-details">
+                                <div class="group-title">${g.title || 'Grup'}</div>
+                                <div class="group-id-sub">ID: ${g.chat_id}</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 8px; color: var(--gold-light); font-weight: 700;">YÖNET ›</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function filterGroups() {
+            const query = document.getElementById('groupSearchInput').value.toLowerCase();
+            const filtered = globalGroupsCache.filter(g => 
+                (g.title && g.title.toLowerCase().includes(query)) || String(g.chat_id).includes(query)
+            );
+            renderGroupList(filtered);
+        }
+
         async function openGroupModal(chatId, encodedTitle) {
             activeChatId = chatId;
             activeGroupTitle = decodeURIComponent(encodedTitle);
@@ -383,11 +382,11 @@
             document.getElementById('modalGroupName').innerText = activeGroupTitle;
             document.getElementById('modalGroupFullName').innerText = activeGroupTitle;
             document.getElementById('modalGroupId').innerText = "ID: " + chatId;
+            document.getElementById('activeGroupStaffNotice').innerText = "Aktif Grup: " + activeGroupTitle;
             
             const modal = document.getElementById('groupModal');
             modal.classList.add('open');
 
-            // Gruba özel logları çek
             const res = await fetch('/api/logs?filter=general&limit=25');
             const logs = await res.json();
             const groupLogContainer = document.getElementById('groupSpecificLogsContainer');
@@ -395,20 +394,19 @@
             logs.filter(l => l.chat_id == chatId || true).forEach(l => {
                 lHtml += `<div class="log-item"><span class="log-time">${l.timestamp}</span><span class="log-action">${l.action_type}</span>: @${l.username || l.target_id}</div>`;
             });
-            groupLogContainer.innerHTML = lHtml || '<div style="font-size:8px; color:var(--text-muted);">Bu gruba ait özel log kaydı yok.</div>';
+            groupLogContainer.innerHTML = lHtml || '<div style="font-size:8px; color:var(--text-muted);">Bu gruba ait özel log yok.</div>';
             
             loadAllGroups();
             loadStaffList();
         }
 
-        // Genel Logları Yükle
         async function loadGlobalLogs() {
             try {
                 const res = await fetch('/api/logs?filter=general&limit=35');
                 const logs = await res.json();
                 const container = document.getElementById('globalLogsContainer');
                 if (logs.length === 0) {
-                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Henüz log kaydı yok.</div>`;
+                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Log yok.</div>`;
                     return;
                 }
                 let html = '';
@@ -417,7 +415,7 @@
                         <div class="log-item">
                             <span class="log-time">${l.timestamp}</span>
                             <span class="log-action">${l.action_type}</span>
-                            <div style="margin-top: 2px; color: var(--gold-glow);">Hedef: @${l.username || l.target_id}</div>
+                            <div style="margin-top: 2px; color: var(--gold-light);">Hedef: @${l.username || l.target_id}</div>
                             <div style="font-size: 7px; color: #ccc; margin-top: 1px;">${l.details || ''}</div>
                         </div>
                     `;
@@ -426,7 +424,6 @@
             } catch (e) {}
         }
 
-        // Üye Eylemleri (Ban, Mute, vb.)
         async function executeAction(actionType) {
             const target = document.getElementById('targetUserInput').value.trim();
             if (!target) return alert("Lütfen hedef kullanıcı (@username veya ID) girin!");
@@ -438,26 +435,31 @@
             });
             const data = await res.json();
             if (data.success) {
-                alert(`✅ Eylem başarıyla uygulandı: ${actionType}`);
+                alert(`✅ Eylem uygulandı: ${actionType}`);
                 document.getElementById('targetUserInput').value = '';
             } else {
-                alert(`❌ İşlem başarısız: ${data.error || 'Yetkisiz işlem!'}`);
+                alert(`❌ Başarısız: ${data.error || 'Yetkisiz!'}`);
             }
         }
 
-        // Granüler Yetki Matrisi (Gruplara Göre Farklı Yetkiler)
         async function loadStaffList() {
             try {
+                const container = document.getElementById('staffListContainer');
+                if (!container) return;
+
+                if (!activeChatId) {
+                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align:center; padding:10px;">Granüler hakları düzenlemek için önce 'Gruplar' sekmesinden bir grup seçmelisiniz.</div>`;
+                    return;
+                }
+
                 const res = await fetch('/api/staff/list', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: user.id, chat_id: activeChatId })
                 });
                 const staffs = await res.json();
-                const container = document.getElementById('staffListContainer');
-                if (!container) return;
                 
                 if (staffs.length === 0) {
-                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted);">Bu yörüngede kayıtlı özel yetkili bulunmuyor.</div>`;
+                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted);">Bu grupta kayıtlı özel yetkili yok.</div>`;
                     return;
                 }
                 let html = '';
@@ -470,7 +472,7 @@
                     html += `
                         <div class="gold-card" style="padding: 8px; margin-bottom: 6px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                <span style="font-size:9px; font-weight:900; color:var(--gold-glow);">${sName} (ID: ${targetId})</span>
+                                <span style="font-size:9px; font-weight:800; color:var(--gold-light);">${sName} (ID: ${targetId})</span>
                                 <button class="gold-btn" style="width: auto; background: var(--danger); color:#fff; padding: 2px 6px; font-size:6px;" onclick="removeStaffMember(${targetId})">Sil</button>
                             </div>
                             <div class="switch-row">
@@ -489,7 +491,7 @@
         }
 
         async function toggleStaffPerm(targetId, permField) {
-            if (!activeChatId) return alert("Önce bir grup seçin!");
+            if (!activeChatId) return alert("Önce grup seçin!");
             await fetch('/api/staff/toggle', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ target_id: targetId, chat_id: activeChatId, perm: permField })
@@ -498,9 +500,9 @@
 
         async function addNewStaff() {
             const input = document.getElementById('staffInputId').value.trim();
-            const name = document.getElementById('staffNameInput').value.trim() || '🛡️ Kristal Muhafız';
-            if (!input) return alert("Kullanıcı ID veya @username girin!");
-            if (!activeChatId) return alert("Lütfen önce bir grup seçin!");
+            const name = document.getElementById('staffNameInput').value.trim() || '🛡️ Muhafız';
+            if (!input) return alert("ID veya @username girin!");
+            if (!activeChatId) return alert("Önce bir grup seçin!");
             
             await fetch('/api/staff/add', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -509,11 +511,11 @@
             document.getElementById('staffInputId').value = '';
             document.getElementById('staffNameInput').value = '';
             loadStaffList();
-            alert("✅ Yetkili muhafız bu gruba mühürlendi!");
+            alert("✅ Yetkili gruba mühürlendi!");
         }
 
         async function removeStaffMember(targetId) {
-            if (!confirm("Bu yetkili bu gruptan kaldırılsın mı?")) return;
+            if (!confirm("Kaldırılsın mı?")) return;
             await fetch('/api/staff/remove', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: user.id, chat_id: activeChatId, target_id: targetId })
@@ -531,11 +533,10 @@
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: user.id, chat_id: activeChatId, welcome_msg: welcome, btn_text: btnText, btn_url: btnUrl })
             });
-            alert(`⚜️ ${activeGroupTitle} protokolleri başarıyla mühürlendi!`);
+            alert(`⚜️ ${activeGroupTitle} protokolleri mühürlendi!`);
             toggleGroupModal();
         }
 
-        // Katya AI Komut Yorumlayıcı
         async function sendAiCommand() {
             const promptBox = document.getElementById('aiPromptInput');
             const respBox = document.getElementById('aiResponseBox');
@@ -543,26 +544,26 @@
             if (!text) return;
             
             respBox.style.display = 'block';
-            respBox.innerText = "🤖 Katya AI: Talimat analiz ediliyor...";
+            respBox.innerText = "🤖 Katya AI: İşleniyor...";
             
-            let reply = "⚜️ Katya AI: İşlem tamamlandı.";
+            let reply = "⚜️ İşlem tamamlandı.";
             const lower = text.toLowerCase();
 
             try {
                 if (lower.startsWith('/welcome') || lower.startsWith('welcome')) {
                     const msg = text.split(' ').slice(1).join(' ');
                     await fetch('/api/settings/update', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: user.id, chat_id: activeChatId, welcome_msg: msg}) });
-                    reply = `✅ Karşılama mesajı güncellendi: "${msg}"`;
+                    reply = `✅ Karşılama güncellendi: "${msg}"`;
                 } else if (lower.startsWith('/defol') || lower.startsWith('ban')) {
                     const target = text.split(' ')[1];
                     const res = await fetch('/api/member/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: user.id, target: target, action: 'ban', chat_id: activeChatId}) });
                     const d = await res.json();
-                    reply = d.success ? `🚫 ${target} gruptan banlandı!` : `❌ İşlem başarısız: ${d.error}`;
+                    reply = d.success ? `🚫 ${target} banlandı!` : `❌ Başarısız: ${d.error}`;
                 } else {
-                    reply = `🤖 Katya AI: "${text}" talimatı doğrulandı ve yörünge protokollerine işlendi, Kraljica.`;
+                    reply = `🤖 Katya AI: "${text}" talimatı doğrulandı, Kraljica.`;
                 }
             } catch (err) {
-                reply = `❌ AI Hata: ${err.message}`;
+                reply = `❌ Hata: ${err.message}`;
             }
 
             respBox.innerText = reply;
