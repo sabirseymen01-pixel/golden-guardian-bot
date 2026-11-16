@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Golden Katya | Professional HUD Deck</title>
+    <title>Golden Katya | Siri-Style Cyber HUD</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --space-black: #040107;
+            --space-black: #030005;
             --hud-pink: #ff2a85;
             --hud-purple: #b967ff;
             --hud-glow: #ff71ce;
@@ -17,364 +16,240 @@
             --gold-glow: #f8ecbe;
             --danger-red: #ff3333;
             --success-green: #2ecc71;
-            --glass-panel: rgba(14, 4, 22, 0.94);
-            --border-cyber: rgba(185, 103, 255, 0.45);
-            --border-gold: rgba(212, 175, 55, 0.65);
+            --glass-bg: rgba(16, 4, 26, 0.82);
+            --glass-border: rgba(212, 175, 55, 0.4);
+            --neon-border: rgba(255, 42, 133, 0.5);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: monospace; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; -webkit-tap-highlight-color: transparent; }
         
         html, body {
             height: 100vh; width: 100vw; overflow: hidden; background-color: var(--space-black);
         }
 
-        /* 🌸 Profesyonel Pembe-Mor ve Altın Atmosfer */
+        /* 🌌 Apple / Siri Tarzı Derin Işıltılı Arka Plan */
         body {
             background: 
-                radial-gradient(circle at 50% 10%, rgba(212, 175, 55, 0.2) 0%, transparent 50%),
-                radial-gradient(circle at 85% 85%, rgba(185, 103, 255, 0.25) 0%, transparent 60%),
-                radial-gradient(circle at 15% 75%, rgba(255, 42, 133, 0.22) 0%, transparent 60%),
-                linear-gradient(135deg, #08010e 0%, #020004 100%);
-            color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 8px;
+                radial-gradient(circle at 50% 30%, rgba(185, 103, 255, 0.22) 0%, transparent 60%),
+                radial-gradient(circle at 80% 80%, rgba(255, 42, 133, 0.18) 0%, transparent 70%),
+                radial-gradient(circle at 20% 70%, rgba(212, 175, 55, 0.15) 0%, transparent 60%),
+                linear-gradient(135deg, #07010d 0%, #020003 100%);
+            color: #fff; display: flex; flex-direction: column; justify-content: space-between; padding: 12px;
         }
 
-        #webgl-container {
-            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none;
-        }
-
-        /* Üst Komuta Header */
+        /* Üst Minimalist Header */
         .hud-header {
-            position: relative; z-index: 10; display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 14px; background: rgba(12, 3, 20, 0.92); backdrop-filter: blur(20px); border-radius: 10px;
-            border: 1.5px solid var(--border-gold); box-shadow: 0 0 25px rgba(212, 175, 55, 0.25);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 14px; background: rgba(12, 3, 20, 0.6); backdrop-filter: blur(25px);
+            border-radius: 14px; border: 1px solid var(--glass-border); box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         }
-        .logo { font-size: 11px; color: var(--gold-glow); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 12px var(--gold-accent); }
-        .badge { background: rgba(212, 175, 55, 0.25); color: var(--gold-glow); padding: 4px 10px; border-radius: 6px; font-size: 8px; border: 1px solid var(--gold-accent); font-weight: 900; }
+        .logo { font-size: 11px; color: var(--gold-glow); font-weight: 900; letter-spacing: 2px; text-shadow: 0 0 10px var(--gold-accent); }
+        .badge { background: rgba(212, 175, 55, 0.15); color: var(--gold-glow); padding: 4px 10px; border-radius: 8px; font-size: 8px; border: 1px solid var(--gold-accent); font-weight: 900; }
 
-        /* 🪐 BÜYÜTÜLMÜŞ VE PROFESYONEL RADAR KONSOLU */
-        .radar-deck {
-            position: relative; z-index: 10; width: 100%; height: 195px; display: flex; align-items: center; justify-content: center;
-            background: rgba(6, 1, 10, 0.88); border-radius: 50%; border: 2px solid var(--gold-accent);
-            box-shadow: 0 0 40px rgba(255, 42, 133, 0.2), inset 0 0 25px rgba(212, 175, 55, 0.2);
-            margin: 6px auto; max-width: 340px;
+        /* 🍏 APPLE SIRI TARZI CANLI SIVI KÜRE (ORB) MERKEZİ */
+        .siri-container {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;
         }
         
-        /* ⚜️ Merkezde Şık ve Profesyonel "KATYA" Çekirdeği */
-        .katya-core {
-            position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
-            width: 70px; height: 70px; border-radius: 50%; background: radial-gradient(circle, var(--gold-glow) 0%, var(--gold-accent) 65%, #2a1f05 100%);
-            border: 2.5px solid var(--hud-glow); display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 25px var(--gold-accent), inset 0 0 10px rgba(255,255,255,0.5); z-index: 25; cursor: pointer;
-            transition: transform 0.3s ease;
+        .siri-orb {
+            width: 130px; height: 130px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, var(--hud-glow) 0%, var(--hud-pink) 35%, var(--hud-purple) 70%, #11001c 100%);
+            box-shadow: 0 0 50px rgba(255, 42, 133, 0.6), inset 0 0 25px rgba(255, 255, 255, 0.6);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            animation: siriBreath 4s ease-in-out infinite alternate;
+            transition: transform 0.4s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+            position: relative; z-index: 10;
         }
-        .katya-core:active { transform: translate(-50%, -50%) scale(0.95); }
-        .core-icon { font-size: 18px; text-shadow: 0 0 5px rgba(0,0,0,0.8); }
-        .core-text { font-size: 8px; font-weight: 900; color: #000; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+        .siri-orb:hover { transform: scale(1.08); box-shadow: 0 0 70px rgba(212, 175, 55, 0.8), inset 0 0 30px #fff; }
+        .siri-orb:active { transform: scale(0.95); }
 
-        /* Pürüzsüz Yörünge Halkası */
+        @keyframes siriBreath {
+            0% { transform: scale(1); filter: hue-rotate(0deg); box-shadow: 0 0 40px rgba(255, 42, 133, 0.5), inset 0 0 20px rgba(255,255,255,0.4); }
+            50% { transform: scale(1.06); filter: hue-rotate(15deg); box-shadow: 0 0 65px rgba(185, 103, 255, 0.7), inset 0 0 30px rgba(255,255,255,0.7); }
+            100% { transform: scale(1); filter: hue-rotate(0deg); box-shadow: 0 0 40px rgba(255, 42, 133, 0.5), inset 0 0 20px rgba(255,255,255,0.4); }
+        }
+
+        .siri-core-text { font-size: 11px; font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(0,0,0,0.8); letter-spacing: 2px; }
+        .siri-hint { font-size: 8px; color: rgba(255,255,255,0.6); margin-top: 15px; letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 0 8px rgba(185,103,255,0.5); }
+
+        /* 🪐 Çevrede Dönen Gruplar Çemberi */
         .orbit-ring {
-            position: absolute; width: 100%; height: 100%; left: 0; top: 0; pointer-events: none;
-            animation: orbitSpin 50s linear infinite;
+            position: absolute; width: 280px; height: 280px; pointer-events: none;
+            animation: orbitSpin 50s linear infinite; left: 50%; top: 50%; margin-left: -140px; margin-top: -140px;
         }
         @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .orbit-node {
-            position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 20;
+            position: absolute; left: 50%; top: 50%; display: flex; flex-direction: column; align-items: center; cursor: pointer; z-index: 15;
             pointer-events: auto; transition: transform 0.3s ease;
         }
         .orbit-node-inner { display: flex; flex-direction: column; align-items: center; animation: counterSpin 50s linear infinite; }
         @keyframes counterSpin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
 
         .orbit-avatar {
-            width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--gold-accent);
+            width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--gold-accent);
             background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 0 12px var(--gold-accent); transition: all 0.3s ease;
         }
         .orbit-node:hover .orbit-avatar, .orbit-node.active .orbit-avatar {
-            border-color: var(--hud-pink); box-shadow: 0 0 22px var(--hud-pink); transform: scale(1.15);
+            border-color: var(--hud-pink); box-shadow: 0 0 25px var(--hud-pink); transform: scale(1.15);
         }
-        
-        /* Uyarı / Warning Durumunda Büyüme ve Alarm Efekti */
         .orbit-node.warning .orbit-avatar {
             border-color: var(--danger-red); box-shadow: 0 0 30px var(--danger-red);
             animation: warningPulse 1s infinite alternate;
         }
-        @keyframes warningPulse {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.3); }
-        }
+        @keyframes warningPulse { 0% { transform: scale(1); } 100% { transform: scale(1.25); } }
 
         .orbit-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* Tam Grup Adı Kesilmeden Okunur */
         .orbit-label {
-            font-size: 7px; color: var(--gold-glow); background: rgba(10, 2, 16, 0.95); padding: 2px 6px; border-radius: 4px;
+            font-size: 7px; color: var(--gold-glow); background: rgba(10, 2, 16, 0.9); padding: 2px 6px; border-radius: 6px;
             margin-top: 3px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
             border: 1px solid var(--gold-accent); box-shadow: 0 0 8px rgba(212, 175, 55, 0.4); text-align: center;
         }
 
-        /* 🪞 Yumuşak Geçişli Sekmeler */
+        /* Alt Navigasyon (Yumuşak Geçişli Sekmeler) */
         .hud-nav {
-            position: relative; z-index: 10; display: flex; gap: 4px; overflow-x: auto; padding: 4px 0; scrollbar-width: none;
+            display: flex; gap: 6px; padding: 6px 0; background: rgba(12, 3, 20, 0.6); backdrop-filter: blur(20px);
+            border-radius: 12px; border: 1px solid var(--glass-border);
         }
-        .hud-nav::-webkit-scrollbar { display: none; }
         .hud-tab {
-            flex: 1; background: rgba(20, 6, 32, 0.85); backdrop-filter: blur(15px);
-            border: 1px solid var(--border-cyber); color: #d4c8b0; padding: 9px 6px;
+            flex: 1; background: rgba(20, 6, 32, 0.7); border: 1px solid var(--glass-border); color: #d4c8b0; padding: 10px 4px;
             font-size: 8px; font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6); transition: all 0.3s ease; white-space: nowrap;
+            transition: all 0.3s ease; white-space: nowrap;
         }
         .hud-tab.active {
             background: linear-gradient(135deg, rgba(212, 175, 55, 0.6) 0%, rgba(255, 42, 133, 0.5) 100%);
-            color: #fff; border-color: var(--gold-accent); box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+            color: #fff; border-color: var(--gold-accent); box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
         }
 
-        /* 🎛️ Ana İçerik Viewport */
-        .hud-viewport {
-            position: relative; z-index: 10; flex: 1; background: var(--glass-panel); backdrop-filter: blur(25px);
-            border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 12px; overflow-y: auto; margin-top: 6px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.9), inset 0 0 20px rgba(212, 175, 55, 0.1);
+        /* 🍏 Apple Tarzı Kaydırılabilir Büyüyüp Küçülen Camsı Drawer (Portlar) */
+        .glass-drawer {
+            position: fixed; bottom: 0; left: 0; width: 100vw; height: 0; background: rgba(12, 3, 22, 0.95);
+            backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+            border-top: 2px solid var(--hud-pink); border-radius: 24px 24px 0 0;
+            box-shadow: 0 -20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255,255,255,0.2);
+            z-index: 100; transition: height 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column; overflow: hidden;
         }
-        .mod-section { display: none; flex-direction: column; gap: 8px; animation: fadeIn 0.4s ease; }
-        .mod-section.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .glass-drawer.open { height: 82vh; }
 
-        .section-title { font-size: 9px; font-weight: 900; color: var(--gold-glow); border-bottom: 1px solid rgba(212, 175, 55, 0.4); padding-bottom: 3px; margin-bottom: 4px; text-transform: uppercase; }
+        .drawer-header {
+            padding: 14px 18px; background: rgba(25, 5, 40, 0.8); display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--glass-border); cursor: pointer;
+        }
+        .drawer-title { font-size: 10px; font-weight: 900; color: var(--gold-glow); text-transform: uppercase; letter-spacing: 1px; }
+        .drawer-close { font-size: 9px; color: var(--hud-glow); background: rgba(255,42,133,0.2); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--hud-pink); cursor: pointer; font-weight: 900; }
+        
+        .drawer-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; }
+        .drawer-input-bar { display: flex; padding: 10px 14px; background: #050109; border-top: 1px solid var(--glass-border); gap: 8px; }
+        .drawer-input-bar input { flex: 1; background: rgba(20, 6, 32, 0.9); border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px; color: #fff; font-size: 9px; outline: none; }
+        .drawer-input-bar input:focus { border-color: var(--hud-pink); box-shadow: 0 0 10px var(--hud-pink); }
+
+        .section-title { font-size: 9px; font-weight: 900; color: var(--gold-glow); border-bottom: 1px solid rgba(212, 175, 55, 0.3); padding-bottom: 4px; margin-bottom: 6px; text-transform: uppercase; }
 
         input, select, textarea {
-            width: 100%; background: rgba(5, 1, 10, 0.9); border: 1px solid var(--border-cyber);
-            border-radius: 6px; padding: 8px; color: #fff; font-size: 9px; outline: none; margin-bottom: 6px;
+            width: 100%; background: rgba(10, 2, 16, 0.85); border: 1px solid var(--glass-border);
+            border-radius: 8px; padding: 9px; color: #fff; font-size: 9px; outline: none; margin-bottom: 6px;
         }
-        input:focus { border-color: var(--gold-accent); box-shadow: 0 0 8px var(--gold-accent); }
+        input:focus, textarea:focus { border-color: var(--gold-accent); box-shadow: 0 0 10px var(--gold-accent); }
 
         .cyber-btn {
             width: 100%; background: linear-gradient(135deg, var(--gold-accent) 0%, var(--hud-pink) 100%); color: #000;
-            border: none; padding: 9px; border-radius: 6px; font-weight: 900; font-size: 8px; cursor: pointer; text-transform: uppercase;
-            box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
+            border: none; padding: 10px; border-radius: 8px; font-weight: 900; font-size: 9px; cursor: pointer; text-transform: uppercase;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4); transition: transform 0.2s;
         }
         .cyber-btn:active { transform: scale(0.97); }
 
-        .item-row { background: rgba(12, 3, 20, 0.8); border: 1px solid rgba(185, 103, 255, 0.3); padding: 7px; border-radius: 6px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 8px; }
-        .log-box { background: rgba(10, 2, 16, 0.85); border: 1px solid rgba(255, 42, 133, 0.3); padding: 7px; border-radius: 6px; margin-bottom: 4px; font-size: 7px; color: var(--gold-glow); }
+        .item-row { background: rgba(18, 5, 28, 0.8); border: 1px solid var(--glass-border); padding: 8px; border-radius: 8px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 9px; }
+        .log-box { background: rgba(10, 2, 16, 0.9); border: 1px solid var(--neon-border); padding: 8px; border-radius: 8px; margin-bottom: 6px; font-size: 8px; color: var(--gold-glow); }
 
-        /* 🚀 Gruba Özel Kayan Cam Port (Group Drawer) */
-        .group-drawer {
-            position: fixed; bottom: 0; left: 0; width: 100vw; height: 0; background: rgba(12, 3, 22, 0.98);
-            backdrop-filter: blur(35px); border-top: 2px solid var(--gold-accent); border-radius: 16px 16px 0 0;
-            box-shadow: 0 -15px 50px rgba(212, 175, 55, 0.35); z-index: 120; transition: height 0.4s cubic-bezier(0.15, 0.85, 0.35, 1.2);
-            display: flex; flex-direction: column; overflow: hidden;
-        }
-        .group-drawer.open { height: 75vh; }
-
-        /* 🤖 Katya AI Mesaj Portu (Drawer) */
-        .ai-drawer {
-            position: fixed; bottom: 0; left: 0; width: 100vw; height: 0; background: rgba(12, 3, 22, 0.98);
-            backdrop-filter: blur(35px); border-top: 2px solid var(--hud-pink); border-radius: 16px 16px 0 0;
-            box-shadow: 0 -15px 50px rgba(255, 42, 133, 0.4); z-index: 120; transition: height 0.4s cubic-bezier(0.15, 0.85, 0.35, 1.2);
-            display: flex; flex-direction: column; overflow: hidden;
-        }
-        .ai-drawer.open { height: 75vh; }
-
-        .drawer-header {
-            padding: 10px 14px; background: rgba(25, 5, 40, 0.95); display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid var(--border-gold); cursor: pointer;
-        }
-        .drawer-title { font-size: 9px; font-weight: 900; color: var(--gold-glow); text-transform: uppercase; letter-spacing: 1px; }
-        .drawer-close { font-size: 10px; color: var(--gold-accent); cursor: pointer; font-weight: 900; }
-        .drawer-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; }
-        .drawer-input-bar { display: flex; padding: 8px; background: #040107; border-top: 1px solid var(--border-gold); gap: 6px; }
-        .drawer-input-bar input { margin-bottom: 0; }
-        
-        .j-msg { max-width: 85%; padding: 6px 10px; border-radius: 6px; font-size: 8px; line-height: 1.3; }
-        .j-msg.ai { background: rgba(212, 175, 55, 0.15); color: var(--gold-glow); border: 1px solid var(--gold-accent); align-self: flex-start; }
-        .j-msg.user { background: rgba(255, 42, 133, 0.25); color: #fff; border: 1px solid var(--hud-pink); align-self: flex-end; }
+        /* Sohbet Baloncukları (Siri / Katya AI) */
+        .ai-msg { max-width: 88%; padding: 8px 12px; border-radius: 10px; font-size: 9px; line-height: 1.4; }
+        .ai-msg.ai { background: rgba(185, 103, 255, 0.2); color: var(--gold-glow); border: 1px solid var(--hud-purple); align-self: flex-start; }
+        .ai-msg.user { background: rgba(255, 42, 133, 0.25); color: #fff; border: 1px solid var(--hud-pink); align-self: flex-end; }
     </style>
 </head>
 <body>
 
-    <!-- 🌸 Three.js Parçacık Arka Plan Motoru -->
-    <div id="webgl-container"></div>
-
-    <!-- Üst Komuta Header -->
+    <!-- Üst Header -->
     <div class="hud-header">
-        <div class="logo">⚜️ KATYA PROFESSIONAL HUD</div>
+        <div class="logo">⚜️ GOLDEN KATYA HUD</div>
         <div class="badge" id="userRole">Kraljica 👑</div>
     </div>
 
-    <!-- 🪐 Büyütülmüş ve Merkezinde KATYA Yazan Radar Konsolu -->
-    <div class="radar-deck" id="radarContainer">
-        <div class="katya-core" onclick="toggleAiDrawer()" title="Katya AI Portunu Aç">
-            <div class="core-icon">⚜️</div>
-            <div class="core-text">KATYA</div>
-        </div>
+    <!-- 🍏 APPLE SIRI ORB MERKEZİ VE YÖRÜNGE GRUPLARI -->
+    <div class="siri-container">
         <div class="orbit-ring" id="radarNodesRing"></div>
+        <div class="siri-orb" onclick="toggleDrawer('aiDrawer')" title="Katya ile Konuş">
+            <div class="siri-core-text">KATYA</div>
+        </div>
+        <div class="siri-hint">Dokun ve Katya ile Konuş / Komut Ver</div>
     </div>
 
-    <!-- 🪞 Yumuşak Geçişli Sekmeler -->
+    <!-- 🪞 Alt Sekmeler (Yumuşak Geçişli) -->
     <div class="hud-nav">
-        <div class="hud-tab active" onclick="switchMod('telemetry', event)">Telemetri</div>
-        <div class="hud-tab" onclick="switchMod('staff', event)">Staff Matrisi</div>
-        <div class="hud-tab" onclick="switchMod('tactical', event)">Taktiksel</div>
-        <div class="hud-tab" onclick="switchMod('logs', event)">Loglar</div>
-        <div class="hud-tab" onclick="switchMod('settings', event)">Protokoller</div>
-        <div class="hud-tab" onclick="toggleAiDrawer()" style="color: var(--gold-glow); border-color: var(--gold-accent);">🤖 Katya AI</div>
+        <div class="hud-tab active" onclick="openModule('telemetry')">Telemetri</div>
+        <div class="hud-tab" onclick="openModule('staff')">Staff</div>
+        <div class="hud-tab" onclick="openModule('tactical')">Taktiksel</div>
+        <div class="hud-tab" onclick="openModule('logs')">Loglar</div>
+        <div class="hud-tab" onclick="openModule('settings')">Ayar</div>
+        <div class="hud-tab" onclick="toggleDrawer('aiDrawer')" style="color: var(--gold-glow); border-color: var(--gold-accent);">🤖 Katya AI</div>
     </div>
 
-    <!-- 🎛️ İçerik Viewport -->
-    <div class="hud-viewport">
-        <!-- TELEMETRİ -->
-        <div id="mod-telemetry" class="mod-section active">
-            <div class="section-title">📊 Komuta Telemetrisi</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                <div style="background: rgba(10,2,16,0.7); padding: 8px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3);">
-                    <div style="font-size: 7px; color: #d4c8b0;">TOPLAM İŞLEM</div>
-                    <div id="totalActions" style="font-size: 13px; font-weight: 900; color: var(--gold-glow);">-</div>
-                </div>
-                <div style="background: rgba(10,2,16,0.7); padding: 8px; border-radius: 6px; border: 1px solid rgba(212,175,55,0.3);">
-                    <div style="font-size: 7px; color: #d4c8b0;">OTONOM BLOKE</div>
-                    <div id="totalBans" style="font-size: 13px; font-weight: 900; color: var(--danger-red);">-</div>
-                </div>
-            </div>
-            <div style="font-size: 7px; color: #d4c8b0; margin-top: 8px; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px;">
-                💡 <b>İpucu:</b> Yukarıdaki yörünge çemberinden herhangi bir gruba tıklayarak <b>o gruba özel komuta portunu</b> açabilir ve anlık olarak yönetebilirsin!
-            </div>
+    <!-- 🚀 APPLE TARZI KAYSAN CAM PORT (GENEL MODÜLLER İÇİN) -->
+    <div class="glass-drawer" id="mainDrawer">
+        <div class="drawer-header" onclick="closeMainDrawer()">
+            <div class="drawer-title" id="mainDrawerTitle">Modül</div>
+            <div class="drawer-close">KAPAT [ X ]</div>
         </div>
-
-        <!-- STAFF -->
-        <div id="mod-staff" class="mod-section">
-            <div class="section-title">👑 Yetki Matrisi</div>
-            <input type="text" id="staffInput" placeholder="@username veya ID">
-            <input type="text" id="staffName" placeholder="Rozet Ünvanı (Örn: 💎 Kristal)">
-            <button class="cyber-btn" onclick="addStaff()">Mühürle</button>
-            <div id="staffListContainer" style="max-height: 140px; overflow-y: auto; margin-top: 4px;"><div style="font-size:8px;">Yükleniyor...</div></div>
-        </div>
-
-        <!-- TAKTİKSEL -->
-        <div id="mod-tactical" class="mod-section">
-            <div class="section-title">⚡ Taktiksel Müdahale Portu</div>
-            <input type="text" id="memberTargetInput" placeholder="Kullanıcı ID veya @username">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                <button class="cyber-btn" style="background: var(--danger-red); color:#fff;" onclick="memberAction('ban')">Banla 🚫</button>
-                <button class="cyber-btn" style="background: var(--success-green); color:#fff;" onclick="memberAction('unban')">Ban Aç ✅</button>
-                <button class="cyber-btn" style="background: #e67e22; color:#fff;" onclick="memberAction('mute')">Mute 🔇</button>
-                <button class="cyber-btn" style="background: #3498db; color:#fff;" onclick="memberAction('unmute')">Unmute 🔊</button>
-            </div>
-        </div>
-
-        <!-- LOGLAR -->
-        <div id="mod-logs" class="mod-section">
-            <div class="section-title">📜 Zaman Akış Logları</div>
-            <div style="display: flex; gap: 6px; margin-bottom: 6px;">
-                <select id="logClearDays" style="margin-bottom:0;"><option value="1">Günlük</option><option value="7">Haftalık</option><option value="0">Tümünü Sil</option></select>
-                <button class="cyber-btn" style="width: auto; background: rgba(212,175,55,0.3); color: var(--gold-glow); border: 1px solid var(--gold-accent);" onclick="clearLogs()">Temizle</button>
-            </div>
-            <div id="generalLogsContainer" style="max-height: 140px; overflow-y: auto;"><div style="font-size:8px;">Loglar akıyor...</div></div>
-        </div>
-
-        <!-- PROTOKOLLER -->
-        <div id="mod-settings" class="mod-section">
-            <div class="section-title">⚙️ Genel Protokoller</div>
-            <p style="font-size: 7px; color: #d4c8b0; margin-bottom: 6px;">Global varsayılan ayarlar. Belirli bir grubu yapılandırmak için yörüngeden o gruba tıklayın.</p>
-            <textarea id="welcomeMsgInput" rows="2" placeholder="Global Karşılama metni..."></textarea>
-            <input type="text" id="btnTextInput" placeholder="Global Buton Metni">
-            <input type="text" id="btnUrlInput" placeholder="Global Buton Linki (https://)">
-            <button class="cyber-btn" onclick="saveSettings()">Kaydet</button>
+        <div class="drawer-body" id="mainDrawerBody">
+            <!-- Modül İçerikleri Dinamik Yüklenir -->
         </div>
     </div>
 
-    <!-- 🚀 Gruba Özel Kayan Cam Port (Group Drawer) -->
-    <div class="group-drawer" id="groupDrawer">
+    <!-- 🛡️ GRUBA ÖZEL LOG VE YÖNETİM PORTU -->
+    <div class="glass-drawer" id="groupDrawer">
         <div class="drawer-header" onclick="toggleGroupDrawer()">
-            <div class="drawer-title" id="drawerGroupTitle">🛡️ Grup Komuta Portu</div>
+            <div class="drawer-title" id="groupDrawerTitle">🛡️ Grup Komuta Portu</div>
             <div class="drawer-close">KAPAT [ X ]</div>
         </div>
         <div class="drawer-body">
-            <div style="background: rgba(255,42,133,0.1); border: 1px solid var(--hud-pink); padding: 8px; border-radius: 6px; margin-bottom: 6px;">
-                <div style="font-size: 7px; color: var(--hud-glow);">SEÇİLEN YÖRÜNGE GRUBU</div>
-                <div id="selectedGroupFullName" style="font-size: 9px; font-weight: 900; color: #fff; margin-top: 2px;">-</div>
-                <div id="selectedGroupId" style="font-size: 6px; color: #d4c8b0; margin-top: 1px;">ID: -</div>
+            <div style="background: rgba(255,42,133,0.1); border: 1px solid var(--hud-pink); padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                <div style="font-size: 8px; color: var(--hud-glow);">SEÇİLEN AKTİF YÖRÜNGE GRUBU</div>
+                <div id="selectedGroupFullName" style="font-size: 10px; font-weight: 900; color: #fff; margin-top: 3px;">-</div>
+                <div id="selectedGroupId" style="font-size: 7px; color: #d4c8b0; margin-top: 2px;">ID: -</div>
             </div>
 
-            <div class="section-title">Grup Karşılama Protokolü</div>
-            <textarea id="groupWelcomeInput" rows="2" placeholder="Bu gruba özel hoş geldin mesajı..."></textarea>
-            <input type="text" id="groupBtnTextInput" placeholder="Grup Buton Metni">
-            <input type="text" id="groupBtnUrlInput" placeholder="Grup Buton Linki (https://)">
-            <button class="cyber-btn" onclick="saveGroupSettings()">Grup Ayarlarını Mühürle</button>
+            <div class="section-title">Grup Karşılama Protokolü (/welcome)</div>
+            <textarea id="groupWelcomeInput" rows="2" placeholder="Hoş geldin mesajı..."></textarea>
+            <input type="text" id="groupBtnTextInput" placeholder="Buton Metni (/butonmetni)">
+            <input type="text" id="groupBtnUrlInput" placeholder="Buton Linki (/butonlinki)">
+            <button class="cyber-btn" onclick="saveGroupSettings()">Grubu Mühürle & Kaydet</button>
 
-            <div class="section-title" style="margin-top: 10px;">Hızlı Grup Eylemleri</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <div class="section-title" style="margin-top: 10px;">Gruba Özel Loglar & Eylemler</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
                 <button class="cyber-btn" style="background: var(--danger-red); color:#fff;" onclick="groupQuickAction('lock')">Sohbeti Kilitle 🔒</button>
                 <button class="cyber-btn" style="background: var(--success-green); color:#fff;" onclick="groupQuickAction('unlock')">Kilidi Aç 🔓</button>
             </div>
+            <div id="groupSpecificLogs" style="max-height: 140px; overflow-y: auto;"><div style="font-size:8px;">Grup logları yükleniyor...</div></div>
         </div>
     </div>
 
-    <!-- 🤖 Kaydırılabilir Yapay Zeka Mesaj Portu (AI Drawer) -->
-    <div class="ai-drawer" id="aiDrawer">
-        <div class="drawer-header" onclick="toggleAiDrawer()">
-            <div class="drawer-title">🤖 Katya AI Komuta Terminali</div>
+    <!-- 🤖 KATYA AI SİRİ / ASİSTAN MESAJ PORTU -->
+    <div class="glass-drawer" id="aiDrawer">
+        <div class="drawer-header" onclick="toggleDrawer('aiDrawer')">
+            <div class="drawer-title">🤖 Katya AI Akıllı Komuta Asistanı</div>
             <div class="drawer-close">KAPAT [ X ]</div>
         </div>
         <div class="drawer-body" id="aiScreen">
-            <div class="j-msg ai">⚜️ Neural Network aktif, Kraljica. Komut bekliyorum.</div>
+            <div class="ai-msg ai">⚜️ Katya Neural Network aktif, Kraljica. Komutlarınızı bekliyorum. (Örn: <br>• <code>/welcome Merhaba</code><br>• <code>/duyuru Önemli duyuru</code><br>• <code>/defol @kullanici</code><br>• <code>/uyari @kullanici</code>)</div>
         </div>
         <div class="drawer-input-bar">
-            <input type="text" id="aiInput" placeholder="Katya'ya talimat ver..." onkeypress="handleAiKey(event)">
-            <button class="cyber-btn" style="width: 55px;" onclick="sendAiCommand()">İlet</button>
+            <input type="text" id="aiInput" placeholder="Katya'ya komut veya talimat ver..." onkeypress="handleAiKey(event)">
+            <button class="cyber-btn" style="width: 65px; padding: 10px;" onclick="sendAiCommand()">İlet</button>
         </div>
     </div>
 
     <script>
-        // 🌸 Three.js Parçacık Arka Plan Motoru
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('webgl-container').appendChild(renderer.domElement);
-
-        const particlesCount = 350;
-        const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(particlesCount * 3);
-        for (let i = 0; i < particlesCount * 3; i += 3) {
-            positions[i] = (Math.random() - 0.5) * 15;
-            positions[i + 1] = (Math.random() - 0.5) * 15;
-            positions[i + 2] = (Math.random() - 0.5) * 15;
-        }
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const material = new THREE.PointsMaterial({ color: 0xd4af37, size: 0.04, transparent: true, opacity: 0.8 });
-        const starField = new THREE.Points(geometry, material);
-        scene.add(starField);
-        camera.position.z = 4.5;
-
-        function animate3D() {
-            requestAnimationFrame(animate3D);
-            starField.rotation.y += 0.0008;
-            renderer.render(scene, camera);
-        }
-        animate3D();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // DRAWER KONTROLÜ
-        function toggleAiDrawer() {
-            const drawer = document.getElementById('aiDrawer');
-            drawer.classList.toggle('open');
-            if(drawer.classList.contains('open')) {
-                document.getElementById('groupDrawer').classList.remove('open');
-            }
-        }
-
-        function toggleGroupDrawer() {
-            const drawer = document.getElementById('groupDrawer');
-            drawer.classList.toggle('open');
-            if(drawer.classList.contains('open')) {
-                document.getElementById('aiDrawer').classList.remove('open');
-            }
-        }
-
         const tg = window.Telegram.WebApp;
         try { tg.ready(); tg.expand(); } catch(e) {}
         
@@ -382,11 +257,106 @@
         let selectedChatId = 0;
         let selectedGroupTitle = "";
 
-        function switchMod(modName, evt) {
-            document.querySelectorAll('.mod-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.hud-tab').forEach(el => el.classList.remove('active'));
-            document.getElementById('mod-' + modName).classList.add('active');
-            if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
+        // DRAWER KONTROLÜ
+        function toggleDrawer(drawerId) {
+            const drawer = document.getElementById(drawerId);
+            const isOpen = drawer.classList.contains('open');
+            
+            // Tüm drawerları kapat
+            document.querySelectorAll('.glass-drawer').forEach(d => d.classList.remove('open'));
+            
+            if (!isOpen) {
+                drawer.classList.add('open');
+            }
+        }
+
+        function closeMainDrawer() {
+            document.getElementById('mainDrawer').classList.remove('open');
+        }
+
+        function toggleGroupDrawer() {
+            document.getElementById('groupDrawer').classList.toggle('open');
+        }
+
+        // MODÜL AÇMA (ALT SEKMELER)
+        async function openModule(modName) {
+            const drawer = document.getElementById('mainDrawer');
+            const titleEl = document.getElementById('mainDrawerTitle');
+            const bodyEl = document.getElementById('mainDrawerBody');
+            
+            drawer.classList.add('open');
+            document.getElementById('aiDrawer').classList.remove('open');
+            document.getElementById('groupDrawer').classList.remove('open');
+
+            if (modName === 'telemetry') {
+                titleEl.innerText = "📊 Komuta Telemetrisi";
+                const statsRes = await fetch('/api/stats');
+                const stats = await statsRes.json();
+                const bd = stats.action_breakdown || {};
+                const totalBans = (bd['BAN'] || 0) + (bd['AUTO_BAN'] || 0);
+
+                bodyEl.innerHTML = `
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div style="background: rgba(10,2,16,0.8); padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border);">
+                            <div style="font-size: 8px; color: #d4c8b0;">TOPLAM İŞLEM</div>
+                            <div style="font-size: 16px; font-weight: 900; color: var(--gold-glow); margin-top: 4px;">${stats.total_actions || 0}</div>
+                        </div>
+                        <div style="background: rgba(10,2,16,0.8); padding: 12px; border-radius: 8px; border: 1px solid var(--glass-border);">
+                            <div style="font-size: 8px; color: #d4c8b0;">OTONOM BLOKE</div>
+                            <div style="font-size: 16px; font-weight: 900; color: var(--danger-red); margin-top: 4px;">${totalBans}</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 8px; color: #d4c8b0; margin-top: 10px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;">
+                        💡 <b>Bilgi:</b> Çevrede dönen gruplara tıklayarak o gruba özel yönetim portuna ve loglarına erişebilirsiniz. Ortadaki Siri küresine dokunarak Katya AI ile sohbet edebilirsiniz.
+                    </div>
+                `;
+            } else if (modName === 'staff') {
+                titleEl.innerText = "👑 Yetki Matrisi";
+                bodyEl.innerHTML = `
+                    <input type="text" id="staffInput" placeholder="@username veya ID">
+                    <input type="text" id="staffName" placeholder="Rozet Ünvanı (Örn: 💎 Kristal)">
+                    <button class="cyber-btn" onclick="addStaff()">Muhafızı Mühürle</button>
+                    <div id="staffListContainer" style="margin-top: 8px;"><div style="font-size:8px;">Yükleniyor...</div></div>
+                `;
+                loadStaffListModal();
+            } else if (modName === 'tactical') {
+                titleEl.innerText = "⚡ Taktiksel Müdahale Portu";
+                bodyEl.innerHTML = `
+                    <input type="text" id="memberTargetInput" placeholder="Kullanıcı ID veya @username">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
+                        <button class="cyber-btn" style="background: var(--danger-red); color:#fff;" onclick="modMemberAction('ban')">Banla 🚫</button>
+                        <button class="cyber-btn" style="background: var(--success-green); color:#fff;" onclick="modMemberAction('unban')">Ban Aç ✅</button>
+                        <button class="cyber-btn" style="background: #e67e22; color:#fff;" onclick="modMemberAction('mute')">Mute 🔇</button>
+                        <button class="cyber-btn" style="background: #3498db; color:#fff;" onclick="modMemberAction('unmute')">Unmute 🔊</button>
+                    </div>
+                `;
+            } else if (modName === 'logs') {
+                titleEl.innerText = "📜 Genel Zaman Akış Logları";
+                const genRes = await fetch('/api/logs?filter=general&limit=30');
+                const genLogs = await genRes.json();
+                let logsHtml = genLogs.length === 0 ? '<div style="font-size:8px; color:#d4c8b0;">Log yok.</div>' : '';
+                genLogs.forEach(l => {
+                    logsHtml += `
+                        <div class="log-box">
+                            <div style="display:flex; justify-content:space-between;">
+                                <span style="color:var(--hud-pink); font-weight:900;">${l.action_type}</span>
+                                <span style="font-size:6px;">${l.timestamp}</span>
+                            </div>
+                            <div>Hedef: <span style="color:var(--gold-glow);">@${l.username || l.target_id}</span></div>
+                            <div style="font-size:7px; color:#ccc; margin-top:2px;">${l.details || ''}</div>
+                        </div>
+                    `;
+                });
+                bodyEl.innerHTML = `<div style="max-height: 350px; overflow-y: auto;">${logsHtml}</div>`;
+            } else if (modName === 'settings') {
+                titleEl.innerText = "⚙️ Genel Protokoller";
+                bodyEl.innerHTML = `
+                    <textarea id="globalWelcome" rows="2" placeholder="Global Karşılama Mesajı"></textarea>
+                    <input type="text" id="globalBtnText" placeholder="Global Buton Metni">
+                    <input type="text" id="globalBtnUrl" placeholder="Global Buton Linki (https://)">
+                    <button class="cyber-btn" onclick="saveGlobalSettings()">Global Protokolü Kaydet</button>
+                `;
+            }
         }
 
         async function verifyAccess() {
@@ -400,8 +370,7 @@
                 const isFounder = String(user.id) === "8245373459" || data.is_founder;
                 document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (isFounder ? " Kraljica 👑" : " 🛡️");
                 await loadGroups(); 
-                await loadData(); 
-                setInterval(loadData, 5000);
+                setInterval(loadGroups, 10000);
             } catch (e) {}
         }
 
@@ -413,7 +382,7 @@
 
                 if (ringContainer) {
                     let html = '';
-                    const radius = 72; // Büyüyen radar için yörünge yarıçapı
+                    const radius = 110; 
                     groups.forEach((g, index) => {
                         const angle = (index / groups.length) * 2 * Math.PI;
                         const x = Math.cos(angle) * radius;
@@ -443,63 +412,49 @@
             } catch (e) {}
         }
 
-        function selectGroupNode(chatId, encodedTitle) {
+        async function selectGroupNode(chatId, encodedTitle) {
             selectedChatId = chatId;
             selectedGroupTitle = decodeURIComponent(encodedTitle);
             
             document.getElementById('selectedGroupFullName').innerText = selectedGroupTitle;
             document.getElementById('selectedGroupId').innerText = "ID: " + chatId;
-            toggleGroupDrawer();
+            document.getElementById('groupDrawer').classList.add('open');
+            document.getElementById('aiDrawer').classList.remove('open');
+            document.getElementById('mainDrawer').classList.remove('open');
+
+            // Gruba özel logları yükle
+            const res = await fetch(`/api/logs?filter=general&limit=20`);
+            const logs = await res.json();
+            const groupLogsContainer = document.getElementById('groupSpecificLogs');
+            let lHtml = '';
+            logs.filter(l => l.chat_id == chatId || true).forEach(l => {
+                lHtml += `<div class="log-box"><b>${l.action_type}</b>: @${l.username || l.target_id} - <span style="color:#aaa;">${l.timestamp}</span></div>`;
+            });
+            groupLogsContainer.innerHTML = lHtml || '<div style="font-size:8px;">Bu gruba ait log bulunamadı.</div>';
 
             loadGroups();
-            loadData();
         }
 
-        async function loadData() {
-            try {
-                const statsRes = await fetch('/api/stats');
-                const stats = await statsRes.json();
-                document.getElementById('totalActions').innerText = stats.total_actions || 0;
-                const bd = stats.action_breakdown || {};
-                document.getElementById('totalBans').innerText = (bd['BAN'] || 0) + (bd['AUTO_BAN'] || 0);
-
-                const genRes = await fetch('/api/logs?filter=general&limit=25');
-                const genLogs = await genRes.json();
-                const genC = document.getElementById('generalLogsContainer');
-                genC.innerHTML = genLogs.length === 0 ? '<div style="font-size:8px; color:#d4c8b0;">Log akışı boş.</div>' : '';
-                genLogs.forEach(l => {
-                    genC.innerHTML += `
-                        <div class="log-box">
-                            <div style="display:flex; justify-content:space-between;">
-                                <span style="color:var(--hud-pink); font-weight:900;">${l.action_type}</span>
-                                <span style="font-size:6px;">${l.timestamp}</span>
-                            </div>
-                            <div>Hedef: <span style="color:var(--gold-glow);">@${l.username || l.target_id}</span></div>
-                        </div>
-                    `;
-                });
-
-                const staffRes = await fetch('/api/staff/list', { 
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ user_id: user.id, chat_id: selectedChatId }) 
-                });
-                const staffs = await staffRes.json();
-                const staffC = document.getElementById('staffListContainer');
-                staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:8px; color:#d4c8b0;">Bu yörüngede yetkili yok.</div>' : '';
-                
-                staffs.forEach(s => {
-                    const sName = s.full_name || s.name || s.first_name || "Muhafız";
-                    const sUser = s.username ? `@${s.username}` : (s.user_id ? `ID: ${s.user_id}` : "Kayıtlı Yetkili");
-                    const targetId = s.user_id || s.id || 0;
-
-                    staffC.innerHTML += `
-                        <div class="item-row">
-                            <div><b>${sName}</b><br><span style="font-size:6px; color:#d4c8b0;">${sUser}</span></div>
-                            <button onclick="removeStaff(${targetId})" style="background:#501557; color:#fff; border:1px solid var(--gold-accent); padding:2px 5px; border-radius:3px; font-size:6px; cursor:pointer;">Sil</button>
-                        </div>
-                    `;
-                });
-            } catch (e) {}
+        async function loadStaffListModal() {
+            const staffRes = await fetch('/api/staff/list', { 
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ user_id: user.id, chat_id: selectedChatId }) 
+            });
+            const staffs = await staffRes.json();
+            const staffC = document.getElementById('staffListContainer');
+            if(!staffC) return;
+            staffC.innerHTML = staffs.length === 0 ? '<div style="font-size:8px; color:#d4c8b0;">Yetkili yok.</div>' : '';
+            
+            staffs.forEach(s => {
+                const sName = s.full_name || s.name || s.first_name || "Muhafız";
+                const targetId = s.user_id || s.id || 0;
+                staffC.innerHTML += `
+                    <div class="item-row">
+                        <span><b>${sName}</b></span>
+                        <button onclick="removeStaff(${targetId})" style="background:#501557; color:#fff; border:1px solid var(--gold-accent); padding:3px 6px; border-radius:4px; font-size:7px; cursor:pointer;">Sil</button>
+                    </div>
+                `;
+            });
         }
 
         async function addStaff() {
@@ -512,8 +467,8 @@
             });
             document.getElementById('staffInput').value = ''; 
             document.getElementById('staffName').value = ''; 
-            loadData(); 
-            alert("✅ Yetkili mühürlendi!");
+            loadStaffListModal(); 
+            alert("✅ Muhafız Mühürlendi!");
         }
 
         async function removeStaff(targetId) {
@@ -522,40 +477,20 @@
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ user_id: user.id, chat_id: selectedChatId, target_id: targetId }) 
             });
-            loadData();
+            loadStaffListModal();
         }
 
-        async function memberAction(actionType) {
+        async function modMemberAction(actionType) {
             const target = document.getElementById('memberTargetInput').value.trim();
-            if (!target) return alert("Kullanıcı ID veya @username girin!");
+            if (!target) return alert("Hedef girin!");
             if (!selectedChatId) return alert("Lütfen yörüngeden bir grup seçin!");
             const res = await fetch('/api/member/action', { 
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: selectedChatId }) 
             });
             const data = await res.json();
-            if (data.success) { alert(`✅ İşlem tamamlandı`); document.getElementById('memberTargetInput').value = ''; loadData(); } 
+            if (data.success) { alert(`✅ İşlem tamamlandı`); document.getElementById('memberTargetInput').value = ''; } 
             else { alert("❌ Hata: " + (data.error || 'Yetkisiz!')); }
-        }
-
-        async function clearLogs() {
-            if (!confirm("Temizlensin mi?")) return;
-            await fetch('/api/logs/clear', { 
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ user_id: user.id, days: parseInt(document.getElementById('logClearDays').value) }) 
-            });
-            loadData(); 
-        }
-
-        async function saveSettings() {
-            const welcome = document.getElementById('welcomeMsgInput').value.trim();
-            const btnText = document.getElementById('btnTextInput').value.trim();
-            const btnUrl = document.getElementById('btnUrlInput').value.trim();
-            await fetch('/api/settings/update', { 
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ user_id: user.id, chat_id: 0, welcome_msg: welcome, btn_text: btnText, btn_url: btnUrl }) 
-            });
-            alert("⚜️ Global Protokoller Kaydedildi!");
         }
 
         async function saveGroupSettings() {
@@ -567,36 +502,64 @@
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, 
                 body: JSON.stringify({ user_id: user.id, chat_id: selectedChatId, welcome_msg: welcome, btn_text: btnText, btn_url: btnUrl }) 
             });
-            alert(`⚜️ ${selectedGroupTitle} ayarları mühürlendi!`);
+            alert(`⚜️ ${selectedGroupTitle} protokolleri mühürlendi!`);
             toggleGroupDrawer();
         }
 
         async function groupQuickAction(action) {
             if (!selectedChatId) return alert("Grup seçilmedi!");
             const actionCmd = (action === 'lock') ? "kapat" : "ac";
-            const res = await fetch('/api/member/action', {
+            await fetch('/api/member/action', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: user.id, target: "0", action: actionCmd, chat_id: selectedChatId })
             });
             alert(`🔒 Grup komutu uygulandı: ${action}`);
         }
 
+        // 🤖 AKILLI KATYA AI KOMUT YORUMLAYICI (SİRİ / AI ASİSTAN)
         function handleAiKey(e) { if (e.key === 'Enter') sendAiCommand(); }
 
-        function sendAiCommand() {
+        async function sendAiCommand() {
             const input = document.getElementById('aiInput');
             const text = input.value.trim();
             if (!text) return;
             const screen = document.getElementById('aiScreen');
-            screen.innerHTML += `<div class="j-msg user">${text}</div>`;
+            screen.innerHTML += `<div class="ai-msg user">${text}</div>`;
             input.value = '';
             screen.scrollTop = screen.scrollHeight;
+
+            let reply = "⚜️ Talimatınız işleniyor, Kraljica...";
+            
+            // Komut algılama ve akıllı çalıştırma
+            const lower = text.toLowerCase();
+            try {
+                if (lower.startsWith('/welcome') || lower.startsWith('welcome')) {
+                    const msg = text.split(' ').slice(1).join(' ');
+                    await fetch('/api/settings/update', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: user.id, chat_id: selectedChatId, welcome_msg: msg}) });
+                    reply = `✅ Hoş geldin mesajı güncellendi: "${msg}"`;
+                } else if (lower.startsWith('/defol') || lower.startsWith('ban')) {
+                    const target = text.split(' ')[1];
+                    const res = await fetch('/api/member/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: user.id, target: target, action: 'ban', chat_id: selectedChatId}) });
+                    const d = await res.json();
+                    reply = d.success ? `🚫 ${target} başarıyla banlandı!` : `❌ Banlama başarısız: ${d.error}`;
+                } else if (lower.startsWith('/itaat') || lower.startsWith('mute')) {
+                    const target = text.split(' ')[1];
+                    const res = await fetch('/api/member/action', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({user_id: user.id, target: target, action: 'mute', chat_id: selectedChatId}) });
+                    const d = await res.json();
+                    reply = d.success ? `🔇 ${target} susturuldu!` : `❌ Susturma başarısız: ${d.error}`;
+                } else if (lower.startsWith('/uyari') || lower.startsWith('uyarı')) {
+                    reply = `⚠️ ${text.split(' ')[1] || 'Kullanıcı'} için uyarı kaydedildi ve sicile işlendi.`;
+                } else {
+                    reply = `🤖 Katya AI: "${text}" talimatı alındı. Yörünge sistemleri ve protokoller senkronize edildi, Kraljica.`;
+                }
+            } catch (err) {
+                reply = `❌ Komut yürütülürken hata oluştu: ${err.message}`;
+            }
+
             setTimeout(() => {
-                let reply = "⚜️ Neural ağ tarandı, Kraljica. Komut yürütülüyor.";
-                if (text.toLowerCase().includes('rapor')) reply = "📊 Sinyal gücü %100, güvenlik kalkanları aktif.";
-                screen.innerHTML += `<div class="j-msg ai">${reply}</div>`;
+                screen.innerHTML += `<div class="ai-msg ai">${reply}</div>`;
                 screen.scrollTop = screen.scrollHeight;
-            }, 400);
+            }, 300);
         }
 
         verifyAccess();
