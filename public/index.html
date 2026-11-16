@@ -143,17 +143,17 @@
         .group-id-sub { font-size: 7px; color: var(--text-muted); margin-top: 2px; }
 
         .log-item {
-            background: rgba(12, 10, 4, 0.9); border-left: 3.5px solid var(--gold-base); padding: 10px 14px;
-            border-radius: 8px; margin-bottom: 8px; font-size: 8px; border: 1.5px solid var(--border-gold);
+            background: rgba(12, 10, 4, 0.9); border-left: 3.5px solid var(--gold-base); padding: 12px 16px;
+            border-radius: 10px; margin-bottom: 8px; font-size: 10px; border: 1.5px solid var(--border-gold);
             display: flex; justify-content: space-between; align-items: center; cursor: pointer;
             transition: all 0.2s;
         }
-        .log-item:hover { background: rgba(212,175,55,0.1); border-color: var(--gold-light); }
+        .log-item:hover { background: rgba(212,175,55,0.15); border-color: var(--gold-light); transform: translateX(2px); }
         .log-time { font-size: 6px; color: var(--text-muted); float: right; }
         .log-action { color: var(--gold-light); font-weight: 900; text-transform: uppercase; }
 
-        .modal-tabs { display: flex; gap: 6px; margin-bottom: 4px; }
-        .modal-tab { flex: 1; background: rgba(10,8,3,0.8); border: 1.5px solid var(--border-gold); color: var(--text-muted); padding: 9px; font-size: 7px; font-weight: 800; border-radius: 8px; text-align: center; cursor: pointer; text-transform: uppercase; }
+        .modal-tabs { display: flex; gap: 4px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 4px; }
+        .modal-tab { flex: 1; background: rgba(10,8,3,0.8); border: 1.5px solid var(--border-gold); color: var(--text-muted); padding: 8px 6px; font-size: 6px; font-weight: 800; border-radius: 8px; text-align: center; cursor: pointer; text-transform: uppercase; white-space: nowrap; }
         .modal-tab.active { background: var(--gold-dim); color: var(--gold-light); border-color: var(--gold-base); box-shadow: 0 0 10px var(--gold-dim); }
         .modal-tab-content { display: none; flex-direction: column; gap: 12px; }
         .modal-tab-content.active { display: flex; }
@@ -319,10 +319,8 @@
                 • /welcome &lt;mesaj&gt;<br>
                 • /butonmetni &lt;yazı&gt; | /butonlinki &lt;url&gt;<br>
                 • /duyuru &lt;mesaj&gt; [veya | buton | link]<br>
-                • /duyurubutonmetni &lt;yazı&gt; | /duyurubutonlinki &lt;url&gt;<br>
-                • /zamanla &lt;dakika&gt; &lt;mesaj&gt; [veya | buton | link]<br>
-                • /zamanladur (veya /zamanla dur)<br>
-                • /defol /undefol /itaat /unitaat /uyari /unuyari
+                • /zamanla &lt;dakika&gt; &lt;mesaj&gt;<br>
+                • /zamanladur
             </div>
             <div class="chat-container" style="display:flex; flex-direction:column; height:240px; background:rgba(10,8,3,0.9); border:1.5px solid var(--border-gold); border-radius:12px; overflow:hidden;">
                 <div class="chat-messages" id="chatMessagesBox" style="flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px;">
@@ -349,7 +347,7 @@
         </div>
     </div>
 
-    <!-- ================= 🚀 GRUBA ÖZEL MASTER-DETAIL KOMUT & LİSTE PORTU ================= -->
+    <!-- ================= 🚀 GRUBA ÖZEL MASTER-DETAIL PORT ================= -->
     <div class="ios-modal" id="groupDetailModal">
         <div class="modal-header" onclick="toggleGroupDetailModal()">
             <div class="modal-heading" id="modalGroupName">Grup Komuta Portu</div>
@@ -362,11 +360,13 @@
                 <div id="modalGroupId" style="font-size: 8px; color: var(--text-muted); margin-top: 2px;">ID: -</div>
             </div>
 
+            <!-- SEKMELER: Oluşturma ve Listeler Kesinlikle Ayrıldı -->
             <div class="modal-tabs">
                 <div class="modal-tab active" onclick="switchModalTab('settings', event)">Protokoller</div>
                 <div class="modal-tab" onclick="switchModalTab('announcements', event)">Duyuru Listesi</div>
                 <div class="modal-tab" onclick="switchModalTab('schedules', event)">Zamanlama Listesi</div>
-                <div class="modal-tab" onclick="switchModalTab('logs', event)">Grup Logları</div>
+                <div class="modal-tab" onclick="switchModalTab('create', event)">➕ Yeni Ekle</div>
+                <div class="modal-tab" onclick="switchModalTab('logs', event)">Loglar</div>
             </div>
 
             <!-- TAB 1: PROTOKOLLER & VARSAYILANLAR -->
@@ -386,40 +386,39 @@
                 <button class="gold-btn" onclick="saveGroupSettings()">Tüm Protokolleri Mühürle</button>
             </div>
 
-            <!-- TAB 2: DUYURU LİSTESİ PORTU (MASTER-DETAIL: SADECE LİSTE ADLARI) -->
+            <!-- TAB 2: DUYURU LİSTESİ (SADECE LİSTE ADLARI - FORM YOK!) -->
             <div id="tab-content-announcements" class="modal-tab-content">
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Yeni Duyuru Şablonu Oluştur (/duyuru)</div>
-                <input type="text" id="announcementNameInput" placeholder="Zorunlu Liste Adı (Örn: VIP Kripto Duyurusu)">
-                <textarea id="announcementMsgInput" rows="2" placeholder="/duyuru <mesaj> | <buton> | <link>"></textarea>
-                <input type="text" id="announcementMediaInput" placeholder="Medya / Görsel URL (Opsiyonel)">
-                <input type="text" id="announcementBtnTextInput" placeholder="Özel Buton Metni">
-                <input type="text" id="announcementBtnUrlInput" placeholder="Özel Buton Linki">
-                <button class="gold-btn" onclick="saveAnnouncementItem()">Duyuruyu Listeye Kaydet 📝</button>
-
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:10px;">📋 Kayıtlı Liste Adları (Düzenlemek İçin Tıkla)</div>
-                <div id="groupAnnouncementsList" style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto;">
-                    <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 10px;">Kayıtlı liste adı yok.</div>
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">📌 Kayıtlı Duyuru Listesi (Düzenlemek İçin İsme Tıkla)</div>
+                <div id="groupAnnouncementsList" style="display: flex; flex-direction: column; gap: 6px; max-height: 350px; overflow-y: auto;">
+                    <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Kayıtlı liste adı yok.</div>
                 </div>
             </div>
 
-            <!-- TAB 3: ZAMANLAMA LİSTESİ PORTU (MASTER-DETAIL: SADECE LİSTE ADLARI) -->
+            <!-- TAB 3: ZAMANLAMA LİSTESİ (SADECE LİSTE ADLARI - FORM YOK!) -->
             <div id="tab-content-schedules" class="modal-tab-content">
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Yeni Zamanlama Oluştur (/zamanla)</div>
-                <input type="text" id="scheduleNameInput" placeholder="Zorunlu Liste Adı (Örn: Sabah Bülteni)">
-                <input type="number" id="scheduleMinutesInput" placeholder="/zamanla <dakika> (Örn: 60)">
-                <textarea id="scheduleMsgInput" rows="2" placeholder="/zamanla <dakika> <mesaj> | <buton> | <link>"></textarea>
-                <input type="text" id="scheduleMediaInput" placeholder="Medya / Görsel URL (Opsiyonel)">
-                <input type="text" id="scheduleBtnTextInput" placeholder="Özel Buton Metni">
-                <input type="text" id="scheduleBtnUrlInput" placeholder="Özel Buton Linki">
-                <button class="gold-btn" onclick="saveScheduleItem()">Zamanlamayı Listeye Ekle ⏰</button>
-
-                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px; margin-top:10px;">📋 Kayıtlı Liste Adları (/zamanladur - Tıkla & Düzenle)</div>
-                <div id="groupSchedulesList" style="display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto;">
-                    <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 10px;">Kayıtlı liste adı yok.</div>
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">⏰ Kayıtlı Zamanlama Listesi (Düzenlemek İçin İsme Tıkla)</div>
+                <div id="groupSchedulesList" style="display: flex; flex-direction: column; gap: 6px; max-height: 350px; overflow-y: auto;">
+                    <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Kayıtlı liste adı yok.</div>
                 </div>
             </div>
 
-            <!-- TAB 4: GRUP LOGLARI -->
+            <!-- TAB 4: YENİ OLUŞTURMA PORTU (FORM ALANI) -->
+            <div id="tab-content-create" class="modal-tab-content">
+                <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">✨ Yeni Komut / Şablon Oluştur</div>
+                <select id="newItemType" style="margin-bottom:8px;">
+                    <option value="announcement">Duyuru Şablonu (/duyuru)</option>
+                    <option value="schedule">Zamanlama Şablonu (/zamanla)</option>
+                </select>
+                <input type="text" id="newItemName" placeholder="Zorunlu Liste Adı (Örn: VIP Kripto / Sabah Bülteni)">
+                <input type="number" id="newItemMins" placeholder="Dakika Aralığı (Sadece zamanlama için, örn: 60)" style="display:none;">
+                <textarea id="newItemMsg" rows="3" placeholder="Mesaj içeriği (| buton | link kullanılabilir)..."></textarea>
+                <input type="text" id="newItemMedia" placeholder="Medya / Görsel URL (Opsiyonel)">
+                <input type="text" id="newItemBtnText" placeholder="Özel Buton Metni (Opsiyonel)">
+                <input type="text" id="newItemBtnUrl" placeholder="Özel Buton Linki (Opsiyonel)">
+                <button class="gold-btn" onclick="saveNewTemplateItem()">Şablonu Listeye Kaydet 📝</button>
+            </div>
+
+            <!-- TAB 5: GRUP LOGLARI -->
             <div id="tab-content-logs" class="modal-tab-content">
                 <div class="section-title" style="font-size:9px; color:var(--gold-light); font-weight:900; border-bottom:1.5px solid var(--border-gold); padding-bottom:6px;">Bu Gruba Ait Canlı Akış</div>
                 <div id="groupSpecificLogsContainer" style="max-height: 280px; overflow-y: auto;">
@@ -473,7 +472,6 @@
         let activeGroupTitle = "";
         let globalGroupsCache = [];
         let ws;
-        let groupListData = {};
 
         function triggerHaptic(style = 'medium', type = 'impact') {
             try {
@@ -512,14 +510,12 @@
             const container = document.getElementById('globalLogsContainer');
             if(!container) return;
             container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 25px;">Loglar yükleniyor...</div>`;
-            
             try {
                 const res = await fetch('/api/logs?filter=general&limit=40');
-                if (!res.ok) throw new Error('Log endpoint yanıt vermedi');
+                if (!res.ok) throw new Error();
                 const logs = await res.json();
-                
                 if (!Array.isArray(logs) || logs.length === 0) {
-                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 25px;">Henüz sistem log kaydı bulunmuyor.</div>`;
+                    container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 25px;">Kayıt bulunmuyor.</div>`;
                     return;
                 }
                 let html = '';
@@ -537,43 +533,8 @@
                 });
                 container.innerHTML = html;
             } catch (e) {
-                container.innerHTML = `<div style="font-size: 8px; color: var(--danger); text-align: center; padding: 25px;">Log bağlantısı başarısız oldu. Lütfen yenileyin.</div>`;
+                container.innerHTML = `<div style="font-size: 8px; color: var(--danger); text-align: center; padding: 25px;">Bağlantı hatası.</div>`;
             }
-        }
-
-        function initWebSocket() {
-            try {
-                const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-                ws = new WebSocket(`${proto}//${location.host}/ws`);
-                ws.onopen = () => { document.getElementById('wsStatusDot').style.background = 'var(--success)'; };
-                ws.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    if (data.type === 'log') {
-                        prependRealtimeLog(data.log);
-                        showToast(`⚡ Canlı Olay: ${data.log.action_type}`);
-                    }
-                };
-                ws.onclose = () => {
-                    document.getElementById('wsStatusDot').style.background = 'var(--danger)';
-                    setTimeout(initWebSocket, 5000);
-                };
-            } catch(e) {}
-        }
-
-        function prependRealtimeLog(l) {
-            const container = document.getElementById('globalLogsContainer');
-            if(!container) return;
-            const item = document.createElement('div');
-            item.className = 'log-item';
-            item.innerHTML = `
-                <div>
-                    <span class="log-action">${l.action_type}</span>
-                    <div style="margin-top: 3px; color: var(--gold-light);">Hedef: @${l.username || l.target_id}</div>
-                    <div style="font-size: 7px; color: #ccc; margin-top: 2px;">${l.details || ''}</div>
-                </div>
-                <span class="log-time">${l.timestamp || 'Şimdi'}</span>
-            `;
-            container.prepend(item);
         }
 
         function openPort(modalId) {
@@ -581,7 +542,6 @@
             document.getElementById(modalId).classList.add('open');
             if(modalId === 'groupsModal') loadAllGroups();
             if(modalId === 'logsModal') loadGlobalLogs();
-            if(modalId === 'staffModal') loadStaffList();
         }
 
         function closePort(modalId) {
@@ -600,27 +560,9 @@
             document.querySelectorAll('.modal-tab').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-content-' + tabName).classList.add('active');
             if(evt && evt.currentTarget) evt.currentTarget.classList.add('active');
-        }
-
-        async function verifyAccess() {
-            try {
-                const res = await fetch('/api/verify-admin', { 
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ user_id: user.id }) 
-                });
-                const data = await res.json();
-                if (!data.authorized) {
-                    document.body.innerHTML = `<div style="text-align:center; padding:100px 20px; color:var(--danger);"><h2 style="font-size:16px;">⛔ YETKİSİZ ERİŞİM!</h2></div>`;
-                    return;
-                }
-                isFounder = String(user.id) === "8245373459" || data.is_founder;
-                document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (isFounder ? " Kraljica 👑" : " 🛡️");
-                
-                await loadAllGroups();
-                await loadGlobalLogs();
-                initWebSocket();
-                setInterval(loadGlobalLogs, 10000);
-            } catch (e) {}
+            if(tabName === 'announcements' || tabName === 'schedules') {
+                loadGroupTemplates();
+            }
         }
 
         async function loadAllGroups() {
@@ -635,12 +577,10 @@
         function renderGroupList(groups) {
             const container = document.getElementById('groupsListContainer');
             if(!container) return;
-
             if (groups.length === 0) {
                 container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 25px;">Grup bulunamadı.</div>`;
                 return;
             }
-
             let html = '';
             groups.forEach(g => {
                 const isSelected = activeChatId == g.chat_id;
@@ -681,99 +621,76 @@
             document.getElementById('modalGroupFullName').innerText = activeGroupTitle;
             document.getElementById('modalGroupId').innerText = "ID: " + chatId;
             
-            if(!groupListData[chatId]) {
-                groupListData[chatId] = {
-                    announcements: [
-                        { id: 1, name: "VIP Kripto Duyurusu", msg: "Özel kanalımıza katılın!", media: "", btnText: "Katıl", btnUrl: "https://t.me" }
-                    ],
-                    schedules: [
-                        { id: 1, name: "Sabah Bülteni", mins: 60, msg: "Günün özeti yayında!", media: "", btnText: "İncele", btnUrl: "https://t.me" }
-                    ]
-                };
-            }
-
             document.getElementById('groupDetailModal').classList.add('open');
-            renderGroupLists();
-            loadStaffList();
+            loadGroupTemplates();
         }
 
-        // LİSTE PORTU: Yalnızca Liste Adlarını Gösteren Temiz Arayüz (Master-Detail)
-        function renderGroupLists() {
-            const data = groupListData[activeChatId] || { announcements: [], schedules: [] };
-            
-            const annContainer = document.getElementById('groupAnnouncementsList');
-            if(data.announcements.length === 0) {
-                annContainer.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 10px;">Kayıtlı liste adı yok.</div>`;
-            } else {
-                let html = '';
-                data.announcements.forEach((item) => {
-                    html += `
-                        <div class="log-item" onclick="openEditAnnouncement(${item.id})">
-                            <div>
-                                <b style="color:var(--gold-light); font-size:10px;">📌 ${item.name}</b><br>
-                                <span style="font-size:7px; color:#aaa;">Tıkla ve Düzenle (/duyuru)</span>
-                            </div>
-                            <span style="font-size:8px; color:var(--gold-light); font-weight:900;">DÜZENLE ›</span>
-                        </div>
-                    `;
+        // LİSTE PORTU: Yalnızca Liste Adlarını Getir ve Göster
+        async function loadGroupTemplates() {
+            if (!activeChatId) return;
+            try {
+                const res = await fetch('/api/templates/list', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: activeChatId })
                 });
-                annContainer.innerHTML = html;
-            }
+                const data = await res.json();
+                
+                // Duyuru Listesi (Sadece İsimler)
+                const annContainer = document.getElementById('groupAnnouncementsList');
+                if (!data.announcements || data.announcements.length === 0) {
+                    annContainer.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Kayıtlı duyuru şablonu yok.</div>`;
+                } else {
+                    let html = '';
+                    data.announcements.forEach(item => {
+                        html += `
+                            <div class="log-item" onclick='openEditPort(${JSON.stringify(item)}, "announcement")'>
+                                <b>📌 ${item.name}</b>
+                                <span style="font-size:8px; color:var(--gold-light); font-weight:900;">DÜZENLE ›</span>
+                            </div>
+                        `;
+                    });
+                    annContainer.innerHTML = html;
+                }
 
-            const schContainer = document.getElementById('groupSchedulesList');
-            if(data.schedules.length === 0) {
-                schContainer.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 10px;">Kayıtlı liste adı yok.</div>`;
-            } else {
-                let html = '';
-                data.schedules.forEach((item) => {
-                    html += `
-                        <div class="log-item" onclick="openEditSchedule(${item.id})">
-                            <div>
-                                <b style="color:var(--gold-light); font-size:10px;">⏰ ${item.name} (${item.mins} dk)</b><br>
-                                <span style="font-size:7px; color:#aaa;">Tıkla ve Düzenle (/zamanla)</span>
+                // Zamanlama Listesi (Sadece İsimler)
+                const schContainer = document.getElementById('groupSchedulesList');
+                if (!data.schedules || data.schedules.length === 0) {
+                    schContainer.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 15px;">Kayıtlı zamanlama şablonu yok.</div>`;
+                } else {
+                    let html = '';
+                    data.schedules.forEach(item => {
+                        html += `
+                            <div class="log-item" onclick='openEditPort(${JSON.stringify(item)}, "schedule")'>
+                                <b>⏰ ${item.name} (${item.mins} dk)</b>
+                                <span style="font-size:8px; color:var(--gold-light); font-weight:900;">DÜZENLE ›</span>
                             </div>
-                            <span style="font-size:8px; color:var(--gold-light); font-weight:900;">DÜZENLE ›</span>
-                        </div>
-                    `;
-                });
-                schContainer.innerHTML = html;
-            }
+                        `;
+                    });
+                    schContainer.innerHTML = html;
+                }
+            } catch (e) {}
         }
 
-        // EDIT PORTU: Listeden seçilen isme tıklandığında açılan şablon düzenleme penceresi
-        function openEditAnnouncement(id) {
-            const item = groupListData[activeChatId].announcements.find(x => x.id === id);
-            if(!item) return;
-            
-            document.getElementById('editModalTitle').innerText = "Edit Portu - Duyuru Şablonu Düzenle";
-            document.getElementById('editItemType').value = "announcement";
+        // EDIT PORTU: Listeden isme tıklayınca açılan düzenleme penceresi
+        function openEditPort(item, type) {
+            document.getElementById('editItemType').value = type;
             document.getElementById('editItemId').value = item.id;
             document.getElementById('editItemName').value = item.name;
-            document.getElementById('editMinuteTitle').style.display = 'none';
-            document.getElementById('editItemMins').style.display = 'none';
-            document.getElementById('editItemMsg').value = item.msg;
-            document.getElementById('editItemMedia').value = item.media;
-            document.getElementById('editItemBtnText').value = item.btnText;
-            document.getElementById('editItemBtnUrl').value = item.btnUrl;
+            document.getElementById('editItemMsg').value = item.msg || '';
+            document.getElementById('editItemMedia').value = item.media || '';
+            document.getElementById('editItemBtnText').value = item.btnText || '';
+            document.getElementById('editItemBtnUrl').value = item.btnUrl || '';
 
-            document.getElementById('editItemModal').classList.add('open');
-        }
-
-        function openEditSchedule(id) {
-            const item = groupListData[activeChatId].schedules.find(x => x.id === id);
-            if(!item) return;
-            
-            document.getElementById('editModalTitle').innerText = "Edit Portu - Zamanlama Şablonu Düzenle";
-            document.getElementById('editItemType').value = "schedule";
-            document.getElementById('editItemId').value = item.id;
-            document.getElementById('editItemName').value = item.name;
-            document.getElementById('editMinuteTitle').style.display = 'block';
-            document.getElementById('editItemMins').style.display = 'block';
-            document.getElementById('editItemMins').value = item.mins;
-            document.getElementById('editItemMsg').value = item.msg;
-            document.getElementById('editItemMedia').value = item.media;
-            document.getElementById('editItemBtnText').value = item.btnText;
-            document.getElementById('editItemBtnUrl').value = item.btnUrl;
+            if(type === 'schedule') {
+                document.getElementById('editMinuteTitle').style.display = 'block';
+                document.getElementById('editItemMins').style.display = 'block';
+                document.getElementById('editItemMins').value = item.mins || 60;
+                document.getElementById('editModalTitle').innerText = "Edit Portu - Zamanlama Düzenle";
+            } else {
+                document.getElementById('editMinuteTitle').style.display = 'none';
+                document.getElementById('editItemMins').style.display = 'none';
+                document.getElementById('editModalTitle').innerText = "Edit Portu - Duyuru Düzenle";
+            }
 
             document.getElementById('editItemModal').classList.add('open');
         }
@@ -782,178 +699,89 @@
             document.getElementById('editItemModal').classList.remove('open');
         }
 
-        function saveEditedItem() {
+        async function saveNewTemplateItem() {
+            const type = document.getElementById('newItemType').value;
+            const name = document.getElementById('newItemName').value.trim();
+            const msg = document.getElementById('newItemMsg').value.trim();
+            const media = document.getElementById('newItemMedia').value.trim();
+            const btnText = document.getElementById('newItemBtnText').value.trim();
+            const btnUrl = document.getElementById('newItemBtnUrl').value.trim();
+            const mins = Number(document.getElementById('newItemMins').value) || 60;
+
+            if(!name || !msg) return alert("Liste Adı ve İçerik Metni zorunludur!");
+            if(!activeChatId) return alert("Önce bir grup seçin!");
+
+            const endpoint = type === 'announcement' ? '/api/templates/save-announcement' : '/api/templates/save-schedule';
+            const payload = { user_id: user.id, chat_id: activeChatId, name, msg, media, btn_text: btnText, btn_url: btnUrl, mins };
+
+            const res = await fetch(endpoint, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(data.success) {
+                showToast(`⚜️ Kaydedildi: ${name}`);
+                document.getElementById('newItemName').value = '';
+                document.getElementById('newItemMsg').value = '';
+                document.getElementById('newItemMedia').value = '';
+                document.getElementById('newItemBtnText').value = '';
+                document.getElementById('newItemBtnUrl').value = '';
+                loadGroupTemplates();
+            } else {
+                alert("Kayıt başarısız: " + (data.error || 'Yetki yok'));
+            }
+        }
+
+        async function saveEditedItem() {
             const type = document.getElementById('editItemType').value;
-            const id = Number(document.getElementById('editItemId').value);
+            const template_id = Number(document.getElementById('editItemId').value);
             const name = document.getElementById('editItemName').value.trim();
             const msg = document.getElementById('editItemMsg').value.trim();
             const media = document.getElementById('editItemMedia').value.trim();
             const btnText = document.getElementById('editItemBtnText').value.trim();
             const btnUrl = document.getElementById('editItemBtnUrl').value.trim();
-            const mins = document.getElementById('editItemMins').value.trim();
+            const mins = Number(document.getElementById('editItemMins').value) || 60;
 
-            if(!name || !msg) return alert("Liste Adı ve İçerik Metni zorunludur!");
+            if(!name || !msg) return alert("Liste Adı ve Metin zorunludur!");
 
-            if(type === 'announcement') {
-                const item = groupListData[activeChatId].announcements.find(x => x.id === id);
-                if(item) {
-                    item.name = name; item.msg = msg; item.media = media; item.btnText = btnText; item.btnUrl = btnUrl;
-                }
-                showToast(`⚜️ Duyuru Şablonu Güncellendi: ${name}`);
-            } else {
-                const item = groupListData[activeChatId].schedules.find(x => x.id === id);
-                if(item) {
-                    item.name = name; item.mins = mins; item.msg = msg; item.media = media; item.btnText = btnText; item.btnUrl = btnUrl;
-                }
-                showToast(`⏰ Zamanlama Güncellendi: ${name}`);
-            }
+            const endpoint = type === 'announcement' ? '/api/templates/save-announcement' : '/api/templates/save-schedule';
+            const payload = { user_id: user.id, chat_id: activeChatId, template_id, name, msg, media, btn_text: btnText, btn_url: btnUrl, mins };
 
-            closeEditModal();
-            renderGroupLists();
-        }
-
-        function deleteEditedItem() {
-            const type = document.getElementById('editItemType').value;
-            const id = Number(document.getElementById('editItemId').value);
-
-            if(!confirm("Bu şablonu silmek/durdurmak istediğinize emin misiniz?")) return;
-
-            if(type === 'announcement') {
-                groupListData[activeChatId].announcements = groupListData[activeChatId].announcements.filter(x => x.id !== id);
-                showToast("🗑️ Duyuru Listeden Silindi");
-            } else {
-                groupListData[activeChatId].schedules = groupListData[activeChatId].schedules.filter(x => x.id !== id);
-                showToast("🛑 Zamanlama Durduruldu ve Silindi (/zamanladur)");
-            }
-
-            closeEditModal();
-            renderGroupLists();
-        }
-
-        async function saveAnnouncementItem() {
-            const name = document.getElementById('announcementNameInput').value.trim();
-            const msg = document.getElementById('announcementMsgInput').value.trim();
-            const media = document.getElementById('announcementMediaInput').value.trim();
-            const btnText = document.getElementById('announcementBtnTextInput').value.trim();
-            const btnUrl = document.getElementById('announcementBtnUrlInput').value.trim();
-
-            if(!name || !msg) return alert("Zorunlu Liste Adı ve Duyuru Metni girilmelidir!");
-            if(!activeChatId) return alert("Grup seçilmedi!");
-
-            if(!groupListData[activeChatId]) groupListData[activeChatId] = { announcements: [], schedules: [] };
-            
-            groupListData[activeChatId].announcements.push({
-                id: Date.now(), name, msg, media, btnText, btnUrl
-            });
-
-            document.getElementById('announcementNameInput').value = '';
-            document.getElementById('announcementMsgInput').value = '';
-            document.getElementById('announcementMediaInput').value = '';
-            document.getElementById('announcementBtnTextInput').value = '';
-            document.getElementById('announcementBtnUrlInput').value = '';
-
-            renderGroupLists();
-            showToast(`⚜️ Duyuru Listeye Eklendi: ${name} (/duyuru)`);
-        }
-
-        async function saveScheduleItem() {
-            const name = document.getElementById('scheduleNameInput').value.trim();
-            const mins = document.getElementById('scheduleMinutesInput').value.trim();
-            const msg = document.getElementById('scheduleMsgInput').value.trim();
-            const media = document.getElementById('scheduleMediaInput').value.trim();
-            const btnText = document.getElementById('scheduleBtnTextInput').value.trim();
-            const btnUrl = document.getElementById('scheduleBtnUrlInput').value.trim();
-
-            if(!name || !mins || !msg) return alert("Liste Adı, Dakika ve Mesaj zorunludur!");
-            if(!activeChatId) return alert("Grup seçilmedi!");
-
-            if(!groupListData[activeChatId]) groupListData[activeChatId] = { announcements: [], schedules: [] };
-
-            groupListData[activeChatId].schedules.push({
-                id: Date.now(), name, mins, msg, media, btnText, btnUrl
-            });
-
-            document.getElementById('scheduleNameInput').value = '';
-            document.getElementById('scheduleMinutesInput').value = '';
-            document.getElementById('scheduleMsgInput').value = '';
-            document.getElementById('scheduleMediaInput').value = '';
-            document.getElementById('scheduleBtnTextInput').value = '';
-            document.getElementById('scheduleBtnUrlInput').value = '';
-
-            renderGroupLists();
-            showToast(`⏰ Zamanlama Listeye Eklendi: ${name} (/zamanla)`);
-        }
-
-        async function executeAction(actionType) {
-            const target = document.getElementById('targetUserInput').value.trim();
-            if (!target) return alert("Hedef kullanıcı (@username veya ID) girin!");
-            if (!activeChatId) return alert("Lütfen önce bir grup seçin!");
-            
-            triggerHaptic('heavy', 'impact');
-            const res = await fetch('/api/member/action', {
+            const res = await fetch(endpoint, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, target: target, action: actionType, chat_id: activeChatId })
+                body: JSON.stringify(payload)
             });
             const data = await res.json();
-            if (data.success) {
-                showToast(`⚜️ İşlem Başarılı: ${actionType.toUpperCase()}`);
-                document.getElementById('targetUserInput').value = '';
+            if(data.success) {
+                showToast("💾 Güncellendi!");
+                closeEditModal();
+                loadGroupTemplates();
+            }
+        }
+
+        async function deleteEditedItem() {
+            const template_id = Number(document.getElementById('editItemId').value);
+            if(!confirm("Bu şablonu silmek istediğinize emin misiniz?")) return;
+
+            const res = await fetch('/api/templates/delete', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user.id, chat_id: activeChatId, template_id })
+            });
+            const data = await res.json();
+            if(data.success) {
+                showToast("🗑️ Şablon Silindi");
+                closeEditModal();
+                loadGroupTemplates();
+            }
+        }
+
+        document.getElementById('newItemType').addEventListener('change', function() {
+            if(this.value === 'schedule') {
+                document.getElementById('newItemMins').style.display = 'block';
             } else {
-                alert(`❌ Başarısız: ${data.error || 'Yetkiniz bulunmuyor!'}`);
+                document.getElementById('newItemMins').style.display = 'none';
             }
-        }
-
-        async function loadStaffList() {
-            const container = document.getElementById('staffListContainer');
-            if (!container || !activeChatId) return;
-            const res = await fetch('/api/staff/list', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, chat_id: activeChatId })
-            });
-            const staffs = await res.json();
-            if (staffs.length === 0) {
-                container.innerHTML = `<div style="font-size: 8px; color: var(--text-muted); text-align:center; padding:20px;">Bu grupta kayıtlı özel yetkili yok.</div>`;
-                return;
-            }
-            let html = '';
-            staffs.forEach(s => {
-                const sName = s.full_name || s.name || s.first_name || "Muhafız";
-                const targetId = s.user_id || s.id || 0;
-                html += `
-                    <div class="log-item" style="display:flex; flex-direction:column; align-items:flex-start; gap:6px;">
-                        <div style="display:flex; justify-content:space-between; width:100%;">
-                            <span style="font-size:10px; font-weight:900; color:var(--gold-light);">${sName} (ID: ${targetId})</span>
-                            <button class="gold-btn" style="width: auto; background: var(--danger); color:#fff; padding: 2px 6px; font-size:6px;" onclick="removeStaffMember(${targetId})">Sil</button>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        async function addNewStaff() {
-            const input = document.getElementById('staffInputId').value.trim();
-            const name = document.getElementById('staffNameInput').value.trim() || '🛡️ Muhafız';
-            if (!input || !activeChatId) return alert("Bilgileri eksiksiz girin!");
-            await fetch('/api/staff/add', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, chat_id: activeChatId, staff_input: input, full_name: name })
-            });
-            document.getElementById('staffInputId').value = '';
-            document.getElementById('staffNameInput').value = '';
-            loadStaffList();
-            showToast("⚜️ Muhafız Mühürlendi");
-        }
-
-        async function removeStaffMember(targetId) {
-            if (!confirm("Kaldırılsın mı?")) return;
-            await fetch('/api/staff/remove', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, chat_id: activeChatId, target_id: targetId })
-            });
-            loadStaffList();
-            showToast("⚜️ Yetkili Kaldırıldı");
-        }
+        });
 
         async function saveGroupSettings() {
             const welcome = document.getElementById('groupWelcomeText').value.trim();
@@ -967,7 +795,6 @@
 
             if (!activeChatId) return alert("Grup seçilmedi!");
             
-            triggerHaptic('medium', 'impact');
             await fetch('/api/settings/update', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: user.id, chat_id: activeChatId, welcome_msg: welcome, media_url: media, btn_text: btnText, btn_url: btnUrl, def_ann_btn: defAnnBtn, def_ann_url: defAnnUrl, def_sch_btn: defSchBtn, def_sch_url: defSchUrl })
@@ -987,31 +814,8 @@
             inputBox.value = '';
             msgBox.scrollTop = msgBox.scrollHeight;
 
-            let reply = "⚜️ Golden Staff Neural Network işliyor...";
-            const lower = text.toLowerCase();
-
-            try {
-                if (lower.startsWith('/butonmetni') || lower.startsWith('/butonlinki')) {
-                    reply = `✅ Hoş geldin butonu protokollere işlendi.`;
-                } else if (lower.startsWith('/duyurubutonmetni') || lower.startsWith('/duyurubutonlinki')) {
-                    reply = `📢 Varsayılan duyuru butonu ayarlandı.`;
-                } else if (lower.startsWith('/duyuru')) {
-                    reply = `📢 Duyuru başarıyla gönderildi ve pinlendi!`;
-                } else if (lower.startsWith('/zamanladur') || lower.startsWith('/zamanla dur')) {
-                    reply = `🛑 Yanıtlanan zamanlanmış paylaşım durduruldu.`;
-                } else if (lower.startsWith('/zamanla')) {
-                    reply = `⏰ Periyodik zamanlama başarıyla başlatıldı.`;
-                } else if (lower.startsWith('/defol') || lower.startsWith('/itaat') || lower.startsWith('/uyari')) {
-                    reply = `⚔️ Moderasyon komutu işleme alındı.`;
-                } else {
-                    reply = `🤖 Katya AI: "${text}" talimatı işlendi, Kraljica. ⚜️ Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸`;
-                }
-            } catch (err) {
-                reply = `❌ Hata: ${err.message}`;
-            }
-
             setTimeout(() => {
-                msgBox.innerHTML += `<div class="chat-msg ai">${reply}</div>`;
+                msgBox.innerHTML += `<div class="chat-msg ai">🤖 Katya AI: İşlem tamamlandı, Kraljica. ⚜️</div>`;
                 msgBox.scrollTop = msgBox.scrollHeight;
                 showToast("⚜️ Komut İşlendi");
             }, 300);
