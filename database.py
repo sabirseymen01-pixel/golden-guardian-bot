@@ -182,21 +182,17 @@ def get_announcement_settings(chat_id):
         "btn_url": "https://golden-guardian-bot.onrender.com/"
     }
 
-# 🛡️ Gelişmiş Grup/Global Yetki Kontrolü
 def is_authorized_staff(user_id, chat_id=0):
     try:
-        # Önce gruba özel yetkiye bak
         if chat_id and int(chat_id) != 0:
             res = staff_col.find_one({"user_id": int(user_id), "chat_id": int(chat_id)})
             if res: return True
-        # Bulunamazsa global (chat_id: 0) yetkiye bak
         return staff_col.find_one({"user_id": int(user_id), "chat_id": 0}) is not None
     except Exception:
         return False
 
 def get_staff_permissions(user_id, chat_id=0):
     try:
-        # Önce gruba özel izinler
         if chat_id and int(chat_id) != 0:
             row = staff_col.find_one({"user_id": int(user_id), "chat_id": int(chat_id)})
             if row:
@@ -205,7 +201,6 @@ def get_staff_permissions(user_id, chat_id=0):
                     "can_mute": row.get("can_mute", True),
                     "warnings": row.get("warnings", 0)
                 }
-        # Global izinler
         row = staff_col.find_one({"user_id": int(user_id), "chat_id": 0})
         if row:
             return {
@@ -248,7 +243,6 @@ def toggle_staff_permission(user_id, chat_id, perm_field):
         query = {"user_id": int(user_id), "chat_id": int(chat_id)}
         row = staff_col.find_one(query)
         if not row:
-            # Eğer gruba özel yoksa global olana bak
             query["chat_id"] = 0
             row = staff_col.find_one(query)
             
