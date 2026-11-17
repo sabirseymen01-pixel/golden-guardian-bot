@@ -250,9 +250,9 @@ async def api_member_action(request: Request):
         if not is_founder:
             perms = database.get_staff_permissions(user_id, chat_id)
             if action in ["ban", "unban"] and not perms.get("can_ban", True):
-                return {"success": False, "error": "❌ Ban/Unban yetkiniz kapalı!"}
+                return {"success": False, "error": "❌ Bu grupta Ban/Unban yetkiniz kapalı!"}
             if action in ["mute", "unmute"] and not perms.get("can_mute", True):
-                return {"success": False, "error": "❌ Mute/Unmute yetkiniz kapalı!"}
+                return {"success": False, "error": "❌ Bu grupta Mute/Unmute yetkiniz kapalı!"}
 
         if not tg_application or not tg_application.bot:
             return {"success": False, "error": "Bot aktif değil!"}
