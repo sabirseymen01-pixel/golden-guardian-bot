@@ -356,8 +356,8 @@ async def api_delete_template(request: Request):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-# 💎 GARANTİLİ KÖK DİZİN (INDEX.HTML) SUNUMU
-@app.get("/", response_class=HTMLResponse)
+# 💎 GARANTİLİ KÖK DİZİN (GET ve HEAD Destekli - UptimeRobot Uyumli)
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 async def handle_root():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     paths_to_check = [
@@ -373,7 +373,7 @@ async def handle_root():
             except Exception as e:
                 logger.error(f"HTML okuma hatası ({path}): {e}")
                 
-    return HTMLResponse(content=f"Index dosyası (public/index.html) bulunamadı! Temel dizin: {base_dir}", status_code=500)
+    return HTMLResponse(content=f"Index dosyası (public/index.html) bulunamadı!", status_code=500)
 
 # ==========================================
 # TELEGRAM BOT KOMUTLARI & YÖNETİM
