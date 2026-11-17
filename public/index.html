@@ -26,58 +26,58 @@
         html, body { height: 100vh; width: 100vw; overflow: hidden; background-color: var(--obsidian); color: var(--text-main); }
         body {
             background: radial-gradient(circle at 50% 15%, rgba(212, 175, 55, 0.3) 0%, transparent 60%), linear-gradient(135deg, #070603 0%, #010100 100%);
-            display: flex; flex-direction: column; justify-content: space-between; padding: 16px;
+            display: flex; flex-direction: column; justify-content: space-between; padding: 12px;
         }
         .spring-header {
-            display: flex; justify-content: space-between; align-items: center; padding: 12px 18px;
-            background: var(--glass-panel); backdrop-filter: blur(25px); border-radius: 16px; border: 1.5px solid var(--border-gold);
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 14px;
+            background: var(--glass-panel); backdrop-filter: blur(25px); border-radius: 14px; border: 1.5px solid var(--border-gold);
             box-shadow: 0 8px 25px rgba(0,0,0,0.85); flex-shrink: 0;
         }
         .brand-title { font-size: 11px; font-weight: 900; color: var(--gold-light); letter-spacing: 2px; display: flex; align-items: center; gap: 8px; }
-        .user-badge { background: var(--gold-dim); color: var(--gold-light); padding: 5px 12px; border-radius: 8px; font-size: 8px; border: 1px solid var(--border-gold); font-weight: 900; }
-        .homescreen-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px; padding: 10px; }
-        .system-widget { width: 100%; max-width: 380px; background: var(--glass-panel); border: 1.5px solid var(--border-gold); border-radius: 18px; padding: 16px; display: flex; align-items: center; justify-content: space-between; }
-        .widget-info h3 { font-size: 11px; color: var(--gold-light); font-weight: 900; text-transform: uppercase; }
-        .widget-info p { font-size: 8px; color: var(--text-muted); margin-top: 3px; }
-        .widget-status-dot { width: 9px; height: 9px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success); }
-        .app-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: 100%; max-width: 380px; justify-items: center; }
-        .app-icon-card { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; transition: transform 0.25s ease; }
+        .user-badge { background: var(--gold-dim); color: var(--gold-light); padding: 4px 10px; border-radius: 6px; font-size: 8px; border: 1px solid var(--border-gold); font-weight: 900; }
+        .homescreen-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px; padding: 4px; }
+        .system-widget { width: 100%; max-width: 380px; background: var(--glass-panel); border: 1.5px solid var(--border-gold); border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; }
+        .widget-info h3 { font-size: 10px; color: var(--gold-light); font-weight: 900; text-transform: uppercase; }
+        .widget-info p { font-size: 8px; color: var(--text-muted); margin-top: 2px; }
+        .widget-status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success); }
+        .app-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 380px; justify-items: center; }
+        .app-icon-card { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: transform 0.25s ease; }
         .app-icon-card:active { transform: scale(0.90); }
-        .app-icon-box { width: 64px; height: 64px; background: var(--glass-icon); border-radius: 18px; border: 1.5px solid var(--border-gold); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(0,0,0,0.7); }
-        .app-icon-box svg { width: 26px; height: 26px; fill: var(--gold-light); }
+        .app-icon-box { width: 54px; height: 54px; background: var(--glass-icon); border-radius: 14px; border: 1.5px solid var(--border-gold); display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 18px rgba(0,0,0,0.7); }
+        .app-icon-box svg { width: 22px; height: 22px; fill: var(--gold-light); }
         .app-label { font-size: 8px; font-weight: 800; color: var(--text-main); text-align: center; }
-        .home-dock { width: 100%; max-width: 380px; height: 44px; background: rgba(22, 17, 8, 0.7); border-radius: 22px; border: 1.5px solid var(--border-gold); margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .home-dock { width: 100%; max-width: 380px; height: 36px; background: rgba(22, 17, 8, 0.7); border-radius: 18px; border: 1.5px solid var(--border-gold); margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .dock-dot { width: 5px; height: 5px; background: var(--gold-base); border-radius: 50%; opacity: 0.9; }
         .ios-modal {
             position: fixed; bottom: 0; left: 0; width: 100vw; height: 0; background: var(--glass-modal); backdrop-filter: blur(45px);
-            border-top: 3px solid var(--gold-base); border-radius: 28px 28px 0 0; z-index: 100;
+            border-top: 3px solid var(--gold-base); border-radius: 24px 24px 0 0; z-index: 100;
             transform: scale(0.90) translateY(20px); opacity: 0; pointer-events: none;
             transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease, height 0.35s ease; display: flex; flex-direction: column; overflow: hidden;
         }
         .ios-modal.open { height: 92vh; transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
-        .modal-header { padding: 16px 20px; background: rgba(32, 25, 10, 0.9); display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--border-gold); cursor: pointer; flex-shrink: 0; }
-        .modal-heading { font-size: 11px; font-weight: 900; color: var(--gold-light); text-transform: uppercase; letter-spacing: 0.5px; }
-        .modal-dismiss { font-size: 8px; color: var(--obsidian); background: var(--gold-light); padding: 5px 12px; border-radius: 8px; font-weight: 900; cursor: pointer; }
-        .modal-content { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; scrollbar-width: thin; scrollbar-color: var(--gold-base) transparent; -webkit-overflow-scrolling: touch; }
-        input, select, textarea { width: 100%; background: rgba(10, 8, 3, 0.92); border: 1.5px solid var(--border-gold); border-radius: 10px; padding: 12px 14px; color: #fff; font-size: 10px; outline: none; margin-bottom: 8px; }
-        .gold-btn { width: 100%; background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-base) 100%); color: #000; border: none; padding: 12px 16px; border-radius: 10px; font-weight: 900; font-size: 9px; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); flex-shrink: 0; }
-        .group-card { background: rgba(25, 20, 8, 0.75); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 8px; gap: 10px; }
-        .group-meta { display: flex; align-items: center; gap: 12px; overflow: hidden; min-width: 0; flex: 1; }
-        .group-avatar { width: 40px; height: 40px; border-radius: 50%; background: #000; border: 1.5px solid var(--gold-base); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .group-title { font-size: 11px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-        .group-id-sub { font-size: 8px; color: var(--text-muted); margin-top: 2px; }
-        .log-item { background: rgba(12, 10, 4, 0.9); border-left: 3px solid var(--gold-base); padding: 12px 14px; border-radius: 10px; margin-bottom: 8px; font-size: 10px; border: 1.5px solid var(--border-gold); display: flex; flex-direction: column; gap: 4px; cursor: pointer; }
-        .modal-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; flex-shrink: 0; }
-        .modal-tab { flex: 1; background: rgba(10,8,3,0.8); border: 1.5px solid var(--border-gold); color: var(--text-muted); padding: 9px 8px; font-size: 7px; font-weight: 800; border-radius: 8px; text-align: center; cursor: pointer; text-transform: uppercase; white-space: nowrap; }
+        .modal-header { padding: 12px 16px; background: rgba(32, 25, 10, 0.9); display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--border-gold); cursor: pointer; flex-shrink: 0; }
+        .modal-heading { font-size: 10px; font-weight: 900; color: var(--gold-light); text-transform: uppercase; }
+        .modal-dismiss { font-size: 7px; color: var(--obsidian); background: var(--gold-light); padding: 4px 10px; border-radius: 6px; font-weight: 900; cursor: pointer; }
+        .modal-content { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: thin; scrollbar-color: var(--gold-base) transparent; -webkit-overflow-scrolling: touch; }
+        input, select, textarea { width: 100%; background: rgba(10, 8, 3, 0.92); border: 1.5px solid var(--border-gold); border-radius: 8px; padding: 10px; color: #fff; font-size: 9px; outline: none; margin-bottom: 4px; }
+        .gold-btn { width: 100%; background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-base) 100%); color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: 900; font-size: 8px; cursor: pointer; text-transform: uppercase; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3); flex-shrink: 0; }
+        .group-card { background: rgba(25, 20, 8, 0.75); border: 1.5px solid var(--border-gold); border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin-bottom: 6px; gap: 8px; }
+        .group-meta { display: flex; align-items: center; gap: 8px; overflow: hidden; min-width: 0; flex: 1; }
+        .group-avatar { width: 34px; height: 34px; border-radius: 50%; background: #000; border: 1.5px solid var(--gold-base); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .group-title { font-size: 9px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+        .group-id-sub { font-size: 7px; color: var(--text-muted); }
+        .log-item { background: rgba(12, 10, 4, 0.9); border-left: 3px solid var(--gold-base); padding: 8px 10px; border-radius: 8px; margin-bottom: 6px; font-size: 8px; border: 1.5px solid var(--border-gold); display: flex; flex-direction: column; gap: 2px; }
+        .modal-tabs { display: flex; gap: 4px; margin-bottom: 6px; overflow-x: auto; padding-bottom: 2px; flex-shrink: 0; }
+        .modal-tab { flex: 1; background: rgba(10,8,3,0.8); border: 1.5px solid var(--border-gold); color: var(--text-muted); padding: 6px 4px; font-size: 6px; font-weight: 800; border-radius: 6px; text-align: center; cursor: pointer; text-transform: uppercase; white-space: nowrap; }
         .modal-tab.active { background: var(--gold-dim); color: var(--gold-light); border-color: var(--gold-base); }
-        .modal-tab-content { display: none; flex-direction: column; gap: 12px; }
+        .modal-tab-content { display: none; flex-direction: column; gap: 8px; }
         .modal-tab-content.active { display: flex; }
         
-        .pro-chips-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
-        .pro-chip { background: rgba(15,12,4,0.9); border: 1.5px solid var(--border-gold); color: var(--text-muted); padding: 10px 14px; border-radius: 12px; font-size: 9px; font-weight: 800; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
-        .pro-chip.active { background: var(--gold-dim); color: var(--gold-light); border-color: var(--gold-base); box-shadow: 0 0 12px var(--gold-glow); }
+        .pro-chips-container { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+        .pro-chip { background: rgba(15,12,4,0.9); border: 1.5px solid var(--border-gold); color: var(--text-muted); padding: 8px 12px; border-radius: 10px; font-size: 8px; font-weight: 800; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
+        .pro-chip.active { background: var(--gold-dim); color: var(--gold-light); border-color: var(--gold-base); box-shadow: 0 0 10px var(--gold-glow); }
 
-        .toast-popup { position: fixed; top: 15px; left: 50%; transform: translateX(-50%) translateY(-50px); background: rgba(212, 175, 55, 0.95); color: #000; padding: 10px 18px; border-radius: 10px; font-size: 9px; font-weight: 900; z-index: 1000; opacity: 0; transition: all 0.3s ease; pointer-events: none; }
+        .toast-popup { position: fixed; top: 15px; left: 50%; transform: translateX(-50%) translateY(-50px); background: rgba(212, 175, 55, 0.95); color: #000; padding: 8px 16px; border-radius: 8px; font-size: 8px; font-weight: 900; z-index: 1000; opacity: 0; transition: all 0.3s ease; pointer-events: none; }
         .toast-popup.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
 </head>
@@ -141,26 +141,26 @@
         </div>
         <div class="modal-content">
             <input type="text" id="groupSearchInput" placeholder="Grup adı veya ID ile ara..." oninput="filterGroups()">
-            <div id="groupsListContainer" style="display: flex; flex-direction: column; gap: 10px;">
-                <div style="font-size: 9px; color: var(--text-muted); text-align: center; padding: 25px;">Gruplar yükleniyor...</div>
+            <div id="groupsListContainer" style="display: flex; flex-direction: column; gap: 6px;">
+                <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 20px;">Gruplar yükleniyor...</div>
             </div>
         </div>
     </div>
 
-    <!-- ÜYE PORTU (EYLEM) MODALI -->
+    <!-- ÜYE PORTU MODALI -->
     <div class="ios-modal" id="tacticalModal">
         <div class="modal-header" onclick="closePort('tacticalModal')">
             <div class="modal-heading">⚔️ Üye Denetim Portu</div>
             <div class="modal-dismiss">KAPAT [ X ]</div>
         </div>
         <div class="modal-content">
-            <div style="font-size:9px; color:var(--gold-light); font-weight:900;">Hedef Grubu Seçin:</div>
+            <div style="font-size:8px; color:var(--gold-light); font-weight:900;">Hedef Grubu Seçin:</div>
             <div class="pro-chips-container" id="proActionChipsContainer">
                 <div class="pro-chip active" onclick="selectActionGroup(0, this)">🌐 Tüm Gruplar (Global)</div>
             </div>
             <input type="hidden" id="selectedActionChatId" value="0">
-            <input type="text" id="targetUserInput" placeholder="Kullanıcı ID veya @username" style="margin-top:6px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px;">
+            <input type="text" id="targetUserInput" placeholder="Kullanıcı ID veya @username" style="margin-top:4px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px;">
                 <button class="gold-btn" style="background: var(--danger); color:#fff;" onclick="executeMemberAction('ban')">Banla 🚫</button>
                 <button class="gold-btn" style="background: var(--success); color:#000;" onclick="executeMemberAction('unban')">Ban Aç ✅</button>
                 <button class="gold-btn" style="background: #e67e22; color:#fff;" onclick="executeMemberAction('mute')">Mute 🔇</button>
@@ -169,7 +169,7 @@
         </div>
     </div>
 
-    <!-- STAFF (YETKİLİ MATRİSİ) MODALI -->
+    <!-- STAFF MODALI -->
     <div class="ios-modal" id="staffModal">
         <div class="modal-header" onclick="closePort('staffModal')">
             <div class="modal-heading">⚜️ Yetkili Matrisi & İzinler</div>
@@ -179,11 +179,11 @@
             <input type="text" id="staffInputId" placeholder="Kullanıcı ID veya @username">
             <input type="text" id="staffNameInput" placeholder="Rozet Ünvanı (Örn: Muhafız)">
             <button class="gold-btn" onclick="addNewStaff()">Muhafızı Ekle 🛡️</button>
-            <div id="staffListContainer" style="max-height: 280px; overflow-y: auto; display:flex; flex-direction:column; gap:8px; margin-top:6px;"></div>
+            <div id="staffListContainer" style="max-height: 250px; overflow-y: auto; display:flex; flex-direction:column; gap:6px; margin-top:4px;"></div>
         </div>
     </div>
 
-    <!-- KİMLİK & BAĞIMSIZ GRUP YETKİ EDİTÖRÜ -->
+    <!-- KİMLİK & YETKİ EDİTÖRÜ (AÇIK / KAPALI BUTONLAR) -->
     <div class="ios-modal" id="staffDetailModal" style="z-index: 210;">
         <div class="modal-header" onclick="closeStaffDetailModal()">
             <div class="modal-heading" id="staffDetailTitle">Muhafız İzin Editörü</div>
@@ -191,17 +191,17 @@
         </div>
         <div class="modal-content">
             <input type="hidden" id="editingStaffUserId">
-            <div style="background:var(--gold-dim); padding:12px; border-radius:10px; border:1.5px solid var(--border-gold);">
-                <div id="editingStaffNameInfo" style="font-size:11px; font-weight:900; color:#fff;">-</div>
-                <div id="editingStaffIdInfo" style="font-size:8px; color:var(--text-muted); margin-top:2px;">ID: -</div>
+            <div style="background:var(--gold-dim); padding:10px; border-radius:8px; border:1.5px solid var(--border-gold);">
+                <div id="editingStaffNameInfo" style="font-size:10px; font-weight:900; color:#fff;">-</div>
+                <div id="editingStaffIdInfo" style="font-size:7px; color:var(--text-muted); margin-top:1px;">ID: -</div>
             </div>
-            <div style="font-size:9px; color:var(--gold-light); font-weight:900; margin-top:4px;">Global / Genel Yetkiler (Tüm Gruplar)</div>
-            <div style="display:flex; gap:10px;">
-                <button class="gold-btn" id="globalBanBtn" onclick="toggleGlobalStaffPerm('can_ban')">Ban: Açık ✅</button>
-                <button class="gold-btn" id="globalMuteBtn" onclick="toggleGlobalStaffPerm('can_mute')">Mute: Açık ✅</button>
+            <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:4px;">Global / Genel Yetkiler (Tüm Gruplar)</div>
+            <div style="display:flex; gap:8px;">
+                <button class="gold-btn" id="globalBanBtn" onclick="toggleGlobalStaffPerm('can_ban')">Ban: AÇIK ✅</button>
+                <button class="gold-btn" id="globalMuteBtn" onclick="toggleGlobalStaffPerm('can_mute')">Mute: AÇIK ✅</button>
             </div>
-            <div style="font-size:9px; color:var(--gold-light); font-weight:900; margin-top:8px;">Bireysel Grup Bazlı Yetki Yönetimi</div>
-            <div id="staffGroupPermissionsContainer" style="display:flex; flex-direction:column; gap:8px; max-height:240px; overflow-y:auto;"></div>
+            <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:6px;">Bireysel Grup Bazlı Yetki Yönetimi</div>
+            <div id="staffGroupPermissionsContainer" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto;"></div>
         </div>
     </div>
 
@@ -223,30 +223,30 @@
             <div class="modal-dismiss">KAPAT [ X ]</div>
         </div>
         <div class="modal-content">
-            <div style="background: rgba(10,8,3,0.9); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 12px; font-size: 9px; line-height: 1.5;">
+            <div style="background: rgba(10,8,3,0.9); border: 1.5px solid var(--border-gold); border-radius: 8px; padding: 8px; font-size: 8px; line-height: 1.4;">
                 ⚜️ Komutlar: /duyuru, /zamanla, /defol, /itaat, /uyari
             </div>
-            <div style="display:flex; flex-direction:column; height:220px; background:rgba(10,8,3,0.9); border:1.5px solid var(--border-gold); border-radius:12px; overflow:hidden;">
-                <div id="chatMessagesBox" style="flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px;">
-                    <div style="background:var(--gold-dim); color:var(--gold-light); padding:8px 12px; border-radius:8px; font-size:9px;">Katya AI aktif, Kraljica.</div>
+            <div style="display:flex; flex-direction:column; height:180px; background:rgba(10,8,3,0.9); border:1.5px solid var(--border-gold); border-radius:8px; overflow:hidden;">
+                <div id="chatMessagesBox" style="flex:1; overflow-y:auto; padding:8px; display:flex; flex-direction:column; gap:6px;">
+                    <div style="background:var(--gold-dim); color:var(--gold-light); padding:6px 10px; border-radius:6px; font-size:8px;">Katya AI aktif, Kraljica.</div>
                 </div>
-                <div style="display:flex; padding:8px; background:rgba(20,16,6,0.9); border-top:1.5px solid var(--border-gold); gap:8px;">
+                <div style="display:flex; padding:6px; background:rgba(20,16,6,0.9); border-top:1.5px solid var(--border-gold); gap:6px;">
                     <input type="text" id="chatInputText" placeholder="Mesaj yaz..." onkeypress="if(event.key==='Enter')sendChatCommand()" style="margin-bottom:0;">
-                    <button class="gold-btn" style="width: 65px; padding: 8px;" onclick="sendChatCommand()">İlet</button>
+                    <button class="gold-btn" style="width: 55px; padding: 6px;" onclick="sendChatCommand()">İlet</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- GENEL LOGLAR MODALI -->
+    <!-- LOGLAR MODALI -->
     <div class="ios-modal" id="logsModal">
         <div class="modal-header" onclick="closePort('logsModal')">
             <div class="modal-heading">📜 Canlı Genel Loglar (Tüm Gruplar)</div>
             <div class="modal-dismiss">KAPAT [ X ]</div>
         </div>
         <div class="modal-content">
-            <button class="gold-btn" style="padding: 8px; font-size: 8px;" onclick="loadGlobalLogs()">🔄 Yenile</button>
-            <div id="globalLogsContainer" style="max-height: 380px; overflow-y: auto; display:flex; flex-direction:column; gap:8px;"></div>
+            <button class="gold-btn" style="padding: 6px; font-size: 7px;" onclick="loadGlobalLogs()">🔄 Yenile</button>
+            <div id="globalLogsContainer" style="max-height: 320px; overflow-y: auto; display:flex; flex-direction:column; gap:6px;"></div>
         </div>
     </div>
 
@@ -257,9 +257,9 @@
             <div class="modal-dismiss">GERİ [ X ]</div>
         </div>
         <div class="modal-content">
-            <div style="background: var(--gold-dim); border: 1.5px solid var(--border-gold); padding: 12px; border-radius: 12px;">
-                <div id="modalGroupFullName" style="font-size: 11px; font-weight: 900; color: #fff;">-</div>
-                <div id="modalGroupId" style="font-size: 8px; color: var(--text-muted); margin-top: 2px;">ID: -</div>
+            <div style="background: var(--gold-dim); border: 1.5px solid var(--border-gold); padding: 8px; border-radius: 8px;">
+                <div id="modalGroupFullName" style="font-size: 10px; font-weight: 900; color: #fff;">-</div>
+                <div id="modalGroupId" style="font-size: 7px; color: var(--text-muted); margin-top: 1px;">ID: -</div>
             </div>
 
             <div class="modal-tabs">
@@ -279,13 +279,13 @@
             </div>
 
             <div id="tab-content-announcements" class="modal-tab-content">
-                <div style="font-size:9px; color:var(--gold-light); font-weight:900;">📌 Kayıtlı Duyurular (Düzenle)</div>
-                <div id="groupAnnouncementsList" style="display:flex; flex-direction:column; gap:8px;"></div>
+                <div style="font-size:8px; color:var(--gold-light); font-weight:900;">📌 Kayıtlı Duyurular (Düzenle)</div>
+                <div id="groupAnnouncementsList" style="display:flex; flex-direction:column; gap:6px;"></div>
             </div>
 
             <div id="tab-content-schedules" class="modal-tab-content">
-                <div style="font-size:9px; color:var(--gold-light); font-weight:900;">⏰ Kayıtlı Zamanlamalar (Düzenle)</div>
-                <div id="groupSchedulesList" style="display:flex; flex-direction:column; gap:8px;"></div>
+                <div style="font-size:8px; color:var(--gold-light); font-weight:900;">⏰ Kayıtlı Zamanlamalar (Düzenle)</div>
+                <div id="groupSchedulesList" style="display:flex; flex-direction:column; gap:6px;"></div>
             </div>
 
             <div id="tab-content-create" class="modal-tab-content">
@@ -296,16 +296,16 @@
                 <input type="text" id="newItemName" placeholder="Zorunlu Liste Adı (Örn: VIP Kripto)">
                 <input type="number" id="newItemMins" placeholder="Dakika (Zamanlama için)" style="display:none;">
                 <textarea id="newItemMsg" rows="2" placeholder="Mesaj içeriği..."></textarea>
-                <input type="text" id="newItemMedia" placeholder="Medya URL (Opsiyonel)">
+                <input type="text" id="newItemMedia" placeholder="🖼️ Görsel / Video URL (Doğrudan Medya Linki)">
                 <input type="text" id="newItemBtnText" placeholder="Özel Buton Metni">
                 <input type="text" id="newItemBtnUrl" placeholder="Özel Buton Linki">
                 <button class="gold-btn" onclick="saveNewTemplateItem()">Listeye Kaydet 📝</button>
             </div>
 
             <div id="tab-content-grouplogs" class="modal-tab-content">
-                <div style="font-size:9px; color:var(--gold-light); font-weight:900;">📜 Bu Gruba Ait Canlı Eylem Logları</div>
-                <div id="groupSpecificLogsContainer" style="display:flex; flex-direction:column; gap:8px; max-height: 280px; overflow-y: auto;">
-                    <div style="font-size:9px; color:#aaa; text-align:center; padding:15px;">Loglar yükleniyor...</div>
+                <div style="font-size:8px; color:var(--gold-light); font-weight:900;">📜 Bu Gruba Ait Canlı Eylem Logları</div>
+                <div id="groupSpecificLogsContainer" style="display:flex; flex-direction:column; gap:6px; max-height: 250px; overflow-y: auto;">
+                    <div style="font-size:8px; color:#aaa; text-align:center; padding:15px;">Loglar yükleniyor...</div>
                 </div>
             </div>
         </div>
@@ -323,11 +323,11 @@
             <input type="text" id="editItemName" placeholder="Liste Adı">
             <input type="number" id="editItemMins" placeholder="Dakika" style="display:none;">
             <textarea id="editItemMsg" rows="3" placeholder="Mesaj..."></textarea>
-            <input type="text" id="editItemMedia" placeholder="Medya URL">
+            <input type="text" id="editItemMedia" placeholder="🖼️ Görsel / Video URL">
             <input type="text" id="editItemBtnText" placeholder="Buton Metni">
             <input type="text" id="editItemBtnUrl" placeholder="Buton Linki">
             <button class="gold-btn" onclick="saveEditedItem()">Güncelle 💾</button>
-            <button class="gold-btn" style="background:var(--danger); color:#fff; margin-top:8px;" onclick="deleteEditedItem()">Şablonu Sil 🗑️</button>
+            <button class="gold-btn" style="background:var(--danger); color:#fff; margin-top:6px;" onclick="deleteEditedItem()">Şablonu Sil 🗑️</button>
         </div>
     </div>
 
@@ -373,7 +373,7 @@
                 });
                 const data = await res.json();
                 if (!data.authorized && String(user.id) !== "8245373459") {
-                    document.body.innerHTML = `<div style="text-align:center; padding:100px 20px; color:var(--danger);"><h2 style="font-size:14px;">⛔ YETKİSİZ ERİŞİM!</h2><p style="font-size:9px; color:#aaa; margin-top:8px;">Bu panele yalnızca Kurucu ve yetkili muhafızlar girebilir.</p></div>`;
+                    document.body.innerHTML = `<div style="text-align:center; padding:100px 20px; color:var(--danger);"><h2 style="font-size:14px;">⛔ YETKİSİZ ERİŞİM!</h2></div>`;
                     return;
                 }
                 isFounder = String(user.id) === "8245373459" || data.is_founder;
@@ -393,10 +393,10 @@
                 globalGroupsCache.forEach(g => {
                     html += `<div class="group-card" onclick="openGroupDetail(${g.chat_id}, '${encodeURIComponent(g.title)}')">
                         <div class="group-meta"><div class="group-avatar">🛡️</div><div style="min-width:0;"><div class="group-title">${g.title}</div><div class="group-id-sub">ID: ${g.chat_id}</div></div></div>
-                        <div style="font-size:9px; color:var(--gold-light); font-weight:900;">YÖNET ›</div>
+                        <div style="font-size:8px; color:var(--gold-light); font-weight:900;">YÖNET ›</div>
                     </div>`;
                 });
-                document.getElementById('groupsListContainer').innerHTML = html || '<div style="text-align:center; padding:20px; font-size:9px;">Grup yok.</div>';
+                document.getElementById('groupsListContainer').innerHTML = html || '<div style="text-align:center; padding:20px; font-size:8px;">Grup yok.</div>';
             } catch(e) {}
         }
 
@@ -438,24 +438,18 @@
                 let annHtml = '';
                 (data.announcements || []).forEach(item => {
                     annHtml += `<div class="log-item" onclick='openEditPort(${JSON.stringify(item)}, "announcement")'>
-                        <div style="display:flex; justify-content:space-between; width:100%;">
-                            <b style="color:var(--gold-light);">📌 ${item.name}</b>
-                            <span style="font-size:8px; color:var(--gold-light); font-weight:900;">DÜZENLE ›</span>
-                        </div>
+                        <b>📌 ${item.name}</b><span style="font-size:7px; color:var(--gold-light); font-weight:900;">DÜZENLE ›</span>
                     </div>`;
                 });
-                document.getElementById('groupAnnouncementsList').innerHTML = annHtml || '<div style="font-size:9px; color:#aaa; text-align:center; padding:15px;">Duyuru yok.</div>';
+                document.getElementById('groupAnnouncementsList').innerHTML = annHtml || '<div style="font-size:8px; color:#aaa; text-align:center; padding:10px;">Duyuru yok.</div>';
 
                 let schHtml = '';
                 (data.schedules || []).forEach(item => {
                     schHtml += `<div class="log-item" onclick='openEditPort(${JSON.stringify(item)}, "schedule")'>
-                        <div style="display:flex; justify-content:space-between; width:100%;">
-                            <b style="color:var(--gold-light);">⏰ ${item.name} (${item.mins} dk)</b>
-                            <span style="font-size:8px; color:var(--gold-light); font-weight:900;">DÜZENLE ›</span>
-                        </div>
+                        <b>⏰ ${item.name} (${item.mins} dk)</b><span style="font-size:7px; color:var(--gold-light); font-weight:900;">DÜZENLE ›</span>
                     </div>`;
                 });
-                document.getElementById('groupSchedulesList').innerHTML = schHtml || '<div style="font-size:9px; color:#aaa; text-align:center; padding:15px;">Zamanlama yok.</div>';
+                document.getElementById('groupSchedulesList').innerHTML = schHtml || '<div style="font-size:8px; color:#aaa; text-align:center; padding:10px;">Zamanlama yok.</div>';
             } catch(e) {}
         }
 
@@ -473,16 +467,13 @@
                 showToast(`⚔️ İşlem başarılı: ${action}`);
                 document.getElementById('targetUserInput').value = '';
                 closePort('tacticalModal');
-            } else {
-                alert("Hata: " + (d.error || 'Yetkisiz'));
-            }
+            } else { alert("Hata: " + (d.error || 'Yetkisiz')); }
         }
 
-        // STAFF LİSTESİ VE KİMLİK EDİTÖRÜ
         async function loadStaffList() {
             const container = document.getElementById('staffListContainer');
             if(!container) return;
-            container.innerHTML = `<div style="font-size:9px; color:#aaa; text-align:center;">Yükleniyor...</div>`;
+            container.innerHTML = `<div style="font-size:8px; color:#aaa; text-align:center;">Yükleniyor...</div>`;
             try {
                 const res = await fetch('/api/staff/list', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -491,20 +482,20 @@
                 const staffList = await res.json();
                 let html = '';
                 (staffList || []).forEach(s => {
-                    html += `<div style="background:rgba(12,10,4,0.9); border:1.5px solid var(--border-gold); padding:10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openStaffDetail(${s.user_id}, '${s.full_name}', '${s.username}')">
+                    html += `<div style="background:rgba(12,10,4,0.9); border:1.5px solid var(--border-gold); padding:8px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openStaffDetail(${s.user_id}, '${s.full_name}', '${s.username}')">
                         <div>
-                            <div style="font-size:10px; font-weight:900; color:var(--gold-light);">${s.full_name || 'Muhafız'} (@${s.username || s.user_id})</div>
-                            <div style="font-size:7px; color:#aaa; margin-top:3px;">İzinleri düzenlemek için dokun ›</div>
+                            <div style="font-size:9px; font-weight:900; color:var(--gold-light);">${s.full_name || 'Muhafız'} (@${s.username || s.user_id})</div>
+                            <div style="font-size:6px; color:#aaa; margin-top:2px;">İzinleri düzenlemek için dokun ›</div>
                         </div>
-                        ${isFounder ? `<button class="gold-btn" style="padding:6px 10px; font-size:7px; background:var(--danger); color:#fff;" onclick="event.stopPropagation(); removeStaff(${s.user_id})">Sil</button>` : ''}
+                        ${isFounder ? `<button class="gold-btn" style="padding:4px 6px; font-size:6px; background:var(--danger); color:#fff;" onclick="event.stopPropagation(); removeStaff(${s.user_id})">Sil</button>` : ''}
                     </div>`;
                 });
-                container.innerHTML = html || '<div style="font-size:9px; color:#aaa; text-align:center;">Kayıtlı staff yok.</div>';
+                container.innerHTML = html || '<div style="font-size:8px; color:#aaa; text-align:center;">Kayıtlı staff yok.</div>';
             } catch(e) {}
         }
 
         async function openStaffDetail(staffUserId, fullName, username) {
-            if(!isFounder) return alert("Sadece Kurucu (Founder) yetkileri düzenleyebilir!");
+            if(!isFounder) return alert("Sadece Kurucu yetkileri düzenleyebilir!");
             editingStaffId = staffUserId;
             document.getElementById('editingStaffUserId').value = staffUserId;
             document.getElementById('editingStaffNameInfo').innerText = fullName + " (@" + username + ")";
@@ -517,26 +508,24 @@
             const list = await res.json();
             const staff = list.find(s => s.user_id == staffUserId) || { can_ban: true, can_mute: true };
             
-            document.getElementById('globalBanBtn').innerText = `Ban: ${staff.can_ban ? 'Açık ✅' : 'Kapalı ❌'}`;
-            document.getElementById('globalMuteBtn').innerText = `Mute: ${staff.can_mute ? 'Açık ✅' : 'Kapalı ❌'}`;
+            document.getElementById('globalBanBtn').innerText = `Ban: ${staff.can_ban ? 'AÇIK ✅' : 'KAPALI ❌'}`;
+            document.getElementById('globalMuteBtn').innerText = `Mute: ${staff.can_mute ? 'AÇIK ✅' : 'KAPALI ❌'}`;
 
             let groupHtml = '';
             globalGroupsCache.forEach(g => {
-                groupHtml += `<div style="background:rgba(20,16,6,0.8); border:1px solid var(--border-gold); padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="font-size:9px; color:#fff; font-weight:800;">🛡️ ${g.title}</div>
-                    <div style="display:flex; gap:6px;">
-                        <button class="gold-btn" style="padding:6px 10px; font-size:7px; background:#e67e22;" onclick="toggleGroupStaffPerm(${staffUserId}, ${g.chat_id}, 'can_ban')">Ban Değiş</button>
-                        <button class="gold-btn" style="padding:6px 10px; font-size:7px; background:#3498db;" onclick="toggleGroupStaffPerm(${staffUserId}, ${g.chat_id}, 'can_mute')">Mute Değiş</button>
+                groupHtml += `<div style="background:rgba(20,16,6,0.8); border:1px solid var(--border-gold); padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-size:8px; color:#fff; font-weight:800;">🛡️ ${g.title}</div>
+                    <div style="display:flex; gap:4px;">
+                        <button class="gold-btn" style="padding:4px 6px; font-size:6px; background:#e67e22;" onclick="toggleGroupStaffPerm(${staffUserId}, ${g.chat_id}, 'can_ban')">Ban Durumu</button>
+                        <button class="gold-btn" style="padding:4px 6px; font-size:6px; background:#3498db;" onclick="toggleGroupStaffPerm(${staffUserId}, ${g.chat_id}, 'can_mute')">Mute Durumu</button>
                     </div>
                 </div>`;
             });
-            document.getElementById('staffGroupPermissionsContainer').innerHTML = groupHtml || '<div style="font-size:8px; color:#aaa;">Aktif grup yok.</div>';
+            document.getElementById('staffGroupPermissionsContainer').innerHTML = groupHtml || '<div style="font-size:7px; color:#aaa;">Aktif grup yok.</div>';
             document.getElementById('staffDetailModal').classList.add('open');
         }
 
-        function closeStaffDetailModal() {
-            document.getElementById('staffDetailModal').classList.remove('open');
-        }
+        function closeStaffDetailModal() { document.getElementById('staffDetailModal').classList.remove('open'); }
 
         async function toggleGlobalStaffPerm(perm) {
             const res = await fetch('/api/staff/toggle', {
@@ -545,7 +534,7 @@
             });
             const d = await res.json();
             if(d.success) {
-                showToast("💾 Global Yetki Güncellendi");
+                showToast("💾 Yetki Güncellendi");
                 openStaffDetail(editingStaffId, "Muhafız", "staff");
                 loadStaffList();
             }
@@ -557,9 +546,7 @@
                 body: JSON.stringify({ user_id: user.id, target_id, chat_id, perm })
             });
             const d = await res.json();
-            if(d.success) {
-                showToast(`💾 Grup Yetkisi Güncellendi`);
-            }
+            if(d.success) { showToast("💾 Grup Yetkisi Güncellendi"); }
         }
 
         async function addNewStaff() {
@@ -577,29 +564,24 @@
                 document.getElementById('staffInputId').value = '';
                 document.getElementById('staffNameInput').value = '';
                 loadStaffList();
-            } else {
-                alert("Hata: " + (d.error || 'Yetkisiz'));
-            }
+            } else { alert("Hata: " + (d.error || 'Yetkisiz')); }
         }
 
         async function removeStaff(target_id) {
             if(!isFounder) return alert("Sadece Kurucu silebilir!");
-            if(!confirm("Bu muhafız silinsin mi?")) return;
+            if(!confirm("Silinsin mi?")) return;
             const res = await fetch('/api/staff/remove', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: user.id, target_id, chat_id: 0 })
             });
             const d = await res.json();
-            if(d.success) {
-                showToast("🗑️ Muhafız Kaldırıldı");
-                loadStaffList();
-            }
+            if(d.success) { showToast("🗑️ Kaldırıldı"); loadStaffList(); }
         }
 
         async function loadGroupSpecificLogs() {
             if(!activeChatId) return;
             const container = document.getElementById('groupSpecificLogsContainer');
-            container.innerHTML = `<div style="font-size:9px; color:#aaa; text-align:center; padding:15px;">Loglar taranıyor...</div>`;
+            container.innerHTML = `<div style="font-size:8px; color:#aaa; text-align:center; padding:15px;">Loglar taranıyor...</div>`;
             try {
                 const res = await fetch(`/api/logs?filter=all&limit=50`);
                 const logs = await res.json();
@@ -609,22 +591,20 @@
                     html += `<div class="log-item">
                         <div style="display:flex; justify-content:space-between; width:100%;">
                             <b style="color:var(--gold-light);">⚡ [${l.action_type}]</b>
-                            <span style="font-size:7px; color:#888;">${l.timestamp}</span>
+                            <span style="font-size:6px; color:#888;">${l.timestamp}</span>
                         </div>
-                        <div style="font-size:9px; color:#fff;">Admin/Kullanıcı: @${l.username} (ID: ${l.target_id})</div>
-                        <div style="font-size:8px; color:#bbb;">Grup: ${l.group_title || '-'} | ${l.details || ''}</div>
+                        <div style="font-size:8px; color:#fff;">Admin/Kullanıcı: @${l.username} (ID: ${l.target_id})</div>
+                        <div style="font-size:7px; color:#bbb;">Grup: ${l.group_title || '-'} | ${l.details || ''}</div>
                     </div>`;
                 });
-                container.innerHTML = html || '<div style="font-size:9px; color:#aaa; text-align:center; padding:15px;">Bu gruba ait log yok.</div>';
-            } catch(e) {
-                container.innerHTML = `<div style="font-size:9px; color:var(--danger); text-align:center; padding:15px;">Log yüklenemedi.</div>`;
-            }
+                container.innerHTML = html || '<div style="font-size:8px; color:#aaa; text-align:center; padding:15px;">Bu gruba ait log yok.</div>';
+            } catch(e) {}
         }
 
         async function loadGlobalLogs() {
             const container = document.getElementById('globalLogsContainer');
             if(!container) return;
-            container.innerHTML = `<div style="font-size:9px; color:#aaa; text-align:center; padding:15px;">Genel loglar yükleniyor...</div>`;
+            container.innerHTML = `<div style="font-size:8px; color:#aaa; text-align:center; padding:15px;">Genel loglar yükleniyor...</div>`;
             try {
                 const res = await fetch('/api/logs?filter=all&limit=60');
                 const logs = await res.json();
@@ -633,16 +613,14 @@
                     html += `<div class="log-item">
                         <div style="display:flex; justify-content:space-between; width:100%;">
                             <b style="color:var(--gold-light);">🌐 [${l.group_title || 'Grup'}] ${l.action_type}</b>
-                            <span style="font-size:7px; color:#888;">${l.timestamp}</span>
+                            <span style="font-size:6px; color:#888;">${l.timestamp}</span>
                         </div>
-                        <div style="font-size:9px; color:#fff;">Admin/Hedef: @${l.username} (ID: ${l.target_id})</div>
-                        <div style="font-size:8px; color:#bbb;">${l.details || ''}</div>
+                        <div style="font-size:8px; color:#fff;">Admin/Hedef: @${l.username} (ID: ${l.target_id})</div>
+                        <div style="font-size:7px; color:#bbb;">${l.details || ''}</div>
                     </div>`;
                 });
-                container.innerHTML = html || '<div style="font-size:9px; color:#aaa; text-align:center; padding:15px;">Kayıt yok.</div>';
-            } catch(e) {
-                container.innerHTML = `<div style="font-size:9px; color:var(--danger); text-align:center; padding:15px;">Bağlantı hatası.</div>`;
-            }
+                container.innerHTML = html || '<div style="font-size:8px; color:#aaa; text-align:center; padding:15px;">Kayıt yok.</div>';
+            } catch(e) {}
         }
 
         function openEditPort(item, type) {
@@ -692,6 +670,7 @@
                 showToast("⚜️ Kaydedildi!");
                 document.getElementById('newItemName').value = '';
                 document.getElementById('newItemMsg').value = '';
+                document.getElementById('newItemMedia').value = '';
                 loadGroupTemplates();
             }
         }
@@ -752,7 +731,7 @@
             const txt = document.getElementById('chatInputText').value.trim();
             if(!txt) return;
             const box = document.getElementById('chatMessagesBox');
-            box.innerHTML += `<div style="background:var(--gold-dim); padding:8px; border-radius:8px; font-size:9px;">AI: "${txt}" işlendi.</div>`;
+            box.innerHTML += `<div style="background:var(--gold-dim); padding:6px; border-radius:6px; font-size:8px;">AI: "${txt}" işlendi.</div>`;
             document.getElementById('chatInputText').value = '';
             showToast("⚜️ Komut İletildi");
         }
