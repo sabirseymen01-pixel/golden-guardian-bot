@@ -9,6 +9,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+from typing import Optional, List, Any
 import uvicorn
 import httpx
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, ChatPermissions
@@ -142,7 +144,7 @@ async def api_get_stats():
 async def api_get_logs(filter: str = "all", limit: int = 100):
     try:
         return database.get_recent_logs(limit=limit, log_filter=filter)
-    except Exception as e:
+    except Exception:
         return []
 
 @app.post("/api/logs/clear")
@@ -178,6 +180,59 @@ async def api_verify_admin(request: Request):
         return {"authorized": True, "is_founder": True}
     return {"authorized": False}
 
+# ==========================================
+# ✨ ETKİNLİK & OYUN API ROTALARI (ÜYE & STAFF)
+# ==========================================
+@app.get("/api/events/list")
+async def api_list_events(only_active: bool = False):
+    return database.get_all_events(only_active=only_active)
+
+@app.post("/api/events/save")
+async def api_save_event(request: Request):
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        is_founder = str(user_id) == str(FOUNDER_ID).strip()
+        if not is_founder and not database.is_authorized_staff(user_id):
+            return {"success": False, "error": "Yetkisiz!"}
+        e_id = database.save_event_db(data)
+        database.log_action(0, "EVENT_SAVE", user_id, "Admin", f"Etkinlik kaydedildi: {data.get('title', '')}")
+        return {"success": True, "event_id": e_id}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/events/delete")
+async def api_delete_event(request: Request):
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        event_id = int(data.get("event_id", 0))
+        is_founder = str(user_id) == str(FOUNDER_ID).strip()
+        if not is_founder and not database.is_authorized_staff(user_id):
+            return {"success": False, "error": "Yetkisiz!"}
+        database.delete_event_db(event_id)
+        database.log_action(0, "EVENT_DELETE", user_id, "Admin", f"Etkinlik silindi ID: {event_id}")
+        return {"success": True}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/events/vote")
+async def api_vote_event(request: Request):
+    try:
+        data = await request.json()
+        event_id = int(data.get("event_id", 0))
+        user_id = int(data.get("user_id", 0))
+        username = str(data.get("username", "Üye")).strip()
+        choice = str(data.get("choice", "Katıldı")).strip()
+        total_votes = database.vote_event_db(event_id, user_id, username, choice)
+        database.log_action(0, "EVENT_INTERACT", user_id, f"@{username}", f"Etkinlik #{event_id} aksiyon: {choice}")
+        return {"success": True, "votes_count": total_votes}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+# ==========================================
+# STAFF & YETKİ API ROTALARI
+# ==========================================
 @app.post("/api/staff/list")
 async def api_get_staff_list(request: Request):
     data = await request.json()
@@ -194,10 +249,8 @@ async def api_add_staff(request: Request):
     chat_id = int(data.get("chat_id", 0))
     input_value = str(data.get("staff_input", "")).strip()
     full_name = data.get("full_name", "🌸 Kristal Yetkili")
-    
     if str(user_id) != str(FOUNDER_ID).strip() and not database.is_authorized_staff(user_id):
         return {"success": False, "error": "Yetkisiz!"}
-
     if not input_value: return {"success": False, "error": "Boş değer"}
     clean_val = input_value.lstrip("@").lower()
     target_id = int(clean_val) if clean_val.isdigit() or (clean_val.startswith("-") and clean_val[1:].isdigit()) else (database.get_user_id_by_username(chat_id, clean_val) or int(hashlib.md5(clean_val.encode()).hexdigest()[:8], 16))
@@ -211,10 +264,8 @@ async def api_toggle_staff_perm(request: Request):
     target_id = int(data.get("target_id", 0))
     chat_id = int(data.get("chat_id", 0))
     perm_field = str(data.get("perm", ""))
-    
     if str(user_id) != str(FOUNDER_ID).strip():
         return {"success": False, "error": "Sadece Kurucu yetki değiştirebilir!"}
-
     if perm_field in ["can_ban", "can_mute"]:
         new_val = database.toggle_staff_permission(target_id, chat_id, perm_field)
         return {"success": True, "new_val": new_val}
@@ -226,10 +277,8 @@ async def api_remove_staff(request: Request):
     user_id = int(data.get("user_id", 0))
     target_id = int(data.get("target_id", 0))
     chat_id = int(data.get("chat_id", 0))
-    
     if str(user_id) != str(FOUNDER_ID).strip():
         return {"success": False, "error": "Yetkisiz!"}
-        
     database.remove_staff_member(target_id, chat_id)
     return {"success": True}
 
@@ -258,7 +307,6 @@ async def api_member_action(request: Request):
 
         bot = tg_application.bot
         clean_target = target_input.lstrip("@").lower()
-        
         target_id = int(clean_target) if clean_target.isdigit() or (clean_target.startswith("-") and clean_target[1:].isdigit()) else database.get_user_id_by_username(chat_id, clean_target)
         if not target_id and chat_id == 0:
             for g in database.get_bot_groups():
@@ -307,9 +355,6 @@ async def api_update_settings(request: Request):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-from pydantic import BaseModel
-from typing import Optional
-
 class TemplateData(BaseModel):
     user_id: int
     chat_id: int
@@ -327,7 +372,7 @@ async def api_list_templates(request: Request):
         data = await request.json()
         chat_id = int(data.get("chat_id", 0))
         return database.get_group_templates(chat_id)
-    except Exception as e:
+    except Exception:
         return {"announcements": [], "schedules": []}
 
 @app.post("/api/templates/save-announcement")
@@ -370,19 +415,32 @@ async def api_delete_template(request: Request):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
-async def handle_root():
+# ==========================================
+# 🌐 HTML SAYFA SUNUMLARI (STAFF & GOLDEN ÜYE)
+# ==========================================
+def _serve_html(filename: str):
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    paths_to_check = [os.path.join(base_dir, "public", "index.html"), os.path.join(base_dir, "index.html")]
+    paths_to_check = [os.path.join(base_dir, "public", filename), os.path.join(base_dir, filename)]
     for path in paths_to_check:
         if os.path.exists(path):
             try:
                 with open(path, "r", encoding="utf-8") as f:
                     return HTMLResponse(content=f.read(), headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
             except Exception as e:
-                logger.error(f"HTML hata: {e}")
-    return HTMLResponse(content="Index bulunamadı!", status_code=500)
+                logger.error(f"HTML hata ({filename}): {e}")
+    return HTMLResponse(content=f"{filename} bulunamadı!", status_code=500)
 
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
+async def handle_root():
+    return _serve_html("index.html")
+
+@app.api_route("/member", methods=["GET", "HEAD"], response_class=HTMLResponse)
+async def handle_member_portal():
+    return _serve_html("member.html")
+
+# ==========================================
+# TELEGRAM BOT KOMUTLARI
+# ==========================================
 async def _delete_after_delay(context, chat_id, message_id, delay=5):
     await asyncio.sleep(delay)
     try: await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
@@ -492,12 +550,12 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "- /butonmetni <yazı> - Hoş geldin butonu yazısı\n"
         "- /butonlinki <url> - Hoş geldin butonu linki\n"
         "- /duyuru <mesaj> - Duyuru gönder (Otomatik Pinlenir / Yanıtlanan görseli sabitler)\n"
-        "- /duyuru <mesaj> | <buton metni> | <link> - Özel butonlu duyuru\n"
+        "- /duyuru <mesaj> | <buton metni> | <link> - Özel butonlu duyuru (Görsele yanıtla atılırsa butonlu görseli pinler)\n"
         "- /duyurubutonmetni <yazı> - Varsayılan duyuru butonu yazısını ayarla\n"
         "- /duyurubutonlinki <url> - Varsayılan duyuru butonu linkini ayarla\n"
-        "- /zamanla <dakika> <mesaj> - Butonsuz periyodik duyuru başlat\n"
-        "- /zamanla <dakika> | <mesaj> | <buton metni> | <link> - Butonlu periyodik duyuru başlat\n"
-        "- /zamanladur veya /zamanla dur - Zamanlanmış paylaşımı durdur\n"
+        "- /zamanla <dakika> <mesaj> - Butonsuz periyodik duyuru başlat (Pinlenmez)\n"
+        "- /zamanla <dakika> | <mesaj> | <buton metni> | <link> - Butonlu periyodik duyuru başlat (Pinlenmez)\n"
+        "- /zamanladur veya /zamanla dur - Yanıtlanan zamanlanmış paylaşımı durdur\n"
         "- /defol <kullanıcı> - Banla\n"
         "- /undefol <kullanıcı> - Ban kaldır\n"
         "- /itaat <kullanıcı> - Sustur\n"
@@ -506,8 +564,11 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "- /unuyari <kullanıcı> - Uyarı sıfırla\n\n"
         "⚜️ Powered by 𝘽𝙍𝙀𝙎𝙆𝘼𝙑𝙄𝘾𝘼 🇷🇸"
     )
-    web_app_url = os.environ.get("WEBAPP_URL", "https://golden-guardian-bot.onrender.com/")
-    keyboard = [[InlineKeyboardButton(text="🛡️ Paneli Aç", web_app=WebAppInfo(url=web_app_url))]]
+    base_url = os.environ.get("WEBAPP_URL", "https://golden-guardian-bot.onrender.com").rstrip("/")
+    keyboard = [
+        [InlineKeyboardButton(text="🛡️ Paneli Aç", web_app=WebAppInfo(url=f"{base_url}/"))],
+        [InlineKeyboardButton(text="✨ Golden Üye Girişi", web_app=WebAppInfo(url=f"{base_url}/member"))]
+    ]
     await update.message.reply_text(welcome_text, reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def cmd_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -516,6 +577,40 @@ async def cmd_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if text: 
         database.update_group_setting(update.effective_chat.id, "welcome_msg", text)
         await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin mesajı güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_butonmetni(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    text = " ".join(context.args)
+    if text:
+        database.update_group_setting(update.effective_chat.id, "btn_text", text)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin buton metni güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_butonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    if context.args:
+        database.update_group_setting(update.effective_chat.id, "btn_url", context.args[0].strip())
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin buton linki güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_duyurubutonmetni(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    text = " ".join(context.args)
+    if text:
+        database.update_group_setting(update.effective_chat.id, "announcement_btn_text", text)
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Duyuru buton metni güncellendi!", 4)
+    try: await update.message.delete()
+    except Exception: pass
+
+async def cmd_duyurubutonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not await is_user_admin(update, context): return
+    if context.args:
+        database.update_group_setting(update.effective_chat.id, "announcement_btn_url", context.args[0].strip())
+        await send_auto_delete_message(context, update.effective_chat.id, "✅ Duyuru buton linki güncellendi!", 4)
     try: await update.message.delete()
     except Exception: pass
 
@@ -563,7 +658,7 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
         admin_user = update.effective_user
         database.log_action(chat_id, "ANNOUNCEMENT", admin_user.id, f"@{admin_user.username or admin_user.first_name}", f"Duyuru: {msg_text[:30]}...")
 
-        auto_name = f"Chat Duyurusu: {msg_text[:20]}..." if msg_text else f"Chat Duyurusu"
+        auto_name = f"Chat Duyurusu: {msg_text[:20]}..." if msg_text else "Chat Duyurusu"
         database.save_template_db(chat_id, "announcement", auto_name, msg_text, photo_file_id or "", btn_text, btn_url, 0)
     except Exception as e:
         logger.error(f"Duyuru hata: {e}")
@@ -721,7 +816,7 @@ async def cmd_uyari(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await send_auto_delete_message(context, chat_id, f"🚫 @{uname} 3 uyarıyı aştığı için otomatik banlandı!", 6)
             except Exception as e: logger.error(f"Otomatik ban: {e}")
         else:
-            database.log_action(chat_id, "WARN", admin_user.id, f"@{admin_user.username or admin_user.first_name}", f"@{uname} uyarldı ({current_warns}/3).")
+            database.log_action(chat_id, "WARN", admin_user.id, f"@{admin_user.username or admin_user.first_name}", f"@{uname} uyarıldı ({current_warns}/3).")
             await send_auto_delete_message(context, chat_id, f"⚠️ @{uname} uyarıldı! ({current_warns}/3)", 5)
     try: await update.message.delete()
     except Exception: pass
@@ -741,9 +836,11 @@ async def cmd_unuyari(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 COMMAND_MAP = {
     "start": cmd_start, "help": cmd_start, "welcome": cmd_welcome,
+    "butonmetni": cmd_butonmetni, "butonlinki": cmd_butonlinki,
+    "duyurubutonmetni": cmd_duyurubutonmetni, "duyurubutonlinki": cmd_duyurubutonlinki,
     "duyuru": cmd_duyuru, "zamanla": cmd_zamanla, "zamanladur": cmd_zamanladur,
     "defol": cmd_defol, "undefol": cmd_undefol, "itaat": cmd_itaat, "unitaat": cmd_unitaat,
-    "uyari": cmd_uyari, "warn": cmd_uyari, "unuyari": cmd_unuyari, "unwarn": cmd_uyari,
+    "uyari": cmd_uyari, "warn": cmd_uyari, "unuyari": cmd_unuyari, "unwarn": cmd_unuyari,
 }
 
 async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -756,7 +853,7 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
             if chat_info.photo:
                 file_obj = await context.bot.get_file(chat_info.photo.small_file_id)
                 photo_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_obj.file_path}"
-            database.register_bot_group(chat.id, chat.title or "Grup", photo_url)
+            database.register_bot_group(chat.id, chat_info.title or "Grup", photo_url)
         except Exception:
             database.register_bot_group(chat.id, chat.title or "Grup", "")
 
