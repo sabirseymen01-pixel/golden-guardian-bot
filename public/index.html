@@ -35,7 +35,7 @@
         }
         .brand-title { font-size: 11px; font-weight: 900; color: var(--gold-light); letter-spacing: 2px; display: flex; align-items: center; gap: 8px; }
         .user-badge { background: var(--gold-dim); color: var(--gold-light); padding: 4px 10px; border-radius: 6px; font-size: 8px; border: 1px solid var(--border-gold); font-weight: 900; }
-        .homescreen-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px; padding: 4px; }
+        .homescreen-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 14px; padding: 4px; }
         .system-widget { width: 100%; max-width: 380px; background: var(--glass-panel); border: 1.5px solid var(--border-gold); border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; }
         .widget-info h3 { font-size: 10px; color: var(--gold-light); font-weight: 900; text-transform: uppercase; }
         .widget-info p { font-size: 8px; color: var(--text-muted); margin-top: 2px; }
@@ -72,11 +72,12 @@
         .modal-tab.active { background: var(--gold-dim); color: var(--gold-light); border-color: var(--gold-base); }
         .modal-tab-content { display: none; flex-direction: column; gap: 8px; }
         .modal-tab-content.active { display: flex; }
-        
         .pro-chips-container { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
         .pro-chip { background: rgba(15,12,4,0.9); border: 1.5px solid var(--border-gold); color: var(--text-muted); padding: 8px 12px; border-radius: 10px; font-size: 8px; font-weight: 800; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
         .pro-chip.active { background: var(--gold-dim); color: var(--gold-light); border-color: var(--gold-base); box-shadow: 0 0 10px var(--gold-glow); }
-
+        .perm-row { background: rgba(20,16,6,0.85); border: 1px solid var(--border-gold); padding: 10px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .perm-row-title { font-size: 9px; color: var(--gold-light); font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .perm-btn-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .toast-popup { position: fixed; top: 15px; left: 50%; transform: translateX(-50%) translateY(-50px); background: rgba(212, 175, 55, 0.95); color: #000; padding: 8px 16px; border-radius: 8px; font-size: 8px; font-weight: 900; z-index: 1000; opacity: 0; transition: all 0.3s ease; pointer-events: none; }
         .toast-popup.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
@@ -112,9 +113,9 @@
                 <div class="app-icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.07 2.75z"/></svg></div>
                 <div class="app-label">Staff Matrisi</div>
             </div>
-            <div class="app-icon-card" onclick="openPort('leaderboardModal')">
-                <div class="app-icon-box"><svg viewBox="0 0 24 24"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.92V19H7v2h10v-2h-3.01v-3.16c1.63-.29 2.98-1.42 3.61-2.92C19.08 10.63 21 8.55 21 6V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg></div>
-                <div class="app-label">Skor</div>
+            <div class="app-icon-card" onclick="openPort('eventsAdminModal')">
+                <div class="app-icon-box"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div>
+                <div class="app-label">Etkinlikler</div>
             </div>
             <div class="app-icon-card" onclick="openPort('aiModal')">
                 <div class="app-icon-box"><svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19h3.58c1.23.63 2.65 1 4.07 1 4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7zm1-11h-2v3H8v2h3v3h2v-3h3v-2h-3z"/></svg></div>
@@ -133,6 +134,31 @@
         </div>
     </main>
 
+    <!-- 🎭 ETKİNLİK & OYUN YÖNETİM MODALI (ÜYE PORTU İLE SENKRONİZE) -->
+    <div class="ios-modal" id="eventsAdminModal">
+        <div class="modal-header" onclick="closePort('eventsAdminModal')">
+            <div class="modal-heading">✨ Etkinlik & Sahne Yönetimi</div>
+            <div class="modal-dismiss">KAPAT [ X ]</div>
+        </div>
+        <div class="modal-content">
+            <div style="font-size:8px; color:var(--gold-light); font-weight:900;">Yeni Etkinlik / Oyun Simgesi Oluştur</div>
+            <input type="hidden" id="editEventId">
+            <div style="display:grid; grid-template-columns: 70px 1fr; gap:6px;">
+                <input type="text" id="evIcon" placeholder="Simge (🎤)" value="🎤">
+                <input type="text" id="evTitle" placeholder="Etkinlik Adı (Örn: Eurovision)">
+            </div>
+            <input type="text" id="evSubtitle" placeholder="Kısa Alt Başlık">
+            <input type="text" id="evSchedule" placeholder="Zaman / Gün (Örn: Cuma 22:00)">
+            <textarea id="evDesc" rows="2" placeholder="Etkinlik kuralları ve açıklaması..."></textarea>
+            <input type="text" id="evMedia" placeholder="Görsel URL (Opsiyonel)">
+            <input type="text" id="evOptions" placeholder="Butonlar (Virgülle ayır: 12 Puan Ver, Sahneye Katıl)">
+            <button class="gold-btn" onclick="saveEventAdmin()">Etkinliği Üye Ekranına Mühürle ✨</button>
+
+            <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:8px;">Aktif Üye Uygulama Simgeleri (Düzenlemek İçin Dokun)</div>
+            <div id="adminEventsListContainer" style="display:flex; flex-direction:column; gap:6px;"></div>
+        </div>
+    </div>
+
     <!-- GRUPLAR MODALI -->
     <div class="ios-modal" id="groupsModal">
         <div class="modal-header" onclick="closePort('groupsModal')">
@@ -141,9 +167,7 @@
         </div>
         <div class="modal-content">
             <input type="text" id="groupSearchInput" placeholder="Grup adı veya ID ile ara..." oninput="filterGroups()">
-            <div id="groupsListContainer" style="display: flex; flex-direction: column; gap: 6px;">
-                <div style="font-size: 8px; color: var(--text-muted); text-align: center; padding: 20px;">Gruplar yükleniyor...</div>
-            </div>
+            <div id="groupsListContainer" style="display: flex; flex-direction: column; gap: 6px;"></div>
         </div>
     </div>
 
@@ -183,7 +207,7 @@
         </div>
     </div>
 
-    <!-- KİMLİK & YETKİ EDİTÖRÜ (AÇIK / KAPALI BUTONLAR) -->
+    <!-- KİMLİK & YETKİ EDİTÖRÜ (SIKIŞMASIZ AÇIK / KAPALI BUTONLAR) -->
     <div class="ios-modal" id="staffDetailModal" style="z-index: 210;">
         <div class="modal-header" onclick="closeStaffDetailModal()">
             <div class="modal-heading" id="staffDetailTitle">Muhafız İzin Editörü</div>
@@ -196,23 +220,12 @@
                 <div id="editingStaffIdInfo" style="font-size:7px; color:var(--text-muted); margin-top:1px;">ID: -</div>
             </div>
             <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:4px;">Global / Genel Yetkiler (Tüm Gruplar)</div>
-            <div style="display:flex; gap:8px;">
+            <div class="perm-btn-pair">
                 <button class="gold-btn" id="globalBanBtn" onclick="toggleGlobalStaffPerm('can_ban')">Ban: AÇIK ✅</button>
                 <button class="gold-btn" id="globalMuteBtn" onclick="toggleGlobalStaffPerm('can_mute')">Mute: AÇIK ✅</button>
             </div>
             <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:6px;">Bireysel Grup Bazlı Yetki Yönetimi</div>
-            <div id="staffGroupPermissionsContainer" style="display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto;"></div>
-        </div>
-    </div>
-
-    <!-- SKOR MODALI -->
-    <div class="ios-modal" id="leaderboardModal">
-        <div class="modal-header" onclick="closePort('leaderboardModal')">
-            <div class="modal-heading">🏆 Liderlik Tablosu</div>
-            <div class="modal-dismiss">KAPAT [ X ]</div>
-        </div>
-        <div class="modal-content">
-            <div class="log-item"><b>1. Kraljica (Founder)</b><span style="color:var(--gold-light);">2,450 Puan</span></div>
+            <div id="staffGroupPermissionsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
         </div>
     </div>
 
@@ -279,12 +292,12 @@
             </div>
 
             <div id="tab-content-announcements" class="modal-tab-content">
-                <div style="font-size:8px; color:var(--gold-light); font-weight:900;">📌 Kayıtlı Duyurular (Düzenle)</div>
+                <div style="font-size:8px; color:var(--gold-light); font-weight:900;">📌 Kayıtlı Duyurular</div>
                 <div id="groupAnnouncementsList" style="display:flex; flex-direction:column; gap:6px;"></div>
             </div>
 
             <div id="tab-content-schedules" class="modal-tab-content">
-                <div style="font-size:8px; color:var(--gold-light); font-weight:900;">⏰ Kayıtlı Zamanlamalar (Düzenle)</div>
+                <div style="font-size:8px; color:var(--gold-light); font-weight:900;">⏰ Kayıtlı Zamanlamalar</div>
                 <div id="groupSchedulesList" style="display:flex; flex-direction:column; gap:6px;"></div>
             </div>
 
@@ -293,10 +306,10 @@
                     <option value="announcement">Duyuru Şablonu (/duyuru)</option>
                     <option value="schedule">Zamanlama Şablonu (/zamanla)</option>
                 </select>
-                <input type="text" id="newItemName" placeholder="Zorunlu Liste Adı (Örn: VIP Kripto)">
+                <input type="text" id="newItemName" placeholder="Zorunlu Liste Adı">
                 <input type="number" id="newItemMins" placeholder="Dakika (Zamanlama için)" style="display:none;">
                 <textarea id="newItemMsg" rows="2" placeholder="Mesaj içeriği..."></textarea>
-                <input type="text" id="newItemMedia" placeholder="🖼️ Görsel / Video URL (Doğrudan Medya Linki)">
+                <input type="text" id="newItemMedia" placeholder="Görsel / Video URL">
                 <input type="text" id="newItemBtnText" placeholder="Özel Buton Metni">
                 <input type="text" id="newItemBtnUrl" placeholder="Özel Buton Linki">
                 <button class="gold-btn" onclick="saveNewTemplateItem()">Listeye Kaydet 📝</button>
@@ -304,9 +317,7 @@
 
             <div id="tab-content-grouplogs" class="modal-tab-content">
                 <div style="font-size:8px; color:var(--gold-light); font-weight:900;">📜 Bu Gruba Ait Canlı Eylem Logları</div>
-                <div id="groupSpecificLogsContainer" style="display:flex; flex-direction:column; gap:6px; max-height: 250px; overflow-y: auto;">
-                    <div style="font-size:8px; color:#aaa; text-align:center; padding:15px;">Loglar yükleniyor...</div>
-                </div>
+                <div id="groupSpecificLogsContainer" style="display:flex; flex-direction:column; gap:6px; max-height: 250px; overflow-y: auto;"></div>
             </div>
         </div>
     </div>
@@ -323,7 +334,7 @@
             <input type="text" id="editItemName" placeholder="Liste Adı">
             <input type="number" id="editItemMins" placeholder="Dakika" style="display:none;">
             <textarea id="editItemMsg" rows="3" placeholder="Mesaj..."></textarea>
-            <input type="text" id="editItemMedia" placeholder="🖼️ Görsel / Video URL">
+            <input type="text" id="editItemMedia" placeholder="Görsel / Video URL">
             <input type="text" id="editItemBtnText" placeholder="Buton Metni">
             <input type="text" id="editItemBtnUrl" placeholder="Buton Linki">
             <button class="gold-btn" onclick="saveEditedItem()">Güncelle 💾</button>
@@ -337,7 +348,7 @@
         
         let user = tg.initDataUnsafe?.user || { id: 8245373459, first_name: "Breskavica", username: "breskavica" };
         let isFounder = String(user.id) === "8245373459";
-        let activeChatId = 0, activeGroupTitle = "", globalGroupsCache = [];
+        let activeChatId = 0, activeGroupTitle = "", globalGroupsCache = [], adminEventsCache = [];
         let editingStaffId = null;
 
         function showToast(msg) {
@@ -352,6 +363,7 @@
             if(id === 'logsModal') loadGlobalLogs();
             if(id === 'tacticalModal') populateActionChips();
             if(id === 'staffModal') loadStaffList();
+            if(id === 'eventsAdminModal') loadAdminEvents();
         }
         function closePort(id) { document.getElementById(id).classList.remove('open'); }
         function toggleGroupDetailModal() { document.getElementById('groupDetailModal').classList.toggle('open'); }
@@ -384,6 +396,92 @@
             }
         }
 
+        // ==========================================
+        // ✨ ETKİNLİK & SAHNE YÖNETİMİ (ADMIN)
+        // ==========================================
+        async function loadAdminEvents() {
+            const container = document.getElementById('adminEventsListContainer');
+            container.innerHTML = `<div style="font-size:8px; color:#aaa; text-align:center;">Yükleniyor...</div>`;
+            try {
+                const res = await fetch('/api/events/list');
+                adminEventsCache = await res.json();
+                let html = '';
+                adminEventsCache.forEach(ev => {
+                    html += `
+                        <div class="group-card" onclick="fillEventEditForm(${ev.event_id})">
+                            <div class="group-meta">
+                                <div class="group-avatar" style="font-size:16px;">${ev.icon || '✨'}</div>
+                                <div style="min-width:0;">
+                                    <div class="group-title">${ev.title} (${ev.votes_count || 0} Etkileşim)</div>
+                                    <div class="group-id-sub">${ev.schedule_time || ''} • ${ev.active ? 'Aktif' : 'Pasif'}</div>
+                                </div>
+                            </div>
+                            <button class="gold-btn" style="width:auto; padding:5px 8px; font-size:7px; background:var(--danger); color:#fff;" onclick="event.stopPropagation(); deleteEventAdmin(${ev.event_id})">Sil</button>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html || '<div style="font-size:8px; color:#aaa; text-align:center;">Etkinlik yok.</div>';
+            } catch (e) {}
+        }
+
+        function fillEventEditForm(eventId) {
+            const ev = adminEventsCache.find(item => item.event_id === eventId);
+            if (!ev) return;
+            document.getElementById('editEventId').value = ev.event_id;
+            document.getElementById('evIcon').value = ev.icon || '✨';
+            document.getElementById('evTitle').value = ev.title || '';
+            document.getElementById('evSubtitle').value = ev.subtitle || '';
+            document.getElementById('evSchedule').value = ev.schedule_time || '';
+            document.getElementById('evDesc').value = ev.description || '';
+            document.getElementById('evMedia').value = ev.media_url || '';
+            document.getElementById('evOptions').value = (ev.options || []).join(', ');
+            showToast(`✏️ Düzenleniyor: ${ev.title}`);
+        }
+
+        async function saveEventAdmin() {
+            const event_id = document.getElementById('editEventId').value || null;
+            const icon = document.getElementById('evIcon').value.trim() || '✨';
+            const title = document.getElementById('evTitle').value.trim();
+            const subtitle = document.getElementById('evSubtitle').value.trim();
+            const schedule_time = document.getElementById('evSchedule').value.trim();
+            const description = document.getElementById('evDesc').value.trim();
+            const media_url = document.getElementById('evMedia').value.trim();
+            const options = document.getElementById('evOptions').value.trim();
+
+            if (!title) return alert("Etkinlik adı zorunludur!");
+
+            const res = await fetch('/api/events/save', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user.id, event_id, icon, title, subtitle, schedule_time, description, media_url, options, active: true })
+            });
+            const d = await res.json();
+            if (d.success) {
+                showToast("✨ Etkinlik Üye Ekranına Mühürlendi!");
+                document.getElementById('editEventId').value = '';
+                document.getElementById('evTitle').value = '';
+                document.getElementById('evSubtitle').value = '';
+                document.getElementById('evDesc').value = '';
+                document.getElementById('evMedia').value = '';
+                loadAdminEvents();
+            }
+        }
+
+        async function deleteEventAdmin(eventId) {
+            if (!confirm("Bu etkinliği üye ekranından kaldırmak istiyor musunuz?")) return;
+            const res = await fetch('/api/events/delete', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user.id, event_id: eventId })
+            });
+            const d = await res.json();
+            if (d.success) {
+                showToast("🗑️ Etkinlik Kaldırıldı");
+                loadAdminEvents();
+            }
+        }
+
+        // ==========================================
+        // GRUPLAR, STAFF & YETKİ MATRİSİ
+        // ==========================================
         async function loadAllGroups() {
             try {
                 const res = await fetch('/api/groups');
@@ -398,6 +496,19 @@
                 });
                 document.getElementById('groupsListContainer').innerHTML = html || '<div style="text-align:center; padding:20px; font-size:8px;">Grup yok.</div>';
             } catch(e) {}
+        }
+
+        function filterGroups() {
+            const q = document.getElementById('groupSearchInput').value.toLowerCase();
+            const filtered = globalGroupsCache.filter(g => (g.title || '').toLowerCase().includes(q) || String(g.chat_id).includes(q));
+            let html = '';
+            filtered.forEach(g => {
+                html += `<div class="group-card" onclick="openGroupDetail(${g.chat_id}, '${encodeURIComponent(g.title)}')">
+                    <div class="group-meta"><div class="group-avatar">🛡️</div><div style="min-width:0;"><div class="group-title">${g.title}</div><div class="group-id-sub">ID: ${g.chat_id}</div></div></div>
+                    <div style="font-size:8px; color:var(--gold-light); font-weight:900;">YÖNET ›</div>
+                </div>`;
+            });
+            document.getElementById('groupsListContainer').innerHTML = html;
         }
 
         function populateActionChips() {
@@ -434,20 +545,15 @@
                     body: JSON.stringify({ chat_id: activeChatId })
                 });
                 const data = await res.json();
-                
                 let annHtml = '';
                 (data.announcements || []).forEach(item => {
-                    annHtml += `<div class="log-item" onclick='openEditPort(${JSON.stringify(item)}, "announcement")'>
-                        <b>📌 ${item.name}</b><span style="font-size:7px; color:var(--gold-light); font-weight:900;">DÜZENLE ›</span>
-                    </div>`;
+                    annHtml += `<div class="log-item" onclick='openEditPort(${JSON.stringify(item)}, "announcement")'><b>📌 ${item.name}</b></div>`;
                 });
                 document.getElementById('groupAnnouncementsList').innerHTML = annHtml || '<div style="font-size:8px; color:#aaa; text-align:center; padding:10px;">Duyuru yok.</div>';
 
                 let schHtml = '';
                 (data.schedules || []).forEach(item => {
-                    schHtml += `<div class="log-item" onclick='openEditPort(${JSON.stringify(item)}, "schedule")'>
-                        <b>⏰ ${item.name} (${item.mins} dk)</b><span style="font-size:7px; color:var(--gold-light); font-weight:900;">DÜZENLE ›</span>
-                    </div>`;
+                    schHtml += `<div class="log-item" onclick='openEditPort(${JSON.stringify(item)}, "schedule")'><b>⏰ ${item.name} (${item.mins} dk)</b></div>`;
                 });
                 document.getElementById('groupSchedulesList').innerHTML = schHtml || '<div style="font-size:8px; color:#aaa; text-align:center; padding:10px;">Zamanlama yok.</div>';
             } catch(e) {}
@@ -482,12 +588,12 @@
                 const staffList = await res.json();
                 let html = '';
                 (staffList || []).forEach(s => {
-                    html += `<div style="background:rgba(12,10,4,0.9); border:1.5px solid var(--border-gold); padding:8px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openStaffDetail(${s.user_id}, '${s.full_name}', '${s.username}')">
-                        <div>
-                            <div style="font-size:9px; font-weight:900; color:var(--gold-light);">${s.full_name || 'Muhafız'} (@${s.username || s.user_id})</div>
-                            <div style="font-size:6px; color:#aaa; margin-top:2px;">İzinleri düzenlemek için dokun ›</div>
+                    html += `<div style="background:rgba(12,10,4,0.9); border:1.5px solid var(--border-gold); padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="openStaffDetail(${s.user_id}, '${s.full_name}', '${s.username}')">
+                        <div style="min-width:0; flex:1;">
+                            <div style="font-size:9px; font-weight:900; color:var(--gold-light); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.full_name || 'Muhafız'} (@${s.username || s.user_id})</div>
+                            <div style="font-size:7px; color:#aaa; margin-top:2px;">Yetkileri düzenlemek için dokun ›</div>
                         </div>
-                        ${isFounder ? `<button class="gold-btn" style="padding:4px 6px; font-size:6px; background:var(--danger); color:#fff;" onclick="event.stopPropagation(); removeStaff(${s.user_id})">Sil</button>` : ''}
+                        ${isFounder ? `<button class="gold-btn" style="width:auto; padding:5px 8px; font-size:7px; background:var(--danger); color:#fff;" onclick="event.stopPropagation(); removeStaff(${s.user_id})">Sil</button>` : ''}
                     </div>`;
                 });
                 container.innerHTML = html || '<div style="font-size:8px; color:#aaa; text-align:center;">Kayıtlı staff yok.</div>';
@@ -506,20 +612,23 @@
                 body: JSON.stringify({ user_id: user.id, chat_id: 0 })
             });
             const list = await res.json();
-            const staff = list.find(s => s.user_id == staffUserId) || { can_ban: true, can_mute: true };
+            const staff = list.find(s => s.user_id == staffUserId && s.chat_id == 0) || list.find(s => s.user_id == staffUserId) || { can_ban: true, can_mute: true };
             
             document.getElementById('globalBanBtn').innerText = `Ban: ${staff.can_ban ? 'AÇIK ✅' : 'KAPALI ❌'}`;
             document.getElementById('globalMuteBtn').innerText = `Mute: ${staff.can_mute ? 'AÇIK ✅' : 'KAPALI ❌'}`;
 
             let groupHtml = '';
             globalGroupsCache.forEach(g => {
-                groupHtml += `<div style="background:rgba(20,16,6,0.8); border:1px solid var(--border-gold); padding:8px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
-                    <div style="font-size:8px; color:#fff; font-weight:800;">🛡️ ${g.title}</div>
-                    <div style="display:flex; gap:4px;">
-                        <button class="gold-btn" style="padding:4px 6px; font-size:6px; background:#e67e22;" onclick="toggleGroupStaffPerm(${staffUserId}, ${g.chat_id}, 'can_ban')">Ban Durumu</button>
-                        <button class="gold-btn" style="padding:4px 6px; font-size:6px; background:#3498db;" onclick="toggleGroupStaffPerm(${staffUserId}, ${g.chat_id}, 'can_mute')">Mute Durumu</button>
+                const gStaff = list.find(s => s.user_id == staffUserId && s.chat_id == g.chat_id) || staff;
+                groupHtml += `
+                    <div class="perm-row">
+                        <div class="perm-row-title">🛡️ ${g.title}</div>
+                        <div class="perm-btn-pair">
+                            <button class="gold-btn" style="padding:7px; font-size:7px;" onclick="toggleGroupStaffPerm(${staffUserId}, ${g.chat_id}, 'can_ban', this)">Ban: ${gStaff.can_ban ? 'AÇIK ✅' : 'KAPALI ❌'}</button>
+                            <button class="gold-btn" style="padding:7px; font-size:7px;" onclick="toggleGroupStaffPerm(${staffUserId}, ${g.chat_id}, 'can_mute', this)">Mute: ${gStaff.can_mute ? 'AÇIK ✅' : 'KAPALI ❌'}</button>
+                        </div>
                     </div>
-                </div>`;
+                `;
             });
             document.getElementById('staffGroupPermissionsContainer').innerHTML = groupHtml || '<div style="font-size:7px; color:#aaa;">Aktif grup yok.</div>';
             document.getElementById('staffDetailModal').classList.add('open');
@@ -535,18 +644,23 @@
             const d = await res.json();
             if(d.success) {
                 showToast("💾 Yetki Güncellendi");
-                openStaffDetail(editingStaffId, "Muhafız", "staff");
-                loadStaffList();
+                const btn = document.getElementById(perm === 'can_ban' ? 'globalBanBtn' : 'globalMuteBtn');
+                const label = perm === 'can_ban' ? 'Ban' : 'Mute';
+                btn.innerText = `${label}: ${d.new_val ? 'AÇIK ✅' : 'KAPALI ❌'}`;
             }
         }
 
-        async function toggleGroupStaffPerm(target_id, chat_id, perm) {
+        async function toggleGroupStaffPerm(target_id, chat_id, perm, btnEl) {
             const res = await fetch('/api/staff/toggle', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: user.id, target_id, chat_id, perm })
             });
             const d = await res.json();
-            if(d.success) { showToast("💾 Grup Yetkisi Güncellendi"); }
+            if(d.success) {
+                showToast("💾 Grup Yetkisi Güncellendi");
+                const label = perm === 'can_ban' ? 'Ban' : 'Mute';
+                btnEl.innerText = `${label}: ${d.new_val ? 'AÇIK ✅' : 'KAPALI ❌'}`;
+            }
         }
 
         async function addNewStaff() {
