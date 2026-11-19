@@ -15,6 +15,8 @@ settings_col = db["group_settings"]
 groups_col = db["bot_groups"]
 scheduled_jobs_col = db["scheduled_jobs"]
 templates_col = db["templates"]
+events_col = db["events"]
+event_votes_col = db["event_votes"]
 
 def init_db():
     try:
@@ -24,8 +26,134 @@ def init_db():
         groups_col.create_index("chat_id", unique=True)
         scheduled_jobs_col.create_index("job_id", unique=True)
         templates_col.create_index([("chat_id", 1), ("template_id", 1)], unique=True)
+        events_col.create_index("event_id", unique=True)
+        event_votes_col.create_index([("event_id", 1), ("user_id", 1)], unique=True)
+        seed_default_events()
     except Exception:
         pass
+
+def seed_default_events():
+    try:
+        if events_col.count_documents({}) == 0:
+            default_items = [
+                {
+                    "event_id": 1001,
+                    "title": "Eurovision Sahnesi",
+                    "subtitle": "Canlı Şarkı & Performans Yarışması",
+                    "icon": "🎤",
+                    "badge": "CANLI",
+                    "description": "Sahne senin! Favori performansına oy ver, gecenin kraliçesini veya kralını taçlandır.",
+                    "schedule_time": "Her Cuma • 22:00",
+                    "media_url": "",
+                    "options": ["12 Puan Ver 🌟", "Sahneye Katıl 🎙️"],
+                    "active": True,
+                    "order": 1
+                },
+                {
+                    "event_id": 1002,
+                    "title": "Mistik Tarot Gecesi",
+                    "subtitle": "Kader & Aşk Kehanetleri",
+                    "icon": "🔮",
+                    "badge": "VIP",
+                    "description": "Kartlar senin için açılıyor. Aşk, kariyer ve gecenin sürpriz enerjisini keşfet.",
+                    "schedule_time": "Özel Gala • 23:00",
+                    "media_url": "",
+                    "options": ["Kart Çek ✨", "Sıraya Gir 🌙"],
+                    "active": True,
+                    "order": 2
+                },
+                {
+                    "event_id": 1003,
+                    "title": "Shade & Tea",
+                    "subtitle": "Anonim İtiraf & Dedikodu Köşesi",
+                    "icon": "☕",
+                    "badge": "HOT",
+                    "description": "Kimliğini gizle, gecenin en cesur itirafını veya dedikodusunu sahneye bırak.",
+                    "schedule_time": "7/24 Aktif",
+                    "media_url": "",
+                    "options": ["İtiraf Bırak 💋", "Çay Dök 🔥"],
+                    "active": True,
+                    "order": 3
+                },
+                {
+                    "event_id": 1004,
+                    "title": "Kraliyet Tacı",
+                    "subtitle": "Haftanın İkonu Oylaması",
+                    "icon": "👑",
+                    "badge": "GALA",
+                    "description": "Topluluğun en parlayan, en ikonik ismine tacını gönder ve liderlik tablosunu belirle.",
+                    "schedule_time": "Haftalık Final",
+                    "media_url": "",
+                    "options": ["Taç Gönder 👑", "Aday Ol 💎"],
+                    "active": True,
+                    "order": 4
+                }
+            ]
+            events_col.insert_many(default_items)
+    except Exception:
+        pass
+
+def get_all_events(only_active=False):
+    try:
+        query = {"active": True} if only_active else {}
+        events = list(events_col.find(query, {"_id": 0}).sort("order", 1))
+        for ev in events:
+            ev["votes_count"] = event_votes_col.count_documents({"event_id": ev["event_id"]})
+        return events
+    except Exception:
+        return []
+
+def save_event_db(data: dict):
+    try:
+        e_id = int(data.get("event_id")) if data.get("event_id") else int(datetime.datetime.now().timestamp() * 1000)
+        options_raw = data.get("options", [])
+        if isinstance(options_raw, str):
+            options_list = [o.strip() for o in options_raw.split(",") if o.strip()]
+        else:
+            options_list = options_raw or ["Katıl ✨", "Oy Ver 👑"]
+
+        doc = {
+            "event_id": e_id,
+            "title": str(data.get("title", "Yeni Etkinlik")).strip(),
+            "subtitle": str(data.get("subtitle", "Özel Sahne Etkinliği")).strip(),
+            "icon": str(data.get("icon", "✨")).strip(),
+            "badge": str(data.get("badge", "YENİ")).strip(),
+            "description": str(data.get("description", "")).strip(),
+            "schedule_time": str(data.get("schedule_time", "Yakında")).strip(),
+            "media_url": str(data.get("media_url", "")).strip(),
+            "options": options_list,
+            "active": bool(data.get("active", True)),
+            "order": int(data.get("order", 10))
+        }
+        events_col.update_one({"event_id": e_id}, {"$set": doc}, upsert=True)
+        return e_id
+    except Exception:
+        return None
+
+def delete_event_db(event_id: int):
+    try:
+        events_col.delete_one({"event_id": int(event_id)})
+        event_votes_col.delete_many({"event_id": int(event_id)})
+        return True
+    except Exception:
+        return False
+
+def vote_event_db(event_id: int, user_id: int, username: str, choice: str):
+    try:
+        event_votes_col.update_one(
+            {"event_id": int(event_id), "user_id": int(user_id)},
+            {"$set": {
+                "event_id": int(event_id),
+                "user_id": int(user_id),
+                "username": username,
+                "choice": choice,
+                "timestamp": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+            }},
+            upsert=True
+        )
+        return event_votes_col.count_documents({"event_id": int(event_id)})
+    except Exception:
+        return 0
 
 def save_user(chat_id, user_id, username):
     try:
@@ -46,12 +174,7 @@ def register_bot_group(chat_id, title, photo_url=""):
         }
         if photo_url:
             update_data["photo_url"] = photo_url
-            
-        groups_col.update_one(
-            {"chat_id": int(chat_id)},
-            {"$set": update_data},
-            upsert=True
-        )
+        groups_col.update_one({"chat_id": int(chat_id)}, {"$set": update_data}, upsert=True)
     except Exception:
         pass
 
@@ -186,7 +309,8 @@ def is_authorized_staff(user_id, chat_id=0):
     try:
         if chat_id and int(chat_id) != 0:
             res = staff_col.find_one({"user_id": int(user_id), "chat_id": int(chat_id)})
-            if res: return True
+            if res:
+                return True
         return staff_col.find_one({"user_id": int(user_id), "chat_id": 0}) is not None
     except Exception:
         return False
@@ -245,7 +369,6 @@ def toggle_staff_permission(user_id, chat_id, perm_field):
         if not row:
             query["chat_id"] = 0
             row = staff_col.find_one(query)
-            
         if row:
             current_val = row.get(perm_field, True)
             new_val = not current_val
@@ -258,7 +381,8 @@ def toggle_staff_permission(user_id, chat_id, perm_field):
 def remove_staff_member(user_id, chat_id=0):
     try:
         query = {"user_id": int(user_id)}
-        if chat_id and int(chat_id) != 0: query["chat_id"] = int(chat_id)
+        if chat_id and int(chat_id) != 0:
+            query["chat_id"] = int(chat_id)
         staff_col.delete_one(query)
     except Exception:
         pass
@@ -287,11 +411,7 @@ def add_warning(user_id):
 
 def reset_warnings(user_id):
     try:
-        users_col.update_one(
-            {"user_id": int(user_id)},
-            {"$set": {"warnings": 0}},
-            upsert=True
-        )
+        users_col.update_one({"user_id": int(user_id)}, {"$set": {"warnings": 0}}, upsert=True)
         return True
     except Exception:
         return False
