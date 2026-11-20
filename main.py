@@ -1,16 +1,15 @@
 import os
-import json
 import asyncio
 import logging
 import hashlib
-from datetime import datetime, timezone
+from datetime import datetime
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from typing import Optional, List, Any
+from typing import Optional
 import uvicorn
 import httpx
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo, ChatPermissions
@@ -27,6 +26,7 @@ from telegram.error import Conflict
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 import database
+
 try:
     import config
 except ImportError:
@@ -38,23 +38,25 @@ logger = logging.getLogger(__name__)
 BOT_TOKEN = (os.environ.get("BOT_TOKEN") or (config and getattr(config, "BOT_TOKEN", None)) or "").strip()
 FOUNDER_ID = (os.environ.get("FOUNDER_ID") or (config and getattr(config, "FOUNDER_ID", None)) or "8245373459").strip()
 
-EMERGENCY_LOCKDOWN = False
-BAD_WORDS = ["küfür1", "küfür2", "argo1"]
 scheduler = AsyncIOScheduler()
 tg_application = None
+
 
 def log_event(level: str, message: str):
     timestamp = datetime.now().strftime("%H:%M:%S")
     print(f"[{timestamp}] [{level}] {message}", flush=True)
+
 
 async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     if isinstance(context.error, Conflict):
         return
     logger.error(f"Telegram Bot Hatası: {context.error}")
 
+
 async def track_bot_group_join(update: Update, context: ContextTypes.DEFAULT_TYPE):
     result = update.my_chat_member
-    if not result: return
+    if not result:
+        return
     chat = update.effective_chat
     new_status = result.new_chat_member.status
     if new_status in ["member", "administrator"]:
@@ -67,6 +69,7 @@ async def track_bot_group_join(update: Update, context: ContextTypes.DEFAULT_TYP
             database.register_bot_group(chat.id, chat_info.title or "Yeni Grup", photo_url)
         except Exception as e:
             logger.error(f"Grup kayıt hatası: {e}")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -92,13 +95,13 @@ async def lifespan(app: FastAPI):
     if BOT_TOKEN:
         tg_application = ApplicationBuilder().token(BOT_TOKEN).request(HTTPXRequest(connect_timeout=30.0, read_timeout=30.0)).build()
         tg_application.add_error_handler(global_error_handler)
-        
+
         for cmd, func in COMMAND_MAP.items():
             tg_application.add_handler(CommandHandler(cmd, func))
-            
+
         tg_application.add_handler(ChatMemberHandler(track_bot_group_join, ChatMemberHandler.MY_CHAT_MEMBER))
         tg_application.add_handler(MessageHandler(filters.ALL & ~filters.COMMAND, master_message_router))
-        
+
         await tg_application.initialize()
         await tg_application.start()
         await tg_application.updater.start_polling(drop_pending_updates=True)
@@ -114,14 +117,17 @@ async def lifespan(app: FastAPI):
         scheduler.shutdown()
     log_event("SYS", "Sunucu kapatıldı.")
 
+
 app = FastAPI(lifespan=lifespan)
 
 if os.path.exists("public"):
     app.mount("/static", StaticFiles(directory="public"), name="static")
 
+
 @app.get("/health")
 async def health_check():
     return HTMLResponse("GOLDEN_ENTERPRISE_FASTAPI_OK")
+
 
 @app.get("/api/proxy-image")
 async def proxy_image(url: str):
@@ -136,9 +142,11 @@ async def proxy_image(url: str):
     except Exception:
         return Response(status_code=500)
 
+
 @app.get("/api/stats")
 async def api_get_stats():
     return database.get_bot_statistics()
+
 
 @app.get("/api/logs")
 async def api_get_logs(filter: str = "all", limit: int = 100):
@@ -146,6 +154,7 @@ async def api_get_logs(filter: str = "all", limit: int = 100):
         return database.get_recent_logs(limit=limit, log_filter=filter)
     except Exception:
         return []
+
 
 @app.post("/api/logs/clear")
 async def api_clear_logs(request: Request):
@@ -160,32 +169,188 @@ async def api_clear_logs(request: Request):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+
 @app.get("/api/admin-stats")
 async def api_get_admin_stats():
     return database.get_admin_performance_stats()
+
 
 @app.get("/api/groups")
 async def api_get_groups():
     return database.get_bot_groups()
 
+
 @app.post("/api/verify-admin")
 async def api_verify_admin(request: Request):
     data = await request.json()
     user_id = int(data.get("user_id", 0))
+    gv_access = database.can_access_gv_studio(user_id, FOUNDER_ID)
     if str(user_id) == str(FOUNDER_ID).strip():
-        return {"authorized": True, "is_founder": True}
+        return {"authorized": True, "is_founder": True, "can_gv_studio": True}
     if database.is_authorized_staff(user_id):
-        return {"authorized": True, "is_founder": False, "permissions": database.get_staff_permissions(user_id)}
+        return {"authorized": True, "is_founder": False, "can_gv_studio": gv_access, "permissions": database.get_staff_permissions(user_id)}
     if not FOUNDER_ID:
-        return {"authorized": True, "is_founder": True}
-    return {"authorized": False}
+        return {"authorized": True, "is_founder": True, "can_gv_studio": True}
+    return {"authorized": False, "can_gv_studio": gv_access}
+
 
 # ==========================================
-# ✨ ETKİNLİK & OYUN API ROTALARI (ÜYE & STAFF)
+# 👑 GOLDENVISION API ROTALARI (ÜYE & YT MASASI)
+# ==========================================
+@app.get("/api/goldenvision/overview")
+async def api_gv_overview(season: Optional[int] = None, user_id: int = 0):
+    data = database.get_gv_overview(season=season, user_id=user_id)
+    data["can_gv_studio"] = database.can_access_gv_studio(user_id, FOUNDER_ID) if user_id else False
+    data["is_founder"] = str(user_id) == str(FOUNDER_ID).strip()
+    return data
+
+
+@app.post("/api/goldenvision/entry")
+async def api_gv_entry(request: Request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    if not user_id:
+        return {"success": False, "error": "Kullanıcı kimliği bulunamadı."}
+    season = int(data.get("season") or database.get_active_season_number())
+    overview = database.get_gv_overview(season=season, user_id=user_id)
+    week = int(data.get("week") or overview["current_week"])
+
+    res = database.submit_gv_entry(
+        season=season,
+        week=week,
+        user_id=user_id,
+        username=str(data.get("username", "")),
+        full_name=str(data.get("full_name", "")),
+        countries_list=data.get("countries", []),
+        country=str(data.get("country", "")),
+        flag=str(data.get("flag", "🏳️")),
+        artist=str(data.get("artist", "")),
+        song=str(data.get("song", "")),
+        views_m=float(data.get("views_m", 0) or 0),
+        pair_partner=str(data.get("pair_partner", ""))
+    )
+    if not res.get("ok"):
+        return {"success": False, "error": res.get("error")}
+    database.log_action(0, "GV_ENTRY", user_id, str(data.get("username", "")), f"Sezon {season} H{week} katılım kaydedildi.")
+    return {"success": True, "entry": res["entry"]}
+
+
+@app.post("/api/goldenvision/ballot")
+async def api_gv_ballot(request: Request):
+    data = await request.json()
+    voter_id = int(data.get("user_id", 0))
+    if not voter_id:
+        return {"success": False, "error": "Kullanıcı kimliği bulunamadı."}
+    season = int(data.get("season") or database.get_active_season_number())
+    overview = database.get_gv_overview(season=season, user_id=voter_id)
+    week = int(data.get("week") or overview["current_week"])
+
+    res = database.submit_gv_ballot(
+        season=season,
+        week=week,
+        voter_id=voter_id,
+        voter_username=str(data.get("username", "")),
+        voter_flag=str(data.get("voter_flag", "🏳️")),
+        allocations=data.get("allocations", {})
+    )
+    if not res.get("ok"):
+        return {"success": False, "error": res.get("error")}
+    database.log_action(0, "GV_VOTE", voter_id, str(data.get("username", "")), f"Sezon {season} H{week} oyları mühürlendi.")
+    return {"success": True, "ballot": res["ballot"]}
+
+
+@app.post("/api/goldenvision/comment")
+async def api_gv_comment(request: Request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    season = int(data.get("season") or database.get_active_season_number())
+    overview = database.get_gv_overview(season=season, user_id=user_id)
+    week = int(data.get("week") or overview["current_week"])
+    entry_id = int(data.get("entry_id", 0))
+    text = str(data.get("text", ""))
+    res = database.add_gv_comment(season, week, user_id, str(data.get("username", "")), entry_id, text)
+    if not res.get("ok"):
+        return {"success": False, "error": res.get("error")}
+    return {"success": True, "comment": res["comment"]}
+
+
+@app.post("/api/goldenvision/studio/state")
+async def api_gv_studio_state(request: Request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    if not database.can_access_gv_studio(user_id, FOUNDER_ID):
+        return {"success": False, "error": "Bu masaya erişim yetkiniz yok!"}
+
+    season = int(data.get("season") or database.get_active_season_number())
+    action = str(data.get("action", "update"))
+
+    if action == "restart_week":
+        week = int(data.get("week") or 1)
+        database.restart_gv_week(season, week)
+        database.log_action(0, "GV_RESTART_WEEK", user_id, "Host", f"Sezon {season} Hafta {week} baştan alındı.")
+        return {"success": True, "season": season}
+
+    if action == "next_season":
+        new_s = season + 1
+        database.set_active_season(new_s, reset_week_to_one=True)
+        database.log_action(0, "GV_NEW_SEASON", user_id, "Host", f"Yeni sezona geçildi: Sezon {new_s}")
+        return {"success": True, "season": new_s}
+
+    if action == "jump_season":
+        target_s = max(1, int(data.get("target_season") or 1))
+        database.set_active_season(target_s, reset_week_to_one=False)
+        database.log_action(0, "GV_JUMP_SEASON", user_id, "Host", f"Sezon {target_s} aktifleştirildi.")
+        return {"success": True, "season": target_s}
+
+    database.update_gv_state(season, data.get("updates", {}))
+    return {"success": True, "season": season}
+
+
+@app.post("/api/goldenvision/studio/week")
+async def api_gv_studio_week(request: Request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    if not database.can_access_gv_studio(user_id, FOUNDER_ID):
+        return {"success": False, "error": "Bu masaya erişim yetkiniz yok!"}
+    season = int(data.get("season") or database.get_active_season_number())
+    week = int(data.get("week", 1))
+    database.update_gv_week(season, week, data.get("updates", {}))
+    return {"success": True}
+
+
+@app.post("/api/goldenvision/studio/hosts")
+async def api_gv_studio_hosts(request: Request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    if str(user_id) != str(FOUNDER_ID).strip():
+        return {"success": False, "error": "Host yetki ataması sadece Kurucu (Founder) tarafından yapılabilir!"}
+
+    sub = str(data.get("sub", "list"))
+    if sub == "set":
+        target_id = int(data.get("target_user_id", 0))
+        can_manage = bool(data.get("can_manage", True))
+        if not target_id:
+            return {"success": False, "error": "Geçerli kullanıcı ID girin."}
+        database.set_gv_host_access(target_id, can_manage, user_id)
+        return {"success": True, "hosts": database.list_gv_hosts()}
+
+    if sub == "penalty":
+        target_id = int(data.get("target_user_id", 0))
+        mode = str(data.get("mode", "leak_first"))
+        reason = str(data.get("reason", ""))
+        database.apply_gv_penalty(target_id, mode, reason)
+        return {"success": True, "bans": database.list_gv_bans()}
+
+    return {"success": True, "hosts": database.list_gv_hosts(), "bans": database.list_gv_bans()}
+
+
+# ==========================================
+# MEVCUT ETKİNLİK & STAFF API ROTALARI
 # ==========================================
 @app.get("/api/events/list")
 async def api_list_events(only_active: bool = False):
     return database.get_all_events(only_active=only_active)
+
 
 @app.post("/api/events/save")
 async def api_save_event(request: Request):
@@ -200,6 +365,7 @@ async def api_save_event(request: Request):
         return {"success": True, "event_id": e_id}
     except Exception as e:
         return {"success": False, "error": str(e)}
+
 
 @app.post("/api/events/delete")
 async def api_delete_event(request: Request):
@@ -216,6 +382,7 @@ async def api_delete_event(request: Request):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+
 @app.post("/api/events/vote")
 async def api_vote_event(request: Request):
     try:
@@ -230,9 +397,7 @@ async def api_vote_event(request: Request):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-# ==========================================
-# STAFF & YETKİ API ROTALARI
-# ==========================================
+
 @app.post("/api/staff/list")
 async def api_get_staff_list(request: Request):
     data = await request.json()
@@ -241,6 +406,7 @@ async def api_get_staff_list(request: Request):
     if not database.is_authorized_staff(user_id) and str(user_id) != str(FOUNDER_ID).strip():
         return {"success": False, "error": "Yetkisiz!"}
     return database.get_all_staff(chat_id)
+
 
 @app.post("/api/staff/add")
 async def api_add_staff(request: Request):
@@ -251,11 +417,13 @@ async def api_add_staff(request: Request):
     full_name = data.get("full_name", "🌸 Kristal Yetkili")
     if str(user_id) != str(FOUNDER_ID).strip() and not database.is_authorized_staff(user_id):
         return {"success": False, "error": "Yetkisiz!"}
-    if not input_value: return {"success": False, "error": "Boş değer"}
+    if not input_value:
+        return {"success": False, "error": "Boş değer"}
     clean_val = input_value.lstrip("@").lower()
     target_id = int(clean_val) if clean_val.isdigit() or (clean_val.startswith("-") and clean_val[1:].isdigit()) else (database.get_user_id_by_username(chat_id, clean_val) or int(hashlib.md5(clean_val.encode()).hexdigest()[:8], 16))
     database.add_staff_member(target_id, clean_val, full_name, user_id, chat_id)
     return {"success": True}
+
 
 @app.post("/api/staff/toggle")
 async def api_toggle_staff_perm(request: Request):
@@ -271,6 +439,7 @@ async def api_toggle_staff_perm(request: Request):
         return {"success": True, "new_val": new_val}
     return {"success": False}
 
+
 @app.post("/api/staff/remove")
 async def api_remove_staff(request: Request):
     data = await request.json()
@@ -282,6 +451,7 @@ async def api_remove_staff(request: Request):
     database.remove_staff_member(target_id, chat_id)
     return {"success": True}
 
+
 @app.post("/api/member/action")
 async def api_member_action(request: Request):
     try:
@@ -290,7 +460,7 @@ async def api_member_action(request: Request):
         target_input = str(data.get("target", "")).strip()
         action = str(data.get("action", "")).strip()
         chat_id = int(data.get("chat_id", 0))
-        
+
         is_founder = str(user_id) == str(FOUNDER_ID).strip()
         if not is_founder and not database.is_authorized_staff(user_id):
             return {"success": False, "error": "⛔ Yetkisiz erişim!"}
@@ -315,7 +485,8 @@ async def api_member_action(request: Request):
                     target_id = uid
                     break
 
-        if not target_id: return {"success": False, "error": "Kullanıcı bulunamadı!"}
+        if not target_id:
+            return {"success": False, "error": "Kullanıcı bulunamadı!"}
 
         target_chats = [g["chat_id"] for g in database.get_bot_groups()] if chat_id == 0 else [chat_id]
         for cid in target_chats:
@@ -340,6 +511,7 @@ async def api_member_action(request: Request):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+
 @app.post("/api/settings/update")
 async def api_update_settings(request: Request):
     try:
@@ -350,10 +522,12 @@ async def api_update_settings(request: Request):
             return {"success": False, "error": "Yetkisiz!"}
         if chat_id:
             for key in ["welcome_msg", "btn_text", "btn_url", "media_url", "announcement_btn_text", "announcement_btn_url", "scheduled_btn_text", "scheduled_btn_url"]:
-                if key in data: database.update_group_setting(chat_id, key, data[key])
+                if key in data:
+                    database.update_group_setting(chat_id, key, data[key])
         return {"success": True}
     except Exception as e:
         return {"success": False, "error": str(e)}
+
 
 class TemplateData(BaseModel):
     user_id: int
@@ -366,6 +540,7 @@ class TemplateData(BaseModel):
     mins: Optional[int] = 0
     template_id: Optional[int] = None
 
+
 @app.post("/api/templates/list")
 async def api_list_templates(request: Request):
     try:
@@ -374,6 +549,7 @@ async def api_list_templates(request: Request):
         return database.get_group_templates(chat_id)
     except Exception:
         return {"announcements": [], "schedules": []}
+
 
 @app.post("/api/templates/save-announcement")
 async def api_save_announcement(data: TemplateData):
@@ -387,6 +563,7 @@ async def api_save_announcement(data: TemplateData):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+
 @app.post("/api/templates/save-schedule")
 async def api_save_schedule(data: TemplateData):
     try:
@@ -398,6 +575,7 @@ async def api_save_schedule(data: TemplateData):
         return {"success": True}
     except Exception as e:
         return {"success": False, "error": str(e)}
+
 
 @app.post("/api/templates/delete")
 async def api_delete_template(request: Request):
@@ -415,8 +593,9 @@ async def api_delete_template(request: Request):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+
 # ==========================================
-# 🌐 HTML SAYFA SUNUMLARI (STAFF & GOLDEN ÜYE)
+# 🌐 HTML SAYFA SUNUMLARI
 # ==========================================
 def _serve_html(filename: str):
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -430,34 +609,44 @@ def _serve_html(filename: str):
                 logger.error(f"HTML hata ({filename}): {e}")
     return HTMLResponse(content=f"{filename} bulunamadı!", status_code=500)
 
+
 @app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 async def handle_root():
     return _serve_html("index.html")
 
+
 @app.api_route("/member", methods=["GET", "HEAD"], response_class=HTMLResponse)
 async def handle_member_portal():
     return _serve_html("member.html")
+
 
 # ==========================================
 # TELEGRAM BOT KOMUTLARI
 # ==========================================
 async def _delete_after_delay(context, chat_id, message_id, delay=5):
     await asyncio.sleep(delay)
-    try: await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-    except Exception: pass
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+    except Exception:
+        pass
+
 
 async def send_auto_delete_message(context, chat_id, text, delay=5):
     try:
         msg = await context.bot.send_message(chat_id=chat_id, text=text)
         asyncio.create_task(_delete_after_delay(context, chat_id, msg.message_id, delay))
-    except Exception as e: logger.error(f"Mesaj hata: {e}")
+    except Exception as e:
+        logger.error(f"Mesaj hata: {e}")
+
 
 async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE, action_type="general") -> bool:
     chat_id = update.effective_chat.id
     user = update.effective_user
-    if not user: return False
-    if str(user.id) == str(FOUNDER_ID).strip(): return True
-    
+    if not user:
+        return False
+    if str(user.id) == str(FOUNDER_ID).strip():
+        return True
+
     if database.is_authorized_staff(user.id, chat_id):
         perms = database.get_staff_permissions(user.id, chat_id)
         if action_type == "ban" and not perms.get("can_ban", True):
@@ -471,18 +660,23 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE, acti
     if update.effective_chat.type in ["group", "supergroup"]:
         try:
             member = await context.bot.get_chat_member(chat_id, user.id)
-            if member.status in ["administrator", "creator"]: return True
-        except Exception: pass
-    else: return True
+            if member.status in ["administrator", "creator"]:
+                return True
+        except Exception:
+            pass
+    else:
+        return True
 
     await send_auto_delete_message(context, chat_id, "❌ Yetkiniz yok!", 4)
     return False
+
 
 async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     if update.message and update.message.reply_to_message:
         target = update.message.reply_to_message.from_user
-        if target and target.username: database.save_user(chat_id, target.id, target.username.lower())
+        if target and target.username:
+            database.save_user(chat_id, target.id, target.username.lower())
         return target
     if context.args:
         clean_arg = context.args[0].strip().lstrip("@").lower()
@@ -492,32 +686,41 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 return member.user
             except Exception:
                 class TempUser:
-                    def __init__(self, uid): self.id, self.full_name, self.username = uid, f"Kullanıcı_{uid}", f"id_{uid}"
+                    def __init__(self, uid):
+                        self.id, self.full_name, self.username = uid, f"Kullanıcı_{uid}", f"id_{uid}"
                 return TempUser(int(clean_arg))
         else:
             db_uid = database.get_user_id_by_username(chat_id, clean_arg) or database.get_user_id_by_username(0, clean_arg)
             if db_uid:
-                try: return (await context.bot.get_chat_member(chat_id, db_uid)).user
-                except Exception: pass
+                try:
+                    return (await context.bot.get_chat_member(chat_id, db_uid)).user
+                except Exception:
+                    pass
             class UsernameTarget:
-                def __init__(self, uname): self.id, self.full_name, self.username = f"@{uname}", f"@{uname}", uname
+                def __init__(self, uname):
+                    self.id, self.full_name, self.username = f"@{uname}", f"@{uname}", uname
             return UsernameTarget(clean_arg)
     return None
+
 
 async def send_periodic_announcement(bot, chat_id, text, btn_text, btn_url, media_url):
     try:
         current_bot = bot or (tg_application and tg_application.bot)
-        if not current_bot: return
+        if not current_bot:
+            return
         reply_markup = None
         if not btn_text or not btn_url:
             sched_settings = database.get_announcement_settings(chat_id)
-            if not btn_text: btn_text = sched_settings.get("scheduled_btn_text", "")
-            if not btn_url: btn_url = sched_settings.get("scheduled_btn_url", "")
+            if not btn_text:
+                btn_text = sched_settings.get("scheduled_btn_text", "")
+            if not btn_url:
+                btn_url = sched_settings.get("scheduled_btn_url", "")
 
         if btn_text and btn_url:
             clean_url = str(btn_url).strip()
             if " " not in clean_url and "\n" not in clean_url:
-                if not clean_url.startswith(("http://", "https://", "tg://")): clean_url = "https://" + clean_url
+                if not clean_url.startswith(("http://", "https://", "tg://")):
+                    clean_url = "https://" + clean_url
                 reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=clean_url)]])
 
         if media_url:
@@ -526,6 +729,7 @@ async def send_periodic_announcement(bot, chat_id, text, btn_text, btn_url, medi
             await current_bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup)
     except Exception as e:
         logger.error(f"Zamanlı duyuru hata: {e}")
+
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
@@ -539,8 +743,10 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             database.register_bot_group(chat.id, chat_info.title or "Grup", photo_url)
         except Exception:
             database.register_bot_group(chat.id, chat.title or "Grup", "")
-        try: await update.message.delete()
-        except Exception: pass
+        try:
+            await update.message.delete()
+        except Exception:
+            pass
         return
 
     welcome_text = (
@@ -571,64 +777,90 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     await update.message.reply_text(welcome_text, reply_markup=InlineKeyboardMarkup(keyboard))
 
+
 async def cmd_welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context): return
+    if not await is_user_admin(update, context):
+        return
     text = " ".join(context.args)
-    if text: 
+    if text:
         database.update_group_setting(update.effective_chat.id, "welcome_msg", text)
         await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin mesajı güncellendi!", 4)
-    try: await update.message.delete()
-    except Exception: pass
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_butonmetni(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context): return
+    if not await is_user_admin(update, context):
+        return
     text = " ".join(context.args)
     if text:
         database.update_group_setting(update.effective_chat.id, "btn_text", text)
         await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin buton metni güncellendi!", 4)
-    try: await update.message.delete()
-    except Exception: pass
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_butonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context): return
+    if not await is_user_admin(update, context):
+        return
     if context.args:
         database.update_group_setting(update.effective_chat.id, "btn_url", context.args[0].strip())
         await send_auto_delete_message(context, update.effective_chat.id, "✅ Hoş geldin buton linki güncellendi!", 4)
-    try: await update.message.delete()
-    except Exception: pass
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_duyurubutonmetni(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context): return
+    if not await is_user_admin(update, context):
+        return
     text = " ".join(context.args)
     if text:
         database.update_group_setting(update.effective_chat.id, "announcement_btn_text", text)
         await send_auto_delete_message(context, update.effective_chat.id, "✅ Duyuru buton metni güncellendi!", 4)
-    try: await update.message.delete()
-    except Exception: pass
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_duyurubutonlinki(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context): return
+    if not await is_user_admin(update, context):
+        return
     if context.args:
         database.update_group_setting(update.effective_chat.id, "announcement_btn_url", context.args[0].strip())
         await send_auto_delete_message(context, update.effective_chat.id, "✅ Duyuru buton linki güncellendi!", 4)
-    try: await update.message.delete()
-    except Exception: pass
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context, "general"): return
+    if not await is_user_admin(update, context, "general"):
+        return
     chat_id = update.effective_chat.id
     reply = update.message.reply_to_message
     raw_text = update.message.text.partition(" ")[2].strip()
 
     photo_file_id = None
     if reply:
-        if reply.photo: photo_file_id = reply.photo[-1].file_id
-        if not raw_text: raw_text = reply.caption or reply.text or ""
+        if reply.photo:
+            photo_file_id = reply.photo[-1].file_id
+        if not raw_text:
+            raw_text = reply.caption or reply.text or ""
 
     if not raw_text and not photo_file_id:
         await send_auto_delete_message(context, chat_id, "❌ Duyuru metni veya görsel belirtmelisiniz!", 4)
-        try: await update.message.delete()
-        except Exception: pass
+        try:
+            await update.message.delete()
+        except Exception:
+            pass
         return
 
     def_settings = database.get_announcement_settings(chat_id)
@@ -639,13 +871,16 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "|" in raw_text:
         parts = [p.strip() for p in raw_text.split("|")]
         msg_text = parts[0]
-        if len(parts) > 1 and parts[1]: btn_text = parts[1]
-        if len(parts) > 2 and parts[2]: btn_url = parts[2]
+        if len(parts) > 1 and parts[1]:
+            btn_text = parts[1]
+        if len(parts) > 2 and parts[2]:
+            btn_url = parts[2]
 
     reply_markup = None
     if btn_text and btn_url:
         clean_url = str(btn_url).strip()
-        if not clean_url.startswith(("http://", "https://", "tg://")): clean_url = "https://" + clean_url
+        if not clean_url.startswith(("http://", "https://", "tg://")):
+            clean_url = "https://" + clean_url
         reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=clean_url)]])
 
     try:
@@ -662,45 +897,60 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
         database.save_template_db(chat_id, "announcement", auto_name, msg_text, photo_file_id or "", btn_text, btn_url, 0)
     except Exception as e:
         logger.error(f"Duyuru hata: {e}")
-    try: await update.message.delete()
-    except Exception: pass
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_zamanladur(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context, "general"): return
+    if not await is_user_admin(update, context, "general"):
+        return
     chat_id = update.effective_chat.id
     job_to_remove = database.get_latest_scheduled_job(chat_id)
     if job_to_remove:
         job_id = job_to_remove["job_id"]
-        try: scheduler.remove_job(job_id)
-        except Exception: pass
+        try:
+            scheduler.remove_job(job_id)
+        except Exception:
+            pass
         database.remove_scheduled_job_db(job_id)
         admin_user = update.effective_user
         database.log_action(chat_id, "SCHEDULE_STOP", admin_user.id, f"@{admin_user.username or admin_user.first_name}", "Periyodik duyuru durduruldu.")
         await send_auto_delete_message(context, chat_id, "🛑 Periyodik duyuru durduruldu!", 5)
     else:
         await send_auto_delete_message(context, chat_id, "❌ Aktif periyodik duyuru bulunamadı!", 5)
-    try: await update.message.delete()
-    except Exception: pass
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context, "general"): return
+    if not await is_user_admin(update, context, "general"):
+        return
     chat_id = update.effective_chat.id
     reply = update.message.reply_to_message
     raw_args = update.message.text.partition(" ")[2].strip()
 
-    if raw_args.lower().startswith("dur"): return await cmd_zamanladur(update, context)
+    if raw_args.lower().startswith("dur"):
+        return await cmd_zamanladur(update, context)
 
     media_url = ""
-    if reply and reply.photo: media_url = reply.photo[-1].file_id
+    if reply and reply.photo:
+        media_url = reply.photo[-1].file_id
 
     btn_text, btn_url, minutes, msg_text = "", "", 0, ""
     if "|" in raw_args:
         parts = [p.strip() for p in raw_args.split("|")]
-        try: minutes = int(parts[0])
+        try:
+            minutes = int(parts[0])
         except ValueError:
             await send_auto_delete_message(context, chat_id, "❌ Dakika sayısal olmalıdır!", 5)
-            try: await update.message.delete()
-            except Exception: pass
+            try:
+                await update.message.delete()
+            except Exception:
+                pass
             return
         msg_text = parts[1] if len(parts) > 1 else ""
         btn_text = parts[2] if len(parts) > 2 else ""
@@ -709,24 +959,32 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parts = raw_args.split(maxsplit=1)
         if not parts or not parts[0].isdigit():
             await send_auto_delete_message(context, chat_id, "❌ Format: /zamanla <dakika> <mesaj>", 6)
-            try: await update.message.delete()
-            except Exception: pass
+            try:
+                await update.message.delete()
+            except Exception:
+                pass
             return
         minutes = int(parts[0])
         msg_text = parts[1] if len(parts) > 1 else ""
 
-    if not msg_text and reply: msg_text = reply.caption or reply.text or ""
+    if not msg_text and reply:
+        msg_text = reply.caption or reply.text or ""
 
     if not btn_text or not btn_url:
         sched_settings = database.get_announcement_settings(chat_id)
-        if not btn_text: btn_text = sched_settings.get("scheduled_btn_text", "")
-        if not btn_url: btn_url = sched_settings.get("scheduled_btn_url", "")
+        if not btn_text:
+            btn_text = sched_settings.get("scheduled_btn_text", "")
+        if not btn_url:
+            btn_url = sched_settings.get("scheduled_btn_url", "")
 
     job_id = hashlib.md5(f"{chat_id}_{minutes}_{msg_text[:20]}".encode()).hexdigest()
     scheduler.add_job(
-        send_periodic_announcement, 'interval', minutes=minutes,
+        send_periodic_announcement,
+        'interval',
+        minutes=minutes,
         args=[context.bot, chat_id, msg_text, btn_text, btn_url, media_url],
-        id=job_id, replace_existing=True
+        id=job_id,
+        replace_existing=True
     )
 
     database.save_scheduled_job(job_id, chat_id, minutes, msg_text, btn_text, btn_url, media_url)
@@ -736,11 +994,15 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
     admin_user = update.effective_user
     database.log_action(chat_id, "SCHEDULE_START", admin_user.id, f"@{admin_user.username or admin_user.first_name}", f"Her {minutes} dk periyodik başlatıldı.")
     await send_auto_delete_message(context, chat_id, f"✅ Her {minutes} dakikada bir paylaşılacak görev başlatıldı!", 5)
-    try: await update.message.delete()
-    except Exception: pass
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context, "ban"): return
+    if not await is_user_admin(update, context, "ban"):
+        return
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
     if user:
@@ -750,12 +1012,17 @@ async def cmd_defol(update: Update, context: ContextTypes.DEFAULT_TYPE):
             admin_user = update.effective_user
             database.log_action(chat_id, "BAN", admin_user.id, f"@{admin_user.username or admin_user.first_name}", f"@{uname} banlandı.")
             await send_auto_delete_message(context, chat_id, f"🚫 @{uname} gruptan banlandı!", 5)
-        except Exception as e: logger.error(f"Ban hata: {e}")
-    try: await update.message.delete()
-    except Exception: pass
+        except Exception as e:
+            logger.error(f"Ban hata: {e}")
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context, "ban"): return
+    if not await is_user_admin(update, context, "ban"):
+        return
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
     if user:
@@ -765,12 +1032,17 @@ async def cmd_undefol(update: Update, context: ContextTypes.DEFAULT_TYPE):
             admin_user = update.effective_user
             database.log_action(chat_id, "UNBAN", admin_user.id, f"@{admin_user.username or admin_user.first_name}", f"@{uname} banı kaldırıldı.")
             await send_auto_delete_message(context, chat_id, f"✅ @{uname} banı kaldırıldı!", 5)
-        except Exception as e: logger.error(f"Unban hata: {e}")
-    try: await update.message.delete()
-    except Exception: pass
+        except Exception as e:
+            logger.error(f"Unban hata: {e}")
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context, "mute"): return
+    if not await is_user_admin(update, context, "mute"):
+        return
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
     if user:
@@ -780,12 +1052,17 @@ async def cmd_itaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             admin_user = update.effective_user
             database.log_action(chat_id, "MUTE", admin_user.id, f"@{admin_user.username or admin_user.first_name}", f"@{uname} susturuldu.")
             await send_auto_delete_message(context, chat_id, f"🔇 @{uname} susturuldu!", 5)
-        except Exception as e: logger.error(f"Mute hata: {e}")
-    try: await update.message.delete()
-    except Exception: pass
+        except Exception as e:
+            logger.error(f"Mute hata: {e}")
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context, "mute"): return
+    if not await is_user_admin(update, context, "mute"):
+        return
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
     if user:
@@ -796,12 +1073,17 @@ async def cmd_unitaat(update: Update, context: ContextTypes.DEFAULT_TYPE):
             admin_user = update.effective_user
             database.log_action(chat_id, "UNMUTE", admin_user.id, f"@{admin_user.username or admin_user.first_name}", f"@{uname} susturması kaldırıldı.")
             await send_auto_delete_message(context, chat_id, f"🔊 @{uname} susturması kaldırıldı!", 5)
-        except Exception as e: logger.error(f"Unmute hata: {e}")
-    try: await update.message.delete()
-    except Exception: pass
+        except Exception as e:
+            logger.error(f"Unmute hata: {e}")
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_uyari(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context, "ban"): return
+    if not await is_user_admin(update, context, "ban"):
+        return
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
     if user:
@@ -814,25 +1096,33 @@ async def cmd_uyari(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 database.reset_warnings(user.id)
                 database.log_action(chat_id, "AUTO_BAN_WARN", admin_user.id, f"@{admin_user.username or admin_user.first_name}", f"@{uname} 3 uyarı ile banlandı.")
                 await send_auto_delete_message(context, chat_id, f"🚫 @{uname} 3 uyarıyı aştığı için otomatik banlandı!", 6)
-            except Exception as e: logger.error(f"Otomatik ban: {e}")
+            except Exception as e:
+                logger.error(f"Otomatik ban: {e}")
         else:
             database.log_action(chat_id, "WARN", admin_user.id, f"@{admin_user.username or admin_user.first_name}", f"@{uname} uyarıldı ({current_warns}/3).")
             await send_auto_delete_message(context, chat_id, f"⚠️ @{uname} uyarıldı! ({current_warns}/3)", 5)
-    try: await update.message.delete()
-    except Exception: pass
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 async def cmd_unuyari(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not await is_user_admin(update, context, "ban"): return
+    if not await is_user_admin(update, context, "ban"):
+        return
     chat_id = update.effective_chat.id
     user = await get_target_user(update, context)
-    if user: 
+    if user:
         uname = getattr(user, 'username', str(user.id))
         admin_user = update.effective_user
         database.reset_warnings(user.id)
         database.log_action(chat_id, "UNWARN", admin_user.id, f"@{admin_user.username or admin_user.first_name}", f"@{uname} uyarıları sıfırlandı.")
         await send_auto_delete_message(context, chat_id, f"✅ @{uname} uyarıları sıfırlandı!", 5)
-    try: await update.message.delete()
-    except Exception: pass
+    try:
+        await update.message.delete()
+    except Exception:
+        pass
+
 
 COMMAND_MAP = {
     "start": cmd_start, "help": cmd_start, "welcome": cmd_welcome,
@@ -843,8 +1133,10 @@ COMMAND_MAP = {
     "uyari": cmd_uyari, "warn": cmd_uyari, "unuyari": cmd_unuyari, "unwarn": cmd_unuyari,
 }
 
+
 async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.message: return
+    if not update.message:
+        return
     user, chat, chat_id = update.effective_user, update.effective_chat, update.effective_chat.id
     if chat.type in ["group", "supergroup"]:
         try:
@@ -857,7 +1149,9 @@ async def master_message_router(update: Update, context: ContextTypes.DEFAULT_TY
         except Exception:
             database.register_bot_group(chat.id, chat.title or "Grup", "")
 
-    if user and user.username: database.save_user(chat_id, user.id, user.username.lower())
+    if user and user.username:
+        database.save_user(chat_id, user.id, user.username.lower())
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
