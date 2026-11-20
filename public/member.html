@@ -4,247 +4,350 @@
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GOLDEN CLUB | Royal Velvet & Stardust Lounge</title>
+    <title>GOLDEN LOUNGE | Royal Velvet & Stardust</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --royal-purple-deep: #18072b;
-            --royal-purple-mid: #320d59;
-            --amethyst-glow: #7b2cbf;
-            --magenta-spark: #c77dff;
+            --purple-deep: #18072b;
+            --purple-mid: #3a0e68;
             --gold-glitter-1: #fff3b0;
             --gold-glitter-2: #f5cb5c;
             --gold-base: #d4af37;
-            --glass-purple: rgba(42, 12, 74, 0.68);
-            --glass-card: rgba(65, 22, 110, 0.55);
-            --border-glitter: rgba(245, 203, 92, 0.65);
+            --border-gold: rgba(245, 203, 92, 0.68);
             --text-pearl: #ffffff;
-            --text-lavender: #e0aaff;
+            --text-lavender: #e8c5ff;
+
+            /* 👑 GOLDENVISION KIRMIZI + GOLD VARAK + KIRMIZI SİM PALETİ */
+            --crimson-dark: #240309;
+            --crimson-rich: #5c0818;
+            --crimson-bright: #9e102b;
+            --foil-gold: #ffd166;
+            --foil-bright: #fff1b8;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        
+
         html, body {
             height: 100vh; width: 100vw; overflow: hidden;
-            background-color: var(--royal-purple-deep); color: var(--text-pearl);
+            background-color: var(--purple-deep); color: var(--text-pearl);
         }
 
-        /* ✨ ALTIN SİMLİ & PARLAK KRALİYET MORU ARKA PLAN */
+        /* ✨ ÜYE ANA EKRANI: ALTIN SİMLİ KRALİYET MORU */
         body {
             background:
                 radial-gradient(circle at 20% 15%, rgba(245, 203, 92, 0.35) 0%, transparent 45%),
                 radial-gradient(circle at 85% 25%, rgba(199, 125, 255, 0.45) 0%, transparent 50%),
-                radial-gradient(circle at 50% 85%, rgba(212, 175, 55, 0.30) 0%, transparent 55%),
-                linear-gradient(145deg, #2b094d 0%, #4a127d 45%, #1c0533 100%);
+                linear-gradient(145deg, #2b094d 0%, #4e1485 48%, #1a0430 100%);
             display: flex; flex-direction: column; justify-content: space-between; padding: 14px;
             position: relative;
         }
 
-        /* ALTIN SİM PARILTISI EFEKTİ */
         body::before {
             content: ""; position: absolute; inset: 0; pointer-events: none;
             background-image:
-                radial-gradient(1.5px 1.5px at 15% 22%, #fff3b0, transparent),
-                radial-gradient(2px 2px at 42% 14%, #f5cb5c, transparent),
-                radial-gradient(1.5px 1.5px at 78% 18%, #ffffff, transparent),
-                radial-gradient(2px 2px at 28% 58%, #f5cb5c, transparent),
-                radial-gradient(1.5px 1.5px at 66% 48%, #fff3b0, transparent),
-                radial-gradient(2px 2px at 88% 72%, #f5cb5c, transparent),
-                radial-gradient(1.5px 1.5px at 12% 82%, #ffffff, transparent);
+                radial-gradient(1.5px 1.5px at 14% 20%, #fff3b0, transparent),
+                radial-gradient(2px 2px at 45% 12%, #f5cb5c, transparent),
+                radial-gradient(1.5px 1.5px at 80% 22%, #ffffff, transparent),
+                radial-gradient(2px 2px at 26% 62%, #f5cb5c, transparent),
+                radial-gradient(1.5px 1.5px at 72% 54%, #fff3b0, transparent),
+                radial-gradient(2px 2px at 88% 76%, #f5cb5c, transparent);
             opacity: 0.85;
-            animation: glitterPulse 4s infinite alternate ease-in-out;
+            animation: sparkleShift 3.6s infinite alternate ease-in-out;
         }
 
-        @keyframes glitterPulse {
-            0% { opacity: 0.55; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.01); }
+        @keyframes sparkleShift {
+            0% { opacity: 0.55; }
+            100% { opacity: 1; }
         }
 
         .velvet-header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 16px; background: var(--glass-purple); backdrop-filter: blur(25px);
-            border-radius: 18px; border: 1.5px solid var(--border-glitter);
-            box-shadow: 0 10px 30px rgba(15, 3, 28, 0.65), inset 0 1px 0 rgba(255, 243, 176, 0.5);
-            z-index: 2; flex-shrink: 0;
+            padding: 12px 16px; background: rgba(42, 12, 74, 0.72); backdrop-filter: blur(24px);
+            border-radius: 18px; border: 1.5px solid var(--border-gold);
+            box-shadow: 0 10px 28px rgba(15, 3, 28, 0.65), inset 0 1px 0 rgba(255, 243, 176, 0.5);
+            z-index: 2; flex-shrink: 0; gap: 8px;
         }
         .club-brand {
             font-size: 11px; font-weight: 900; letter-spacing: 2px;
             background: linear-gradient(90deg, #fff3b0, #f5cb5c, #ffffff);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 15px rgba(245, 203, 92, 0.5);
+        }
+        .header-right { display: flex; align-items: center; gap: 6px; }
+        .sound-toggle-btn {
+            background: rgba(255, 243, 176, 0.16); color: #fff3b0;
+            border: 1px solid var(--border-gold); border-radius: 9px;
+            padding: 5px 8px; font-size: 8px; font-weight: 900; cursor: pointer;
         }
         .vip-member-pill {
             background: linear-gradient(135deg, rgba(245, 203, 92, 0.3), rgba(157, 78, 221, 0.45));
-            color: #fff3b0; padding: 5px 11px; border-radius: 10px;
-            font-size: 8px; font-weight: 900; border: 1px solid var(--border-glitter);
-            box-shadow: 0 0 12px rgba(245, 203, 92, 0.35);
+            color: #fff3b0; padding: 5px 10px; border-radius: 10px;
+            font-size: 8px; font-weight: 900; border: 1px solid var(--border-gold);
         }
 
         .springboard-main {
             flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            gap: 18px; padding: 6px; z-index: 2; overflow-y: auto;
+            gap: 16px; padding: 6px; z-index: 2; overflow-y: auto;
         }
 
-        /* SAHNE SPOTLIGHT KARTI */
         .spotlight-banner {
             width: 100%; max-width: 390px;
-            background: linear-gradient(135deg, rgba(82, 24, 138, 0.78), rgba(45, 11, 82, 0.85));
-            backdrop-filter: blur(25px); border: 1.5px solid var(--border-glitter);
+            background: linear-gradient(135deg, rgba(82, 24, 138, 0.78), rgba(45, 11, 82, 0.88));
+            backdrop-filter: blur(24px); border: 1.5px solid var(--border-gold);
             border-radius: 20px; padding: 14px 16px;
-            box-shadow: 0 12px 32px rgba(12, 2, 24, 0.7), inset 0 1px 1px rgba(255, 243, 176, 0.55);
-            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            box-shadow: 0 12px 30px rgba(12, 2, 24, 0.7), inset 0 1px 1px rgba(255, 243, 176, 0.5);
+            display: flex; align-items: center; justify-content: space-between;
         }
-        .spotlight-text h3 {
-            font-size: 11px; font-weight: 900; color: #fff3b0; letter-spacing: 0.6px; text-transform: uppercase;
-        }
-        .spotlight-text p {
-            font-size: 8px; color: var(--text-lavender); margin-top: 3px; line-height: 1.35;
-        }
-        .spotlight-crown {
-            font-size: 24px; filter: drop-shadow(0 0 10px rgba(245, 203, 92, 0.9));
-        }
+        .spotlight-text h3 { font-size: 11px; font-weight: 900; color: #fff3b0; text-transform: uppercase; }
+        .spotlight-text p { font-size: 8px; color: var(--text-lavender); margin-top: 3px; }
 
-        /* 📱 TELEFON ANA EKRANI UYGULAMA SİMGELERİ IZGARASI */
         .apps-springboard-grid {
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
-            width: 100%; max-width: 390px; justify-items: center; padding: 4px 0;
+            width: 100%; max-width: 390px; justify-items: center;
         }
 
         .member-app-card {
             display: flex; flex-direction: column; align-items: center; gap: 6px;
-            cursor: pointer; transition: transform 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            width: 100%; position: relative;
+            cursor: pointer; transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%;
         }
         .member-app-card:active { transform: scale(0.88); }
 
         .member-app-icon {
             width: 64px; height: 64px;
-            background: linear-gradient(145deg, rgba(114, 38, 184, 0.72), rgba(56, 14, 99, 0.88));
-            backdrop-filter: blur(25px);
-            border-radius: 19px; border: 1.5px solid var(--border-glitter);
-            display: flex; align-items: center; justify-content: center; font-size: 27px;
-            box-shadow: 0 10px 24px rgba(14, 2, 28, 0.75), 0 0 16px rgba(245, 203, 92, 0.28), inset 0 1px 1px rgba(255, 243, 176, 0.65);
+            background: linear-gradient(145deg, rgba(114, 38, 184, 0.75), rgba(56, 14, 99, 0.9));
+            border-radius: 19px; border: 1.5px solid var(--border-gold);
+            display: flex; align-items: center; justify-content: center; font-size: 28px;
+            box-shadow: 0 10px 24px rgba(14, 2, 28, 0.75), 0 0 16px rgba(245, 203, 92, 0.25), inset 0 1px 1px rgba(255, 243, 176, 0.6);
             position: relative;
+        }
+
+        .member-app-icon.gv-special {
+            background: linear-gradient(145deg, #b5122f 0%, #5c0616 70%, #2b0209 100%);
+            border: 2px solid #ffd166;
+            box-shadow: 0 10px 26px rgba(181, 18, 47, 0.55), 0 0 18px rgba(255, 209, 102, 0.45);
         }
 
         .app-live-badge {
             position: absolute; top: -5px; right: -6px;
             background: linear-gradient(135deg, #fff3b0, #f5cb5c); color: #240742;
             font-size: 6px; font-weight: 900; padding: 2px 6px; border-radius: 8px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6); text-transform: uppercase;
+            text-transform: uppercase;
         }
 
         .member-app-title {
             font-size: 8.5px; font-weight: 800; color: #fff; text-align: center;
-            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 92px;
         }
 
         .velvet-dock {
-            width: 100%; max-width: 390px; height: 42px;
-            background: rgba(58, 17, 99, 0.65); backdrop-filter: blur(25px);
-            border-radius: 21px; border: 1.5px solid var(--border-glitter);
+            width: 100%; max-width: 390px; height: 40px;
+            background: rgba(58, 17, 99, 0.65); backdrop-filter: blur(24px);
+            border-radius: 20px; border: 1.5px solid var(--border-gold);
             margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 10px;
             z-index: 2; flex-shrink: 0;
         }
         .glitter-dot { width: 6px; height: 6px; background: #f5cb5c; border-radius: 50%; box-shadow: 0 0 10px #fff3b0; }
 
-        /* 🎭 ETKİNLİK & OYUN SAHNE MODALI */
+        /* =========================================================
+           👑 TAM EKRAN GOLDENVISION: KIRMIZI + GOLD VARAK + KIRMIZI SİM
+           ========================================================= */
+        .gv-fullscreen-stage {
+            position: fixed; inset: 0; width: 100vw; height: 100vh;
+            background:
+                radial-gradient(circle at 50% 10%, rgba(255, 209, 102, 0.28) 0%, transparent 45%),
+                radial-gradient(circle at 15% 80%, rgba(255, 46, 99, 0.35) 0%, transparent 50%),
+                radial-gradient(circle at 85% 75%, rgba(212, 175, 55, 0.25) 0%, transparent 50%),
+                linear-gradient(160deg, #4a0614 0%, #240209 55%, #120104 100%);
+            z-index: 300; display: none; flex-direction: column; overflow: hidden;
+        }
+        .gv-fullscreen-stage::before {
+            content: ""; position: absolute; inset: 0; pointer-events: none;
+            background-image:
+                radial-gradient(2px 2px at 12% 18%, #ff4d6d, transparent),
+                radial-gradient(1.5px 1.5px at 34% 28%, #ffd166, transparent),
+                radial-gradient(2px 2px at 64% 16%, #ff758f, transparent),
+                radial-gradient(1.5px 1.5px at 84% 34%, #ffd166, transparent),
+                radial-gradient(2px 2px at 22% 74%, #ff4d6d, transparent),
+                radial-gradient(1.5px 1.5px at 76% 82%, #ffd166, transparent);
+            animation: crimsonGlitter 3s infinite alternate ease-in-out;
+        }
+        @keyframes crimsonGlitter {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .gv-fullscreen-stage.open { display: flex; }
+
+        .gv-topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px;
+            background: linear-gradient(90deg, rgba(92, 8, 24, 0.92), rgba(48, 4, 12, 0.95));
+            border-bottom: 2px solid var(--foil-gold);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.65);
+            z-index: 2; flex-shrink: 0; gap: 8px;
+        }
+        .gv-brand-wrap { display: flex; flex-direction: column; min-width: 0; }
+        .gv-logo-text {
+            font-size: 12px; font-weight: 900; letter-spacing: 1.5px;
+            background: linear-gradient(90deg, #fff1b8, #ffd166, #d4af37);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .gv-week-sub { font-size: 8px; color: #ffd6de; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .gv-top-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .gv-exit-btn {
+            background: linear-gradient(135deg, #fff1b8, #ffd166);
+            color: #2b0209; border: none; border-radius: 9px;
+            padding: 6px 12px; font-size: 8px; font-weight: 900;
+            text-transform: uppercase; cursor: pointer;
+            box-shadow: 0 0 14px rgba(255, 209, 102, 0.45);
+        }
+
+        .gv-nav-bar {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+            padding: 10px 14px; background: rgba(24, 2, 7, 0.75);
+            border-bottom: 1px solid rgba(255, 209, 102, 0.35);
+            z-index: 2; flex-shrink: 0;
+        }
+        .gv-nav-btn {
+            background: rgba(92, 8, 24, 0.55); border: 1px solid rgba(255, 209, 102, 0.4);
+            color: #ffd6de; border-radius: 10px; padding: 8px 4px;
+            font-size: 8px; font-weight: 900; text-align: center; cursor: pointer;
+            text-transform: uppercase;
+        }
+        .gv-nav-btn.active {
+            background: linear-gradient(135deg, #fff1b8, #ffd166);
+            color: #2b0209; border-color: #fff1b8;
+            box-shadow: 0 0 12px rgba(255, 209, 102, 0.5);
+        }
+
+        .gv-scroll-body {
+            flex: 1; overflow-y: auto; padding: 14px;
+            display: flex; flex-direction: column; gap: 12px; z-index: 2;
+        }
+        .gv-panel { display: none; flex-direction: column; gap: 10px; }
+        .gv-panel.active { display: flex; }
+
+        .palace-card {
+            background: linear-gradient(145deg, rgba(84, 7, 22, 0.82), rgba(34, 3, 9, 0.92));
+            border: 1.5px solid var(--foil-gold); border-radius: 16px; padding: 13px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 241, 184, 0.4);
+        }
+        .palace-card-title { font-size: 10px; font-weight: 900; color: #fff1b8; text-transform: uppercase; margin-bottom: 6px; }
+        .palace-muted { font-size: 8.5px; color: #f3c6cf; line-height: 1.45; }
+
+        .gv-input, .gv-select, .gv-textarea {
+            width: 100%; background: rgba(18, 1, 5, 0.9);
+            border: 1.5px solid rgba(255, 209, 102, 0.55); border-radius: 10px;
+            padding: 10px 12px; color: #fff; font-size: 9.5px; outline: none; margin-bottom: 6px;
+        }
+
+        .palace-gold-btn {
+            width: 100%; padding: 11px 14px; border: none; border-radius: 11px;
+            background: linear-gradient(135deg, #fff1b8 0%, #ffd166 55%, #d4af37 100%);
+            color: #240208; font-size: 9px; font-weight: 900; text-transform: uppercase;
+            cursor: pointer; box-shadow: 0 6px 18px rgba(255, 209, 102, 0.35);
+        }
+        .palace-gold-btn:active { transform: scale(0.97); }
+
+        /* 12-1 PUANLAMA KARTLARI */
+        .vote-entry-card {
+            background: rgba(58, 5, 15, 0.85); border: 1.5px solid rgba(255, 209, 102, 0.5);
+            border-radius: 14px; padding: 11px; display: flex; flex-direction: column; gap: 8px;
+        }
+        .vote-entry-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .vote-song-meta { min-width: 0; flex: 1; }
+        .vote-song-title { font-size: 10px; font-weight: 900; color: #fff1b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .vote-artist-sub { font-size: 8px; color: #f3c6cf; }
+        .pts-chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
+        .pts-chip {
+            padding: 6px 9px; border-radius: 8px; font-size: 8.5px; font-weight: 900;
+            background: rgba(24, 2, 7, 0.9); color: #ffd166;
+            border: 1px solid rgba(255, 209, 102, 0.45); cursor: pointer;
+        }
+        .pts-chip.selected {
+            background: linear-gradient(135deg, #fff1b8, #ffd166);
+            color: #240208; border-color: #fff1b8;
+            box-shadow: 0 0 10px rgba(255, 209, 102, 0.65);
+        }
+
+        /* GÖRSEL PUAN MATRİSİ & SIRALAMA TABLOSU */
+        .matrix-scroll { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255, 209, 102, 0.45); }
+        .score-matrix-table { width: 100%; border-collapse: collapse; font-size: 8px; background: rgba(20, 2, 6, 0.92); }
+        .score-matrix-table th, .score-matrix-table td {
+            border: 1px solid rgba(255, 209, 102, 0.25); padding: 6px; text-align: center; white-space: nowrap;
+        }
+        .score-matrix-table th { background: rgba(110, 10, 29, 0.85); color: #fff1b8; font-weight: 900; }
+        .cell-twelve { background: linear-gradient(135deg, #ffd166, #d4af37); color: #240208; font-weight: 900; }
+        .cell-pts { color: #ffd6de; font-weight: 800; }
+
+        .rank-row {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(68, 6, 18, 0.78); border: 1px solid rgba(255, 209, 102, 0.4);
+            border-radius: 11px; padding: 9px 12px; font-size: 9px;
+        }
+        .rank-pos { font-weight: 900; color: #ffd166; margin-right: 8px; }
+        .rank-score { font-weight: 900; color: #fff1b8; background: rgba(255, 209, 102, 0.18); padding: 4px 8px; border-radius: 8px; }
+
+        .weeks-25-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+        .week-mini-box {
+            background: rgba(58, 5, 15, 0.85); border: 1px solid rgba(255, 209, 102, 0.4);
+            border-radius: 10px; padding: 7px 4px; text-align: center;
+        }
+        .week-mini-box.is-current {
+            border: 2px solid #fff1b8; background: rgba(145, 14, 39, 0.9);
+            box-shadow: 0 0 12px rgba(255, 209, 102, 0.5);
+        }
+        .week-mini-num { font-size: 8.5px; font-weight: 900; color: #fff1b8; }
+        .week-mini-type { font-size: 6px; color: #f3c6cf; margin-top: 2px; line-height: 1.2; }
+
+        /* DİĞER ETKİNLİKLER MODALI */
         .stage-modal {
             position: fixed; bottom: 0; left: 0; width: 100vw; height: 0;
             background: linear-gradient(165deg, rgba(44, 11, 79, 0.98), rgba(20, 4, 38, 0.99));
-            backdrop-filter: blur(45px);
-            border-top: 3px solid #f5cb5c; border-radius: 28px 28px 0 0;
-            z-index: 100; transform: translateY(30px); opacity: 0; pointer-events: none;
-            transition: all 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex; flex-direction: column; overflow: hidden;
+            backdrop-filter: blur(45px); border-top: 3px solid #f5cb5c; border-radius: 28px 28px 0 0;
+            z-index: 150; transform: translateY(30px); opacity: 0; pointer-events: none;
+            transition: all 0.35s ease; display: flex; flex-direction: column; overflow: hidden;
         }
-        .stage-modal.open { height: 88vh; transform: translateY(0); opacity: 1; pointer-events: auto; }
-
+        .stage-modal.open { height: 86vh; transform: translateY(0); opacity: 1; pointer-events: auto; }
         .stage-header {
-            padding: 15px 18px; background: rgba(68, 19, 117, 0.75);
+            padding: 14px 18px; background: rgba(68, 19, 117, 0.8);
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1.5px solid var(--border-glitter); flex-shrink: 0;
+            border-bottom: 1.5px solid var(--border-gold);
         }
-        .stage-heading { font-size: 11px; font-weight: 900; color: #fff3b0; text-transform: uppercase; letter-spacing: 1px; }
-        .stage-close {
-            background: linear-gradient(135deg, #fff3b0, #f5cb5c); color: #240742;
-            padding: 5px 12px; border-radius: 8px; font-size: 8px; font-weight: 900; cursor: pointer;
-        }
-
-        .stage-body {
-            flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px;
-        }
-
-        .stage-hero {
-            background: rgba(88, 28, 145, 0.45); border: 1.5px solid var(--border-glitter);
-            border-radius: 18px; padding: 16px; text-align: center;
-            box-shadow: inset 0 1px 1px rgba(255, 243, 176, 0.4);
-        }
-        .stage-hero-icon { font-size: 42px; margin-bottom: 6px; filter: drop-shadow(0 0 14px rgba(245, 203, 92, 0.8)); }
-        .stage-hero-title { font-size: 14px; font-weight: 900; color: #fff3b0; }
-        .stage-hero-sub { font-size: 9px; color: var(--text-lavender); margin-top: 3px; }
-        .stage-time-pill {
-            display: inline-block; margin-top: 8px; padding: 4px 12px; border-radius: 12px;
-            background: rgba(245, 203, 92, 0.22); border: 1px solid var(--border-glitter);
-            font-size: 8px; font-weight: 800; color: #fff3b0;
-        }
-
-        .stage-desc-box {
-            background: rgba(30, 8, 54, 0.75); border: 1px solid rgba(224, 170, 255, 0.35);
-            border-radius: 14px; padding: 14px; font-size: 10px; line-height: 1.55; color: #f8f0ff;
-        }
-
-        .stage-media-img {
-            width: 100%; max-height: 220px; object-fit: cover; border-radius: 14px;
-            border: 1.5px solid var(--border-glitter);
-        }
-
-        .glitter-action-btn {
-            width: 100%; padding: 13px 16px; border: none; border-radius: 14px;
-            background: linear-gradient(135deg, #fff3b0 0%, #f5cb5c 50%, #d4af37 100%);
-            color: #240742; font-size: 10px; font-weight: 900; text-transform: uppercase;
-            letter-spacing: 0.8px; cursor: pointer;
-            box-shadow: 0 8px 24px rgba(245, 203, 92, 0.45);
-            transition: transform 0.2s ease;
-        }
-        .glitter-action-btn:active { transform: scale(0.96); }
-
-        .votes-counter {
-            text-align: center; font-size: 9px; font-weight: 800; color: #fff3b0;
-            background: rgba(245, 203, 92, 0.14); padding: 8px; border-radius: 10px;
-            border: 1px solid rgba(245, 203, 92, 0.35);
-        }
+        .stage-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 
         .glitter-toast {
             position: fixed; top: 18px; left: 50%; transform: translateX(-50%) translateY(-60px);
-            background: linear-gradient(135deg, #fff3b0, #f5cb5c); color: #240742;
+            background: linear-gradient(135deg, #fff1b8, #ffd166); color: #240208;
             padding: 9px 18px; border-radius: 12px; font-size: 9px; font-weight: 900;
-            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65); z-index: 1000; opacity: 0;
-            transition: all 0.35s ease; pointer-events: none;
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7); z-index: 1000; opacity: 0;
+            transition: all 0.3s ease; pointer-events: none;
         }
         .glitter-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
 
-    <div class="glitter-toast" id="glitterToast">✨ SAHNEYE HOŞ GELDİN</div>
+    <div class="glitter-toast" id="glitterToast">✨ GOLDEN LOUNGE AKTİF</div>
 
     <header class="velvet-header">
         <div class="club-brand">✨ GOLDEN LOUNGE</div>
-        <div class="vip-member-pill" id="memberBadge">VIP YILDIZ 👑</div>
+        <div class="header-right">
+            <button class="sound-toggle-btn" id="soundBtn" onclick="toggleSound()">🔊 SES</button>
+            <div class="vip-member-pill" id="memberBadge">VIP ✨</div>
+        </div>
     </header>
 
     <main class="springboard-main">
         <div class="spotlight-banner">
             <div class="spotlight-text">
                 <h3>Kraliyet Sahnesi & Oyunlar</h3>
-                <p>Bir uygulama simgesine dokun, sahneye katıl ve gecenin yıldızı ol.</p>
+                <p>Uygulama simgelerine dokun, sahneye katıl ve gecenin yıldızı ol.</p>
             </div>
-            <div class="spotlight-crown">👑</div>
+            <div style="font-size:24px;">👑</div>
         </div>
 
         <div class="apps-springboard-grid" id="memberAppsGrid">
-            <div style="grid-column: span 3; font-size: 9px; color: #e0aaff; padding: 20px;">Sahne hazırlanıyor...</div>
+            <div style="grid-column: span 3; font-size: 9px; color: #e8c5ff; padding: 20px;">Sahne hazırlanıyor...</div>
         </div>
     </main>
 
@@ -254,26 +357,116 @@
         <div class="glitter-dot"></div>
     </div>
 
-    <!-- ETKİNLİK & OYUN SAHNE MODALI -->
-    <div class="stage-modal" id="eventStageModal">
-        <div class="stage-header" onclick="closeStageModal()">
-            <div class="stage-heading" id="stageModalHeader">✨ SAHNE</div>
-            <div class="stage-close">GERİ [ X ]</div>
+    <!-- =========================================================
+         👑 TAM EKRAN GOLDENVISION SARAY SAHNESİ
+         ========================================================= -->
+    <div class="gv-fullscreen-stage" id="gvStageModal">
+        <div class="gv-topbar">
+            <div class="gv-brand-wrap">
+                <div class="gv-logo-text" id="gvHeaderTitle">👑 GOLDENVISION • SEZON 3</div>
+                <div class="gv-week-sub" id="gvHeaderWeek">Hafta 1 • Yükleniyor...</div>
+            </div>
+            <div class="gv-top-actions">
+                <button class="sound-toggle-btn" id="gvSoundBtn" onclick="toggleSound()">🔊</button>
+                <button class="gv-exit-btn" onclick="closeGoldenVision()">ÇIKIŞ</button>
+            </div>
         </div>
-        <div class="stage-body">
-            <div class="stage-hero">
-                <div class="stage-hero-icon" id="stageIcon">🎤</div>
-                <div class="stage-hero-title" id="stageTitle">-</div>
-                <div class="stage-hero-sub" id="stageSubtitle">-</div>
-                <div class="stage-time-pill" id="stageSchedule">-</div>
+
+        <div class="gv-nav-bar">
+            <button class="gv-nav-btn active" id="nav-sahne" onclick="switchGvTab('sahne')">🎭 Sahne</button>
+            <button class="gv-nav-btn" id="nav-oylama" onclick="switchGvTab('oylama')">🗳️ 12–1 Oy</button>
+            <button class="gv-nav-btn" id="nav-tablo" onclick="switchGvTab('tablo')">📊 Matris</button>
+            <button class="gv-nav-btn" id="nav-sezon" onclick="switchGvTab('sezon')">🗓️ 25 Hafta</button>
+        </div>
+
+        <div class="gv-scroll-body">
+            <!-- 1. SAHNE & KATILIM PORTU -->
+            <div class="gv-panel active" id="panel-sahne">
+                <div class="palace-card" id="gvStatusBanner">
+                    <div class="palace-card-title" id="gvConceptTitle">Hafta Konsepti</div>
+                    <div class="palace-muted" id="gvRuleNote">Kurallar yükleniyor...</div>
+                </div>
+
+                <div class="palace-card" id="gvMyEntryCard">
+                    <div class="palace-card-title">🔒 Senin Haftalık Seçimin (Gizli Kilit)</div>
+                    <div class="palace-muted" id="gvMyEntrySummary">Henüz ülke/şarkı kaydın yok. Seçimlerin sonuç açıklanana kadar gizli kalır; dışarı sızdırmanın cezası 3 hafta yarışma banıdır (tekrarda gruptan/yarışmadan ban).</div>
+                </div>
+
+                <div class="palace-card">
+                    <div class="palace-card-title">🌍 Ülke & Şarkı Bildirimi (Max 75M)</div>
+                    <input class="gv-input" id="gvCountriesInput" placeholder="3 Ülke (Örn: USA🇺🇸, UK🇬🇧, Gana🇬🇭)">
+                    <div style="display:grid; grid-template-columns: 76px 1fr; gap:6px;">
+                        <input class="gv-input" id="gvFlagInput" placeholder="Bayrak" value="🇹🇷">
+                        <input class="gv-input" id="gvPrimaryCountryInput" placeholder="Yarışacak Ana Ülke">
+                    </div>
+                    <input class="gv-input" id="gvArtistInput" placeholder="Şarkıcı / Sanatçı">
+                    <input class="gv-input" id="gvSongInput" placeholder="Şarkı Adı">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+                        <input class="gv-input" type="number" step="0.1" id="gvViewsInput" placeholder="İzlenme (Milyon, max 75)">
+                        <input class="gv-input" id="gvPairInput" placeholder="Çift Haftası Partneri (@...)">
+                    </div>
+                    <button class="palace-gold-btn" onclick="sendGvEntry()">Seçimi Mühürle 👑</button>
+                </div>
+
+                <div class="palace-card">
+                    <div class="palace-card-title">💬 Sahne Yorumları</div>
+                    <div class="palace-muted" id="gvCommentsLockNote" style="margin-bottom:6px;">Yorum durumu kontrol ediliyor...</div>
+                    <div id="gvCommentsList" style="display:flex; flex-direction:column; gap:5px; max-height:140px; overflow-y:auto; margin-bottom:8px;"></div>
+                    <div style="display:flex; gap:6px;">
+                        <select class="gv-select" id="gvCommentTargetSelect" style="margin-bottom:0; max-width:120px;"></select>
+                        <input class="gv-input" id="gvCommentInput" placeholder="Yorum yaz..." style="margin-bottom:0;">
+                        <button class="palace-gold-btn" style="width:auto; padding:8px 12px;" onclick="sendGvComment()">Gönder</button>
+                    </div>
+                </div>
             </div>
 
-            <img id="stageMediaImg" class="stage-media-img" style="display:none;" alt="Etkinlik Görseli">
+            <!-- 2. FORMATA UYGUN 12-1 OYLAMA PORTU -->
+            <div class="gv-panel" id="panel-oylama">
+                <div class="palace-card">
+                    <div class="palace-card-title">🗳️ Eurovision Puan Dağıtımı (12, 10, 8, 7, 6, 5, 4, 3, 2, 1)</div>
+                    <div class="palace-muted">Her puanı yalnızca bir şarkıya verebilirsin. 12 puan altın varakla sahneye vurulur.</div>
+                </div>
+                <div id="gvVotingListContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
+                <button class="palace-gold-btn" onclick="sendGvBallot()">Oylarımı Mühürle 🏆</button>
+            </div>
 
-            <div class="stage-desc-box" id="stageDesc">-</div>
+            <!-- 3. GÖRSEL PUAN MATRİSİ & SIRALAMA TABLOSU -->
+            <div class="gv-panel" id="panel-tablo">
+                <div class="palace-card">
+                    <div class="palace-card-title">📊 Puan Matrisi</div>
+                    <div class="matrix-scroll" id="gvMatrixContainer"></div>
+                </div>
+                <div class="palace-card">
+                    <div class="palace-card-title">🏆 FULL RANKING (Sıralama)</div>
+                    <div id="gvRankingContainer" style="display:flex; flex-direction:column; gap:6px;"></div>
+                </div>
+            </div>
 
-            <div class="votes-counter" id="stageVotesCount">✨ Toplam Sahne Etkileşimi: 0</div>
+            <!-- 4. 25 HAFTALIK SEZON TAKVİMİ -->
+            <div class="gv-panel" id="panel-sezon">
+                <div class="palace-card">
+                    <div class="palace-card-title">🗓️ 25 Haftalık Sezon Haritası</div>
+                    <div class="palace-muted" style="margin-bottom:8px;">Çakılı Haftalar, Çift Haftası, Özel Konsept/Saygı Haftaları ve 25. Hafta Second Chance.</div>
+                    <div class="weeks-25-grid" id="gv25WeeksGrid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- DİĞER ETKİNLİKLER MODALI -->
+    <div class="stage-modal" id="eventStageModal">
+        <div class="stage-header" onclick="closeStageModal()">
+            <div style="font-size:10px; font-weight:900; color:#fff3b0;" id="stageModalHeader">✨ SAHNE</div>
+            <div style="background:#f5cb5c; color:#240742; padding:4px 10px; border-radius:8px; font-size:8px; font-weight:900; cursor:pointer;">GERİ [ X ]</div>
+        </div>
+        <div class="stage-body">
+            <div style="background:rgba(88,28,145,0.45); border:1.5px solid var(--border-gold); border-radius:16px; padding:14px; text-align:center;">
+                <div style="font-size:38px;" id="stageIcon">✨</div>
+                <div style="font-size:13px; font-weight:900; color:#fff3b0; margin-top:4px;" id="stageTitle">-</div>
+                <div style="font-size:8.5px; color:#e8c5ff; margin-top:2px;" id="stageSubtitle">-</div>
+            </div>
+            <div style="background:rgba(30,8,54,0.75); border:1px solid rgba(224,170,255,0.35); border-radius:12px; padding:12px; font-size:9.5px; line-height:1.5;" id="stageDesc">-</div>
+            <div style="text-align:center; font-size:9px; font-weight:800; color:#fff3b0;" id="stageVotesCount">✨ Etkileşim: 0</div>
             <div id="stageActionButtons" style="display:flex; flex-direction:column; gap:8px;"></div>
         </div>
     </div>
@@ -285,8 +478,74 @@
         const memberUser = tg.initDataUnsafe?.user || { id: 1000001, first_name: "Yıldız Üye", username: "vip_member" };
         document.getElementById('memberBadge').innerText = (memberUser.first_name || "VIP") + " ✨";
 
-        let cachedEvents = [];
-        let activeEvent = null;
+        // =========================================================
+        // 🔊 MOBILE LEGENDS TARZI WEB AUDIO SES EFEKTLERİ
+        // =========================================================
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function ensureAudioCtx() {
+            if (!soundEnabled) return null;
+            if (!audioCtx) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+            return audioCtx;
+        }
+
+        function playTone(freq, duration, type = 'triangle', delay = 0, gainPeak = 0.16) {
+            const ctx = ensureAudioCtx();
+            if (!ctx) return;
+            const start = ctx.currentTime + delay;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, start);
+            gain.gain.setValueAtTime(0.0001, start);
+            gain.gain.exponentialRampToValueAtTime(gainPeak, start + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(start);
+            osc.stop(start + duration + 0.02);
+        }
+
+        function playMlSfx(kind) {
+            if (!soundEnabled) return;
+            if (kind === 'enter') {
+                // Arena / Saray giriş akoru
+                playTone(523.25, 0.14, 'triangle', 0, 0.14);
+                playTone(659.25, 0.14, 'triangle', 0.07, 0.15);
+                playTone(783.99, 0.24, 'sawtooth', 0.14, 0.12);
+            } else if (kind === 'seal') {
+                // Mühür / Onay vuruşu
+                playTone(440, 0.1, 'square', 0, 0.11);
+                playTone(880, 0.22, 'triangle', 0.08, 0.16);
+            } else if (kind === 'twelve') {
+                // 12 Puan / Kraliyet vuruşu
+                playTone(587.33, 0.12, 'triangle', 0, 0.15);
+                playTone(783.99, 0.12, 'triangle', 0.08, 0.15);
+                playTone(1046.5, 0.28, 'sine', 0.16, 0.18);
+            } else if (kind === 'tap') {
+                playTone(620, 0.05, 'sine', 0, 0.08);
+            } else if (kind === 'error') {
+                playTone(210, 0.15, 'sawtooth', 0, 0.14);
+                playTone(165, 0.2, 'sawtooth', 0.11, 0.14);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const txt = soundEnabled ? "🔊 SES" : "🔇 SESSİZ";
+            const gvTxt = soundEnabled ? "🔊" : "🔇";
+            document.getElementById('soundBtn').innerText = txt;
+            document.getElementById('gvSoundBtn').innerText = gvTxt;
+            if (soundEnabled) playMlSfx('tap');
+            showGlitterToast(soundEnabled ? "🔊 Ses Efektleri Açık" : "🔇 Ses Efektleri Kapalı");
+        }
 
         function showGlitterToast(msg) {
             const t = document.getElementById('glitterToast');
@@ -295,19 +554,29 @@
             setTimeout(() => t.classList.remove('show'), 2500);
         }
 
+        let cachedEvents = [];
+        let activeEvent = null;
+        let gvOverviewData = null;
+        let draftAllocations = {}; // { [entry_id]: pts }
+
         async function loadMemberEvents() {
             try {
                 const res = await fetch('/api/events/list?only_active=true');
                 cachedEvents = await res.json();
                 const grid = document.getElementById('memberAppsGrid');
 
-                if (!cachedEvents || cachedEvents.length === 0) {
-                    grid.innerHTML = `<div style="grid-column: span 3; font-size: 9px; color: #e0aaff; text-align:center; padding: 25px;">Şu an aktif sahne etkinliği bulunmuyor.</div>`;
-                    return;
-                }
+                let html = `
+                    <div class="member-app-card" onclick="openGoldenVision()">
+                        <div class="member-app-icon gv-special">
+                            <span class="app-live-badge">SARAY</span>
+                            <span>👑</span>
+                        </div>
+                        <div class="member-app-title">GOLDENVISION</div>
+                    </div>
+                `;
 
-                let html = '';
-                cachedEvents.forEach(ev => {
+                (cachedEvents || []).forEach(ev => {
+                    if (String(ev.title).toUpperCase() === 'GOLDENVISION') return;
                     html += `
                         <div class="member-app-card" onclick="openEventStage(${ev.event_id})">
                             <div class="member-app-icon">
@@ -318,68 +587,317 @@
                         </div>
                     `;
                 });
+
                 grid.innerHTML = html;
             } catch (e) {
-                document.getElementById('memberAppsGrid').innerHTML = `<div style="grid-column: span 3; font-size: 9px; color: #fff3b0; text-align:center;">Bağlantı yenileniyor...</div>`;
+                document.getElementById('memberAppsGrid').innerHTML = `
+                    <div class="member-app-card" onclick="openGoldenVision()">
+                        <div class="member-app-icon gv-special"><span>👑</span></div>
+                        <div class="member-app-title">GOLDENVISION</div>
+                    </div>
+                `;
             }
+        }
+
+        async function openGoldenVision() {
+            playMlSfx('enter');
+            document.getElementById('gvStageModal').classList.add('open');
+            await refreshGoldenVision();
+        }
+
+        function closeGoldenVision() {
+            playMlSfx('tap');
+            document.getElementById('gvStageModal').classList.remove('open');
+        }
+
+        function switchGvTab(tabKey) {
+            playMlSfx('tap');
+            ['sahne', 'oylama', 'tablo', 'sezon'].forEach(k => {
+                document.getElementById('nav-' + k).classList.toggle('active', k === tabKey);
+                document.getElementById('panel-' + k).classList.toggle('active', k === tabKey);
+            });
+            if (tabKey === 'tablo' || tabKey === 'oylama' || tabKey === 'sezon') {
+                refreshGoldenVision();
+            }
+        }
+
+        async function refreshGoldenVision() {
+            try {
+                const res = await fetch(`/api/goldenvision/overview?user_id=${memberUser.id}`);
+                gvOverviewData = await res.json();
+                renderGoldenVision(gvOverviewData);
+            } catch (e) {}
+        }
+
+        function renderGoldenVision(data) {
+            const season = data.season || 3;
+            const week = data.current_week || 1;
+            const wk = data.active_week || {};
+            const st = data.state || {};
+
+            document.getElementById('gvHeaderTitle').innerText = `👑 GOLDENVISION • SEZON ${season}`;
+            document.getElementById('gvHeaderWeek').innerText = `Hafta ${week} • ${wk.week_type || 'NORMAL HAFTA'} ${st.paused ? '• DURAKLATILDI' : ''}`;
+            document.getElementById('gvConceptTitle').innerText = `${wk.week_type || 'HAFTA'} — ${wk.concept || ''}`;
+            document.getElementById('gvRuleNote').innerText = `${wk.rule_note || ''} • Süre: ${st.song_duration_sec || 120} sn • Max İzlenme: ${st.max_views_million || 75}M`;
+
+            // Kullanıcının kendi seçimi (Gizli kilit)
+            if (data.ban_info && data.ban_info.banned) {
+                document.getElementById('gvMyEntrySummary').innerText = `⛔ ${data.ban_info.reason}`;
+            } else if (data.my_entry) {
+                const me = data.my_entry;
+                document.getElementById('gvMyEntrySummary').innerText =
+                    `🔒 ${me.flag} ${me.country} — "${me.song}" (${me.artist}) • ${me.views_m}M • Tercihler: ${(me.countries || []).join(', ')} [Sonuçlara kadar gizli]`;
+            } else {
+                document.getElementById('gvMyEntrySummary').innerText =
+                    `Seçimlerin sonuç açıklanana kadar gizli kalır; dışarı sızdırmanın cezası 3 hafta yarışma banıdır (tekrarda gruptan/yarışmadan ban).`;
+            }
+
+            // Yorumlar
+            const commentsOpen = Boolean(st.comments_open);
+            document.getElementById('gvCommentsLockNote').innerText = commentsOpen
+                ? "🟢 Host yorumları açtı — sahne yorumları aktif."
+                : "🔒 Yorumlar şu anda kapalı (sadece Host açtığında aktif olur).";
+
+            const commentSel = document.getElementById('gvCommentTargetSelect');
+            commentSel.innerHTML = (data.entries || []).map(e =>
+                `<option value="${e.entry_id}">${e.flag} ${e.country}</option>`
+            ).join('') || `<option value="0">Genel</option>`;
+
+            document.getElementById('gvCommentsList').innerHTML = (data.comments || []).map(c =>
+                `<div style="background:rgba(24,2,7,0.8); padding:6px 8px; border-radius:8px; font-size:8px; border:1px solid rgba(255,209,102,0.25);">
+                    <b style="color:#ffd166;">@${c.username}</b>: ${c.text} <span style="color:#b88892; font-size:7px;">(${c.timestamp})</span>
+                </div>`
+            ).join('') || `<div class="palace-muted">Henüz yorum yok.</div>`;
+
+            // Oylama listesi
+            if (data.my_ballot && data.my_ballot.allocations && Object.keys(draftAllocations).length === 0) {
+                Object.entries(data.my_ballot.allocations).forEach(([k, v]) => {
+                    draftAllocations[Number(k)] = Number(v);
+                });
+            }
+
+            const votingContainer = document.getElementById('gvVotingListContainer');
+            const entries = data.entries || [];
+            if (!entries.length) {
+                votingContainer.innerHTML = `<div class="palace-card"><div class="palace-muted">Bu hafta henüz yarışan şarkı kaydı yok.</div></div>`;
+            } else {
+                const pointScale = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
+                votingContainer.innerHTML = entries.map(ev => {
+                    const isOwn = Number(ev.user_id) === Number(memberUser.id);
+                    const currentPts = draftAllocations[ev.entry_id] || 0;
+                    const chips = pointScale.map(p => {
+                        const sel = currentPts === p ? 'selected' : '';
+                        const disabledAttr = isOwn ? 'disabled style="opacity:0.35; cursor:not-allowed;"' : '';
+                        return `<button class="pts-chip ${sel}" ${disabledAttr} onclick="pickBallotPoints(${ev.entry_id}, ${p})">${p}</button>`;
+                    }).join('');
+
+                    return `
+                        <div class="vote-entry-card">
+                            <div class="vote-entry-top">
+                                <div class="vote-song-meta">
+                                    <div class="vote-song-title">${ev.flag} ${ev.country} — ${ev.song}</div>
+                                    <div class="vote-artist-sub">${ev.artist} ${isOwn ? '• (Senin Şarkın)' : ''}</div>
+                                </div>
+                                <div style="font-size:9px; font-weight:900; color:#ffd166;">${currentPts ? currentPts + ' PUAN' : '-'}</div>
+                            </div>
+                            <div class="pts-chip-row">${chips}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Matris & Sıralama Tablosu
+            renderScoreMatrixAndRanking(data.ranking || []);
+
+            // 25 Haftalık Takvim
+            const wGrid = document.getElementById('gv25WeeksGrid');
+            wGrid.innerHTML = (data.weeks || []).map(w => {
+                const isCur = Number(w.week) === Number(week);
+                return `
+                    <div class="week-mini-box ${isCur ? 'is-current' : ''}">
+                        <div class="week-mini-num">H${w.week}</div>
+                        <div class="week-mini-type">${w.week_type}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function pickBallotPoints(entryId, pts) {
+            // Aynı puan başka şarkıdaysa temizle
+            Object.keys(draftAllocations).forEach(k => {
+                if (Number(draftAllocations[k]) === Number(pts)) {
+                    delete draftAllocations[k];
+                }
+            });
+            if (draftAllocations[entryId] === pts) {
+                delete draftAllocations[entryId];
+                playMlSfx('tap');
+            } else {
+                draftAllocations[entryId] = pts;
+                playMlSfx(pts === 12 ? 'twelve' : 'tap');
+            }
+            if (gvOverviewData) renderGoldenVision(gvOverviewData);
+        }
+
+        async function sendGvEntry() {
+            const rawCountries = document.getElementById('gvCountriesInput').value.trim();
+            const countries = rawCountries ? rawCountries.split(',').map(s => s.trim()).filter(Boolean) : [];
+            const flag = document.getElementById('gvFlagInput').value.trim() || '🏳️';
+            const country = document.getElementById('gvPrimaryCountryInput').value.trim() || (countries[0] || '');
+            const artist = document.getElementById('gvArtistInput').value.trim();
+            const song = document.getElementById('gvSongInput').value.trim();
+            const views_m = parseFloat(document.getElementById('gvViewsInput').value || '0');
+            const pair_partner = document.getElementById('gvPairInput').value.trim();
+
+            const res = await fetch('/api/goldenvision/entry', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: memberUser.id,
+                    username: memberUser.username || memberUser.first_name || '',
+                    full_name: memberUser.first_name || '',
+                    countries, country, flag, artist, song, views_m, pair_partner
+                })
+            });
+            const d = await res.json();
+            if (!d.success) {
+                playMlSfx('error');
+                return alert(d.error || 'Katılım reddedildi.');
+            }
+            playMlSfx('seal');
+            showGlitterToast("👑 Haftalık Seçimin Mühürlendi!");
+            await refreshGoldenVision();
+        }
+
+        async function sendGvBallot() {
+            const res = await fetch('/api/goldenvision/ballot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: memberUser.id,
+                    username: memberUser.username || memberUser.first_name || '',
+                    voter_flag: document.getElementById('gvFlagInput').value.trim() || '🏳️',
+                    allocations: draftAllocations
+                })
+            });
+            const d = await res.json();
+            if (!d.success) {
+                playMlSfx('error');
+                return alert(d.error || 'Oylar kaydedilemedi.');
+            }
+            playMlSfx('twelve');
+            showGlitterToast("🏆 12-1 Oyların Mühürlendi!");
+            await refreshGoldenVision();
+        }
+
+        async function sendGvComment() {
+            const entry_id = Number(document.getElementById('gvCommentTargetSelect').value || 0);
+            const text = document.getElementById('gvCommentInput').value.trim();
+            const res = await fetch('/api/goldenvision/comment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: memberUser.id,
+                    username: memberUser.username || memberUser.first_name || 'Üye',
+                    entry_id, text
+                })
+            });
+            const d = await res.json();
+            if (!d.success) {
+                playMlSfx('error');
+                return alert(d.error || 'Yorum gönderilemedi.');
+            }
+            playMlSfx('tap');
+            document.getElementById('gvCommentInput').value = '';
+            await refreshGoldenVision();
+        }
+
+        function renderScoreMatrixAndRanking(ranking) {
+            const matrixEl = document.getElementById('gvMatrixContainer');
+            const rankEl = document.getElementById('gvRankingContainer');
+
+            if (!ranking.length) {
+                matrixEl.innerHTML = `<div style="padding:12px; font-size:8.5px; color:#f3c6cf;">Henüz puan tablosu oluşmadı.</div>`;
+                rankEl.innerHTML = `<div class="palace-muted">Sıralama bekleniyor...</div>`;
+                return;
+            }
+
+            // Jüri/oylayan sütunlarını topla
+            const votersMap = {};
+            ranking.forEach(row => {
+                Object.entries(row.votes_from || {}).forEach(([vid, vobj]) => {
+                    votersMap[vid] = vobj.flag || '🏳️';
+                });
+            });
+            const voterIds = Object.keys(votersMap);
+
+            let ths = `<th>ŞARKI</th>` + voterIds.map(vid => `<th>${votersMap[vid]}</th>`).join('') + `<th>TOPLAM</th>`;
+            let trs = ranking.map((row, idx) => {
+                const pos = String(idx + 1).padStart(2, '0');
+                const tds = voterIds.map(vid => {
+                    const info = (row.votes_from || {})[vid];
+                    if (!info) return `<td class="cell-pts">-</td>`;
+                    const cls = Number(info.pts) === 12 ? 'cell-twelve' : 'cell-pts';
+                    return `<td class="${cls}">${info.pts}</td>`;
+                }).join('');
+                return `<tr><td style="text-align:left; font-weight:800;">${pos} ${row.flag} ${row.country}</td>${tds}<td style="font-weight:900; color:#fff1b8;">${row.total}</td></tr>`;
+            }).join('');
+
+            matrixEl.innerHTML = `<table class="score-matrix-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
+
+            rankEl.innerHTML = ranking.map((row, idx) => {
+                const pos = String(idx + 1).padStart(2, '0');
+                return `
+                    <div class="rank-row">
+                        <div style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            <span class="rank-pos">${pos}</span>
+                            <b>${row.flag} ${row.country}</b> — <span style="color:#f3c6cf;">${row.song} (${row.artist})</span>
+                        </div>
+                        <div class="rank-score">${row.total}</div>
+                    </div>
+                `;
+            }).join('');
         }
 
         function openEventStage(eventId) {
             const ev = cachedEvents.find(item => item.event_id === eventId);
             if (!ev) return;
+            playMlSfx('enter');
             activeEvent = ev;
-
             document.getElementById('stageModalHeader').innerText = `${ev.icon || '✨'} ${ev.title}`;
             document.getElementById('stageIcon').innerText = ev.icon || '✨';
             document.getElementById('stageTitle').innerText = ev.title;
             document.getElementById('stageSubtitle').innerText = ev.subtitle || '';
-            document.getElementById('stageSchedule').innerText = `⏰ ${ev.schedule_time || 'Canlı'}`;
             document.getElementById('stageDesc').innerText = ev.description || '';
-            document.getElementById('stageVotesCount').innerText = `✨ Toplam Sahne Etkileşimi: ${ev.votes_count || 0}`;
-
-            const imgEl = document.getElementById('stageMediaImg');
-            if (ev.media_url && ev.media_url.startsWith('http')) {
-                imgEl.src = ev.media_url;
-                imgEl.style.display = 'block';
-            } else {
-                imgEl.style.display = 'none';
-            }
-
-            const btnContainer = document.getElementById('stageActionButtons');
-            let btnHtml = '';
-            (ev.options || ['Sahneye Katıl ✨']).forEach(opt => {
-                btnHtml += `<button class="glitter-action-btn" onclick="submitEventChoice('${opt.replace(/'/g, "\\'")}')">${opt}</button>`;
-            });
-            btnContainer.innerHTML = btnHtml;
-
+            document.getElementById('stageVotesCount').innerText = `✨ Etkileşim: ${ev.votes_count || 0}`;
+            document.getElementById('stageActionButtons').innerHTML = (ev.options || ['Katıl ✨']).map(opt =>
+                `<button style="width:100%; padding:11px; border:none; border-radius:12px; background:linear-gradient(135deg,#fff3b0,#f5cb5c); color:#240742; font-weight:900; font-size:9px; cursor:pointer;" onclick="submitEventChoice('${opt.replace(/'/g, "\\'")}')">${opt}</button>`
+            ).join('');
             document.getElementById('eventStageModal').classList.add('open');
         }
 
         function closeStageModal() {
+            playMlSfx('tap');
             document.getElementById('eventStageModal').classList.remove('open');
         }
 
         async function submitEventChoice(choice) {
             if (!activeEvent) return;
-            try {
-                const res = await fetch('/api/events/vote', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        event_id: activeEvent.event_id,
-                        user_id: memberUser.id,
-                        username: memberUser.username || memberUser.first_name || 'VIP',
-                        choice: choice
-                    })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    activeEvent.votes_count = data.votes_count;
-                    document.getElementById('stageVotesCount').innerText = `✨ Toplam Sahne Etkileşimi: ${data.votes_count}`;
-                    showGlitterToast(`👑 Seçimin işlendi: ${choice}`);
-                }
-            } catch (e) {
-                showGlitterToast("✨ İşlem kaydedildi!");
+            const res = await fetch('/api/events/vote', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event_id: activeEvent.event_id,
+                    user_id: memberUser.id,
+                    username: memberUser.username || memberUser.first_name || 'VIP',
+                    choice
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                playMlSfx('seal');
+                activeEvent.votes_count = data.votes_count;
+                document.getElementById('stageVotesCount').innerText = `✨ Etkileşim: ${data.votes_count}`;
+                showGlitterToast(`👑 Seçimin işlendi: ${choice}`);
             }
         }
 
