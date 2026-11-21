@@ -195,7 +195,7 @@ async def api_verify_admin(request: Request):
 
 
 # ==========================================
-# 👑 GOLDENVISION API ROTALARI (ÜYE & YT MASASI)
+# 👑 GOLDENVISION API ROTALARI
 # ==========================================
 @app.get("/api/goldenvision/overview")
 async def api_gv_overview(season: Optional[int] = None, user_id: int = 0):
@@ -215,6 +215,11 @@ async def api_gv_entry(request: Request):
     overview = database.get_gv_overview(season=season, user_id=user_id)
     week = int(data.get("week") or overview["current_week"])
 
+    views_mil = database.normalize_views_to_millions(
+        float(data.get("views_amount", data.get("views_m", 0)) or 0),
+        str(data.get("views_unit", "M"))
+    )
+
     res = database.submit_gv_entry(
         season=season,
         week=week,
@@ -226,13 +231,62 @@ async def api_gv_entry(request: Request):
         flag=str(data.get("flag", "🏳️")),
         artist=str(data.get("artist", "")),
         song=str(data.get("song", "")),
-        views_m=float(data.get("views_m", 0) or 0),
+        song_url=str(data.get("song_url", "")),
+        views_m=views_mil,
         pair_partner=str(data.get("pair_partner", ""))
     )
     if not res.get("ok"):
         return {"success": False, "error": res.get("error")}
-    database.log_action(0, "GV_ENTRY", user_id, str(data.get("username", "")), f"Sezon {season} H{week} katılım kaydedildi.")
-    return {"success": True, "entry": res["entry"]}
+    database.log_action(0, "GV_PENDING_ENTRY", user_id, str(data.get("username", "")), f"Sezon {season} H{week} onay bekleyen başvuru.")
+    return {"success": True, "pending": res["pending"]}
+
+
+@app.post("/api/goldenvision/studio/review")
+async def api_gv_studio_review(request: Request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    if not database.can_access_gv_studio(user_id, FOUNDER_ID):
+        return {"success": False, "error": "Bu masaya erişim yetkiniz yok!"}
+
+    season = int(data.get("season") or database.get_active_season_number())
+    overview = database.get_gv_overview(season=season, user_id=user_id)
+    week = int(data.get("week") or overview["current_week"])
+    pending_id = int(data.get("pending_id", 0))
+    approve = bool(data.get("approve", False))
+    reject_reason = str(data.get("reject_reason", ""))
+
+    res = database.review_gv_pending_entry(season, week, pending_id, approve, reject_reason)
+    if not res.get("ok"):
+        return {"success": False, "error": res.get("error")}
+
+    # Reddedilen üyeye Telegram DM bildirimi dene
+    if not approve and res.get("rejected_user_id") and tg_application and tg_application.bot:
+        try:
+            await tg_application.bot.send_message(
+                chat_id=int(res["rejected_user_id"]),
+                text=f"❌ GOLDENVISION Başvuru Reddedildi\n\nSebep: {reject_reason or 'Kurallara uygun bulunmadı.'}"
+            )
+        except Exception:
+            pass
+
+    database.log_action(0, "GV_REVIEW", user_id, "Host", f"Başvuru #{pending_id} -> {'ONAYLANDI' if approve else 'REDDEDİLDİ'}")
+    return {"success": True, "approved": res.get("approved")}
+
+
+@app.post("/api/goldenvision/studio/finale")
+async def api_gv_studio_finale(request: Request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    if not database.can_access_gv_studio(user_id, FOUNDER_ID):
+        return {"success": False, "error": "Bu masaya erişim yetkiniz yok!"}
+
+    season = int(data.get("season") or database.get_active_season_number())
+    overview = database.get_gv_overview(season=season, user_id=user_id)
+    week = int(data.get("week") or overview["current_week"])
+
+    database.trigger_grand_finale(season, week)
+    database.log_action(0, "GV_GRAND_FINALE", user_id, "Host", f"Sezon {season} Hafta {week} BİTİR / ŞENLİK FİNALİ başlatıldı.")
+    return {"success": True}
 
 
 @app.post("/api/goldenvision/ballot")
@@ -594,9 +648,6 @@ async def api_delete_template(request: Request):
         return {"success": False, "error": str(e)}
 
 
-# ==========================================
-# 🌐 HTML SAYFA SUNUMLARI
-# ==========================================
 def _serve_html(filename: str):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     paths_to_check = [os.path.join(base_dir, "public", filename), os.path.join(base_dir, filename)]
@@ -620,9 +671,6 @@ async def handle_member_portal():
     return _serve_html("member.html")
 
 
-# ==========================================
-# TELEGRAM BOT KOMUTLARI
-# ==========================================
 async def _delete_after_delay(context, chat_id, message_id, delay=5):
     await asyncio.sleep(delay)
     try:
@@ -756,12 +804,12 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "- /butonmetni <yazı> - Hoş geldin butonu yazısı\n"
         "- /butonlinki <url> - Hoş geldin butonu linki\n"
         "- /duyuru <mesaj> - Duyuru gönder (Otomatik Pinlenir / Yanıtlanan görseli sabitler)\n"
-        "- /duyuru <mesaj> | <buton metni> | <link> - Özel butonlu duyuru (Görsele yanıtla atılırsa butonlu görseli pinler)\n"
+        "- /duyuru <mesaj> | <buton metni> | <link> - Özel butonlu duyuru\n"
         "- /duyurubutonmetni <yazı> - Varsayılan duyuru butonu yazısını ayarla\n"
         "- /duyurubutonlinki <url> - Varsayılan duyuru butonu linkini ayarla\n"
-        "- /zamanla <dakika> <mesaj> - Butonsuz periyodik duyuru başlat (Pinlenmez)\n"
-        "- /zamanla <dakika> | <mesaj> | <buton metni> | <link> - Butonlu periyodik duyuru başlat (Pinlenmez)\n"
-        "- /zamanladur veya /zamanla dur - Yanıtlanan zamanlanmış paylaşımı durdur\n"
+        "- /zamanla <dakika> <mesaj> - Butonsuz periyodik duyuru başlat\n"
+        "- /zamanla <dakika> | <mesaj> | <buton metni> | <link> - Butonlu periyodik duyuru başlat\n"
+        "- /zamanladur veya /zamanla dur - Zamanlanmış paylaşımı durdur\n"
         "- /defol <kullanıcı> - Banla\n"
         "- /undefol <kullanıcı> - Ban kaldır\n"
         "- /itaat <kullanıcı> - Sustur\n"
