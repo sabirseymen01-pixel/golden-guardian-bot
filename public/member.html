@@ -70,29 +70,40 @@
 
         .springboard-main {
             flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            gap: 16px; padding: 6px; z-index: 2; overflow-y: auto;
+            gap: 12px; padding: 4px; z-index: 2; width: 100%; overflow: hidden;
         }
         .spotlight-banner {
             width: 100%; max-width: 390px;
             background: linear-gradient(135deg, rgba(82, 24, 138, 0.78), rgba(45, 11, 82, 0.88));
             backdrop-filter: blur(24px); border: 1.5px solid var(--border-gold);
-            border-radius: 20px; padding: 14px 16px;
-            display: flex; align-items: center; justify-content: space-between;
+            border-radius: 20px; padding: 12px 16px;
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
         }
         .spotlight-text h3 { font-size: 11px; font-weight: 900; color: #fff3b0; text-transform: uppercase; }
         .spotlight-text p { font-size: 8px; color: var(--text-lavender); margin-top: 3px; }
 
-        .apps-springboard-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
-            width: 100%; max-width: 390px; justify-items: center;
+        /* 📱 ANDROID SOLA KAYDIRMALI 9 SİMGELİK (3x3) SAYFA SİSTEMİ */
+        .member-pager-viewport {
+            width: 100%; max-width: 390px; overflow: hidden; position: relative; flex: 1;
+            display: flex; align-items: center; touch-action: pan-y;
         }
-        .member-app-card { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; width: 100%; }
+        .member-pager-track {
+            display: flex; width: 100%; height: 100%;
+            transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .member-spring-page {
+            min-width: 100%; height: 100%;
+            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+            gap: 10px; align-content: center; justify-items: center; padding: 4px;
+        }
+
+        .member-app-card { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; width: 100%; }
         .member-app-card:active { transform: scale(0.88); }
         .member-app-icon {
-            width: 64px; height: 64px;
+            width: 60px; height: 60px;
             background: linear-gradient(145deg, rgba(114, 38, 184, 0.75), rgba(56, 14, 99, 0.9));
-            border-radius: 19px; border: 1.5px solid var(--border-gold);
-            display: flex; align-items: center; justify-content: center; font-size: 28px;
+            border-radius: 18px; border: 1.5px solid var(--border-gold);
+            display: flex; align-items: center; justify-content: center; font-size: 26px;
             position: relative;
         }
         .member-app-icon.gv-special {
@@ -108,16 +119,18 @@
         .member-app-title { font-size: 8.5px; font-weight: 800; color: #fff; text-align: center; max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         .velvet-dock {
-            width: 100%; max-width: 390px; height: 40px;
+            width: 100%; max-width: 390px; height: 36px;
             background: rgba(58, 17, 99, 0.65); backdrop-filter: blur(24px);
-            border-radius: 20px; border: 1.5px solid var(--border-gold);
-            margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 10px; z-index: 2; flex-shrink: 0;
+            border-radius: 18px; border: 1.5px solid var(--border-gold);
+            margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 8px; z-index: 2; flex-shrink: 0;
         }
-        .glitter-dot { width: 6px; height: 6px; background: #f5cb5c; border-radius: 50%; box-shadow: 0 0 10px #fff3b0; }
+        .glitter-dot {
+            width: 7px; height: 7px; background: rgba(245, 203, 92, 0.35);
+            border-radius: 50%; cursor: pointer; transition: all 0.2s ease;
+        }
+        .glitter-dot.active { width: 16px; border-radius: 6px; background: #fff3b0; box-shadow: 0 0 10px #fff3b0; }
 
-        /* =========================================================
-           👑 TAM EKRAN GOLDENVISION: KIRMIZI + GOLD VARAK + KIRMIZI SİM
-           ========================================================= */
+        /* TAM EKRAN GOLDENVISION SAHNESİ */
         .gv-fullscreen-stage {
             position: fixed; inset: 0; width: 100vw; height: 100vh;
             background:
@@ -133,9 +146,7 @@
                 radial-gradient(2px 2px at 12% 18%, #ff4d6d, transparent),
                 radial-gradient(1.5px 1.5px at 34% 28%, #ffd166, transparent),
                 radial-gradient(2px 2px at 64% 16%, #ff758f, transparent),
-                radial-gradient(1.5px 1.5px at 84% 34%, #ffd166, transparent),
-                radial-gradient(2px 2px at 22% 74%, #ff4d6d, transparent),
-                radial-gradient(1.5px 1.5px at 76% 82%, #ffd166, transparent);
+                radial-gradient(1.5px 1.5px at 84% 34%, #ffd166, transparent);
             animation: crimsonGlitter 3s infinite alternate ease-in-out;
         }
         @keyframes crimsonGlitter { 0% { opacity: 0.5; } 100% { opacity: 1; } }
@@ -147,14 +158,12 @@
             background: linear-gradient(90deg, rgba(92, 8, 24, 0.92), rgba(48, 4, 12, 0.95));
             border-bottom: 2px solid var(--foil-gold); z-index: 2; flex-shrink: 0; gap: 8px;
         }
-        .gv-brand-wrap { display: flex; flex-direction: column; min-width: 0; }
         .gv-logo-text {
             font-size: 12px; font-weight: 900; letter-spacing: 1.5px;
             background: linear-gradient(90deg, #fff1b8, #ffd166, #d4af37);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .gv-week-sub { font-size: 8px; color: #ffd6de; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
+        .gv-week-sub { font-size: 8px; color: #ffd6de; font-weight: 700; }
         .gv-top-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
         .gv-exit-btn {
             background: linear-gradient(135deg, #fff1b8, #ffd166);
@@ -172,10 +181,7 @@
             color: #ffd6de; border-radius: 10px; padding: 8px 4px;
             font-size: 8px; font-weight: 900; text-align: center; cursor: pointer; text-transform: uppercase;
         }
-        .gv-nav-btn.active {
-            background: linear-gradient(135deg, #fff1b8, #ffd166);
-            color: #2b0209; border-color: #fff1b8;
-        }
+        .gv-nav-btn.active { background: linear-gradient(135deg, #fff1b8, #ffd166); color: #2b0209; border-color: #fff1b8; }
 
         .gv-scroll-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; z-index: 2; }
         .gv-panel { display: none; flex-direction: column; gap: 10px; }
@@ -184,7 +190,6 @@
         .palace-card {
             background: linear-gradient(145deg, rgba(84, 7, 22, 0.82), rgba(34, 3, 9, 0.92));
             border: 1.5px solid var(--foil-gold); border-radius: 16px; padding: 13px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 241, 184, 0.4);
         }
         .palace-card-title { font-size: 10px; font-weight: 900; color: #fff1b8; text-transform: uppercase; margin-bottom: 6px; }
         .palace-muted { font-size: 8.5px; color: #f3c6cf; line-height: 1.45; }
@@ -199,26 +204,18 @@
             background: rgba(18, 1, 5, 0.95); border: 1.5px solid var(--foil-gold);
             border-radius: 10px; font-size: 22px; min-height: 38px; margin-bottom: 6px;
         }
-
         .palace-gold-btn {
             width: 100%; padding: 11px 14px; border: none; border-radius: 11px;
             background: linear-gradient(135deg, #fff1b8 0%, #ffd166 55%, #d4af37 100%);
             color: #240208; font-size: 9px; font-weight: 900; text-transform: uppercase; cursor: pointer;
         }
 
-        .vote-entry-card {
-            background: rgba(58, 5, 15, 0.85); border: 1.5px solid rgba(255, 209, 102, 0.5);
-            border-radius: 14px; padding: 11px; display: flex; flex-direction: column; gap: 8px;
-        }
+        .vote-entry-card { background: rgba(58, 5, 15, 0.85); border: 1.5px solid rgba(255, 209, 102, 0.5); border-radius: 14px; padding: 11px; display: flex; flex-direction: column; gap: 8px; }
         .vote-entry-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .vote-song-title { font-size: 10px; font-weight: 900; color: #fff1b8; }
         .vote-artist-sub { font-size: 8px; color: #f3c6cf; }
         .pts-chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
-        .pts-chip {
-            padding: 6px 9px; border-radius: 8px; font-size: 8.5px; font-weight: 900;
-            background: rgba(24, 2, 7, 0.9); color: #ffd166;
-            border: 1px solid rgba(255, 209, 102, 0.45); cursor: pointer;
-        }
+        .pts-chip { padding: 6px 9px; border-radius: 8px; font-size: 8.5px; font-weight: 900; background: rgba(24, 2, 7, 0.9); color: #ffd166; border: 1px solid rgba(255, 209, 102, 0.45); cursor: pointer; }
         .pts-chip.selected { background: linear-gradient(135deg, #fff1b8, #ffd166); color: #240208; border-color: #fff1b8; }
 
         .matrix-scroll { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255, 209, 102, 0.45); }
@@ -228,41 +225,24 @@
         .cell-twelve { background: linear-gradient(135deg, #ffd166, #d4af37); color: #240208; font-weight: 900; }
         .cell-pts { color: #ffd6de; font-weight: 800; }
 
-        .rank-row {
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(68, 6, 18, 0.78); border: 1px solid rgba(255, 209, 102, 0.4);
-            border-radius: 11px; padding: 9px 12px; font-size: 9px;
-        }
+        .rank-row { display: flex; justify-content: space-between; align-items: center; background: rgba(68, 6, 18, 0.78); border: 1px solid rgba(255, 209, 102, 0.4); border-radius: 11px; padding: 9px 12px; font-size: 9px; }
         .rank-pos { font-weight: 900; color: #ffd166; margin-right: 8px; }
         .rank-score { font-weight: 900; color: #fff1b8; background: rgba(255, 209, 102, 0.18); padding: 4px 8px; border-radius: 8px; }
 
         .weeks-25-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-        .week-mini-box {
-            background: rgba(58, 5, 15, 0.85); border: 1px solid rgba(255, 209, 102, 0.4);
-            border-radius: 10px; padding: 7px 4px; text-align: center;
-        }
+        .week-mini-box { background: rgba(58, 5, 15, 0.85); border: 1px solid rgba(255, 209, 102, 0.4); border-radius: 10px; padding: 7px 4px; text-align: center; }
         .week-mini-box.is-current { border: 2px solid #fff1b8; background: rgba(145, 14, 39, 0.9); }
-        .week-mini-num { font-size: 8.5px; font-weight: 900; color: #fff1b8; }
+        .week-mini-num { font-size: 8.5px; font-weight: 900; color: #fff1b0; }
         .week-mini-type { font-size: 6px; color: #f3c6cf; margin-top: 2px; }
 
-        /* 🎆 ŞENLİK & SIRA SIRA PUAN AÇIKLAMA SAHNESİ */
         .festival-reveal-overlay {
             position: fixed; inset: 0; z-index: 400;
             background: radial-gradient(circle at 50% 20%, rgba(255, 209, 102, 0.32), rgba(26, 2, 10, 0.98) 70%);
-            display: none; flex-direction: column; justify-content: space-between; padding: 16px;
-            overflow-y: auto;
+            display: none; flex-direction: column; justify-content: space-between; padding: 16px; overflow-y: auto;
         }
         .festival-reveal-overlay.open { display: flex; }
-        .firework-banner {
-            text-align: center; padding: 14px; border-radius: 18px;
-            background: linear-gradient(135deg, rgba(138, 12, 36, 0.9), rgba(56, 4, 14, 0.95));
-            border: 2px solid #ffd166; box-shadow: 0 0 28px rgba(255, 209, 102, 0.45);
-        }
-        .reveal-spotlight-card {
-            background: linear-gradient(145deg, rgba(92, 8, 24, 0.92), rgba(34, 2, 8, 0.98));
-            border: 2px solid #fff1b8; border-radius: 20px; padding: 18px; text-align: center;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.75);
-        }
+        .firework-banner { text-align: center; padding: 14px; border-radius: 18px; background: linear-gradient(135deg, rgba(138, 12, 36, 0.9), rgba(56, 4, 14, 0.95)); border: 2px solid #ffd166; }
+        .reveal-spotlight-card { background: linear-gradient(145deg, rgba(92, 8, 24, 0.92), rgba(34, 2, 8, 0.98)); border: 2px solid #fff1b8; border-radius: 20px; padding: 18px; text-align: center; }
         .reveal-flag-big { font-size: 46px; margin-bottom: 6px; }
         .reveal-pts-big { font-size: 24px; font-weight: 900; color: #ffd166; margin-top: 6px; }
 
@@ -291,32 +271,23 @@
         <div class="spotlight-banner">
             <div class="spotlight-text">
                 <h3>Kraliyet Sahnesi & Oyunlar</h3>
-                <p>Uygulama simgelerine dokun, sahneye katıl ve gecenin yıldızı ol.</p>
+                <p>Sola kaydırarak diğer sayfaları keşfet • Simgelere dokun.</p>
             </div>
             <div style="font-size:24px;">👑</div>
         </div>
 
-        <div class="apps-springboard-grid" id="memberAppsGrid">
-            <div class="member-app-card" onclick="openGoldenVision()">
-                <div class="member-app-icon gv-special">
-                    <span class="app-live-badge">SARAY</span>
-                    <span>👑</span>
-                </div>
-                <div class="member-app-title">GOLDENVISION</div>
-            </div>
+        <!-- 📱 9 SİMGELİK 3x3 ANDROID SOLA KAYDIRMALI SAYFALAR -->
+        <div class="member-pager-viewport" id="memberPagerViewport">
+            <div class="member-pager-track" id="memberPagerTrack"></div>
         </div>
     </main>
 
-    <div class="velvet-dock">
-        <div class="glitter-dot"></div>
-        <div class="glitter-dot"></div>
-        <div class="glitter-dot"></div>
-    </div>
+    <div class="velvet-dock" id="memberPagerDots"></div>
 
     <!-- 👑 TAM EKRAN GOLDENVISION SAHNESİ -->
     <div class="gv-fullscreen-stage" id="gvStageModal">
         <div class="gv-topbar">
-            <div class="gv-brand-wrap">
+            <div>
                 <div class="gv-logo-text" id="gvHeaderTitle">👑 GOLDENVISION • SEZON 3</div>
                 <div class="gv-week-sub" id="gvHeaderWeek">Hafta 1 • Yükleniyor...</div>
             </div>
@@ -334,7 +305,6 @@
         </div>
 
         <div class="gv-scroll-body">
-            <!-- 1. SAHNE & KATILIM -->
             <div class="gv-panel active" id="panel-sahne">
                 <div class="palace-card">
                     <div class="palace-card-title" id="gvConceptTitle">Hafta Konsepti</div>
@@ -356,21 +326,19 @@
                     <input class="gv-input" id="gvCountriesInput" placeholder="3 Ülke (Örn: USA, UK, Gana / Türkiye)">
                     <div style="display:grid; grid-template-columns: 74px 1fr; gap:6px; align-items:center;">
                         <div class="country-flag-box" id="gvAutoFlagBox">🏳️</div>
-                        <input class="gv-input" id="gvPrimaryCountryInput" placeholder="Ülke Adı (TR veya EN — örn: Türkiye, Eritrea)" oninput="syncAutoFlag()">
+                        <input class="gv-input" id="gvPrimaryCountryInput" placeholder="Ülke Adı (TR veya EN)" oninput="syncAutoFlag()">
                     </div>
                     <input class="gv-input" id="gvArtistInput" placeholder="Şarkıcı / Sanatçı">
                     <input class="gv-input" id="gvSongInput" placeholder="Şarkı Adı">
-                    <input class="gv-input" id="gvSongUrlInput" placeholder="🔗 Şarkı Linki (YouTube / Spotify / SoundCloud vb.)">
-
+                    <input class="gv-input" id="gvSongUrlInput" placeholder="🔗 Şarkı Linki">
                     <div style="display:grid; grid-template-columns: 1fr 96px; gap:6px;">
-                        <input class="gv-input" type="number" step="0.1" id="gvViewsAmountInput" placeholder="İzlenme Değeri (Örn: 42.5)">
+                        <input class="gv-input" type="number" step="0.1" id="gvViewsAmountInput" placeholder="İzlenme (Örn: 42.5)">
                         <select class="gv-select" id="gvViewsUnitSelect">
                             <option value="M">Milyon (M)</option>
                             <option value="B">Milyar (B)</option>
                             <option value="K">Bin (K)</option>
                         </select>
                     </div>
-
                     <input class="gv-input" id="gvPairInput" placeholder="Çift Haftası Partneri (@...)">
                     <button class="palace-gold-btn" onclick="sendGvEntry()">Onaya Gönder 👑</button>
                 </div>
@@ -387,7 +355,6 @@
                 </div>
             </div>
 
-            <!-- 2. 12-1 OYLAMA -->
             <div class="gv-panel" id="panel-oylama">
                 <div class="palace-card">
                     <div class="palace-card-title">🗳️ Eurovision Puan Dağıtımı (12, 10, 8, 7, 6, 5, 4, 3, 2, 1)</div>
@@ -397,7 +364,6 @@
                 <button class="palace-gold-btn" onclick="sendGvBallot()">Oylarımı Mühürle 🏆</button>
             </div>
 
-            <!-- 3. GÖRSEL MATRİS & LİDERLİK -->
             <div class="gv-panel" id="panel-tablo">
                 <div class="palace-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -412,7 +378,6 @@
                 </div>
             </div>
 
-            <!-- 4. 25 HAFTALIK SEZON -->
             <div class="gv-panel" id="panel-sezon">
                 <div class="palace-card">
                     <div class="palace-card-title">🗓️ 25 Haftalık Sezon Haritası</div>
@@ -422,21 +387,18 @@
         </div>
     </div>
 
-    <!-- 🎆 SIRA SIRA PUAN AÇIKLAMA & ŞENLİK EKRANI -->
     <div class="festival-reveal-overlay" id="festivalOverlay">
         <div class="firework-banner">
             <div style="font-size:13px; font-weight:900; color:#fff1b8;">🎆 GOLDENVISION BÜYÜK FİNAL ŞENLİĞİ 🎆</div>
             <div style="font-size:8.5px; color:#ffd6de; margin-top:3px;">Bayraklar ve puanlar sıra sıra açıklanıyor • Liderlik tablosu en sonda sunulur</div>
         </div>
-
-        <div class="reveal-spotlight-card" id="revealSpotlightBox">
+        <div class="reveal-spotlight-card">
             <div class="reveal-flag-big" id="revFlag">🏳️</div>
             <div style="font-size:15px; font-weight:900; color:#fff1b8;" id="revCountry">Ülke</div>
             <div style="font-size:10px; color:#f3c6cf; margin-top:3px;" id="revSong">Şarkı • Sanatçı</div>
             <div class="reveal-pts-big" id="revScore">0 PUAN</div>
             <div style="font-size:8px; color:#ffd166; margin-top:4px;" id="revCounter">0 / 0</div>
         </div>
-
         <div style="display:flex; gap:8px;">
             <button class="palace-gold-btn" onclick="stepFestivalReveal()">Sıradaki Ülkeyi Aç ›</button>
             <button class="gv-exit-btn" onclick="closeFestivalAndShowRanking()">Liderlik Tablosuna Geç</button>
@@ -450,102 +412,91 @@
         const memberUser = tg.initDataUnsafe?.user || { id: 1000001, first_name: "Yıldız Üye", username: "vip_member" };
         document.getElementById('memberBadge').innerText = (memberUser.first_name || "VIP") + " ✨";
 
-        // =========================================================
-        // 🌍 TR + EN ÜLKE BAYRAK SÖZLÜĞÜ (TÜRKÇE KARAKTER DUYARLI)
-        // =========================================================
+        let currentMemberPage = 0;
+        let allMemberApps = [];
+
+        function renderMemberPages() {
+            const perPage = 9;
+            const totalPages = Math.max(1, Math.ceil(allMemberApps.length / perPage));
+            const track = document.getElementById('memberPagerTrack');
+            const dots = document.getElementById('memberPagerDots');
+
+            let pagesHtml = '';
+            for (let p = 0; p < totalPages; p++) {
+                const slice = allMemberApps.slice(p * perPage, (p + 1) * perPage);
+                const cards = slice.map((app, idx) => `
+                    <div class="member-app-card" onclick="triggerMemberApp(${p * perPage + idx})">
+                        <div class="member-app-icon ${app.special ? 'gv-special' : ''}">
+                            ${app.badge ? `<span class="app-live-badge">${app.badge}</span>` : ''}
+                            <span>${app.icon || '✨'}</span>
+                        </div>
+                        <div class="member-app-title">${app.title}</div>
+                    </div>
+                `).join('');
+                pagesHtml += `<div class="member-spring-page">${cards}</div>`;
+            }
+            track.innerHTML = pagesHtml;
+
+            dots.innerHTML = Array.from({ length: totalPages }, (_, idx) =>
+                `<div class="glitter-dot ${idx === currentMemberPage ? 'active' : ''}" onclick="goMemberPage(${idx})"></div>`
+            ).join('');
+
+            goMemberPage(currentMemberPage);
+        }
+
+        function goMemberPage(pageIdx) {
+            const perPage = 9;
+            const totalPages = Math.max(1, Math.ceil(allMemberApps.length / perPage));
+            currentMemberPage = Math.max(0, Math.min(pageIdx, totalPages - 1));
+            document.getElementById('memberPagerTrack').style.transform = `translateX(-${currentMemberPage * 100}%)`;
+            document.querySelectorAll('#memberPagerDots .glitter-dot').forEach((d, i) => {
+                d.classList.toggle('active', i === currentMemberPage);
+            });
+        }
+
+        let mTouchStartX = 0;
+        const mVp = document.getElementById('memberPagerViewport');
+        mVp.addEventListener('touchstart', (e) => { mTouchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        mVp.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].screenX - mTouchStartX;
+            if (dx < -45) goMemberPage(currentMemberPage + 1); // Sola kaydır -> Sonraki sayfa
+            else if (dx > 45) goMemberPage(currentMemberPage - 1); // Sağa kaydır -> Önceki sayfa
+        }, { passive: true });
+
+        function triggerMemberApp(index) {
+            const item = allMemberApps[index];
+            if (!item) return;
+            if (item.isGv) {
+                openGoldenVision();
+            } else {
+                showGlitterToast(`${item.icon} ${item.title} Açıldı`);
+            }
+        }
+
         const COUNTRY_FLAGS = {
             "turkiye": "🇹🇷", "turkey": "🇹🇷", "tr": "🇹🇷",
-            "abd": "🇺🇸", "usa": "🇺🇸", "amerika": "🇺🇸", "united states": "🇺🇸", "birlesik devletler": "🇺🇸",
-            "ingiltere": "🇬🇧", "uk": "🇬🇧", "united kingdom": "🇬🇧", "britanya": "🇬🇧",
-            "gana": "🇬🇭", "ghana": "🇬🇭",
-            "eritrea": "🇪🇷",
-            "isvec": "🇸🇪", "sweden": "🇸🇪",
-            "norvec": "🇳🇴", "norway": "🇳🇴",
-            "finlandiya": "🇫🇮", "finland": "🇫🇮",
-            "danimarka": "🇩🇰", "denmark": "🇩🇰",
-            "fransa": "🇫🇷", "france": "🇫🇷",
-            "almanya": "🇩🇪", "germany": "🇩🇪",
-            "italya": "🇮🇹", "italy": "🇮🇹",
-            "ispanya": "🇪🇸", "spain": "🇪🇸",
-            "portekiz": "🇵🇹", "portugal": "🇵🇹",
-            "hollanda": "🇳🇱", "netherlands": "🇳🇱",
-            "belcika": "🇧🇪", "belgium": "🇧🇪",
-            "isvicre": "🇨🇭", "switzerland": "🇨🇭",
-            "avusturya": "🇦🇹", "austria": "🇦🇹",
-            "yunanistan": "🇬🇷", "greece": "🇬🇷",
-            "polonya": "🇵🇱", "poland": "🇵🇱",
-            "ukrayna": "🇺🇦", "ukraine": "🇺🇦",
-            "rusya": "🇷🇺", "russia": "🇷🇺",
-            "kanada": "🇨🇦", "canada": "🇨🇦",
-            "meksika": "🇲🇽", "mexico": "🇲🇽",
-            "brezilya": "🇧🇷", "brazil": "🇧🇷",
-            "arjantin": "🇦🇷", "argentina": "🇦🇷",
-            "kolombiya": "🇨🇴", "colombia": "🇨🇴",
-            "sili": "🇨🇱", "chile": "🇨🇱",
-            "peru": "🇵🇪",
-            "japonya": "🇯🇵", "japan": "🇯🇵",
-            "guney kore": "🇰🇷", "south korea": "🇰🇷", "korea": "🇰🇷",
-            "cin": "🇨🇳", "china": "🇨🇳",
-            "hindistan": "🇮🇳", "india": "🇮🇳",
-            "tayland": "🇹🇭", "thailand": "🇹🇭",
-            "vietnam": "🇻🇳",
-            "endonezya": "🇮🇩", "indonesia": "🇮🇩",
-            "malezya": "🇲🇾", "malaysia": "🇲🇾",
-            "filipinler": "🇵🇭", "philippines": "🇵🇭",
-            "avustralya": "🇦🇺", "australia": "🇦🇺",
-            "yeni zelanda": "🇳🇿", "new zealand": "🇳🇿",
-            "misir": "🇪🇬", "egypt": "🇪🇬",
-            "fas": "🇲🇦", "morocco": "🇲🇦",
-            "tunus": "🇹🇳", "tunisia": "🇹🇳",
-            "cezayir": "🇩🇿", "algeria": "🇩🇿",
-            "nijerya": "🇳🇬", "nigeria": "🇳🇬",
-            "guney afrika": "🇿🇦", "south africa": "🇿🇦",
-            "kenya": "🇰🇪",
-            "etiyopya": "🇪🇹", "ethiopia": "🇪🇹",
-            "irlanda": "🇮🇪", "ireland": "🇮🇪",
-            "izlanda": "🇮🇸", "iceland": "🇮🇸",
-            "hirvatistan": "🇭🇷", "croatia": "🇭🇷",
-            "sirbistan": "🇷🇸", "serbia": "🇷🇸",
-            "romanya": "🇷🇴", "romania": "🇷🇴",
-            "bulgaristan": "🇧🇬", "bulgaria": "🇧🇬",
-            "macaristan": "🇭🇺", "hungary": "🇭🇺",
-            "cekya": "🇨🇿", "czechia": "🇨🇿", "czech republic": "🇨🇿",
-            "letonya": "🇱🇻", "latvia": "🇱🇻",
-            "litvanya": "🇱🇹", "lithuania": "🇱🇹",
-            "estonya": "🇪🇪", "estonia": "🇪🇪",
-            "israil": "🇮🇱", "israel": "🇮🇱",
-            "bae": "🇦🇪", "birlesik arap emirlikleri": "🇦🇪", "united arab emirates": "🇦🇪",
-            "suudi arabistan": "🇸🇦", "saudi arabia": "🇸🇦",
-            "katar": "🇶🇦", "qatar": "🇶🇦",
-            "lubnan": "🇱🇧", "lebanon": "🇱🇧",
-            "urdun": "🇯🇴", "jordan": "🇯🇴",
-            "azerbaycan": "🇦🇿", "azerbaijan": "🇦🇿",
-            "gurcistan": "🇬🇪", "georgia": "🇬🇪",
-            "ermenistan": "🇦🇲", "armenia": "🇦🇲"
+            "abd": "🇺🇸", "usa": "🇺🇸", "amerika": "🇺🇸", "united states": "🇺🇸",
+            "ingiltere": "🇬🇧", "uk": "🇬🇧", "united kingdom": "🇬🇧",
+            "gana": "🇬🇭", "ghana": "🇬🇭", "eritrea": "🇪🇷",
+            "isvec": "🇸🇪", "sweden": "🇸🇪", "norvec": "🇳🇴", "norway": "🇳🇴",
+            "fransa": "🇫🇷", "france": "🇫🇷", "almanya": "🇩🇪", "germany": "🇩🇪",
+            "italya": "🇮🇹", "italy": "🇮🇹", "ispanya": "🇪🇸", "spain": "🇪🇸",
+            "japonya": "🇯🇵", "japan": "🇯🇵", "guney kore": "🇰🇷", "south korea": "🇰🇷",
+            "brezilya": "🇧🇷", "brazil": "🇧🇷", "kanada": "🇨🇦", "canada": "🇨🇦"
         };
 
         function foldTurkishText(str) {
-            return (str || "")
-                .toLowerCase()
-                .replace(/ğ/g, "g")
-                .replace(/ü/g, "u")
-                .replace(/ş/g, "s")
-                .replace(/ı/g, "i")
-                .replace(/i̇/g, "i")
-                .replace(/ö/g, "o")
-                .replace(/ç/g, "c")
-                .trim();
+            return (str || "").toLowerCase()
+                .replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s")
+                .replace(/ı/g, "i").replace(/i̇/g, "i").replace(/ö/g, "o").replace(/ç/g, "c").trim();
         }
 
         function resolveCountryFlag(rawName) {
             const folded = foldTurkishText(rawName);
             if (!folded) return "🏳️";
             if (COUNTRY_FLAGS[folded]) return COUNTRY_FLAGS[folded];
-            // Parçalı eşleşme (örn: "turkey (türkiye)")
             for (const [k, fl] of Object.entries(COUNTRY_FLAGS)) {
-                if (folded.includes(k) || k.includes(folded)) {
-                    if (k.length >= 2) return fl;
-                }
+                if (k.length >= 2 && (folded.includes(k) || k.includes(folded))) return fl;
             }
             return "🏳️";
         }
@@ -555,24 +506,17 @@
             document.getElementById('gvAutoFlagBox').innerText = resolveCountryFlag(val);
         }
 
-        // =========================================================
-        // 🔊 MOBILE LEGENDS TARZI SES EFEKTLERİ
-        // =========================================================
         let soundEnabled = true;
         let audioCtx = null;
-
         function ensureAudioCtx() {
             if (!soundEnabled) return null;
             if (!audioCtx) {
                 const Ctx = window.AudioContext || window.webkitAudioContext;
                 if (Ctx) audioCtx = new Ctx();
             }
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume().catch(() => {});
-            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
             return audioCtx;
         }
-
         function playTone(freq, duration, type = 'triangle', delay = 0, gainPeak = 0.16) {
             const ctx = ensureAudioCtx();
             if (!ctx) return;
@@ -584,44 +528,26 @@
             gain.gain.setValueAtTime(0.0001, start);
             gain.gain.exponentialRampToValueAtTime(gainPeak, start + 0.015);
             gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start(start);
-            osc.stop(start + duration + 0.02);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(start); osc.stop(start + duration + 0.02);
         }
-
         function playMlSfx(kind) {
             if (!soundEnabled) return;
-            if (kind === 'enter') {
-                playTone(523.25, 0.14, 'triangle', 0, 0.14);
-                playTone(659.25, 0.14, 'triangle', 0.07, 0.15);
-                playTone(783.99, 0.24, 'sawtooth', 0.14, 0.12);
-            } else if (kind === 'seal') {
-                playTone(440, 0.1, 'square', 0, 0.11);
-                playTone(880, 0.22, 'triangle', 0.08, 0.16);
-            } else if (kind === 'twelve') {
-                playTone(587.33, 0.12, 'triangle', 0, 0.15);
-                playTone(783.99, 0.12, 'triangle', 0.08, 0.15);
-                playTone(1046.5, 0.28, 'sine', 0.16, 0.18);
-            } else if (kind === 'tap') {
-                playTone(620, 0.05, 'sine', 0, 0.08);
-            } else if (kind === 'error') {
-                playTone(210, 0.15, 'sawtooth', 0, 0.14);
-                playTone(165, 0.2, 'sawtooth', 0.11, 0.14);
-            }
+            if (kind === 'enter') { playTone(523.25, 0.14, 'triangle', 0, 0.14); playTone(659.25, 0.14, 'triangle', 0.07, 0.15); playTone(783.99, 0.24, 'sawtooth', 0.14, 0.12); }
+            else if (kind === 'seal') { playTone(440, 0.1, 'square', 0, 0.11); playTone(880, 0.22, 'triangle', 0.08, 0.16); }
+            else if (kind === 'twelve') { playTone(587.33, 0.12, 'triangle', 0, 0.15); playTone(783.99, 0.12, 'triangle', 0.08, 0.15); playTone(1046.5, 0.28, 'sine', 0.16, 0.18); }
+            else if (kind === 'tap') { playTone(620, 0.05, 'sine', 0, 0.08); }
+            else if (kind === 'error') { playTone(210, 0.15, 'sawtooth', 0, 0.14); playTone(165, 0.2, 'sawtooth', 0.11, 0.14); }
         }
-
         function toggleSound() {
             soundEnabled = !soundEnabled;
             document.getElementById('soundBtn').innerText = soundEnabled ? "🔊 SES" : "🔇 SESSİZ";
             document.getElementById('gvSoundBtn').innerText = soundEnabled ? "🔊" : "🔇";
             if (soundEnabled) playMlSfx('tap');
         }
-
         function showGlitterToast(msg) {
             const t = document.getElementById('glitterToast');
-            t.innerText = msg;
-            t.classList.add('show');
+            t.innerText = msg; t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 2500);
         }
 
@@ -629,39 +555,58 @@
         let draftAllocations = {};
         let festivalSequence = [];
         let festivalIndex = 0;
-        let lastFinaleFlagged = false;
+
+        async function loadMemberEvents() {
+            const baseApps = [
+                { title: 'GOLDENVISION', icon: '👑', badge: 'SARAY', special: true, isGv: true },
+                { title: 'Tarot Gecesi', icon: '🔮', badge: 'VIP' },
+                { title: 'Shade & Tea', icon: '☕', badge: 'HOT' },
+                { title: 'Kraliyet Tacı', icon: '🏆', badge: 'GALA' },
+                { title: 'Lip-Sync', icon: '🎙️', badge: '' },
+                { title: 'İtiraf Kutusu', icon: '💌', badge: '' },
+                { title: 'Kader Çarkı', icon: '🎡', badge: '' },
+                { title: 'Sahne Kulisi', icon: '✨', badge: '' },
+                { title: 'VIP Liste', icon: '💎', badge: '' }
+            ];
+            try {
+                const res = await fetch('/api/events/list?only_active=true');
+                const extra = await res.json();
+                const merged = [...baseApps];
+                (extra || []).forEach(ev => {
+                    if (String(ev.title).toUpperCase() !== 'GOLDENVISION' && !merged.some(m => m.title === ev.title)) {
+                        merged.push({ title: ev.title, icon: ev.icon || '✨', badge: ev.badge || 'YENİ' });
+                    }
+                });
+                allMemberApps = merged;
+            } catch (e) {
+                allMemberApps = baseApps;
+            }
+            renderMemberPages();
+        }
 
         async function openGoldenVision() {
             playMlSfx('enter');
             document.getElementById('gvStageModal').classList.add('open');
-            await refreshGoldenVision(true);
+            await refreshGoldenVision();
         }
-
         function closeGoldenVision() {
             playMlSfx('tap');
             document.getElementById('gvStageModal').classList.remove('open');
         }
-
         function switchGvTab(tabKey) {
             playMlSfx('tap');
             ['sahne', 'oylama', 'tablo', 'sezon'].forEach(k => {
                 document.getElementById('nav-' + k).classList.toggle('active', k === tabKey);
                 document.getElementById('panel-' + k).classList.toggle('active', k === tabKey);
             });
-            refreshGoldenVision(false);
+            refreshGoldenVision();
         }
 
-        async function refreshGoldenVision(autoTriggerFinaleIfNew) {
+        async function refreshGoldenVision() {
             try {
                 const res = await fetch(`/api/goldenvision/overview?user_id=${memberUser.id}`);
                 gvOverviewData = await res.json();
                 renderGoldenVision(gvOverviewData);
-
-                const st = gvOverviewData.state || {};
-                if (autoTriggerFinaleIfNew && st.grand_finale_triggered && !lastFinaleFlagged && (gvOverviewData.reveal_sequence || []).length > 0) {
-                    lastFinaleFlagged = true;
-                    startFestivalSequence();
-                }
             } catch (e) {}
         }
 
@@ -672,7 +617,7 @@
             const st = data.state || {};
 
             document.getElementById('gvHeaderTitle').innerText = `👑 GOLDENVISION • SEZON ${season}`;
-            document.getElementById('gvHeaderWeek').innerText = `Hafta ${week} • ${wk.week_type || 'NORMAL HAFTA'} ${st.paused ? '• DURAKLATILDI' : ''}`;
+            document.getElementById('gvHeaderWeek').innerText = `Hafta ${week} • ${wk.week_type || 'NORMAL HAFTA'}`;
             document.getElementById('gvConceptTitle').innerText = `${wk.week_type || 'HAFTA'} — ${wk.concept || ''}`;
 
             const limitText = wk.no_view_limit
@@ -680,58 +625,35 @@
                 : `Genel ${st.max_views_million || 75}M • ABD & TR ${st.special_country_limit_million || 50}M`;
             document.getElementById('gvRuleNote').innerText = `${wk.rule_note || ''} • Süre: ${st.song_duration_sec || 120} sn • ${limitText}`;
 
-            // Bildirimler (Red / Onay)
             const notifs = data.my_notifications || [];
             const notifCard = document.getElementById('gvNotificationsCard');
             if (notifs.length > 0) {
                 notifCard.style.display = 'block';
                 document.getElementById('gvNotificationsList').innerHTML = notifs.map(n =>
                     `<div style="background:rgba(24,2,7,0.85); border:1px solid rgba(255,209,102,0.4); border-radius:8px; padding:7px 9px; font-size:8px;">
-                        <b style="color:#ffd166;">${n.title}</b> — ${n.message} <span style="color:#b88892;">(${n.timestamp})</span>
+                        <b style="color:#ffd166;">${n.title}</b> — ${n.message}
                     </div>`
                 ).join('');
-            } else {
-                notifCard.style.display = 'none';
-            }
+            } else notifCard.style.display = 'none';
 
-            // Kullanıcının kendi seçimi
             if (data.ban_info && data.ban_info.banned) {
                 document.getElementById('gvMyEntrySummary').innerText = `⛔ ${data.ban_info.reason}`;
             } else if (data.my_entry) {
                 const me = data.my_entry;
-                document.getElementById('gvMyEntrySummary').innerText =
-                    `✅ ONAYLANDI: ${me.flag} ${me.country} — "${me.song}" (${me.artist}) • ${me.views_m}M • [Sonuçlara kadar gizli]`;
+                document.getElementById('gvMyEntrySummary').innerText = `✅ ONAYLANDI: ${me.flag} ${me.country} — "${me.song}" (${me.artist}) • ${me.views_m}M`;
             } else if (data.my_pending) {
                 const mp = data.my_pending;
-                document.getElementById('gvMyEntrySummary').innerText =
-                    `⏳ HOST ONAYI BEKLENİYOR: ${mp.flag} ${mp.country} — "${mp.song}" (${mp.artist}) • ${mp.views_m}M`;
+                document.getElementById('gvMyEntrySummary').innerText = `⏳ ONAY BEKLENİYOR: ${mp.flag} ${mp.country} — "${mp.song}" (${mp.artist}) • ${mp.views_m}M`;
             } else {
-                document.getElementById('gvMyEntrySummary').innerText =
-                    `Seçimlerin sonuç açıklanana kadar gizli kalır; dışarı sızdırmanın cezası 3 hafta yarışma banıdır (tekrarda gruptan/yarışmadan ban).`;
+                document.getElementById('gvMyEntrySummary').innerText = `Seçimlerin sonuç açıklanana kadar gizli kalır; sızdırmanın cezası 3 hafta yarışma banıdır (tekrarda gruptan/yarışmadan ban).`;
             }
 
-            // Yorumlar
             const commentsOpen = Boolean(st.comments_open);
-            document.getElementById('gvCommentsLockNote').innerText = commentsOpen
-                ? "🟢 Host yorumları açtı — sahne yorumları aktif."
-                : "🔒 Yorumlar şu anda kapalı (sadece Host açtığında aktif olur).";
-
-            document.getElementById('gvCommentTargetSelect').innerHTML = (data.entries || []).map(e =>
-                `<option value="${e.entry_id}">${e.flag} ${e.country}</option>`
-            ).join('') || `<option value="0">Genel</option>`;
-
+            document.getElementById('gvCommentsLockNote').innerText = commentsOpen ? "🟢 Yorumlar açık." : "🔒 Yorumlar kapalı.";
+            document.getElementById('gvCommentTargetSelect').innerHTML = (data.entries || []).map(e => `<option value="${e.entry_id}">${e.flag} ${e.country}</option>`).join('') || `<option value="0">Genel</option>`;
             document.getElementById('gvCommentsList').innerHTML = (data.comments || []).map(c =>
-                `<div style="background:rgba(24,2,7,0.8); padding:6px 8px; border-radius:8px; font-size:8px; border:1px solid rgba(255,209,102,0.25);">
-                    <b style="color:#ffd166;">@${c.username}</b>: ${c.text}
-                </div>`
+                `<div style="background:rgba(24,2,7,0.8); padding:6px 8px; border-radius:8px; font-size:8px;"><b style="color:#ffd166;">@${c.username}</b>: ${c.text}</div>`
             ).join('') || `<div class="palace-muted">Henüz yorum yok.</div>`;
-
-            // Oylama listesi
-            if (data.my_ballot && data.my_ballot.allocations && Object.keys(draftAllocations).length === 0) {
-                Object.entries(data.my_ballot.allocations).forEach(([k, v]) => {
-                    draftAllocations[Number(k)] = Number(v);
-                });
-            }
 
             const votingContainer = document.getElementById('gvVotingListContainer');
             const entries = data.entries || [];
@@ -744,49 +666,24 @@
                     const currentPts = draftAllocations[ev.entry_id] || 0;
                     const chips = pointScale.map(p => {
                         const sel = currentPts === p ? 'selected' : '';
-                        const disabledAttr = isOwn ? 'disabled style="opacity:0.35; cursor:not-allowed;"' : '';
-                        return `<button class="pts-chip ${sel}" ${disabledAttr} onclick="pickBallotPoints(${ev.entry_id}, ${p})">${p}</button>`;
+                        const dis = isOwn ? 'disabled style="opacity:0.35;"' : '';
+                        return `<button class="pts-chip ${sel}" ${dis} onclick="pickBallotPoints(${ev.entry_id}, ${p})">${p}</button>`;
                     }).join('');
-
-                    return `
-                        <div class="vote-entry-card">
-                            <div class="vote-entry-top">
-                                <div>
-                                    <div class="vote-song-title">${ev.flag} ${ev.country} — ${ev.song}</div>
-                                    <div class="vote-artist-sub">${ev.artist} ${ev.song_url ? '• 🔗 Link Var' : ''} ${isOwn ? '• (Senin Şarkın)' : ''}</div>
-                                </div>
-                                <div style="font-size:9px; font-weight:900; color:#ffd166;">${currentPts ? currentPts + ' PUAN' : '-'}</div>
-                            </div>
-                            <div class="pts-chip-row">${chips}</div>
-                        </div>
-                    `;
+                    return `<div class="vote-entry-card"><div class="vote-entry-top"><div><div class="vote-song-title">${ev.flag} ${ev.country} — ${ev.song}</div><div class="vote-artist-sub">${ev.artist}</div></div><div style="font-size:9px; font-weight:900; color:#ffd166;">${currentPts ? currentPts + ' PUAN' : '-'}</div></div><div class="pts-chip-row">${chips}</div></div>`;
                 }).join('');
             }
 
             renderScoreMatrixAndRanking(data.ranking || []);
 
-            document.getElementById('gv25WeeksGrid').innerHTML = (data.weeks || []).map(w => {
-                const isCur = Number(w.week) === Number(week);
-                return `
-                    <div class="week-mini-box ${isCur ? 'is-current' : ''}">
-                        <div class="week-mini-num">H${w.week}</div>
-                        <div class="week-mini-type">${w.week_type}</div>
-                    </div>
-                `;
-            }).join('');
+            document.getElementById('gv25WeeksGrid').innerHTML = (data.weeks || []).map(w =>
+                `<div class="week-mini-box ${Number(w.week) === Number(week) ? 'is-current' : ''}"><div class="week-mini-num">H${w.week}</div><div class="week-mini-type">${w.week_type}</div></div>`
+            ).join('');
         }
 
         function pickBallotPoints(entryId, pts) {
-            Object.keys(draftAllocations).forEach(k => {
-                if (Number(draftAllocations[k]) === Number(pts)) delete draftAllocations[k];
-            });
-            if (draftAllocations[entryId] === pts) {
-                delete draftAllocations[entryId];
-                playMlSfx('tap');
-            } else {
-                draftAllocations[entryId] = pts;
-                playMlSfx(pts === 12 ? 'twelve' : 'tap');
-            }
+            Object.keys(draftAllocations).forEach(k => { if (Number(draftAllocations[k]) === Number(pts)) delete draftAllocations[k]; });
+            if (draftAllocations[entryId] === pts) { delete draftAllocations[entryId]; playMlSfx('tap'); }
+            else { draftAllocations[entryId] = pts; playMlSfx(pts === 12 ? 'twelve' : 'tap'); }
             if (gvOverviewData) renderGoldenVision(gvOverviewData);
         }
 
@@ -797,37 +694,31 @@
             const flag = resolveCountryFlag(country);
             document.getElementById('gvAutoFlagBox').innerText = flag;
 
-            const artist = document.getElementById('gvArtistInput').value.trim();
-            const song = document.getElementById('gvSongInput').value.trim();
-            const song_url = document.getElementById('gvSongUrlInput').value.trim();
-            const views_amount = parseFloat(document.getElementById('gvViewsAmountInput').value || '0');
-            const views_unit = document.getElementById('gvViewsUnitSelect').value;
-            const pair_partner = document.getElementById('gvPairInput').value.trim();
-
             const res = await fetch('/api/goldenvision/entry', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     user_id: memberUser.id,
                     username: memberUser.username || memberUser.first_name || '',
                     full_name: memberUser.first_name || '',
-                    countries, country, flag, artist, song, song_url, views_amount, views_unit, pair_partner
+                    countries, country, flag,
+                    artist: document.getElementById('gvArtistInput').value.trim(),
+                    song: document.getElementById('gvSongInput').value.trim(),
+                    song_url: document.getElementById('gvSongUrlInput').value.trim(),
+                    views_amount: parseFloat(document.getElementById('gvViewsAmountInput').value || '0'),
+                    views_unit: document.getElementById('gvViewsUnitSelect').value,
+                    pair_partner: document.getElementById('gvPairInput').value.trim()
                 })
             });
             const d = await res.json();
-            if (!d.success) {
-                playMlSfx('error');
-                return alert(d.error || 'Katılım reddedildi.');
-            }
+            if (!d.success) { playMlSfx('error'); return alert(d.error || 'Katılım reddedildi.'); }
             playMlSfx('seal');
-            showGlitterToast("👑 Başvurun Host Onayına Gönderildi!");
-            await refreshGoldenVision(false);
+            showGlitterToast("👑 Başvurun Onaya Gönderildi!");
+            await refreshGoldenVision();
         }
 
         async function sendGvBallot() {
             const res = await fetch('/api/goldenvision/ballot', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     user_id: memberUser.id,
                     username: memberUser.username || memberUser.first_name || '',
@@ -836,97 +727,61 @@
                 })
             });
             const d = await res.json();
-            if (!d.success) {
-                playMlSfx('error');
-                return alert(d.error || 'Oylar kaydedilemedi.');
-            }
+            if (!d.success) { playMlSfx('error'); return alert(d.error || 'Oylar kaydedilemedi.'); }
             playMlSfx('twelve');
             showGlitterToast("🏆 12-1 Oyların Mühürlendi!");
-            await refreshGoldenVision(false);
+            await refreshGoldenVision();
         }
 
         async function sendGvComment() {
-            const entry_id = Number(document.getElementById('gvCommentTargetSelect').value || 0);
-            const text = document.getElementById('gvCommentInput').value.trim();
             const res = await fetch('/api/goldenvision/comment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     user_id: memberUser.id,
                     username: memberUser.username || memberUser.first_name || 'Üye',
-                    entry_id, text
+                    entry_id: Number(document.getElementById('gvCommentTargetSelect').value || 0),
+                    text: document.getElementById('gvCommentInput').value.trim()
                 })
             });
             const d = await res.json();
-            if (!d.success) {
-                playMlSfx('error');
-                return alert(d.error || 'Yorum gönderilemedi.');
-            }
-            playMlSfx('tap');
+            if (!d.success) { playMlSfx('error'); return alert(d.error || 'Yorum gönderilemedi.'); }
             document.getElementById('gvCommentInput').value = '';
-            await refreshGoldenVision(false);
+            await refreshGoldenVision();
         }
 
         function renderScoreMatrixAndRanking(ranking) {
             const matrixEl = document.getElementById('gvMatrixContainer');
             const rankEl = document.getElementById('gvRankingContainer');
-
             if (!ranking.length) {
                 matrixEl.innerHTML = `<div style="padding:12px; font-size:8.5px; color:#f3c6cf;">Henüz puan tablosu oluşmadı.</div>`;
                 rankEl.innerHTML = `<div class="palace-muted">Sıralama bekleniyor...</div>`;
                 return;
             }
-
             const votersMap = {};
-            ranking.forEach(row => {
-                Object.entries(row.votes_from || {}).forEach(([vid, vobj]) => {
-                    votersMap[vid] = vobj.flag || '🏳️';
-                });
-            });
+            ranking.forEach(row => Object.entries(row.votes_from || {}).forEach(([vid, vobj]) => { votersMap[vid] = vobj.flag || '🏳️'; }));
             const voterIds = Object.keys(votersMap);
-
-            let ths = `<th>ÜLKE</th>` + voterIds.map(vid => `<th>${votersMap[vid]}</th>`).join('') + `<th>TOPLAM</th>`;
-            let trs = ranking.map((row, idx) => {
+            const ths = `<th>ÜLKE</th>` + voterIds.map(vid => `<th>${votersMap[vid]}</th>`).join('') + `<th>TOPLAM</th>`;
+            const trs = ranking.map((row, idx) => {
                 const pos = String(idx + 1).padStart(2, '0');
                 const tds = voterIds.map(vid => {
                     const info = (row.votes_from || {})[vid];
                     if (!info) return `<td class="cell-pts">-</td>`;
-                    const cls = Number(info.pts) === 12 ? 'cell-twelve' : 'cell-pts';
-                    return `<td class="${cls}">${info.pts}</td>`;
+                    return `<td class="${Number(info.pts) === 12 ? 'cell-twelve' : 'cell-pts'}">${info.pts}</td>`;
                 }).join('');
                 return `<tr><td style="text-align:left; font-weight:800;">${pos} ${row.flag} ${row.country}</td>${tds}<td style="font-weight:900; color:#fff1b8;">${row.total}</td></tr>`;
             }).join('');
-
             matrixEl.innerHTML = `<table class="score-matrix-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
-
-            rankEl.innerHTML = ranking.map((row, idx) => {
-                const pos = String(idx + 1).padStart(2, '0');
-                return `
-                    <div class="rank-row">
-                        <div style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                            <span class="rank-pos">${pos}</span>
-                            <b>${row.flag} ${row.country}</b> — <span style="color:#f3c6cf;">${row.song} (${row.artist})</span>
-                        </div>
-                        <div class="rank-score">${row.total}</div>
-                    </div>
-                `;
-            }).join('');
+            rankEl.innerHTML = ranking.map((row, idx) => `<div class="rank-row"><div><span class="rank-pos">${String(idx + 1).padStart(2, '0')}</span><b>${row.flag} ${row.country}</b> — ${row.song}</div><div class="rank-score">${row.total}</div></div>`).join('');
         }
 
-        // 🎆 SIRA SIRA ANONİM ŞENLİK AÇIKLAMA
         function startFestivalSequence() {
             const seq = (gvOverviewData && gvOverviewData.reveal_sequence) || [];
-            if (!seq.length) {
-                showGlitterToast("Açıklanacak puan bulunmuyor.");
-                return;
-            }
-            festivalSequence = seq;
-            festivalIndex = 0;
+            if (!seq.length) return showGlitterToast("Açıklanacak puan bulunmuyor.");
+            festivalSequence = seq; festivalIndex = 0;
             playMlSfx('twelve');
             document.getElementById('festivalOverlay').classList.add('open');
             paintFestivalStep();
         }
-
         function paintFestivalStep() {
             const item = festivalSequence[festivalIndex];
             if (!item) return;
@@ -936,23 +791,17 @@
             document.getElementById('revScore').innerText = `${item.total} PUAN`;
             document.getElementById('revCounter').innerText = `Açıklanan: ${festivalIndex + 1} / ${festivalSequence.length}`;
         }
-
         function stepFestivalReveal() {
-            if (festivalIndex + 1 < festivalSequence.length) {
-                festivalIndex += 1;
-                playMlSfx('twelve');
-                paintFestivalStep();
-            } else {
-                closeFestivalAndShowRanking();
-            }
+            if (festivalIndex + 1 < festivalSequence.length) { festivalIndex += 1; playMlSfx('twelve'); paintFestivalStep(); }
+            else closeFestivalAndShowRanking();
         }
-
         function closeFestivalAndShowRanking() {
             playMlSfx('seal');
             document.getElementById('festivalOverlay').classList.remove('open');
             switchGvTab('tablo');
-            showGlitterToast("🏆 Liderlik ve Açık Tablo Yayında!");
         }
+
+        loadMemberEvents();
     </script>
 </body>
 </html>
