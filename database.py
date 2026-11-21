@@ -253,23 +253,37 @@ def update_gv_state(season: int, updates: dict):
         "results_published", "grand_finale_triggered"
     }
     clean = {k: v for k, v in updates.items() if k in allowed}
+    if not clean:
+        return
+
     clean["updated_at"] = datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
     gv_state_col.update_one({"season": season}, {"$set": clean}, upsert=True)
+
+    st = gv_state_col.find_one({"season": season}) or {}
+    target_week = int(clean.get("current_week", st.get("current_week", 1)))
+
     if "current_week" in clean:
-        w_num = int(clean["current_week"])
-        wk = gv_weeks_col.find_one({"season": season, "week": w_num})
+        wk = gv_weeks_col.find_one({"season": season, "week": target_week})
         if wk:
-            gv_state_col.update_one(
-                {"season": season},
-                {"$set": {
-                    "submissions_open": wk.get("submissions_open", True),
-                    "voting_open": wk.get("voting_open", False),
-                    "comments_open": wk.get("comments_open", False),
-                    "results_published": wk.get("results_published", False),
-                    "grand_finale_triggered": wk.get("grand_finale_triggered", False),
-                    "song_duration_sec": wk.get("song_duration_sec", 120)
-                }}
-            )
+            sync_from_week = {
+                "submissions_open": wk.get("submissions_open", True),
+                "voting_open": wk.get("voting_open", False),
+                "comments_open": wk.get("comments_open", False),
+                "results_published": wk.get("results_published", False),
+                "grand_finale_triggered": wk.get("grand_finale_triggered", False),
+                "song_duration_sec": wk.get("song_duration_sec", 120)
+            }
+            for k in ["submissions_open", "voting_open", "comments_open", "results_published", "grand_finale_triggered", "song_duration_sec"]:
+                if k in clean:
+                    sync_from_week[k] = clean[k]
+            gv_state_col.update_one({"season": season}, {"$set": sync_from_week})
+
+    week_sync_keys = {
+        k: v for k, v in clean.items()
+        if k in {"submissions_open", "voting_open", "comments_open", "results_published", "grand_finale_triggered", "song_duration_sec"}
+    }
+    if week_sync_keys:
+        gv_weeks_col.update_one({"season": season, "week": target_week}, {"$set": week_sync_keys}, upsert=True)
 
 
 def trigger_grand_finale(season: int, week: int):
