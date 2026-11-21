@@ -1,5 +1,4 @@
 import os
-import time
 import datetime
 from pymongo import MongoClient
 
@@ -18,6 +17,7 @@ scheduled_jobs_col = db["scheduled_jobs"]
 templates_col = db["templates"]
 events_col = db["events"]
 event_votes_col = db["event_votes"]
+suspicious_col = db["ai_suspicious_activity"]
 
 gv_state_col = db["goldenvision_state"]
 gv_weeks_col = db["goldenvision_weeks"]
@@ -28,17 +28,6 @@ gv_ballots_col = db["goldenvision_ballots"]
 gv_comments_col = db["goldenvision_comments"]
 gv_bans_col = db["goldenvision_bans"]
 gv_hosts_col = db["goldenvision_hosts"]
-
-_GROUP_SYNC_CACHE = {}
-
-
-def should_sync_group_meta(chat_id: int, ttl_seconds: int = 300) -> bool:
-    now = time.time()
-    last = _GROUP_SYNC_CACHE.get(int(chat_id), 0)
-    if (now - last) >= ttl_seconds:
-        _GROUP_SYNC_CACHE[int(chat_id)] = now
-        return True
-    return False
 
 
 def _default_25_weeks():
@@ -617,6 +606,44 @@ def list_gv_bans():
     return list(gv_bans_col.find({"banned": True}, {"_id": 0}))
 
 
+# ==========================================
+# AI ŞÜPHELİ YETKİ KULLANIMI ANALİZİ
+# ==========================================
+def record_suspicious_ai_alert(user_id: int, chat_id: int, action_name: str, reason: str, risk_score: int = 85):
+    try:
+        recent_count = suspicious_col.count_documents({"user_id": int(user_id)})
+        computed_score = min(100, int(risk_score) + min(15, recent_count * 5))
+        ai_verdict = (
+            "KRİTİK RİSK: Kapalı/yetkisiz yetkiyle tekrarlanan işlem girişimi tespit edildi."
+            if computed_score >= 85
+            else "ŞÜPHELİ İŞLEM: Yetki sınırını zorlayan anormal aksiyon kaydı."
+        )
+        doc = {
+            "user_id": int(user_id),
+            "chat_id": int(chat_id or 0),
+            "group_title": get_group_title(chat_id),
+            "action": action_name,
+            "reason": reason,
+            "risk_score": computed_score,
+            "ai_verdict": ai_verdict,
+            "timestamp": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+            "dt": datetime.datetime.now()
+        }
+        suspicious_col.insert_one(doc)
+    except Exception:
+        pass
+
+
+def get_suspicious_ai_alerts(limit: int = 40):
+    try:
+        return list(suspicious_col.find({}, {"_id": 0, "dt": 0}).sort("_id", -1).limit(limit))
+    except Exception:
+        return []
+
+
+# ==========================================
+# MEVCUT SİSTEM & YETKİ FONKSİYONLARI
+# ==========================================
 def init_db():
     try:
         users_col.create_index("user_id", unique=True)
@@ -642,19 +669,22 @@ def init_db():
 def seed_default_events():
     try:
         if events_col.count_documents({}) == 0:
-            events_col.insert_one({
-                "event_id": 1001,
-                "title": "GOLDENVISION",
-                "subtitle": "25 Haftalık Saray Şarkı Yarışması",
-                "icon": "👑",
-                "badge": "CANLI",
-                "description": "Ülkeni seç, şarkını sahneye taşı, 12-1 oylarıyla gecenin şampiyonunu belirle.",
-                "schedule_time": "Sezon Aktif",
-                "media_url": "",
-                "options": ["Sahneye Gir 👑"],
-                "active": True,
-                "order": 1
-            })
+            default_items = [
+                {
+                    "event_id": 1001,
+                    "title": "GOLDENVISION",
+                    "subtitle": "25 Haftalık Saray Şarkı Yarışması",
+                    "icon": "👑",
+                    "badge": "CANLI",
+                    "description": "Ülkeni seç, şarkını sahneye taşı, 12-1 oylarıyla gecenin şampiyonunu belirle.",
+                    "schedule_time": "Sezon Aktif",
+                    "media_url": "",
+                    "options": ["Sahneye Gir 👑"],
+                    "active": True,
+                    "order": 1
+                }
+            ]
+            events_col.insert_many(default_items)
     except Exception:
         pass
 
@@ -746,7 +776,6 @@ def register_bot_group(chat_id, title, photo_url=""):
         if photo_url:
             update_data["photo_url"] = photo_url
         groups_col.update_one({"chat_id": int(chat_id)}, {"$set": update_data}, upsert=True)
-        _GROUP_SYNC_CACHE[int(chat_id)] = time.time()
     except Exception:
         pass
 
@@ -897,6 +926,23 @@ def is_authorized_staff(user_id, chat_id=0):
         return staff_col.find_one({"user_id": int(user_id), "chat_id": 0}) is not None
     except Exception:
         return False
+
+
+def is_perm_explicitly_disabled_in_staff(user_id: int, chat_id: int, perm_field: str) -> bool:
+    """Grup adminliği açık olsa bile Staff yetkisi açıkça KAPALI yapılmışsa True döner."""
+    try:
+        uid = int(user_id)
+        cid = int(chat_id or 0)
+        if cid != 0:
+            grp_row = staff_col.find_one({"user_id": uid, "chat_id": cid})
+            if grp_row is not None and not bool(grp_row.get(perm_field, True)):
+                return True
+        glob_row = staff_col.find_one({"user_id": uid, "chat_id": 0})
+        if glob_row is not None and not bool(glob_row.get(perm_field, True)):
+            return True
+    except Exception:
+        pass
+    return False
 
 
 def get_staff_permissions(user_id, chat_id=0):
