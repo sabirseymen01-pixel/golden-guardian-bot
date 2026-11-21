@@ -12,14 +12,14 @@
             --gold-base: #d4af37;
             --gold-light: #f8ecbe;
             --gold-dim: rgba(212, 175, 55, 0.22);
-            --glass-panel: rgba(16, 12, 5, 0.92);
-            --glass-icon: rgba(26, 20, 8, 0.85);
+            --glass-panel: rgba(16, 12, 5, 0.94);
+            --glass-icon: rgba(26, 20, 8, 0.86);
             --glass-modal: rgba(12, 9, 3, 0.99);
             --danger: #ff4757;
             --success: #2ed573;
             --text-main: #f5f6fa;
             --text-muted: #b2bec3;
-            --border-gold: rgba(212, 175, 55, 0.45);
+            --border-gold: rgba(212, 175, 55, 0.48);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
         html, body { height: 100vh; width: 100vw; overflow: hidden; background-color: var(--obsidian); color: var(--text-main); }
@@ -29,9 +29,14 @@
         }
         .spring-header {
             display: flex; justify-content: space-between; align-items: center; padding: 10px 14px;
-            background: var(--glass-panel); backdrop-filter: blur(25px); border-radius: 14px; border: 1.5px solid var(--border-gold); flex-shrink: 0;
+            background: var(--glass-panel); backdrop-filter: blur(25px); border-radius: 14px; border: 1.5px solid var(--border-gold); flex-shrink: 0; gap: 8px;
         }
         .brand-title { font-size: 11px; font-weight: 900; color: var(--gold-light); letter-spacing: 2px; }
+        .header-right { display: flex; align-items: center; gap: 6px; }
+        .sound-btn {
+            background: var(--gold-dim); color: var(--gold-light); border: 1px solid var(--border-gold);
+            border-radius: 7px; padding: 4px 8px; font-size: 7.5px; font-weight: 900; cursor: pointer;
+        }
         .user-badge { background: var(--gold-dim); color: var(--gold-light); padding: 4px 10px; border-radius: 6px; font-size: 8px; border: 1px solid var(--border-gold); font-weight: 900; }
 
         .homescreen-container {
@@ -46,7 +51,7 @@
         .widget-info p { font-size: 8px; color: var(--text-muted); margin-top: 2px; }
         .widget-status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success); }
 
-        /* 📱 ANDROID SOLA KAYDIRMALI 9 SİMGELİK (3x3) SAYFA SİSTEMİ */
+        /* 📱 9 SİMGELİK 3x3 ANDROID SOLA KAYDIRMALI SAYFALAR */
         .pager-viewport {
             width: 100%; max-width: 390px; overflow: hidden; position: relative; flex: 1;
             display: flex; align-items: center; touch-action: pan-y;
@@ -60,13 +65,24 @@
             display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
             gap: 10px; align-content: center; justify-items: center; padding: 4px;
         }
-        .app-icon-card { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .app-icon-card { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; width: 100%; }
         .app-icon-card:active { transform: scale(0.90); }
         .app-icon-box {
             width: 56px; height: 56px; background: var(--glass-icon); border-radius: 15px;
             border: 1.5px solid var(--border-gold); display: flex; align-items: center; justify-content: center; font-size: 22px;
         }
         .app-icon-box.gv-studio-icon { background: linear-gradient(145deg, #5c0818, #240309); border-color: #ffd166; }
+
+        /* ŞEFFAF KARE ORTASINDA + BOŞ YUVA SİMGESİ */
+        .empty-plus-card { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; pointer-events: none; }
+        .empty-plus-box {
+            width: 56px; height: 56px; border-radius: 15px;
+            background: rgba(212, 175, 55, 0.04);
+            border: 1.5px dashed rgba(212, 175, 55, 0.28);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; font-weight: 300; color: rgba(248, 236, 190, 0.42);
+        }
+
         .app-label { font-size: 8px; font-weight: 800; color: var(--text-main); text-align: center; max-width: 92px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .home-dock {
@@ -86,13 +102,14 @@
             background: var(--glass-modal); z-index: 120;
             display: none; flex-direction: column; overflow: hidden;
         }
+        .fullpage-port.sub-port { z-index: 180; }
         .fullpage-port.open { display: flex; }
         .fullpage-header {
             padding: 12px 16px; background: rgba(28, 22, 8, 0.96);
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 2px solid var(--gold-base); flex-shrink: 0; gap: 8px;
         }
-        .fullpage-title { font-size: 10.5px; font-weight: 900; color: var(--gold-light); text-transform: uppercase; }
+        .fullpage-title { font-size: 10.5px; font-weight: 900; color: var(--gold-light); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .fullpage-exit-btn {
             background: linear-gradient(135deg, var(--gold-light), var(--gold-base));
             color: #000; border: none; padding: 6px 12px; border-radius: 8px;
@@ -108,6 +125,7 @@
             width: 100%; background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-base) 100%);
             color: #000; border: none; padding: 10px; border-radius: 9px; font-weight: 900; font-size: 8.5px; cursor: pointer; text-transform: uppercase;
         }
+        .gold-btn:active { transform: scale(0.98); }
 
         .modal-tabs { display: flex; gap: 5px; overflow-x: auto; flex-shrink: 0; }
         .modal-tab {
@@ -124,8 +142,8 @@
             border-radius: 12px; padding: 11px; display: flex; flex-direction: column; gap: 8px;
         }
         .staff-card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-        .staff-card-name { font-size: 9.5px; font-weight: 900; color: var(--gold-light); }
-        .staff-card-sub { font-size: 7.5px; color: var(--text-muted); }
+        .staff-card-name { font-size: 9.5px; font-weight: 900; color: var(--gold-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .staff-card-sub { font-size: 7.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .status-pill-row { display: flex; flex-wrap: wrap; gap: 6px; font-size: 7.5px; font-weight: 800; }
         .status-chip { padding: 4px 8px; border-radius: 7px; border: 1px solid rgba(212,175,55,0.4); background: rgba(10,8,3,0.85); }
         .status-chip.on { color: var(--success); border-color: rgba(46,213,115,0.5); }
@@ -134,14 +152,18 @@
         .perm-btn-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .pending-card { background: rgba(24, 18, 6, 0.92); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 8.5px; }
         .pending-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .log-item { background: rgba(12, 10, 4, 0.9); border-left: 3px solid var(--gold-base); padding: 8px 10px; border-radius: 8px; font-size: 8px; border: 1.5px solid var(--border-gold); display: flex; flex-direction: column; gap: 2px; }
+        .log-item { background: rgba(12, 10, 4, 0.9); border-left: 3px solid var(--gold-base); padding: 8px 10px; border-radius: 8px; font-size: 8px; border: 1.5px solid var(--border-gold); display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
+        .group-card { background: rgba(25, 20, 8, 0.85); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 11px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; gap: 8px; }
+        .group-meta { display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1; min-width: 0; }
+        .group-avatar { width: 34px; height: 34px; border-radius: 50%; background: #000; border: 1.5px solid var(--gold-base); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .group-title { font-size: 9.5px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .toast-popup {
             position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-60px);
             background: linear-gradient(135deg, var(--gold-light), var(--gold-base)); color: #000;
             padding: 9px 18px; border-radius: 10px; font-size: 8.5px; font-weight: 900;
             z-index: 1000; opacity: 0; transition: all 0.3s ease; pointer-events: none;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7); max-width: 92vw; text-align: center;
         }
         .toast-popup.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
@@ -152,7 +174,10 @@
 
     <header class="spring-header">
         <div class="brand-title">GOLDEN STAFF</div>
-        <div class="user-badge" id="userRole">Kraljica 👑</div>
+        <div class="header-right">
+            <button class="sound-btn" id="staffSoundBtn" onclick="toggleStaffSound()">🔊</button>
+            <div class="user-badge" id="userRole">Kraljica 👑</div>
+        </div>
     </header>
 
     <main class="homescreen-container">
@@ -164,7 +189,7 @@
             <div class="widget-status-dot"></div>
         </div>
 
-        <!-- 📱 9 SİMGELİK 3x3 ANDROID SOLA KAYDIRMALI SAYFALAR -->
+        <!-- 📱 9 SİMGELİK 3x3 ANDROID SOLA KAYDIRMALI SAYFALAR (+ BOŞ YUVLAR) -->
         <div class="pager-viewport" id="staffPagerViewport">
             <div class="pager-track" id="staffPagerTrack"></div>
         </div>
@@ -172,7 +197,7 @@
         <div class="home-dock" id="staffPagerDots"></div>
     </main>
 
-    <!-- 👑 TAM SAYFA GOLDENVISION YT MASASI -->
+    <!-- 👑 TAM SAYFA GOLDENVISION YT MASASI (TÜM YARIŞMA YÖNETİMİ TEK MERKEZDE) -->
     <div class="fullpage-port" id="gvStudioModal">
         <div class="fullpage-header">
             <div class="fullpage-title" id="gvStudioHeader">👑 GOLDENVISION YT MASASI</div>
@@ -194,7 +219,7 @@
             </div>
 
             <div id="studio-tab-kontrol" class="modal-tab-content">
-                <div class="log-item" id="gvStudioSummary">Yükleniyor...</div>
+                <div class="log-item" id="gvStudioSummary" style="cursor:default;">Yükleniyor...</div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
                     <select id="stWeekSelect"></select>
                     <input type="number" id="stDurationInput" placeholder="Şarkı Süresi (sn)" value="120">
@@ -305,16 +330,62 @@
         </div>
     </div>
 
-    <!-- TAM SAYFA GRUPLAR PORTU -->
+    <!-- 🛡️ TAM SAYFA GRUPLAR PORTU -->
     <div class="fullpage-port" id="groupsModal">
         <div class="fullpage-header">
             <div class="fullpage-title">🛡️ Yörünge Grupları</div>
             <button class="fullpage-exit-btn" onclick="closePort('groupsModal')">ÇIKIŞ</button>
         </div>
-        <div class="fullpage-body" id="groupsListContainer"></div>
+        <div class="fullpage-body">
+            <input type="text" id="groupSearchInput" placeholder="Grup adı veya ID ile ara..." oninput="filterGroupsList()">
+            <div id="groupsListContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
     </div>
 
-    <!-- TAM SAYFA LOGLAR PORTU -->
+    <!-- 🛡️ TAM SAYFA GRUP DETAY PORTU -->
+    <div class="fullpage-port sub-port" id="groupDetailModal">
+        <div class="fullpage-header">
+            <div class="fullpage-title" id="groupDetailHeaderTitle">🛡️ GRUP DETAYI</div>
+            <button class="fullpage-exit-btn" onclick="closePort('groupDetailModal')">ÇIKIŞ</button>
+        </div>
+        <div class="fullpage-body">
+            <div class="staff-card-box">
+                <div class="staff-card-name" id="groupDetailName">-</div>
+                <div class="staff-card-sub" id="groupDetailId">ID: -</div>
+            </div>
+
+            <div class="modal-tabs">
+                <div class="modal-tab active" onclick="switchGroupTab('ayar', event)">Ayarlar</div>
+                <div class="modal-tab" onclick="switchGroupTab('sablon', event)">Şablonlar</div>
+                <div class="modal-tab" onclick="switchGroupTab('log', event)">Grup Logları</div>
+            </div>
+
+            <div id="gtab-ayar" class="modal-tab-content active">
+                <input type="text" id="grpWelcomeInput" placeholder="Hoş geldin mesajı...">
+                <input type="text" id="grpBtnTextInput" placeholder="Hoş geldin buton metni...">
+                <input type="text" id="grpBtnUrlInput" placeholder="Hoş geldin buton linki...">
+                <button class="gold-btn" onclick="saveGroupDetailSettings()">Grup Ayarlarını Kaydet 💾</button>
+            </div>
+
+            <div id="gtab-sablon" class="modal-tab-content">
+                <select id="grpTplTypeSelect">
+                    <option value="announcement">Duyuru Şablonu</option>
+                    <option value="schedule">Zamanlama Şablonu</option>
+                </select>
+                <input type="text" id="grpTplNameInput" placeholder="Şablon Adı">
+                <input type="number" id="grpTplMinsInput" placeholder="Dakika (Zamanlama için)" value="60">
+                <textarea id="grpTplMsgInput" rows="2" placeholder="Mesaj metni..."></textarea>
+                <button class="gold-btn" onclick="createGroupTemplate()">Şablon Ekle 📝</button>
+                <div id="groupTemplatesList" style="display:flex; flex-direction:column; gap:6px; margin-top:4px;"></div>
+            </div>
+
+            <div id="gtab-log" class="modal-tab-content">
+                <div id="groupSpecificLogsList" style="display:flex; flex-direction:column; gap:6px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📜 TAM SAYFA LOGLAR PORTU -->
     <div class="fullpage-port" id="logsModal">
         <div class="fullpage-header">
             <div class="fullpage-title">📜 Canlı Genel Loglar</div>
@@ -335,19 +406,43 @@
         let staffCache = [];
         let gvHostsMap = {};
         let currentStaffPage = 0;
+        let activeDetailGroupId = 0;
+        let activeDetailGroupTitle = "";
 
-        // Staff ana ekran simgeleri (Sayfa başına 9 simge, 10+ simgede otomatik yeni sayfa)
+        let staffSoundOn = true;
+        let sAudioCtx = null;
+        function playStaffSfx(kind = 'tap') {
+            if (!staffSoundOn) return;
+            try {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!sAudioCtx && Ctx) sAudioCtx = new Ctx();
+                if (sAudioCtx && sAudioCtx.state === 'suspended') sAudioCtx.resume();
+                if (!sAudioCtx) return;
+                const now = sAudioCtx.currentTime;
+                const osc = sAudioCtx.createOscillator();
+                const gain = sAudioCtx.createGain();
+                osc.type = kind === 'ok' ? 'triangle' : 'sine';
+                osc.frequency.setValueAtTime(kind === 'ok' ? 784 : 580, now);
+                gain.gain.setValueAtTime(0.001, now);
+                gain.gain.exponentialRampToValueAtTime(0.12, now + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+                osc.connect(gain); gain.connect(sAudioCtx.destination);
+                osc.start(now); osc.stop(now + 0.18);
+            } catch (e) {}
+        }
+        function toggleStaffSound() {
+            staffSoundOn = !staffSoundOn;
+            document.getElementById('staffSoundBtn').innerText = staffSoundOn ? "🔊" : "🔇";
+            if (staffSoundOn) playStaffSfx('tap');
+        }
+
+        // Staff ana ekran simgeleri (Sayfa başına 9 yuva; boş yuvalar şeffaf + simgesi olur)
         const STAFF_APPS = [
             { id: 'gv', icon: '👑', label: 'GOLDENVISION', special: true, action: () => openGvStudio() },
             { id: 'staff', icon: '⚜️', label: 'Staff & Yetki', action: () => openPort('staffModal') },
             { id: 'groups', icon: '🛡️', label: 'Gruplar', action: () => openPort('groupsModal') },
             { id: 'logs', icon: '📜', label: 'Loglar', action: () => openPort('logsModal') },
-            { id: 'onay', icon: '✅', label: 'Onay Kuyruğu', action: () => { openGvStudio().then(() => switchStudioTab('onay')); } },
-            { id: 'haftalar', icon: '🗓️', label: '25 Hafta', action: () => { openGvStudio().then(() => switchStudioTab('haftalar')); } },
-            { id: 'kontrol', icon: '🎛️', label: 'Sahne Kontrol', action: () => { openGvStudio().then(() => switchStudioTab('kontrol')); } },
-            { id: 'ceza', icon: '⚖️', label: 'Host & Ceza', action: () => { openGvStudio().then(() => switchStudioTab('yetki')); } },
-            { id: 'yenile', icon: '🔄', label: 'Senkronize', action: () => { loadAllGroups(); showToast("🔄 Veriler Güncellendi"); } },
-            { id: 'final', icon: '🎆', label: 'Şenlik Finali', action: () => { openGvStudio().then(() => switchStudioTab('kontrol')); } }
+            { id: 'sync', icon: '🔄', label: 'Yenile', action: () => { loadAllGroups(); showToast("🔄 Güncellendi"); } }
         ];
 
         function buildStaffPages() {
@@ -359,13 +454,24 @@
             let pagesHtml = '';
             for (let p = 0; p < totalPages; p++) {
                 const slice = STAFF_APPS.slice(p * perPage, (p + 1) * perPage);
-                const cards = slice.map((app, idx) => `
+                let cellsHtml = slice.map((app, idx) => `
                     <div class="app-icon-card" onclick="runStaffApp(${p * perPage + idx})">
                         <div class="app-icon-box ${app.special ? 'gv-studio-icon' : ''}">${app.icon}</div>
                         <div class="app-label">${app.label}</div>
                     </div>
                 `).join('');
-                pagesHtml += `<div class="spring-page">${cards}</div>`;
+
+                // Kalan boş yuvalara şeffaf kare ortasında + simgesi koy
+                const remainder = perPage - slice.length;
+                for (let b = 0; b < remainder; b++) {
+                    cellsHtml += `
+                        <div class="empty-plus-card">
+                            <div class="empty-plus-box">+</div>
+                            <div class="app-label" style="opacity:0.35;">Boş</div>
+                        </div>
+                    `;
+                }
+                pagesHtml += `<div class="spring-page">${cellsHtml}</div>`;
             }
             track.innerHTML = pagesHtml;
 
@@ -377,6 +483,7 @@
         }
 
         function runStaffApp(index) {
+            playStaffSfx('tap');
             const item = STAFF_APPS[index];
             if (item && typeof item.action === 'function') item.action();
         }
@@ -391,14 +498,13 @@
             });
         }
 
-        // Android sola/sağa kaydırma (swipe)
         let touchStartX = 0;
         const vp = document.getElementById('staffPagerViewport');
         vp.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
         vp.addEventListener('touchend', (e) => {
             const dx = e.changedTouches[0].screenX - touchStartX;
-            if (dx < -45) goStaffPage(currentStaffPage + 1); // Sola kaydır -> Sonraki sayfa
-            else if (dx > 45) goStaffPage(currentStaffPage - 1); // Sağa kaydır -> Önceki sayfa
+            if (dx < -45) goStaffPage(currentStaffPage + 1);
+            else if (dx > 45) goStaffPage(currentStaffPage - 1);
         }, { passive: true });
 
         function showToast(msg) {
@@ -408,14 +514,19 @@
         }
 
         function openPort(id) {
+            playStaffSfx('tap');
             document.getElementById(id).classList.add('open');
             if (id === 'staffModal') loadStaffAndGroupPerms();
             if (id === 'groupsModal') loadAllGroups();
             if (id === 'logsModal') loadGlobalLogs();
         }
-        function closePort(id) { document.getElementById(id).classList.remove('open'); }
+        function closePort(id) {
+            playStaffSfx('tap');
+            document.getElementById(id).classList.remove('open');
+        }
 
         function switchStudioTab(tabKey, evt) {
+            playStaffSfx('tap');
             ['onay', 'kontrol', 'haftalar', 'yetki'].forEach(k => {
                 document.getElementById('studio-tab-' + k).classList.remove('active');
             });
@@ -423,6 +534,18 @@
             document.getElementById('studio-tab-' + tabKey).classList.add('active');
             if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
             if (tabKey === 'yetki') loadStudioHostsAndBans();
+        }
+
+        function switchGroupTab(tabKey, evt) {
+            playStaffSfx('tap');
+            ['ayar', 'sablon', 'log'].forEach(k => {
+                document.getElementById('gtab-' + k).classList.remove('active');
+            });
+            document.querySelectorAll('#groupDetailModal .modal-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('gtab-' + tabKey).classList.add('active');
+            if (evt && evt.currentTarget) evt.currentTarget.classList.add('active');
+            if (tabKey === 'sablon') loadGroupDetailTemplates();
+            if (tabKey === 'log') loadGroupDetailLogs();
         }
 
         async function verifyAccess() {
@@ -439,6 +562,9 @@
             } catch (e) {}
         }
 
+        // =========================================================
+        // 👑 GOLDENVISION YT MASASI
+        // =========================================================
         async function openGvStudio() {
             if (!canGvStudio) {
                 alert("⛔ GOLDENVISION YT Masasına erişim yetkiniz yok! Kurucu (Founder) tarafından yetki açılmalıdır.");
@@ -490,15 +616,15 @@
                         <button class="gold-btn" style="background:var(--danger); color:#fff;" onclick="reviewPending(${p.pending_id}, false)">Reddet ❌</button>
                     </div>
                 </div>
-            `).join('') || `<div class="log-item">Onay bekleyen kart bulunmuyor.</div>`;
+            `).join('') || `<div class="log-item" style="cursor:default;">Onay bekleyen kart bulunmuyor.</div>`;
 
             const approvedList = studioDataCache.entries || [];
             document.getElementById('stApprovedListContainer').innerHTML = approvedList.map(e => `
-                <div class="log-item">
+                <div class="log-item" style="cursor:default;">
                     <b>${e.flag} ${e.country} — ${e.song} (${e.artist})</b>
                     <span>@${e.username || e.user_id} • ${e.views_m} Milyon ${e.song_url ? `• ${e.song_url}` : ''}</span>
                 </div>
-            `).join('') || `<div class="log-item">Henüz onaylanmış şarkı yok.</div>`;
+            `).join('') || `<div class="log-item" style="cursor:default;">Henüz onaylanmış şarkı yok.</div>`;
 
             loadWeekFormFromCache();
         }
@@ -518,6 +644,7 @@
             });
             const d = await res.json();
             if (d.success) {
+                playStaffSfx('ok');
                 showToast(approve ? "✅ Başvuru Onaylandı!" : "❌ Başvuru Reddedildi ve Silindi!");
                 await refreshGvStudio();
             }
@@ -535,6 +662,7 @@
             });
             const d = await res.json();
             if (d.success) {
+                playStaffSfx('ok');
                 showToast("🎆 BİTİR İşlendi — Şenlik Finali Aktif!");
                 await refreshGvStudio();
             }
@@ -550,7 +678,7 @@
             document.getElementById('stEditNoViewLimit').value = String(Boolean(wk.no_view_limit));
 
             document.getElementById('stWeeksOverviewList').innerHTML = (studioDataCache.weeks || []).map(x =>
-                `<div class="log-item"><b style="color:var(--gold-light);">H${x.week}</b><span>[${x.week_type}] — ${x.concept || ''} ${x.no_view_limit ? '• Sınırsız İzlenme' : ''}</span></div>`
+                `<div class="log-item" style="cursor:default;"><b style="color:var(--gold-light);">H${x.week}</b><span>[${x.week_type}] — ${x.concept || ''} ${x.no_view_limit ? '• Sınırsız İzlenme' : ''}</span></div>`
             ).join('');
         }
 
@@ -572,6 +700,7 @@
             });
             const d = await res.json();
             if (d.success) {
+                playStaffSfx('ok');
                 showToast("👑 Ayarlar Mühürlendi!");
                 await refreshGvStudio();
             }
@@ -587,6 +716,7 @@
             });
             const d = await res.json();
             if (d.success) {
+                playStaffSfx('ok');
                 showToast("⚜️ İşlem Tamamlandı!");
                 await refreshGvStudio();
             }
@@ -607,6 +737,7 @@
             });
             const d = await res.json();
             if (d.success) {
+                playStaffSfx('ok');
                 showToast(`✨ Hafta ${week} Güncellendi!`);
                 await refreshGvStudio();
             }
@@ -641,6 +772,7 @@
             });
             const d = await res.json();
             if (d.success) {
+                playStaffSfx('ok');
                 showToast(`⚜️ YT Yetkisi ${can_manage ? 'AÇILDI ✅' : 'KAPATILDI ❌'} (ID: ${target_user_id})`);
                 await loadStudioHostsAndBans();
                 await loadStaffAndGroupPerms();
@@ -657,19 +789,21 @@
             });
             const d = await res.json();
             if (d.success) {
+                playStaffSfx('ok');
                 showToast("⚖️ Ceza Kaydı Güncellendi");
                 await loadStudioHostsAndBans();
             } else alert(d.error);
         }
 
+        // =========================================================
+        // 🛡️ GRUPLAR & GRUP DETAY PORTU
+        // =========================================================
         async function loadAllGroups() {
             try {
                 const res = await fetch('/api/groups');
                 globalGroupsCache = await res.json();
                 document.getElementById('widgetGroupCount').innerText = globalGroupsCache.length + " Yörünge Grubu Aktif";
-                document.getElementById('groupsListContainer').innerHTML = (globalGroupsCache || []).map(g =>
-                    `<div class="log-item"><b>🛡️ ${g.title}</b><span>ID: ${g.chat_id}</span></div>`
-                ).join('') || '<div class="log-item">Grup yok.</div>';
+                renderGroupsCards(globalGroupsCache);
 
                 const sel = document.getElementById('permTargetGroupSelect');
                 if (sel) {
@@ -681,6 +815,112 @@
             } catch (e) {}
         }
 
+        function renderGroupsCards(list) {
+            const container = document.getElementById('groupsListContainer');
+            if (!container) return;
+            container.innerHTML = (list || []).map(g => `
+                <div class="group-card" onclick="openGroupDetailPort(${g.chat_id}, '${encodeURIComponent(g.title || 'Grup')}')">
+                    <div class="group-meta">
+                        <div class="group-avatar">🛡️</div>
+                        <div style="min-width:0;">
+                            <div class="group-title">${g.title}</div>
+                            <div class="staff-card-sub">ID: ${g.chat_id}</div>
+                        </div>
+                    </div>
+                    <div style="font-size:8px; color:var(--gold-light); font-weight:900; flex-shrink:0;">AÇ ›</div>
+                </div>
+            `).join('') || '<div class="log-item" style="cursor:default;">Kayıtlı grup bulunmuyor.</div>';
+        }
+
+        function filterGroupsList() {
+            const q = (document.getElementById('groupSearchInput').value || '').toLowerCase();
+            const filtered = (globalGroupsCache || []).filter(g =>
+                (g.title || '').toLowerCase().includes(q) || String(g.chat_id).includes(q)
+            );
+            renderGroupsCards(filtered);
+        }
+
+        async function openGroupDetailPort(chatId, encodedTitle) {
+            playStaffSfx('tap');
+            activeDetailGroupId = Number(chatId);
+            activeDetailGroupTitle = decodeURIComponent(encodedTitle || 'Grup');
+            document.getElementById('groupDetailHeaderTitle').innerText = `🛡️ ${activeDetailGroupTitle}`;
+            document.getElementById('groupDetailName').innerText = activeDetailGroupTitle;
+            document.getElementById('groupDetailId').innerText = `Grup ID: ${activeDetailGroupId}`;
+            document.getElementById('groupDetailModal').classList.add('open');
+            await loadGroupDetailTemplates();
+            await loadGroupDetailLogs();
+        }
+
+        async function saveGroupDetailSettings() {
+            const welcome_msg = document.getElementById('grpWelcomeInput').value.trim();
+            const btn_text = document.getElementById('grpBtnTextInput').value.trim();
+            const btn_url = document.getElementById('grpBtnUrlInput').value.trim();
+            const payload = { user_id: user.id, chat_id: activeDetailGroupId };
+            if (welcome_msg) payload.welcome_msg = welcome_msg;
+            if (btn_text) payload.btn_text = btn_text;
+            if (btn_url) payload.btn_url = btn_url;
+
+            const res = await fetch('/api/settings/update', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            if (d.success) {
+                playStaffSfx('ok');
+                showToast(`✔ ${activeDetailGroupTitle} ayarları kaydedildi!`);
+            }
+        }
+
+        async function loadGroupDetailTemplates() {
+            const res = await fetch('/api/templates/list', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: activeDetailGroupId })
+            });
+            const data = await res.json();
+            const all = [
+                ...(data.announcements || []).map(x => `📌 [Duyuru] ${x.name}: ${x.msg}`),
+                ...(data.schedules || []).map(x => `⏰ [${x.mins}dk] ${x.name}: ${x.msg}`)
+            ];
+            document.getElementById('groupTemplatesList').innerHTML = all.map(txt =>
+                `<div class="log-item" style="cursor:default;"><span>${txt}</span></div>`
+            ).join('') || '<div class="log-item" style="cursor:default;">Kayıtlı şablon yok.</div>';
+        }
+
+        async function createGroupTemplate() {
+            const type = document.getElementById('grpTplTypeSelect').value;
+            const name = document.getElementById('grpTplNameInput').value.trim();
+            const mins = Number(document.getElementById('grpTplMinsInput').value || 60);
+            const msg = document.getElementById('grpTplMsgInput').value.trim();
+            if (!name || !msg) return alert("Şablon adı ve mesaj zorunludur.");
+
+            const ep = type === 'schedule' ? '/api/templates/save-schedule' : '/api/templates/save-announcement';
+            const res = await fetch(ep, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user.id, chat_id: activeDetailGroupId, name, msg, mins })
+            });
+            const d = await res.json();
+            if (d.success) {
+                playStaffSfx('ok');
+                document.getElementById('grpTplNameInput').value = '';
+                document.getElementById('grpTplMsgInput').value = '';
+                showToast("✔ Şablon Kaydedildi!");
+                await loadGroupDetailTemplates();
+            }
+        }
+
+        async function loadGroupDetailLogs() {
+            const res = await fetch(`/api/logs?filter=all&limit=50`);
+            const logs = await res.json();
+            const filtered = (logs || []).filter(l => Number(l.chat_id) === Number(activeDetailGroupId));
+            document.getElementById('groupSpecificLogsList').innerHTML = filtered.map(l =>
+                `<div class="log-item" style="cursor:default;"><b>[${l.action_type}]</b><span>@${l.username} • ${l.details || ''}</span></div>`
+            ).join('') || '<div class="log-item" style="cursor:default;">Bu gruba ait log yok.</div>';
+        }
+
+        // =========================================================
+        // ⚜️ STAFF & YETKİ MATRİSİ (ANLIK DURUM + ONAY)
+        // =========================================================
         async function loadStaffAndGroupPerms() {
             await loadAllGroups();
             try {
@@ -711,7 +951,7 @@
 
             const container = document.getElementById('staffListContainer');
             if (!staffCache || !staffCache.length) {
-                container.innerHTML = `<div class="log-item">Kayıtlı yetkili bulunmuyor.</div>`;
+                container.innerHTML = `<div class="log-item" style="cursor:default;">Kayıtlı yetkili bulunmuyor.</div>`;
                 return;
             }
 
@@ -724,7 +964,7 @@
                 return `
                     <div class="staff-card-box">
                         <div class="staff-card-top">
-                            <div>
+                            <div style="min-width:0; flex:1;">
                                 <div class="staff-card-name">${s.full_name || 'Muhafız'} (@${s.username || s.user_id})</div>
                                 <div class="staff-card-sub">ID: ${s.user_id} • Kapsam: ${groupLabel}</div>
                             </div>
@@ -764,6 +1004,7 @@
             });
             const d = await res.json();
             if (d.success) {
+                playStaffSfx('ok');
                 const pName = permField === 'can_ban' ? 'BAN' : 'MUTE';
                 const stateTxt = d.new_val ? 'AÇIK ✅' : 'KAPALI ❌';
                 const msg = `✔ İşlendi: ID ${targetId} için ${pName} yetkisi ${stateTxt} olarak güncellendi.`;
@@ -781,6 +1022,7 @@
             });
             const d = await res.json();
             if (d.success) {
+                playStaffSfx('ok');
                 const msg = `✔ İşlendi: ID ${targetId} için GOLDENVISION YT yetkisi ${enableYt ? 'AÇIK ✅' : 'KAPALI ❌'}.`;
                 document.getElementById('permLastActionBanner').innerText = msg;
                 showToast(msg);
@@ -798,9 +1040,10 @@
             });
             const d = await res.json();
             if (d.success) {
+                playStaffSfx('ok');
                 document.getElementById('staffInputId').value = '';
                 document.getElementById('staffNameInput').value = '';
-                showToast("⚜️ Muhafız Eklendi!");
+                showToast("✔ Muhafız Eklendi!");
                 await loadStaffAndGroupPerms();
             }
         }
@@ -814,7 +1057,8 @@
             });
             const d = await res.json();
             if (d.success) {
-                showToast("🗑️ Yetkili Kaldırıldı");
+                playStaffSfx('ok');
+                showToast("✔ Yetkili Kaldırıldı");
                 await loadStaffAndGroupPerms();
             }
         }
@@ -823,8 +1067,8 @@
             const res = await fetch('/api/logs?filter=all&limit=50');
             const logs = await res.json();
             document.getElementById('globalLogsContainer').innerHTML = (logs || []).map(l =>
-                `<div class="log-item"><b>[${l.action_type}]</b><span>@${l.username} • ${l.details || ''}</span></div>`
-            ).join('') || '<div class="log-item">Log yok.</div>';
+                `<div class="log-item" style="cursor:default;"><b>[${l.action_type}]</b><span>@${l.username} • ${l.details || ''}</span></div>`
+            ).join('') || '<div class="log-item" style="cursor:default;">Log yok.</div>';
         }
 
         buildStaffPages();
