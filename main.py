@@ -41,7 +41,6 @@ FOUNDER_ID = (os.environ.get("FOUNDER_ID") or (config and getattr(config, "FOUND
 scheduler = AsyncIOScheduler()
 tg_application = None
 
-# Grup meta verileri için kısa önbellek (her mesajda getChat/getFile çakışmasını ve log şişmesini önler)
 _group_meta_cache: dict[int, float] = {}
 GROUP_CACHE_TTL_SEC = 300.0
 
@@ -242,9 +241,6 @@ async def api_verify_admin(request: Request):
     return {"authorized": False, "can_gv_studio": gv_access}
 
 
-# ==========================================
-# 👑 GOLDENVISION API ROTALARI
-# ==========================================
 @app.get("/api/goldenvision/overview")
 async def api_gv_overview(season: Optional[int] = None, user_id: int = 0):
     data = database.get_gv_overview(season=season, user_id=user_id)
@@ -293,6 +289,28 @@ async def api_gv_entry(request: Request):
         f"Sezon {season} H{week} onay bekleyen başvuru.",
     )
     return {"success": True, "pending": res["pending"]}
+
+
+@app.post("/api/goldenvision/studio/flag")
+async def api_gv_studio_flag(request: Request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    if not database.can_access_gv_studio(user_id, FOUNDER_ID):
+        return {"success": False, "error": "Bu masaya erişim yetkiniz yok!"}
+
+    season = int(data.get("season") or database.get_active_season_number())
+    overview = database.get_gv_overview(season=season, user_id=user_id)
+    week = int(data.get("week") or overview["current_week"])
+    entry_id = int(data.get("entry_id", 0) or 0)
+    pending_id = int(data.get("pending_id", 0) or 0)
+    new_flag = str(data.get("flag", "🏳️")).strip() or "🏳️"
+
+    res = database.update_gv_entry_flag(season, week, entry_id=entry_id, pending_id=pending_id, new_flag=new_flag)
+    if not res.get("ok"):
+        return {"success": False, "error": res.get("error")}
+
+    database.log_action(0, "GV_FLAG_SET", user_id, "Host", f"Bayrak güncellendi: {new_flag}")
+    return {"success": True, "flag": res["flag"]}
 
 
 @app.post("/api/goldenvision/studio/review")
@@ -478,9 +496,6 @@ async def api_gv_studio_hosts(request: Request):
     return {"success": True, "hosts": database.list_gv_hosts(), "bans": database.list_gv_bans()}
 
 
-# ==========================================
-# ETKİNLİK & STAFF API ROTALARI
-# ==========================================
 @app.get("/api/events/list")
 async def api_list_events(only_active: bool = False):
     return database.get_all_events(only_active=only_active)
@@ -785,9 +800,6 @@ async def api_delete_template(request: Request):
         return {"success": False, "error": str(e)}
 
 
-# ==========================================
-# 🌐 HTML SAYFA SUNUMLARI
-# ==========================================
 def _serve_html(filename: str):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     paths_to_check = [os.path.join(base_dir, "public", filename), os.path.join(base_dir, filename)]
@@ -814,9 +826,6 @@ async def handle_member_portal():
     return _serve_html("member.html")
 
 
-# ==========================================
-# TELEGRAM BOT KOMUTLARI
-# ==========================================
 async def _delete_after_delay(context, chat_id, message_id, delay=5):
     await asyncio.sleep(delay)
     try:
