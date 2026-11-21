@@ -1,4 +1,5 @@
 import os
+import time
 import datetime
 from pymongo import MongoClient
 
@@ -27,6 +28,17 @@ gv_ballots_col = db["goldenvision_ballots"]
 gv_comments_col = db["goldenvision_comments"]
 gv_bans_col = db["goldenvision_bans"]
 gv_hosts_col = db["goldenvision_hosts"]
+
+_GROUP_SYNC_CACHE = {}
+
+
+def should_sync_group_meta(chat_id: int, ttl_seconds: int = 300) -> bool:
+    now = time.time()
+    last = _GROUP_SYNC_CACHE.get(int(chat_id), 0)
+    if (now - last) >= ttl_seconds:
+        _GROUP_SYNC_CACHE[int(chat_id)] = now
+        return True
+    return False
 
 
 def _default_25_weeks():
@@ -605,9 +617,6 @@ def list_gv_bans():
     return list(gv_bans_col.find({"banned": True}, {"_id": 0}))
 
 
-# ==========================================
-# MEVCUT SİSTEM & ETKİNLİK FONKSİYONLARI
-# ==========================================
 def init_db():
     try:
         users_col.create_index("user_id", unique=True)
@@ -633,22 +642,19 @@ def init_db():
 def seed_default_events():
     try:
         if events_col.count_documents({}) == 0:
-            default_items = [
-                {
-                    "event_id": 1001,
-                    "title": "GOLDENVISION",
-                    "subtitle": "25 Haftalık Saray Şarkı Yarışması",
-                    "icon": "👑",
-                    "badge": "CANLI",
-                    "description": "Ülkeni seç, şarkını sahneye taşı, 12-1 oylarıyla gecenin şampiyonunu belirle.",
-                    "schedule_time": "Sezon Aktif",
-                    "media_url": "",
-                    "options": ["Sahneye Gir 👑"],
-                    "active": True,
-                    "order": 1
-                }
-            ]
-            events_col.insert_many(default_items)
+            events_col.insert_one({
+                "event_id": 1001,
+                "title": "GOLDENVISION",
+                "subtitle": "25 Haftalık Saray Şarkı Yarışması",
+                "icon": "👑",
+                "badge": "CANLI",
+                "description": "Ülkeni seç, şarkını sahneye taşı, 12-1 oylarıyla gecenin şampiyonunu belirle.",
+                "schedule_time": "Sezon Aktif",
+                "media_url": "",
+                "options": ["Sahneye Gir 👑"],
+                "active": True,
+                "order": 1
+            })
     except Exception:
         pass
 
@@ -740,6 +746,7 @@ def register_bot_group(chat_id, title, photo_url=""):
         if photo_url:
             update_data["photo_url"] = photo_url
         groups_col.update_one({"chat_id": int(chat_id)}, {"$set": update_data}, upsert=True)
+        _GROUP_SYNC_CACHE[int(chat_id)] = time.time()
     except Exception:
         pass
 
@@ -920,7 +927,6 @@ def get_all_staff(chat_id=0):
         if chat_id and int(chat_id) != 0:
             query["chat_id"] = int(chat_id)
         rows = list(staff_col.find(query, {"_id": 0}))
-        # Benzersiz kullanıcı listesi + grup bazlı izin haritası eklensin
         by_user = {}
         for r in rows:
             uid = int(r["user_id"])
