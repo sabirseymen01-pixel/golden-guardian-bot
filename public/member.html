@@ -245,6 +245,7 @@
             display: none;
             flex-direction: column;
             overflow: hidden;
+            transition: filter 0.35s ease, transform 0.35s ease;
         }
         .gv-fullscreen-stage::before {
             content: "";
@@ -260,6 +261,10 @@
         }
         @keyframes crimsonGlitter { 0% { opacity: 0.5; } 100% { opacity: 1; } }
         .gv-fullscreen-stage.open { display: flex; }
+        .gv-fullscreen-stage.stage-frosted > :not(.festival-reveal-overlay) {
+            filter: blur(12px) brightness(0.45);
+            pointer-events: none;
+        }
 
         .gv-topbar {
             display: flex;
@@ -406,9 +411,27 @@
         .cell-twelve { background: linear-gradient(135deg, #ffd166, #d4af37); color: #240208; font-weight: 900; }
         .cell-pts { color: #ffd6de; font-weight: 800; }
 
-        .rank-row { display: flex; justify-content: space-between; align-items: center; background: rgba(68, 6, 18, 0.82); border: 1px solid rgba(255, 209, 102, 0.42); border-radius: 11px; padding: 9px 12px; font-size: 9px; }
-        .rank-pos { font-weight: 900; color: #ffd166; margin-right: 8px; }
-        .rank-score { font-weight: 900; color: #fff1b8; background: rgba(255, 209, 102, 0.18); padding: 4px 8px; border-radius: 8px; }
+        .rank-card-block {
+            background: linear-gradient(145deg, rgba(72, 6, 19, 0.88), rgba(32, 3, 9, 0.95));
+            border: 1px solid rgba(255, 209, 102, 0.45);
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .rank-row { display: flex; justify-content: space-between; align-items: center; font-size: 9px; gap: 8px; }
+        .rank-pos { font-weight: 900; color: #ffd166; margin-right: 6px; }
+        .rank-score { font-weight: 900; color: #fff1b8; background: rgba(255, 209, 102, 0.18); padding: 4px 8px; border-radius: 8px; flex-shrink: 0; }
+        .rank-notes-box {
+            font-size: 7.8px;
+            color: #f6d5dc;
+            background: rgba(20, 2, 6, 0.72);
+            border-left: 2px solid #ffd166;
+            padding: 6px 8px;
+            border-radius: 7px;
+            line-height: 1.4;
+        }
 
         .weeks-25-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
         .week-mini-box { background: rgba(58, 5, 15, 0.88); border: 1px solid rgba(255, 209, 102, 0.42); border-radius: 10px; padding: 7px 4px; text-align: center; }
@@ -416,22 +439,146 @@
         .week-mini-num { font-size: 8.5px; font-weight: 900; color: #fff1b0; }
         .week-mini-type { font-size: 6px; color: #f3c6cf; margin-top: 2px; }
 
+        /* MATLAŞMIŞ ŞÖLEN SAHNESİ & DALGALANAN DEV BAYRAK */
         .festival-reveal-overlay {
             position: fixed;
             inset: 0;
             z-index: 400;
-            background: radial-gradient(circle at 50% 20%, rgba(255, 209, 102, 0.34), rgba(26, 2, 10, 0.98) 70%);
+            background:
+                radial-gradient(circle at 50% 24%, rgba(255, 209, 102, 0.24), rgba(14, 2, 6, 0.78) 72%);
+            backdrop-filter: blur(22px) saturate(125%);
+            -webkit-backdrop-filter: blur(22px) saturate(125%);
             display: none;
             flex-direction: column;
             justify-content: space-between;
-            padding: 16px;
-            overflow-y: auto;
+            padding: 18px;
+            overflow: hidden;
         }
         .festival-reveal-overlay.open { display: flex; }
-        .firework-banner { text-align: center; padding: 14px; border-radius: 18px; background: linear-gradient(135deg, rgba(138, 12, 36, 0.92), rgba(56, 4, 14, 0.96)); border: 2px solid #ffd166; }
-        .reveal-spotlight-card { background: linear-gradient(145deg, rgba(92, 8, 24, 0.94), rgba(34, 2, 8, 0.98)); border: 2px solid #fff1b8; border-radius: 20px; padding: 18px; text-align: center; }
-        .reveal-flag-big { font-size: 46px; margin-bottom: 6px; }
-        .reveal-pts-big { font-size: 24px; font-weight: 900; color: #ffd166; margin-top: 6px; }
+
+        .firework-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 401;
+        }
+
+        .festival-content-layer {
+            position: relative;
+            z-index: 402;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .firework-banner {
+            text-align: center;
+            padding: 13px 14px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(138, 12, 36, 0.88), rgba(46, 4, 12, 0.94));
+            border: 2px solid #ffd166;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .reveal-spotlight-card {
+            background: linear-gradient(145deg, rgba(84, 7, 22, 0.86), rgba(26, 2, 7, 0.94));
+            border: 2px solid #fff1b8;
+            border-radius: 24px;
+            padding: 24px 16px;
+            text-align: center;
+            box-shadow: 0 22px 55px rgba(0, 0, 0, 0.7), 0 0 36px rgba(255, 209, 102, 0.28);
+            animation: stageCardPop 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .reveal-spotlight-card.champion-mode {
+            border-color: #ffd166;
+            box-shadow: 0 24px 65px rgba(255, 209, 102, 0.45), 0 0 55px rgba(255, 46, 99, 0.55);
+        }
+        @keyframes stageCardPop {
+            0% { transform: scale(0.92) translateY(10px); opacity: 0.4; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        .reveal-flag-wave {
+            font-size: 82px;
+            line-height: 1.08;
+            display: inline-block;
+            transform-origin: left center;
+            animation: royalFlagWave 1.7s ease-in-out infinite;
+            filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.65));
+            margin-bottom: 10px;
+        }
+        @keyframes royalFlagWave {
+            0%, 100% { transform: rotate(-3.5deg) scale(1) skewX(0deg); }
+            25% { transform: rotate(3.5deg) scale(1.05) skewX(4deg); }
+            50% { transform: rotate(-2.5deg) scale(1.02) skewX(-3deg); }
+            75% { transform: rotate(3deg) scale(1.06) skewX(3deg); }
+        }
+
+        .reveal-rank-pill {
+            display: inline-block;
+            background: rgba(255, 209, 102, 0.18);
+            border: 1px solid #ffd166;
+            color: #fff1b8;
+            font-size: 9px;
+            font-weight: 900;
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .reveal-user-profile {
+            font-size: 17px;
+            font-weight: 900;
+            color: #fff1b8;
+            margin-top: 4px;
+        }
+
+        .reveal-user-handle {
+            font-size: 10px;
+            font-weight: 700;
+            color: #ffd6de;
+            margin-top: 2px;
+        }
+
+        .reveal-country-line {
+            font-size: 11px;
+            font-weight: 800;
+            color: #ffd166;
+            margin-top: 8px;
+        }
+
+        .reveal-pts-big {
+            font-size: 26px;
+            font-weight: 900;
+            color: #ffffff;
+            margin-top: 10px;
+            text-shadow: 0 0 20px rgba(255, 209, 102, 0.8);
+        }
+
+        .finale-outro-box {
+            background: linear-gradient(145deg, rgba(124, 10, 32, 0.94), rgba(32, 2, 8, 0.98));
+            border: 2px solid #ffd166;
+            border-radius: 24px;
+            padding: 26px 18px;
+            text-align: center;
+            box-shadow: 0 20px 55px rgba(0, 0, 0, 0.75), 0 0 42px rgba(255, 209, 102, 0.35);
+        }
+
+        .finale-credit-text {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 209, 102, 0.35);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            color: #ffd166;
+            text-transform: uppercase;
+        }
 
         .glitter-toast {
             position: fixed;
@@ -572,7 +719,7 @@
                 </div>
                 <div class="palace-card">
                     <div class="palace-card-title">🏆 LİDERLİK VE AÇIK TABLO</div>
-                    <div id="gvRankingContainer" style="display:flex; flex-direction:column; gap:6px;"></div>
+                    <div id="gvRankingContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
                 </div>
             </div>
 
@@ -583,23 +730,44 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="festival-reveal-overlay" id="festivalOverlay">
-        <div class="firework-banner">
-            <div style="font-size:13px; font-weight:900; color:#fff1b8;">🎆 GOLDENVISION BÜYÜK FİNAL ŞENLİĞİ 🎆</div>
-            <div style="font-size:8.5px; color:#ffd6de; margin-top:3px;">Bayraklar ve puanlar sıra sıra açıklanıyor • Liderlik tablosu en sonda sunulur</div>
-        </div>
-        <div class="reveal-spotlight-card">
-            <div class="reveal-flag-big" id="revFlag">🏳️</div>
-            <div style="font-size:15px; font-weight:900; color:#fff1b8;" id="revCountry">Ülke</div>
-            <div style="font-size:10px; color:#f3c6cf; margin-top:3px;" id="revSong">Şarkı • Sanatçı</div>
-            <div class="reveal-pts-big" id="revScore">0 PUAN</div>
-            <div style="font-size:8px; color:#ffd166; margin-top:4px;" id="revCounter">0 / 0</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-            <button class="palace-gold-btn" onclick="stepFestivalReveal()">Sıradaki Ülkeyi Aç ›</button>
-            <button class="gv-exit-btn" onclick="closeFestivalAndShowRanking()">Liderlik Tablosuna Geç</button>
+        <!-- 🎆 MATLAŞMIŞ FİNAL ŞÖLENİ KATMANI -->
+        <div class="festival-reveal-overlay" id="festivalOverlay">
+            <canvas class="firework-canvas" id="fireworkCanvas"></canvas>
+            <div class="festival-content-layer">
+                <div class="firework-banner">
+                    <div style="font-size:13px; font-weight:900; color:#fff1b8;">🎆 GOLDENVISION FİNAL ŞÖLENİ 🎆</div>
+                    <div style="font-size:8.5px; color:#ffd6de; margin-top:3px;">Sıralama ve bayraklar sahnede • 1. sırada zirve havai fişek şöleni</div>
+                </div>
+
+                <div id="festivalSpotlightView">
+                    <div class="reveal-spotlight-card" id="revealCardBox">
+                        <div class="reveal-rank-pill" id="revRankBadge">SIRALAMA #1</div>
+                        <div class="reveal-flag-wave" id="revFlag">🏳️</div>
+                        <div class="reveal-user-profile" id="revUserProfile">Yarışmacı</div>
+                        <div class="reveal-user-handle" id="revUserHandle">@kullanici</div>
+                        <div class="reveal-country-line" id="revCountryLine">Ülke • "Şarkı"</div>
+                        <div class="reveal-pts-big" id="revScore">0 PUAN</div>
+                        <div style="font-size:8px; color:#ffd166; margin-top:6px;" id="revCounter">1 / 1</div>
+                    </div>
+                </div>
+
+                <div id="festivalOutroView" style="display:none;">
+                    <div class="finale-outro-box">
+                        <div style="font-size:30px; margin-bottom:8px;">👑🎉✨</div>
+                        <div style="font-size:15px; font-weight:900; color:#fff1b8;">Tebrikler Tüm Yarışmacılara!</div>
+                        <div style="font-size:9px; color:#ffd6de; margin-top:6px; line-height:1.5;">
+                            Harika bir sahne performansı ve heyecan yaşattınız. Şimdi matlaşma kalkıyor ve açık liderlik tablosu kullanıcı açıklamalarıyla açılıyor!
+                        </div>
+                        <div class="finale-credit-text">Breskavica ve Golden Ekibi sundu</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:8px;">
+                    <button class="palace-gold-btn" id="festivalNextBtn" onclick="stepFestivalReveal()">Sıradaki Bayrağı Aç ›</button>
+                    <button class="gv-exit-btn" onclick="closeFestivalAndShowRanking()">Açık Tabloya Geç</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -679,7 +847,6 @@
             else { playMlSfx('tap'); showGlitterToast(`${item.icon} ${item.title} Açıldı`); }
         }
 
-        // 189 Ülke Sözlüğü (TR & EN); bölgesel/listede olmayan ülkeler varsayılan 🏳️ döner
         const COUNTRY_FLAGS = {
             "afganistan": "🇦🇫", "afghanistan": "🇦🇫",
             "almanya": "🇩🇪", "germany": "🇩🇪",
@@ -831,8 +998,11 @@
 
         let gvOverviewData = null;
         let draftAllocations = {};
-        let festivalSequence = [];
+        let festivalOrderedList = [];
         let festivalIndex = 0;
+
+        let fwAnimId = null;
+        let fwParticles = [];
 
         async function loadMemberEvents() {
             const baseApps = [
@@ -862,6 +1032,7 @@
         function closeGoldenVision() {
             playMlSfx('tap');
             document.getElementById('gvStageModal').classList.remove('open');
+            document.getElementById('gvStageModal').classList.remove('stage-frosted');
         }
         function switchGvTab(tabKey) {
             playMlSfx('tap');
@@ -925,7 +1096,6 @@
                 `<div style="background:rgba(24,2,7,0.8); padding:6px 8px; border-radius:8px; font-size:8px;"><b style="color:#ffd166;">@${c.username}</b>: ${c.text}</div>`
             ).join('') || `<div class="palace-muted">Henüz yorum yok.</div>`;
 
-            // Dinamik puan skalası (2-3 şarkıda da kusursuz puan verilebilir)
             const votingContainer = document.getElementById('gvVotingListContainer');
             const entries = data.entries || [];
             if (!entries.length) {
@@ -948,14 +1118,13 @@
                 }).join('');
             }
 
-            renderScoreMatrixAndRanking(data.ranking || []);
+            renderScoreMatrixAndRanking(data.ranking || [], data.comments || []);
 
             document.getElementById('gv25WeeksGrid').innerHTML = (data.weeks || []).map(w =>
                 `<div class="week-mini-box ${Number(w.week) === Number(week) ? 'is-current' : ''}"><div class="week-mini-num">H${w.week}</div><div class="week-mini-type">${w.week_type}</div></div>`
             ).join('');
 
-            // Host BİTİR butonuna bastığında şenlik finali otomatik açılır
-            if (st.grand_finale_triggered && !festivalAutoShown && (data.reveal_sequence || []).length > 0) {
+            if (st.grand_finale_triggered && !festivalAutoShown && (data.ranking || []).length > 0) {
                 festivalAutoShown = true;
                 startFestivalSequence();
             }
@@ -1046,7 +1215,7 @@
             }
         }
 
-        function renderScoreMatrixAndRanking(ranking) {
+        function renderScoreMatrixAndRanking(ranking, comments = []) {
             const matrixEl = document.getElementById('gvMatrixContainer');
             const rankEl = document.getElementById('gvRankingContainer');
             if (!ranking.length) {
@@ -1068,33 +1237,159 @@
                 return `<tr><td style="text-align:left; font-weight:800;">${pos} ${row.flag} ${row.country}</td>${tds}<td style="font-weight:900; color:#fff1b8;">${row.total}</td></tr>`;
             }).join('');
             matrixEl.innerHTML = `<table class="score-matrix-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
-            rankEl.innerHTML = ranking.map((row, idx) => `<div class="rank-row"><div><span class="rank-pos">${String(idx + 1).padStart(2, '0')}</span><b>${row.flag} ${row.country}</b> — ${row.song}</div><div class="rank-score">${row.total}</div></div>`).join('');
+
+            rankEl.innerHTML = ranking.map((row, idx) => {
+                const entryComments = (comments || []).filter(c => Number(c.entry_id) === Number(row.entry_id));
+                const voteDetails = Object.values(row.votes_from || {}).map(v => `${v.flag} ${v.pts}p`).join(' • ');
+                const commentLines = entryComments.map(c => `💬 <b>@${c.username}</b>: ${c.text}`).join('<br>');
+                const notesHtml = (voteDetails || commentLines)
+                    ? `<div class="rank-notes-box">
+                        ${voteDetails ? `<div>🗳️ <b>Oylar:</b> ${voteDetails}</div>` : ''}
+                        ${commentLines ? `<div style="margin-top:3px;">${commentLines}</div>` : ''}
+                       </div>`
+                    : `<div class="rank-notes-box">Henüz kullanıcı açıklaması veya yorum eklenmedi.</div>`;
+
+                const ownerTag = row.username ? `@${row.username}` : (row.full_name || '');
+                return `
+                    <div class="rank-card-block">
+                        <div class="rank-row">
+                            <div>
+                                <span class="rank-pos">#${idx + 1}</span>
+                                <b>${row.flag} ${row.country}</b> — ${row.song} <span style="color:#ffd6de; font-size:7.5px;">(${ownerTag})</span>
+                            </div>
+                            <div class="rank-score">${row.total} PUAN</div>
+                        </div>
+                        ${notesHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function spawnFireworkBurst(intensity = 1) {
+            const canvas = document.getElementById('fireworkCanvas');
+            if (!canvas) return;
+            const w = canvas.width = window.innerWidth;
+            const h = canvas.height = window.innerHeight;
+            const burstCount = Math.max(1, Math.min(8, intensity));
+            const colors = ['#ffd166', '#ff2e63', '#fff1b8', '#ff758f', '#2ed573', '#70a1ff'];
+
+            for (let b = 0; b < burstCount; b++) {
+                const cx = w * (0.14 + Math.random() * 0.72);
+                const cy = h * (0.14 + Math.random() * 0.46);
+                const perBurst = 26 + intensity * 15;
+                for (let i = 0; i < perBurst; i++) {
+                    const angle = (Math.PI * 2 * i) / perBurst + Math.random() * 0.25;
+                    const speed = 2.0 + Math.random() * (3.6 + intensity * 1.4);
+                    fwParticles.push({
+                        x: cx,
+                        y: cy,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        alpha: 1,
+                        decay: 0.011 + Math.random() * 0.01,
+                        size: 2.2 + Math.random() * (2.2 + intensity * 0.45),
+                        color: colors[Math.floor(Math.random() * colors.length)]
+                    });
+                }
+            }
+
+            if (!fwAnimId) {
+                const ctx = canvas.getContext('2d');
+                const loop = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    fwParticles = fwParticles.filter(p => p.alpha > 0.02);
+                    fwParticles.forEach(p => {
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += 0.045;
+                        p.alpha -= p.decay;
+                        ctx.save();
+                        ctx.globalAlpha = Math.max(0, p.alpha);
+                        ctx.fillStyle = p.color;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    });
+                    if (fwParticles.length > 0 || document.getElementById('festivalOverlay').classList.contains('open')) {
+                        fwAnimId = requestAnimationFrame(loop);
+                    } else {
+                        fwAnimId = null;
+                    }
+                };
+                fwAnimId = requestAnimationFrame(loop);
+            }
         }
 
         function startFestivalSequence() {
-            const seq = (gvOverviewData && gvOverviewData.reveal_sequence) || [];
-            if (!seq.length) return showGlitterToast("Açıklanacak puan bulunmuyor.");
-            festivalSequence = seq; festivalIndex = 0;
-            playMlSfx('twelve');
+            const ranking = (gvOverviewData && gvOverviewData.ranking) || [];
+            if (!ranking.length) return showGlitterToast("Açıklanacak sıralama bulunmuyor.");
+
+            festivalOrderedList = [...ranking].reverse();
+            festivalIndex = 0;
+            fwParticles = [];
+            document.getElementById('gvStageModal').classList.add('stage-frosted');
+            document.getElementById('festivalSpotlightView').style.display = 'block';
+            document.getElementById('festivalOutroView').style.display = 'none';
+            document.getElementById('festivalNextBtn').innerText = "Sıradaki Bayrağı Aç ›";
+            document.getElementById('festivalNextBtn').onclick = stepFestivalReveal;
             document.getElementById('festivalOverlay').classList.add('open');
             paintFestivalStep();
         }
+
         function paintFestivalStep() {
-            const item = festivalSequence[festivalIndex];
+            const item = festivalOrderedList[festivalIndex];
             if (!item) return;
+
+            const totalCount = festivalOrderedList.length;
+            const rankNumber = totalCount - festivalIndex;
+            const isFirstPlace = rankNumber === 1;
+            const intensity = isFirstPlace ? 8 : (rankNumber === 2 ? 4 : (rankNumber === 3 ? 3 : 1));
+
+            const cardBox = document.getElementById('revealCardBox');
+            cardBox.classList.toggle('champion-mode', isFirstPlace);
+
+            spawnFireworkBurst(intensity);
+            playMlSfx(isFirstPlace ? 'twelve' : 'tap');
+
+            const profileName = item.full_name || item.username || "Yarışmacı";
+            const handleText = item.username ? `@${item.username}` : `ID: ${item.user_id || ""}`;
+
+            document.getElementById('revRankBadge').innerText = isFirstPlace ? "👑 #1 ŞAMPİYON" : `SIRALAMA #${rankNumber}`;
             document.getElementById('revFlag').innerText = item.flag || "🏳️";
-            document.getElementById('revCountry').innerText = `${item.country} (Anonim Sahne)`;
-            document.getElementById('revSong').innerText = `${item.song} — ${item.artist}`;
+            document.getElementById('revUserProfile').innerText = profileName;
+            document.getElementById('revUserHandle').innerText = handleText;
+            document.getElementById('revCountryLine').innerText = `${item.country} • "${item.song}" (${item.artist})`;
             document.getElementById('revScore').innerText = `${item.total} PUAN`;
-            document.getElementById('revCounter').innerText = `Açıklanan: ${festivalIndex + 1} / ${festivalSequence.length}`;
+            document.getElementById('revCounter').innerText = `Bayrak ${festivalIndex + 1} / ${totalCount}`;
+            document.getElementById('festivalNextBtn').innerText = (festivalIndex + 1 < totalCount) ? "Sıradaki Bayrağı Aç ›" : "Şöleni Bitir & Tebrik ›";
         }
+
         function stepFestivalReveal() {
-            if (festivalIndex + 1 < festivalSequence.length) { festivalIndex += 1; playMlSfx('twelve'); paintFestivalStep(); }
-            else closeFestivalAndShowRanking();
+            if (festivalIndex + 1 < festivalOrderedList.length) {
+                festivalIndex += 1;
+                paintFestivalStep();
+            } else {
+                showFestivalOutro();
+            }
         }
+
+        function showFestivalOutro() {
+            spawnFireworkBurst(8);
+            playMlSfx('twelve');
+            document.getElementById('festivalSpotlightView').style.display = 'none';
+            document.getElementById('festivalOutroView').style.display = 'block';
+            document.getElementById('festivalNextBtn').innerText = "Açık Liderlik Tablosunu Aç 🏆";
+            document.getElementById('festivalNextBtn').onclick = closeFestivalAndShowRanking;
+        }
+
         function closeFestivalAndShowRanking() {
             playMlSfx('seal');
+            fwParticles = [];
             document.getElementById('festivalOverlay').classList.remove('open');
+            document.getElementById('gvStageModal').classList.remove('stage-frosted');
+            document.getElementById('festivalNextBtn').innerText = "Sıradaki Bayrağı Aç ›";
+            document.getElementById('festivalNextBtn').onclick = stepFestivalReveal;
             switchGvTab('tablo');
         }
 
