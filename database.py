@@ -21,6 +21,8 @@ event_votes_col = db["event_votes"]
 gv_state_col = db["goldenvision_state"]
 gv_weeks_col = db["goldenvision_weeks"]
 gv_entries_col = db["goldenvision_entries"]
+gv_pending_col = db["goldenvision_pending_entries"]
+gv_notifications_col = db["goldenvision_notifications"]
 gv_ballots_col = db["goldenvision_ballots"]
 gv_comments_col = db["goldenvision_comments"]
 gv_bans_col = db["goldenvision_bans"]
@@ -29,63 +31,55 @@ gv_hosts_col = db["goldenvision_hosts"]
 
 def _default_25_weeks():
     week_types = {
-        1: ("ÇAKILI HAFTA", "Çakılı Hafta • Tek Ülke / Farklı Şarkı", "3 hafta boyunca tek ülke; her hafta farklı şarkı (75M altı)."),
-        2: ("ÇAKILI HAFTA", "Çakılı Hafta • Tek Ülke / Farklı Şarkı", "3 hafta boyunca tek ülke; her hafta farklı şarkı (75M altı)."),
-        3: ("ÇAKILI HAFTA", "Çakılı Hafta • Tek Ülke / Farklı Şarkı", "3 hafta boyunca tek ülke; her hafta farklı şarkı (75M altı)."),
-        4: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        5: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        6: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        7: ("ÇİFT HAFTASI", "Çift Haftası • İkili Sahne", "Yarışmacılar 2'şer kişilik çift olarak eşleşir; çift 1 ülke ve 1 şarkı ile yarışır."),
-        8: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        9: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        10: ("ÖZEL HAFTA", "Özel Konsept / Saygı Haftası", "Anketle seçilen konsept veya sanatçı saygı haftası."),
-        11: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        12: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        13: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        14: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        15: ("ÖZEL HAFTA", "Özel Konsept / Saygı Haftası", "Anketle seçilen konsept veya sanatçı saygı haftası."),
-        16: ("ÇAKILI HAFTA", "Çakılı Hafta • Tek Ülke / Farklı Şarkı", "3 hafta boyunca tek ülke; her hafta farklı şarkı (75M altı)."),
-        17: ("ÇAKILI HAFTA", "Çakılı Hafta • Tek Ülke / Farklı Şarkı", "3 hafta boyunca tek ülke; her hafta farklı şarkı (75M altı)."),
-        18: ("ÇAKILI HAFTA", "Çakılı Hafta • Tek Ülke / Farklı Şarkı", "3 hafta boyunca tek ülke; her hafta farklı şarkı (75M altı)."),
-        19: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        20: ("ÖZEL HAFTA", "Özel Konsept / Saygı Haftası", "Anketle seçilen konsept veya sanatçı saygı haftası."),
-        21: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        22: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        23: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        24: ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (75M altı, ABD haftada 1)."),
-        25: ("SECOND CHANCE", "Second Chance • Büyük Şans", "25 hafta boyunca yarışmış ve kazanmasını istediğin şarkıyla sahneye çık."),
+        1: ("ÇAKILI HAFTA", "Çakılı Hafta • Tek Ülke / Farklı Şarkı", "3 hafta tek ülke; her hafta farklı şarkı. Standart 75M, ABD & TR 50M."),
+        2: ("ÇAKILI HAFTA", "Çakılı Hafta • Tek Ülke / Farklı Şarkı", "3 hafta tek ülke; her hafta farklı şarkı. Standart 75M, ABD & TR 50M."),
+        3: ("ÇAKILI HAFTA", "Çakılı Hafta • Tek Ülke / Farklı Şarkı", "3 hafta tek ülke; her hafta farklı şarkı. Standart 75M, ABD & TR 50M."),
+        7: ("ÇİFT HAFTASI", "Çift Haftası • İkili Sahne", "2'şer kişilik çiftler 1 ülke ve 1 şarkı ile yarışır."),
+        10: ("ÖZEL HAFTA", "Özel Konsept / Saygı Haftası", "Konsept / saygı haftası (Örn: Madonna Haftası — izlenme sınırı esnek)."),
+        15: ("ÖZEL HAFTA", "Özel Konsept / Saygı Haftası", "Konsept / saygı haftası."),
+        16: ("ÇAKILI HAFTA", "Çakılı Hafta • Tek Ülke / Farklı Şarkı", "3 hafta tek ülke; her hafta farklı şarkı."),
+        17: ("ÇAKILI HAFTA", "Çakılı Hafta • Tek Ülke / Farklı Şarkı", "3 hafta tek ülke; her hafta farklı şarkı."),
+        18: ("ÇAKILI HAFTA", "Çakılı Hafta • Tek Ülke / Farklı Şarkı", "3 hafta tek ülke; her hafta farklı şarkı."),
+        20: ("ÖZEL HAFTA", "Özel Konsept / Saygı Haftası", "Özel konsept / saygı haftası."),
+        25: ("SECOND CHANCE", "Second Chance • Büyük Şans", "Sezonun favori/yarışmış şarkılarıyla ikinci şans haftası."),
     }
     out = []
     for w in range(1, 26):
-        wtype, concept, rule = week_types.get(w, ("NORMAL HAFTA", "Standart Eurovision Haftası", "75M izlenme sınırı geçerlidir."))
+        wtype, concept, rule = week_types.get(
+            w,
+            ("NORMAL HAFTA", "Standart Eurovision Haftası", "3 ülke tercihi; her hafta farklı ülke ve şarkıcı (Genel 75M, ABD & TR 50M).")
+        )
         out.append({
             "week": w,
             "week_type": wtype,
             "concept": concept,
             "rule_note": rule,
             "song_duration_sec": 120,
+            "no_view_limit": (wtype == "ÖZEL HAFTA"),
             "submissions_open": True,
             "voting_open": False,
             "comments_open": False,
-            "results_published": False
+            "results_published": False,
+            "grand_finale_triggered": False
         })
     return out
 
 
 def ensure_season_initialized(season: int):
     season = max(1, int(season))
-    state = gv_state_col.find_one({"season": season})
-    if not state:
+    if not gv_state_col.find_one({"season": season}):
         gv_state_col.insert_one({
             "season": season,
             "current_week": 1,
             "paused": False,
-            "max_views_million": 75,
+            "max_views_million": 75.0,
+            "special_country_limit_million": 50.0,
             "song_duration_sec": 120,
             "submissions_open": True,
             "voting_open": False,
             "comments_open": False,
             "results_published": False,
+            "grand_finale_triggered": False,
             "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
         })
     if gv_weeks_col.count_documents({"season": season}) < 25:
@@ -117,9 +111,24 @@ def set_active_season(season: int, reset_week_to_one: bool = False):
     if reset_week_to_one:
         gv_state_col.update_one(
             {"season": season},
-            {"$set": {"current_week": 1, "paused": False, "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")}}
+            {"$set": {
+                "current_week": 1,
+                "paused": False,
+                "grand_finale_triggered": False,
+                "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+            }}
         )
     return season
+
+
+def normalize_views_to_millions(amount: float, unit: str) -> float:
+    val = float(amount or 0)
+    u = (unit or "M").strip().upper()
+    if u in ["B", "MİLYAR", "MILYAR", "BILLION"]:
+        return round(val * 1000.0, 3)
+    if u in ["K", "BİN", "BIN", "THOUSAND"]:
+        return round(val / 1000.0, 4)
+    return round(val, 3)  # M = Milyon
 
 
 def get_gv_overview(season: int = None, user_id: int = 0):
@@ -131,11 +140,10 @@ def get_gv_overview(season: int = None, user_id: int = 0):
     active_week_obj = next((w for w in weeks if int(w.get("week", 1)) == cur_week), weeks[0] if weeks else {})
 
     entries = list(gv_entries_col.find({"season": s, "week": cur_week}, {"_id": 0}))
+    pending_entries = list(gv_pending_col.find({"season": s, "week": cur_week}, {"_id": 0}))
     ballots = list(gv_ballots_col.find({"season": s, "week": cur_week}, {"_id": 0}))
     comments = list(gv_comments_col.find({"season": s, "week": cur_week}, {"_id": 0}).sort("_id", -1).limit(50))
 
-    # Puan hesaplama (12, 10, 8, 7, 6, 5, 4, 3, 2, 1)
-    # entry_id -> total_score ve voter_id -> {entry_id: pts}
     score_map = {}
     for e in entries:
         eid = e["entry_id"]
@@ -145,6 +153,7 @@ def get_gv_overview(season: int = None, user_id: int = 0):
             "flag": e.get("flag", "🏳️"),
             "song": e.get("song", ""),
             "artist": e.get("artist", ""),
+            "song_url": e.get("song_url", ""),
             "views_m": e.get("views_m", 0),
             "pair_partner": e.get("pair_partner", ""),
             "user_id": e.get("user_id"),
@@ -158,7 +167,7 @@ def get_gv_overview(season: int = None, user_id: int = 0):
         voter_id = str(b.get("voter_id"))
         voter_flag = b.get("voter_flag", "🏳️")
         voter_code = b.get("voter_code", voter_id[-3:])
-        allocations = b.get("allocations", {})  # {str(entry_id): pts}
+        allocations = b.get("allocations", {})
         for eid_str, pts in allocations.items():
             eid = int(eid_str)
             p = int(pts)
@@ -178,27 +187,36 @@ def get_gv_overview(season: int = None, user_id: int = 0):
         reverse=True
     )
 
+    # Sıra sıra (düşükten yükseğe) final şovu dizilimi (anonim/gizli yarışmacı görünümü)
+    reveal_sequence = [
+        {
+            "entry_id": r["entry_id"],
+            "country": r["country"],
+            "flag": r["flag"],
+            "song": r["song"],
+            "artist": r["artist"],
+            "total": r["total"],
+            "twelve_count": r["twelve_count"]
+        }
+        for r in reversed(ranking)
+    ]
+
     my_entry = None
+    my_pending = None
     my_ballot = None
     ban_info = None
+    my_notifications = []
+
     if user_id:
         my_entry = next((e for e in entries if int(e.get("user_id", 0)) == int(user_id)), None)
+        my_pending = next((p for p in pending_entries if int(p.get("user_id", 0)) == int(user_id)), None)
         my_ballot = next((b for b in ballots if int(b.get("voter_id", 0)) == int(user_id)), None)
         ban_doc = gv_bans_col.find_one({"user_id": int(user_id)}, {"_id": 0})
         if ban_doc:
             ban_info = ban_doc
-
-    # Kullanıcının önceki haftalarda kullandığı ülkeler ve ABD kullanımı
-    used_countries_season = []
-    usa_used_count = 0
-    if user_id:
-        past_entries = list(gv_entries_col.find({"season": s, "user_id": int(user_id)}, {"_id": 0}))
-        for pe in past_entries:
-            c_name = (pe.get("country") or "").strip()
-            if c_name:
-                used_countries_season.append({"week": pe.get("week"), "country": c_name, "artist": pe.get("artist", ""), "song": pe.get("song", "")})
-                if c_name.upper() in ["USA", "ABD", "UNITED STATES", "AMERİKA"]:
-                    usa_used_count += 1
+        my_notifications = list(
+            gv_notifications_col.find({"user_id": int(user_id)}, {"_id": 0}).sort("_id", -1).limit(10)
+        )
 
     all_seasons = sorted([int(x["season"]) for x in gv_state_col.find({"season": {"$exists": True}}, {"season": 1}) if x.get("season")])
     if s not in all_seasons:
@@ -213,21 +231,27 @@ def get_gv_overview(season: int = None, user_id: int = 0):
         "active_week": active_week_obj,
         "weeks": weeks,
         "entries": entries,
+        "pending_entries": pending_entries,
         "ranking": ranking,
+        "reveal_sequence": reveal_sequence,
         "ballots_count": len(ballots),
         "comments": comments,
         "my_entry": my_entry,
+        "my_pending": my_pending,
         "my_ballot": my_ballot,
         "ban_info": ban_info,
-        "used_countries_season": used_countries_season,
-        "usa_used_count": usa_used_count
+        "my_notifications": my_notifications
     }
 
 
 def update_gv_state(season: int, updates: dict):
     season = int(season)
     ensure_season_initialized(season)
-    allowed = {"current_week", "paused", "max_views_million", "song_duration_sec", "submissions_open", "voting_open", "comments_open", "results_published"}
+    allowed = {
+        "current_week", "paused", "max_views_million", "special_country_limit_million",
+        "song_duration_sec", "submissions_open", "voting_open", "comments_open",
+        "results_published", "grand_finale_triggered"
+    }
     clean = {k: v for k, v in updates.items() if k in allowed}
     clean["updated_at"] = datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
     gv_state_col.update_one({"season": season}, {"$set": clean}, upsert=True)
@@ -242,21 +266,49 @@ def update_gv_state(season: int, updates: dict):
                     "voting_open": wk.get("voting_open", False),
                     "comments_open": wk.get("comments_open", False),
                     "results_published": wk.get("results_published", False),
+                    "grand_finale_triggered": wk.get("grand_finale_triggered", False),
                     "song_duration_sec": wk.get("song_duration_sec", 120)
                 }}
             )
+
+
+def trigger_grand_finale(season: int, week: int):
+    season = int(season)
+    week = int(week)
+    ensure_season_initialized(season)
+    gv_state_col.update_one(
+        {"season": season},
+        {"$set": {
+            "voting_open": False,
+            "results_published": True,
+            "grand_finale_triggered": True,
+            "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        }},
+        upsert=True
+    )
+    gv_weeks_col.update_one(
+        {"season": season, "week": week},
+        {"$set": {"voting_open": False, "results_published": True, "grand_finale_triggered": True}}
+    )
 
 
 def update_gv_week(season: int, week: int, updates: dict):
     season = int(season)
     week = int(week)
     ensure_season_initialized(season)
-    allowed = {"week_type", "concept", "rule_note", "song_duration_sec", "submissions_open", "voting_open", "comments_open", "results_published"}
+    allowed = {
+        "week_type", "concept", "rule_note", "song_duration_sec",
+        "no_view_limit", "submissions_open", "voting_open",
+        "comments_open", "results_published", "grand_finale_triggered"
+    }
     clean = {k: v for k, v in updates.items() if k in allowed}
     gv_weeks_col.update_one({"season": season, "week": week}, {"$set": clean}, upsert=True)
     st = gv_state_col.find_one({"season": season}) or {}
     if int(st.get("current_week", 1)) == week:
-        sync_keys = {k: v for k, v in clean.items() if k in {"submissions_open", "voting_open", "comments_open", "results_published", "song_duration_sec"}}
+        sync_keys = {k: v for k, v in clean.items() if k in {
+            "submissions_open", "voting_open", "comments_open",
+            "results_published", "grand_finale_triggered", "song_duration_sec"
+        }}
         if sync_keys:
             gv_state_col.update_one({"season": season}, {"$set": sync_keys})
 
@@ -269,12 +321,33 @@ def restart_gv_week(season: int, week: int):
     gv_comments_col.delete_many({"season": season, "week": week})
     gv_state_col.update_one(
         {"season": season},
-        {"$set": {"paused": False, "results_published": False, "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")}}
+        {"$set": {
+            "paused": False,
+            "results_published": False,
+            "grand_finale_triggered": False,
+            "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        }}
     )
-    gv_weeks_col.update_one({"season": season, "week": week}, {"$set": {"results_published": False}})
+    gv_weeks_col.update_one(
+        {"season": season, "week": week},
+        {"$set": {"results_published": False, "grand_finale_triggered": False}}
+    )
 
 
-def submit_gv_entry(season: int, week: int, user_id: int, username: str, full_name: str, countries_list: list, country: str, flag: str, artist: str, song: str, views_m: float, pair_partner: str = ""):
+def _is_usa_or_turkey(country_name: str) -> str:
+    c = (country_name or "").strip().lower()
+    if c in ["usa", "abd", "united states", "united states of america", "amerika", "birleşik devletler"]:
+        return "USA"
+    if c in ["turkey", "türkiye", "turkiye", "tr"]:
+        return "TURKEY"
+    return ""
+
+
+def submit_gv_entry(
+    season: int, week: int, user_id: int, username: str, full_name: str,
+    countries_list: list, country: str, flag: str, artist: str, song: str,
+    song_url: str, views_m: float, pair_partner: str = ""
+):
     season = int(season)
     week = int(week)
     ensure_season_initialized(season)
@@ -289,12 +362,9 @@ def submit_gv_entry(season: int, week: int, user_id: int, username: str, full_na
     if not st.get("submissions_open", True):
         return {"ok": False, "error": "Bu hafta için katılım penceresi kapalı."}
 
-    max_views = float(st.get("max_views_million", 75))
-    if float(views_m or 0) > max_views:
-        return {"ok": False, "error": f"Şarkı izlenmesi {max_views}M sınırını aşamaz!"}
-
     wk_doc = gv_weeks_col.find_one({"season": season, "week": week}) or {}
     wtype = (wk_doc.get("week_type") or "").upper()
+    no_view_limit = bool(wk_doc.get("no_view_limit", False))
 
     clean_countries = [c.strip() for c in (countries_list or []) if str(c).strip()]
     primary_country = (country or (clean_countries[0] if clean_countries else "")).strip()
@@ -304,30 +374,38 @@ def submit_gv_entry(season: int, week: int, user_id: int, username: str, full_na
     if "ÇİFT" not in wtype and "SECOND CHANCE" not in wtype and len(clean_countries) < 3:
         return {"ok": False, "error": "Bu formatta 3 ülke tercihi girilmelidir (Örn: USA, UK, Gana)."}
 
-    # ABD kontrolü (sezon içinde en fazla 1 kez)
-    all_user_entries = list(gv_entries_col.find({"season": season, "user_id": int(user_id)}))
-    usa_count = sum(1 for x in all_user_entries if (x.get("country") or "").strip().upper() in ["USA", "ABD", "UNITED STATES", "AMERİKA"])
-    if primary_country.upper() in ["USA", "ABD", "UNITED STATES", "AMERİKA"]:
-        already_this_week = any(int(x.get("week", -1)) == week and (x.get("country") or "").strip().upper() in ["USA", "ABD", "UNITED STATES", "AMERİKA"] for x in all_user_entries)
-        if usa_count >= 1 and not already_this_week:
-            return {"ok": False, "error": "ABD (USA) her yarışmacı tarafından 1 kez alınabilir!"}
+    # İzlenme sınırı kontrolü (Konsept haftalarında sınır esnek/yok; aksi halde ABD/TR 50M, diğerleri 75M)
+    v_mil = float(views_m or 0)
+    if not no_view_limit:
+        special_tag = _is_usa_or_turkey(primary_country)
+        special_cap = float(st.get("special_country_limit_million", 50.0))
+        general_cap = float(st.get("max_views_million", 75.0))
+        if special_tag in ["USA", "TURKEY"]:
+            if v_mil > special_cap:
+                return {"ok": False, "error": f"{primary_country} için izlenme sınırı {special_cap:g}M (Milyon) olmalıdır!"}
+        else:
+            if v_mil > general_cap:
+                return {"ok": False, "error": f"Genel izlenme sınırı {general_cap:g}M (Milyon) olmalıdır!"}
 
-    # Aynı ülkeyi tekrar alma kontrolü (Çakılı Hafta hariç)
+    all_user_entries = list(gv_entries_col.find({"season": season, "user_id": int(user_id)}))
+    usa_count = sum(1 for x in all_user_entries if _is_usa_or_turkey(x.get("country", "")) == "USA")
+    if _is_usa_or_turkey(primary_country) == "USA":
+        already_this_week = any(int(x.get("week", -1)) == week and _is_usa_or_turkey(x.get("country", "")) == "USA" for x in all_user_entries)
+        if usa_count >= 1 and not already_this_week:
+            return {"ok": False, "error": "ABD (USA) her yarışmacı tarafından sezonda 1 kez alınabilir!"}
+
     if "ÇAKILI" not in wtype:
         same_country_past = [x for x in all_user_entries if int(x.get("week", -1)) != week and (x.get("country") or "").strip().lower() == primary_country.lower()]
         if same_country_past:
             return {"ok": False, "error": f"{primary_country} ülkesi bu sezonda zaten kullanıldı!"}
 
-    # Aynı şarkıcıyı haftada en fazla 3 kez seçme kontrolü
     same_artist_count = sum(1 for x in all_user_entries if (x.get("artist") or "").strip().lower() == artist.strip().lower())
     if same_artist_count > 3:
         return {"ok": False, "error": f"{artist} sanatçısı sınırını aştı!"}
 
-    existing = gv_entries_col.find_one({"season": season, "week": week, "user_id": int(user_id)})
-    entry_id = int(existing["entry_id"]) if existing else int(datetime.datetime.now().timestamp() * 1000)
-
+    pending_id = int(datetime.datetime.now().timestamp() * 1000)
     doc = {
-        "entry_id": entry_id,
+        "pending_id": pending_id,
         "season": season,
         "week": week,
         "user_id": int(user_id),
@@ -338,12 +416,65 @@ def submit_gv_entry(season: int, week: int, user_id: int, username: str, full_na
         "flag": (flag or "🏳️").strip(),
         "artist": artist.strip(),
         "song": song.strip(),
-        "views_m": float(views_m or 0),
+        "song_url": (song_url or "").strip(),
+        "views_m": v_mil,
         "pair_partner": pair_partner.strip(),
-        "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        "status": "pending",
+        "created_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
     }
-    gv_entries_col.update_one({"season": season, "week": week, "user_id": int(user_id)}, {"$set": doc}, upsert=True)
-    return {"ok": True, "entry": doc}
+    gv_pending_col.update_one({"season": season, "week": week, "user_id": int(user_id)}, {"$set": doc}, upsert=True)
+    return {"ok": True, "pending": doc}
+
+
+def review_gv_pending_entry(season: int, week: int, pending_id: int, approve: bool, reject_reason: str = ""):
+    season = int(season)
+    week = int(week)
+    p_doc = gv_pending_col.find_one({"pending_id": int(pending_id)})
+    if not p_doc:
+        return {"ok": False, "error": "Bekleyen başvuru bulunamadı."}
+
+    target_uid = int(p_doc["user_id"])
+    gv_pending_col.delete_one({"pending_id": int(pending_id)})
+
+    if approve:
+        existing = gv_entries_col.find_one({"season": season, "week": week, "user_id": target_uid})
+        entry_id = int(existing["entry_id"]) if existing else int(datetime.datetime.now().timestamp() * 1000)
+        approved_doc = {
+            "entry_id": entry_id,
+            "season": season,
+            "week": week,
+            "user_id": target_uid,
+            "username": p_doc.get("username", ""),
+            "full_name": p_doc.get("full_name", ""),
+            "countries": p_doc.get("countries", []),
+            "country": p_doc.get("country", ""),
+            "flag": p_doc.get("flag", "🏳️"),
+            "artist": p_doc.get("artist", ""),
+            "song": p_doc.get("song", ""),
+            "song_url": p_doc.get("song_url", ""),
+            "views_m": p_doc.get("views_m", 0),
+            "pair_partner": p_doc.get("pair_partner", ""),
+            "approved_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        }
+        gv_entries_col.update_one({"season": season, "week": week, "user_id": target_uid}, {"$set": approved_doc}, upsert=True)
+        gv_notifications_col.insert_one({
+            "user_id": target_uid,
+            "type": "approved",
+            "title": "Başvurun Onaylandı 👑",
+            "message": f"{approved_doc['flag']} {approved_doc['country']} — '{approved_doc['song']}' yarışma listesine eklendi.",
+            "timestamp": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        })
+        return {"ok": True, "approved": True, "entry": approved_doc}
+    else:
+        reason_txt = (reject_reason or "Host tarafından katılım talebiniz reddedildi.").strip()
+        gv_notifications_col.insert_one({
+            "user_id": target_uid,
+            "type": "rejected",
+            "title": "Başvurun Reddedildi ❌",
+            "message": f"{p_doc.get('flag', '🏳️')} {p_doc.get('country', '')} — '{p_doc.get('song', '')}' başvurusu silindi. Sebep: {reason_txt}",
+            "timestamp": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+        })
+        return {"ok": True, "approved": False, "rejected_user_id": target_uid}
 
 
 def submit_gv_ballot(season: int, week: int, voter_id: int, voter_username: str, voter_flag: str, allocations: dict):
@@ -445,7 +576,6 @@ def list_gv_hosts():
 
 
 def apply_gv_penalty(target_user_id: int, mode: str, reason: str = ""):
-    # mode: 'leak_first' (3 hafta yarışma banı) | 'leak_repeat' (tam yarışma/grup banı) | 'clear'
     uid = int(target_user_id)
     if mode == "clear":
         gv_bans_col.delete_one({"user_id": uid})
@@ -492,6 +622,7 @@ def init_db():
         event_votes_col.create_index([("event_id", 1), ("user_id", 1)], unique=True)
         gv_weeks_col.create_index([("season", 1), ("week", 1)], unique=True)
         gv_entries_col.create_index([("season", 1), ("week", 1), ("user_id", 1)], unique=True)
+        gv_pending_col.create_index([("season", 1), ("week", 1), ("user_id", 1)], unique=True)
         gv_ballots_col.create_index([("season", 1), ("week", 1), ("voter_id", 1)], unique=True)
         gv_bans_col.create_index("user_id", unique=True)
         gv_hosts_col.create_index("user_id", unique=True)
@@ -517,32 +648,6 @@ def seed_default_events():
                     "options": ["Sahneye Gir 👑"],
                     "active": True,
                     "order": 1
-                },
-                {
-                    "event_id": 1002,
-                    "title": "Mistik Tarot Gecesi",
-                    "subtitle": "Kader & Aşk Kehanetleri",
-                    "icon": "🔮",
-                    "badge": "VIP",
-                    "description": "Kartlar senin için açılıyor. Aşk, kariyer ve gecenin sürpriz enerjisini keşfet.",
-                    "schedule_time": "Özel Gala • 23:00",
-                    "media_url": "",
-                    "options": ["Kart Çek ✨", "Sıraya Gir 🌙"],
-                    "active": True,
-                    "order": 2
-                },
-                {
-                    "event_id": 1003,
-                    "title": "Shade & Tea",
-                    "subtitle": "Anonim İtiraf & Dedikodu Köşesi",
-                    "icon": "☕",
-                    "badge": "HOT",
-                    "description": "Kimliğini gizle, gecenin en cesur itirafını veya dedikodusunu sahneye bırak.",
-                    "schedule_time": "7/24 Aktif",
-                    "media_url": "",
-                    "options": ["İtiraf Bırak 💋", "Çay Dök 🔥"],
-                    "active": True,
-                    "order": 3
                 }
             ]
             events_col.insert_many(default_items)
