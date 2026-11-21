@@ -128,7 +128,7 @@ def normalize_views_to_millions(amount: float, unit: str) -> float:
         return round(val * 1000.0, 3)
     if u in ["K", "BİN", "BIN", "THOUSAND"]:
         return round(val / 1000.0, 4)
-    return round(val, 3)  # M = Milyon
+    return round(val, 3)
 
 
 def get_gv_overview(season: int = None, user_id: int = 0):
@@ -187,7 +187,6 @@ def get_gv_overview(season: int = None, user_id: int = 0):
         reverse=True
     )
 
-    # Sıra sıra (düşükten yükseğe) final şovu dizilimi (anonim/gizli yarışmacı görünümü)
     reveal_sequence = [
         {
             "entry_id": r["entry_id"],
@@ -374,7 +373,6 @@ def submit_gv_entry(
     if "ÇİFT" not in wtype and "SECOND CHANCE" not in wtype and len(clean_countries) < 3:
         return {"ok": False, "error": "Bu formatta 3 ülke tercihi girilmelidir (Örn: USA, UK, Gana)."}
 
-    # İzlenme sınırı kontrolü (Konsept haftalarında sınır esnek/yok; aksi halde ABD/TR 50M, diğerleri 75M)
     v_mil = float(views_m or 0)
     if not no_view_limit:
         special_tag = _is_usa_or_turkey(primary_country)
@@ -900,15 +898,15 @@ def get_staff_permissions(user_id, chat_id=0):
             row = staff_col.find_one({"user_id": int(user_id), "chat_id": int(chat_id)})
             if row:
                 return {
-                    "can_ban": row.get("can_ban", True),
-                    "can_mute": row.get("can_mute", True),
+                    "can_ban": bool(row.get("can_ban", True)),
+                    "can_mute": bool(row.get("can_mute", True)),
                     "warnings": row.get("warnings", 0)
                 }
         row = staff_col.find_one({"user_id": int(user_id), "chat_id": 0})
         if row:
             return {
-                "can_ban": row.get("can_ban", True),
-                "can_mute": row.get("can_mute", True),
+                "can_ban": bool(row.get("can_ban", True)),
+                "can_mute": bool(row.get("can_mute", True)),
                 "warnings": row.get("warnings", 0)
             }
     except Exception:
@@ -921,7 +919,29 @@ def get_all_staff(chat_id=0):
         query = {}
         if chat_id and int(chat_id) != 0:
             query["chat_id"] = int(chat_id)
-        return list(staff_col.find(query, {"_id": 0}))
+        rows = list(staff_col.find(query, {"_id": 0}))
+        # Benzersiz kullanıcı listesi + grup bazlı izin haritası eklensin
+        by_user = {}
+        for r in rows:
+            uid = int(r["user_id"])
+            cid = int(r.get("chat_id", 0))
+            if uid not in by_user:
+                by_user[uid] = {
+                    "user_id": uid,
+                    "username": r.get("username", ""),
+                    "full_name": r.get("full_name", "Muhafız"),
+                    "can_ban": bool(r.get("can_ban", True)),
+                    "can_mute": bool(r.get("can_mute", True)),
+                    "group_perms": {}
+                }
+            if cid == 0:
+                by_user[uid]["can_ban"] = bool(r.get("can_ban", True))
+                by_user[uid]["can_mute"] = bool(r.get("can_mute", True))
+            by_user[uid]["group_perms"][str(cid)] = {
+                "can_ban": bool(r.get("can_ban", True)),
+                "can_mute": bool(r.get("can_mute", True))
+            }
+        return list(by_user.values())
     except Exception:
         return []
 
@@ -946,16 +966,29 @@ def add_staff_member(user_id, username, full_name, added_by, chat_id=0):
 
 def toggle_staff_permission(user_id, chat_id, perm_field):
     try:
-        query = {"user_id": int(user_id), "chat_id": int(chat_id)}
-        row = staff_col.find_one(query)
+        uid = int(user_id)
+        cid = int(chat_id)
+        row = staff_col.find_one({"user_id": uid, "chat_id": cid})
         if not row:
-            query["chat_id"] = 0
-            row = staff_col.find_one(query)
-        if row:
-            current_val = row.get(perm_field, True)
-            new_val = not current_val
-            staff_col.update_one(query, {"$set": {perm_field: new_val}})
+            base_row = staff_col.find_one({"user_id": uid, "chat_id": 0}) or {}
+            new_val = not bool(base_row.get(perm_field, True))
+            staff_col.update_one(
+                {"user_id": uid, "chat_id": cid},
+                {"$set": {
+                    "user_id": uid,
+                    "chat_id": cid,
+                    "username": base_row.get("username", ""),
+                    "full_name": base_row.get("full_name", "Muhafız"),
+                    "can_ban": new_val if perm_field == "can_ban" else bool(base_row.get("can_ban", True)),
+                    "can_mute": new_val if perm_field == "can_mute" else bool(base_row.get("can_mute", True))
+                }},
+                upsert=True
+            )
             return new_val
+        current_val = bool(row.get(perm_field, True))
+        new_val = not current_val
+        staff_col.update_one({"user_id": uid, "chat_id": cid}, {"$set": {perm_field: new_val}})
+        return new_val
     except Exception:
         pass
     return None
