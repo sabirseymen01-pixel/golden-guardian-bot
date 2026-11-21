@@ -8,162 +8,320 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --obsidian: #030201;
+            --obsidian: #050302;
             --gold-base: #d4af37;
             --gold-light: #f8ecbe;
             --gold-dim: rgba(212, 175, 55, 0.22);
-            --glass-panel: rgba(16, 12, 5, 0.94);
-            --glass-icon: rgba(26, 20, 8, 0.86);
-            --glass-modal: rgba(12, 9, 3, 0.99);
+            --glass-panel: rgba(24, 17, 6, 0.92);
+            --glass-icon: rgba(34, 24, 9, 0.88);
+            --glass-modal: rgba(16, 11, 4, 0.98);
             --danger: #ff4757;
             --success: #2ed573;
             --text-main: #f5f6fa;
-            --text-muted: #b2bec3;
-            --border-gold: rgba(212, 175, 55, 0.48);
+            --text-muted: #c9bfa7;
+            --border-gold: rgba(212, 175, 55, 0.52);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-        html, body { height: 100vh; width: 100vw; overflow: hidden; background-color: var(--obsidian); color: var(--text-main); }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        html, body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: var(--obsidian);
+            color: var(--text-main);
+        }
         body {
-            background: radial-gradient(circle at 50% 15%, rgba(212, 175, 55, 0.3) 0%, transparent 60%), linear-gradient(135deg, #070603 0%, #010100 100%);
-            display: flex; flex-direction: column; justify-content: space-between; padding: 12px;
+            background:
+                radial-gradient(circle at 50% 12%, rgba(212, 175, 55, 0.28) 0%, transparent 58%),
+                linear-gradient(145deg, #0d0903 0%, #040201 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 12px;
         }
         .spring-header {
-            display: flex; justify-content: space-between; align-items: center; padding: 10px 14px;
-            background: var(--glass-panel); backdrop-filter: blur(25px); border-radius: 14px; border: 1.5px solid var(--border-gold); flex-shrink: 0; gap: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: var(--glass-panel);
+            border-radius: 14px;
+            border: 1.5px solid var(--border-gold);
+            flex-shrink: 0;
+            gap: 8px;
         }
         .brand-title { font-size: 11px; font-weight: 900; color: var(--gold-light); letter-spacing: 2px; }
         .header-right { display: flex; align-items: center; gap: 6px; }
         .sound-btn {
-            background: var(--gold-dim); color: var(--gold-light); border: 1px solid var(--border-gold);
-            border-radius: 7px; padding: 4px 8px; font-size: 7.5px; font-weight: 900; cursor: pointer;
+            background: rgba(212, 175, 55, 0.18);
+            color: var(--gold-light);
+            border: 1px solid var(--border-gold);
+            border-radius: 8px;
+            padding: 5px 8px;
+            font-size: 8px;
+            font-weight: 900;
+            cursor: pointer;
         }
-        .user-badge { background: var(--gold-dim); color: var(--gold-light); padding: 4px 10px; border-radius: 6px; font-size: 8px; border: 1px solid var(--border-gold); font-weight: 900; }
+        .user-badge {
+            background: var(--gold-dim);
+            color: var(--gold-light);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 8px;
+            border: 1px solid var(--border-gold);
+            font-weight: 900;
+        }
 
         .homescreen-container {
-            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            gap: 12px; padding: 4px; width: 100%; overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 4px;
+            width: 100%;
+            overflow: hidden;
         }
         .system-widget {
-            width: 100%; max-width: 390px; background: var(--glass-panel); border: 1.5px solid var(--border-gold);
-            border-radius: 14px; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+            width: 100%;
+            max-width: 390px;
+            background: var(--glass-panel);
+            border: 1.5px solid var(--border-gold);
+            border-radius: 14px;
+            padding: 11px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
         }
         .widget-info h3 { font-size: 10px; color: var(--gold-light); font-weight: 900; text-transform: uppercase; }
         .widget-info p { font-size: 8px; color: var(--text-muted); margin-top: 2px; }
         .widget-status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success); }
 
-        /* 📱 9 SİMGELİK 3x3 ANDROID SOLA KAYDIRMALI SAYFALAR */
         .pager-viewport {
-            width: 100%; max-width: 390px; overflow: hidden; position: relative; flex: 1;
-            display: flex; align-items: center; touch-action: pan-y;
+            width: 100%;
+            max-width: 390px;
+            overflow: hidden;
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            touch-action: pan-y;
         }
         .pager-track {
-            display: flex; width: 100%; height: 100%;
-            transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
         }
         .spring-page {
-            min-width: 100%; height: 100%;
-            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
-            gap: 10px; align-content: center; justify-items: center; padding: 4px;
+            min-width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            align-content: center;
+            justify-items: center;
+            padding: 4px;
         }
-        .app-icon-card { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; width: 100%; }
-        .app-icon-card:active { transform: scale(0.90); }
+        .app-icon-card { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; width: 100%; transition: transform 0.12s ease; }
+        .app-icon-card:active { transform: scale(0.92); }
         .app-icon-box {
-            width: 56px; height: 56px; background: var(--glass-icon); border-radius: 15px;
-            border: 1.5px solid var(--border-gold); display: flex; align-items: center; justify-content: center; font-size: 22px;
+            width: 56px;
+            height: 56px;
+            background: var(--glass-icon);
+            border-radius: 15px;
+            border: 1.5px solid var(--border-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
         }
-        .app-icon-box.gv-studio-icon { background: linear-gradient(145deg, #5c0818, #240309); border-color: #ffd166; }
+        .app-icon-box.gv-studio-icon { background: linear-gradient(145deg, #69091c, #29030a); border-color: #ffd166; }
 
-        /* ŞEFFAF KARE ORTASINDA + BOŞ YUVA SİMGESİ */
         .empty-plus-card { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; pointer-events: none; }
         .empty-plus-box {
-            width: 56px; height: 56px; border-radius: 15px;
-            background: rgba(212, 175, 55, 0.04);
-            border: 1.5px dashed rgba(212, 175, 55, 0.28);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; font-weight: 300; color: rgba(248, 236, 190, 0.42);
+            width: 56px;
+            height: 56px;
+            border-radius: 15px;
+            background: rgba(212, 175, 55, 0.05);
+            border: 1.5px dashed rgba(212, 175, 55, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 300;
+            color: rgba(248, 236, 190, 0.45);
         }
-
         .app-label { font-size: 8px; font-weight: 800; color: var(--text-main); text-align: center; max-width: 92px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .home-dock {
-            width: 100%; max-width: 390px; height: 34px; background: rgba(22, 17, 8, 0.75);
-            border-radius: 17px; border: 1.5px solid var(--border-gold); margin: 0 auto;
-            display: flex; align-items: center; justify-content: center; gap: 8px; flex-shrink: 0;
+            width: 100%;
+            max-width: 390px;
+            height: 34px;
+            background: rgba(28, 20, 7, 0.82);
+            border-radius: 17px;
+            border: 1.5px solid var(--border-gold);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-shrink: 0;
         }
         .dock-dot {
-            width: 7px; height: 7px; background: rgba(212, 175, 55, 0.35);
-            border-radius: 50%; cursor: pointer; transition: all 0.2s ease;
+            width: 7px;
+            height: 7px;
+            background: rgba(212, 175, 55, 0.35);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.16s ease;
         }
-        .dock-dot.active { width: 16px; border-radius: 6px; background: var(--gold-light); box-shadow: 0 0 8px var(--gold-base); }
+        .dock-dot.active { width: 16px; border-radius: 6px; background: var(--gold-light); }
 
-        /* TAM SAYFA PORT MODALLARI */
         .fullpage-port {
-            position: fixed; inset: 0; width: 100vw; height: 100vh;
-            background: var(--glass-modal); z-index: 120;
-            display: none; flex-direction: column; overflow: hidden;
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(160deg, #1b1306 0%, #0d0802 100%);
+            z-index: 120;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
         }
         .fullpage-port.sub-port { z-index: 180; }
         .fullpage-port.open { display: flex; }
         .fullpage-header {
-            padding: 12px 16px; background: rgba(28, 22, 8, 0.96);
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 2px solid var(--gold-base); flex-shrink: 0; gap: 8px;
+            padding: 12px 16px;
+            background: linear-gradient(90deg, rgba(42, 29, 8, 0.96), rgba(24, 16, 5, 0.98));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--gold-base);
+            flex-shrink: 0;
+            gap: 8px;
         }
         .fullpage-title { font-size: 10.5px; font-weight: 900; color: var(--gold-light); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .fullpage-exit-btn {
             background: linear-gradient(135deg, var(--gold-light), var(--gold-base));
-            color: #000; border: none; padding: 6px 12px; border-radius: 8px;
-            font-size: 8px; font-weight: 900; text-transform: uppercase; cursor: pointer; flex-shrink: 0;
+            color: #120b02;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            flex-shrink: 0;
         }
-        .fullpage-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .fullpage-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; -webkit-overflow-scrolling: touch; }
 
+        /* KONSEPTE UYGUN ALTIN & KOYU KEHRİBAR SEÇİM KUTULARI */
         input, select, textarea {
-            width: 100%; background: rgba(10, 8, 3, 0.92); border: 1.5px solid var(--border-gold);
-            border-radius: 9px; padding: 10px; color: #fff; font-size: 9px; outline: none; margin-bottom: 6px;
+            width: 100%;
+            background: linear-gradient(145deg, rgba(44, 30, 9, 0.92), rgba(25, 17, 5, 0.96));
+            border: 1.5px solid rgba(212, 175, 55, 0.62);
+            border-radius: 10px;
+            padding: 10px 12px;
+            color: var(--gold-light);
+            font-size: 9px;
+            font-weight: 700;
+            outline: none;
+            margin-bottom: 6px;
+            box-shadow: inset 0 1px 0 rgba(248, 236, 190, 0.18);
         }
+        input::placeholder, textarea::placeholder { color: rgba(248, 236, 190, 0.48); font-weight: 500; }
+        select option { background: #221706; color: var(--gold-light); }
+
         .gold-btn {
-            width: 100%; background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-base) 100%);
-            color: #000; border: none; padding: 10px; border-radius: 9px; font-weight: 900; font-size: 8.5px; cursor: pointer; text-transform: uppercase;
+            width: 100%;
+            background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-base) 100%);
+            color: #140d02;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-weight: 900;
+            font-size: 8.5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: transform 0.1s ease, opacity 0.12s ease;
         }
-        .gold-btn:active { transform: scale(0.98); }
+        .gold-btn:active { transform: scale(0.97); }
+        .gold-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .modal-tabs { display: flex; gap: 5px; overflow-x: auto; flex-shrink: 0; }
         .modal-tab {
-            flex: 1; background: rgba(10,8,3,0.85); border: 1.5px solid var(--border-gold);
-            color: var(--text-muted); padding: 7px 6px; font-size: 7px; font-weight: 800;
-            border-radius: 8px; text-align: center; cursor: pointer; text-transform: uppercase; white-space: nowrap;
+            flex: 1;
+            background: rgba(36, 25, 8, 0.85);
+            border: 1.5px solid rgba(212, 175, 55, 0.42);
+            color: var(--text-muted);
+            padding: 7px 6px;
+            font-size: 7px;
+            font-weight: 800;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            text-transform: uppercase;
+            white-space: nowrap;
         }
-        .modal-tab.active { background: var(--gold-dim); color: var(--gold-light); border-color: var(--gold-base); }
+        .modal-tab.active { background: linear-gradient(135deg, rgba(212,175,55,0.35), rgba(140,108,24,0.28)); color: var(--gold-light); border-color: var(--gold-light); }
         .modal-tab-content { display: none; flex-direction: column; gap: 8px; }
         .modal-tab-content.active { display: flex; }
 
         .staff-card-box {
-            background: rgba(20, 16, 6, 0.9); border: 1.5px solid var(--border-gold);
-            border-radius: 12px; padding: 11px; display: flex; flex-direction: column; gap: 8px;
+            background: linear-gradient(145deg, rgba(36, 25, 8, 0.92), rgba(20, 14, 4, 0.96));
+            border: 1.5px solid var(--border-gold);
+            border-radius: 12px;
+            padding: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
         .staff-card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .staff-card-name { font-size: 9.5px; font-weight: 900; color: var(--gold-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .staff-card-sub { font-size: 7.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .status-pill-row { display: flex; flex-wrap: wrap; gap: 6px; font-size: 7.5px; font-weight: 800; }
-        .status-chip { padding: 4px 8px; border-radius: 7px; border: 1px solid rgba(212,175,55,0.4); background: rgba(10,8,3,0.85); }
-        .status-chip.on { color: var(--success); border-color: rgba(46,213,115,0.5); }
-        .status-chip.off { color: var(--danger); border-color: rgba(255,71,87,0.5); }
+        .status-chip { padding: 4px 8px; border-radius: 7px; border: 1px solid rgba(212,175,55,0.4); background: rgba(24,17,5,0.9); }
+        .status-chip.on { color: var(--success); border-color: rgba(46,213,115,0.55); }
+        .status-chip.off { color: var(--danger); border-color: rgba(255,71,87,0.55); }
 
         .perm-btn-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .pending-card { background: rgba(24, 18, 6, 0.92); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 8.5px; }
+        .pending-card { background: rgba(34, 24, 8, 0.94); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 8.5px; }
         .pending-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .log-item { background: rgba(12, 10, 4, 0.9); border-left: 3px solid var(--gold-base); padding: 8px 10px; border-radius: 8px; font-size: 8px; border: 1.5px solid var(--border-gold); display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
-        .group-card { background: rgba(25, 20, 8, 0.85); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 11px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; gap: 8px; }
+        .log-item { background: rgba(26, 18, 6, 0.92); border-left: 3px solid var(--gold-base); padding: 8px 10px; border-radius: 8px; font-size: 8px; border: 1px solid rgba(212,175,55,0.35); display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
+        .group-card { background: linear-gradient(145deg, rgba(38, 27, 9, 0.9), rgba(22, 15, 5, 0.95)); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 11px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; gap: 8px; }
         .group-meta { display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1; min-width: 0; }
-        .group-avatar { width: 34px; height: 34px; border-radius: 50%; background: #000; border: 1.5px solid var(--gold-base); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .group-title { font-size: 9.5px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .group-avatar { width: 34px; height: 34px; border-radius: 50%; background: #171004; border: 1.5px solid var(--gold-base); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .group-title { font-size: 9.5px; font-weight: 800; color: var(--gold-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .toast-popup {
-            position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-60px);
-            background: linear-gradient(135deg, var(--gold-light), var(--gold-base)); color: #000;
-            padding: 9px 18px; border-radius: 10px; font-size: 8.5px; font-weight: 900;
-            z-index: 1000; opacity: 0; transition: all 0.3s ease; pointer-events: none;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.7); max-width: 92vw; text-align: center;
+            position: fixed;
+            top: 16px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-60px);
+            background: linear-gradient(135deg, var(--gold-light), var(--gold-base));
+            color: #120b02;
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-size: 8.5px;
+            font-weight: 900;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.22s ease;
+            pointer-events: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+            max-width: 92vw;
+            text-align: center;
         }
         .toast-popup.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
@@ -189,7 +347,6 @@
             <div class="widget-status-dot"></div>
         </div>
 
-        <!-- 📱 9 SİMGELİK 3x3 ANDROID SOLA KAYDIRMALI SAYFALAR (+ BOŞ YUVLAR) -->
         <div class="pager-viewport" id="staffPagerViewport">
             <div class="pager-track" id="staffPagerTrack"></div>
         </div>
@@ -197,7 +354,7 @@
         <div class="home-dock" id="staffPagerDots"></div>
     </main>
 
-    <!-- 👑 TAM SAYFA GOLDENVISION YT MASASI (TÜM YARIŞMA YÖNETİMİ TEK MERKEZDE) -->
+    <!-- 👑 TAM SAYFA GOLDENVISION YT MASASI -->
     <div class="fullpage-port" id="gvStudioModal">
         <div class="fullpage-header">
             <div class="fullpage-title" id="gvStudioHeader">👑 GOLDENVISION YT MASASI</div>
@@ -248,17 +405,17 @@
                         <option value="true">Akış: DURAKLATILDI</option>
                     </select>
                 </div>
-                <button class="gold-btn" onclick="saveGvStudioState()">Ayarları Mühürle 💾</button>
-                <button class="gold-btn" style="background:linear-gradient(135deg,#ff4757,#ffd166); color:#000;" onclick="triggerFinaleBtn()">
+                <button class="gold-btn" onclick="saveGvStudioState(this)">Ayarları Mühürle 💾</button>
+                <button class="gold-btn" style="background:linear-gradient(135deg,#ff4757,#ffd166); color:#120b02;" onclick="triggerFinaleBtn(this)">
                     🎆 BİTİR • OYLARI TOPLA & ŞENLİK FİNALİNİ BAŞLAT
                 </button>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
-                    <button class="gold-btn" style="background:#e67e22; color:#fff;" onclick="gvStudioAction('restart_week')">Aktif Haftayı Baştan Al</button>
-                    <button class="gold-btn" style="background:#9b59b6; color:#fff;" onclick="gvStudioAction('next_season')">Yeni Sezona Direkt Atla</button>
+                    <button class="gold-btn" style="background:#e67e22; color:#fff;" onclick="gvStudioAction('restart_week', this)">Aktif Haftayı Baştan Al</button>
+                    <button class="gold-btn" style="background:#9b59b6; color:#fff;" onclick="gvStudioAction('next_season', this)">Yeni Sezona Direkt Atla</button>
                 </div>
                 <div style="display:flex; gap:6px;">
                     <input type="number" id="stJumpSeasonInput" placeholder="Geçilecek Sezon No" style="margin-bottom:0;">
-                    <button class="gold-btn" style="width:auto; padding:8px 12px;" onclick="gvStudioAction('jump_season')">Sezona Geç</button>
+                    <button class="gold-btn" style="width:auto; padding:8px 12px;" onclick="gvStudioAction('jump_season', this)">Sezona Geç</button>
                 </div>
             </div>
 
@@ -277,7 +434,7 @@
                     <option value="false">İzlenme Sınırı: Aktif (75M / ABD-TR 50M)</option>
                     <option value="true">İzlenme Sınırı: Sınırsız</option>
                 </select>
-                <button class="gold-btn" onclick="saveGvWeekEdit()">Hafta Konseptini Güncelle ✨</button>
+                <button class="gold-btn" onclick="saveGvWeekEdit(this)">Hafta Konseptini Güncelle ✨</button>
                 <div id="stWeeksOverviewList" style="display:flex; flex-direction:column; gap:4px; max-height:170px; overflow-y:auto;"></div>
             </div>
 
@@ -285,19 +442,19 @@
                 <div style="font-size:8px; color:var(--gold-light); font-weight:900;">GOLDENVISION YT Masası Erişim Yetkisi</div>
                 <div style="display:flex; gap:6px;">
                     <input type="number" id="stHostUserId" placeholder="Yetkili Telegram ID" style="margin-bottom:0;">
-                    <button class="gold-btn" style="width:auto; padding:8px 12px;" onclick="setGvHost(true)">YT Aç</button>
-                    <button class="gold-btn" style="width:auto; padding:8px 12px; background:var(--danger); color:#fff;" onclick="setGvHost(false)">YT Kapat</button>
+                    <button class="gold-btn" style="width:auto; padding:8px 12px;" onclick="setGvHost(true, this)">YT Aç</button>
+                    <button class="gold-btn" style="width:auto; padding:8px 12px; background:var(--danger); color:#fff;" onclick="setGvHost(false, this)">YT Kapat</button>
                 </div>
-                <div id="stHostsList" style="font-size:8px; color:#ccc;"></div>
+                <div id="stHostsList" style="font-size:8px; color:#ddd2b8;"></div>
 
                 <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:8px;">Gizlilik / Sızdırma Cezası</div>
                 <input type="number" id="stPenaltyUserId" placeholder="Ceza uygulanacak Kullanıcı ID">
                 <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px;">
-                    <button class="gold-btn" style="background:#e67e22; color:#fff; font-size:7px;" onclick="applyGvPenalty('leak_first')">3 Hafta Ban</button>
-                    <button class="gold-btn" style="background:var(--danger); color:#fff; font-size:7px;" onclick="applyGvPenalty('leak_repeat')">Tam Ban</button>
-                    <button class="gold-btn" style="background:var(--success); color:#000; font-size:7px;" onclick="applyGvPenalty('clear')">Temizle</button>
+                    <button class="gold-btn" style="background:#e67e22; color:#fff; font-size:7px;" onclick="applyGvPenalty('leak_first', this)">3 Hafta Ban</button>
+                    <button class="gold-btn" style="background:var(--danger); color:#fff; font-size:7px;" onclick="applyGvPenalty('leak_repeat', this)">Tam Ban</button>
+                    <button class="gold-btn" style="background:var(--success); color:#120b02; font-size:7px;" onclick="applyGvPenalty('clear', this)">Temizle</button>
                 </div>
-                <div id="stBansList" style="font-size:8px; color:#f3c6cf;"></div>
+                <div id="stBansList" style="font-size:8px; color:#ffb3bf;"></div>
             </div>
         </div>
     </div>
@@ -313,7 +470,7 @@
                 <div class="staff-card-name">Yeni Muhafız / Yönetici Ekle</div>
                 <input type="text" id="staffInputId" placeholder="Kullanıcı ID veya @username">
                 <input type="text" id="staffNameInput" placeholder="Ünvan (Örn: Muhafız / Host)">
-                <button class="gold-btn" onclick="addNewStaff()">Yetkiliyi Kaydet 🛡️</button>
+                <button class="gold-btn" onclick="addNewStaff(this)">Yetkiliyi Kaydet 🛡️</button>
             </div>
 
             <div class="staff-card-box">
@@ -364,7 +521,7 @@
                 <input type="text" id="grpWelcomeInput" placeholder="Hoş geldin mesajı...">
                 <input type="text" id="grpBtnTextInput" placeholder="Hoş geldin buton metni...">
                 <input type="text" id="grpBtnUrlInput" placeholder="Hoş geldin buton linki...">
-                <button class="gold-btn" onclick="saveGroupDetailSettings()">Grup Ayarlarını Kaydet 💾</button>
+                <button class="gold-btn" onclick="saveGroupDetailSettings(this)">Grup Ayarlarını Kaydet 💾</button>
             </div>
 
             <div id="gtab-sablon" class="modal-tab-content">
@@ -375,7 +532,7 @@
                 <input type="text" id="grpTplNameInput" placeholder="Şablon Adı">
                 <input type="number" id="grpTplMinsInput" placeholder="Dakika (Zamanlama için)" value="60">
                 <textarea id="grpTplMsgInput" rows="2" placeholder="Mesaj metni..."></textarea>
-                <button class="gold-btn" onclick="createGroupTemplate()">Şablon Ekle 📝</button>
+                <button class="gold-btn" onclick="createGroupTemplate(this)">Şablon Ekle 📝</button>
                 <div id="groupTemplatesList" style="display:flex; flex-direction:column; gap:6px; margin-top:4px;"></div>
             </div>
 
@@ -424,10 +581,10 @@
                 osc.type = kind === 'ok' ? 'triangle' : 'sine';
                 osc.frequency.setValueAtTime(kind === 'ok' ? 784 : 580, now);
                 gain.gain.setValueAtTime(0.001, now);
-                gain.gain.exponentialRampToValueAtTime(0.12, now + 0.015);
-                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+                gain.gain.exponentialRampToValueAtTime(0.11, now + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
                 osc.connect(gain); gain.connect(sAudioCtx.destination);
-                osc.start(now); osc.stop(now + 0.18);
+                osc.start(now); osc.stop(now + 0.16);
             } catch (e) {}
         }
         function toggleStaffSound() {
@@ -436,7 +593,6 @@
             if (staffSoundOn) playStaffSfx('tap');
         }
 
-        // Staff ana ekran simgeleri (Sayfa başına 9 yuva; boş yuvalar şeffaf + simgesi olur)
         const STAFF_APPS = [
             { id: 'gv', icon: '👑', label: 'GOLDENVISION', special: true, action: () => openGvStudio() },
             { id: 'staff', icon: '⚜️', label: 'Staff & Yetki', action: () => openPort('staffModal') },
@@ -461,7 +617,6 @@
                     </div>
                 `).join('');
 
-                // Kalan boş yuvalara şeffaf kare ortasında + simgesi koy
                 const remainder = perPage - slice.length;
                 for (let b = 0; b < remainder; b++) {
                     cellsHtml += `
@@ -562,9 +717,6 @@
             } catch (e) {}
         }
 
-        // =========================================================
-        // 👑 GOLDENVISION YT MASASI
-        // =========================================================
         async function openGvStudio() {
             if (!canGvStudio) {
                 alert("⛔ GOLDENVISION YT Masasına erişim yetkiniz yok! Kurucu (Founder) tarafından yetki açılmalıdır.");
@@ -612,8 +764,8 @@
                     <div>Tercihler: ${(p.countries || []).join(', ')} ${p.pair_partner ? `• Çift: ${p.pair_partner}` : ''}</div>
                     <div>Şarkı Linki: ${p.song_url ? `<a href="${p.song_url}" target="_blank" style="color:#ffd166;">${p.song_url}</a>` : 'Yok'}</div>
                     <div class="pending-actions">
-                        <button class="gold-btn" style="background:var(--success); color:#000;" onclick="reviewPending(${p.pending_id}, true)">Onayla ✅</button>
-                        <button class="gold-btn" style="background:var(--danger); color:#fff;" onclick="reviewPending(${p.pending_id}, false)">Reddet ❌</button>
+                        <button class="gold-btn" style="background:var(--success); color:#120b02;" onclick="reviewPending(${p.pending_id}, true, this)">Onayla ✅</button>
+                        <button class="gold-btn" style="background:var(--danger); color:#fff;" onclick="reviewPending(${p.pending_id}, false, this)">Reddet ❌</button>
                     </div>
                 </div>
             `).join('') || `<div class="log-item" style="cursor:default;">Onay bekleyen kart bulunmuyor.</div>`;
@@ -629,42 +781,54 @@
             loadWeekFormFromCache();
         }
 
-        async function reviewPending(pendingId, approve) {
-            const reject_reason = document.getElementById('stRejectReasonInput').value.trim();
-            const res = await fetch('/api/goldenvision/studio/review', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: user.id,
-                    season: studioDataCache?.season || 3,
-                    week: studioDataCache?.current_week || 1,
-                    pending_id: pendingId,
-                    approve,
-                    reject_reason
-                })
-            });
-            const d = await res.json();
-            if (d.success) {
-                playStaffSfx('ok');
-                showToast(approve ? "✅ Başvuru Onaylandı!" : "❌ Başvuru Reddedildi ve Silindi!");
-                await refreshGvStudio();
+        async function reviewPending(pendingId, approve, btn) {
+            if (btn) btn.disabled = true;
+            try {
+                const reject_reason = document.getElementById('stRejectReasonInput').value.trim();
+                const res = await fetch('/api/goldenvision/studio/review', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        season: studioDataCache?.season || 3,
+                        week: studioDataCache?.current_week || 1,
+                        pending_id: pendingId,
+                        approve,
+                        reject_reason
+                    })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    showToast(approve ? "✔ DB Kaydedildi: Başvuru Onaylandı!" : "✔ DB Kaydedildi: Başvuru Reddedildi!");
+                    await refreshGvStudio();
+                } else {
+                    alert(d.error || "İşlem başarısız!");
+                }
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
-        async function triggerFinaleBtn() {
+        async function triggerFinaleBtn(btn) {
             if (!confirm("Haftayı BİTİRİP oyları toplamak ve şenlik finalini başlatmak istiyor musunuz?")) return;
-            const res = await fetch('/api/goldenvision/studio/finale', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: user.id,
-                    season: studioDataCache?.season || 3,
-                    week: studioDataCache?.current_week || 1
-                })
-            });
-            const d = await res.json();
-            if (d.success) {
-                playStaffSfx('ok');
-                showToast("🎆 BİTİR İşlendi — Şenlik Finali Aktif!");
-                await refreshGvStudio();
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/goldenvision/studio/finale', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        season: studioDataCache?.season || 3,
+                        week: studioDataCache?.current_week || 1
+                    })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    showToast("✔ DB Kaydedildi: Şenlik Finali Başlatıldı!");
+                    await refreshGvStudio();
+                }
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
@@ -682,64 +846,79 @@
             ).join('');
         }
 
-        async function saveGvStudioState() {
-            const season = studioDataCache?.season || 3;
-            const updates = {
-                current_week: Number(document.getElementById('stWeekSelect').value || 1),
-                song_duration_sec: Number(document.getElementById('stDurationInput').value || 120),
-                max_views_million: Number(document.getElementById('stGenLimitInput').value || 75),
-                special_country_limit_million: Number(document.getElementById('stSpecialLimitInput').value || 50),
-                submissions_open: document.getElementById('stSubmissionsOpen').value === 'true',
-                voting_open: document.getElementById('stVotingOpen').value === 'true',
-                comments_open: document.getElementById('stCommentsOpen').value === 'true',
-                paused: document.getElementById('stPausedSelect').value === 'true'
-            };
-            const res = await fetch('/api/goldenvision/studio/state', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, season, action: 'update', updates })
-            });
-            const d = await res.json();
-            if (d.success) {
-                playStaffSfx('ok');
-                showToast("👑 Ayarlar Mühürlendi!");
-                await refreshGvStudio();
+        async function saveGvStudioState(btn) {
+            if (btn) btn.disabled = true;
+            try {
+                const season = studioDataCache?.season || 3;
+                const updates = {
+                    current_week: Number(document.getElementById('stWeekSelect').value || 1),
+                    song_duration_sec: Number(document.getElementById('stDurationInput').value || 120),
+                    max_views_million: Number(document.getElementById('stGenLimitInput').value || 75),
+                    special_country_limit_million: Number(document.getElementById('stSpecialLimitInput').value || 50),
+                    submissions_open: document.getElementById('stSubmissionsOpen').value === 'true',
+                    voting_open: document.getElementById('stVotingOpen').value === 'true',
+                    comments_open: document.getElementById('stCommentsOpen').value === 'true',
+                    paused: document.getElementById('stPausedSelect').value === 'true'
+                };
+                const res = await fetch('/api/goldenvision/studio/state', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, season, action: 'update', updates })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    showToast("✔ DB Kaydedildi: Ayarlar Mühürlendi!");
+                    await refreshGvStudio();
+                }
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
-        async function gvStudioAction(action) {
-            const season = studioDataCache?.season || 3;
-            const week = studioDataCache?.current_week || 1;
-            const target_season = Number(document.getElementById('stJumpSeasonInput').value || season);
-            const res = await fetch('/api/goldenvision/studio/state', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, season, week, action, target_season })
-            });
-            const d = await res.json();
-            if (d.success) {
-                playStaffSfx('ok');
-                showToast("⚜️ İşlem Tamamlandı!");
-                await refreshGvStudio();
+        async function gvStudioAction(action, btn) {
+            if (btn) btn.disabled = true;
+            try {
+                const season = studioDataCache?.season || 3;
+                const week = studioDataCache?.current_week || 1;
+                const target_season = Number(document.getElementById('stJumpSeasonInput').value || season);
+                const res = await fetch('/api/goldenvision/studio/state', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, season, week, action, target_season })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    showToast("✔ DB Kaydedildi: Geçiş Tamamlandı!");
+                    await refreshGvStudio();
+                }
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
-        async function saveGvWeekEdit() {
-            const season = studioDataCache?.season || 3;
-            const week = Number(document.getElementById('stEditWeekNum').value || 1);
-            const updates = {
-                week_type: document.getElementById('stEditWeekType').value,
-                concept: document.getElementById('stEditConcept').value.trim(),
-                rule_note: document.getElementById('stEditRuleNote').value.trim(),
-                no_view_limit: document.getElementById('stEditNoViewLimit').value === 'true'
-            };
-            const res = await fetch('/api/goldenvision/studio/week', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, season, week, updates })
-            });
-            const d = await res.json();
-            if (d.success) {
-                playStaffSfx('ok');
-                showToast(`✨ Hafta ${week} Güncellendi!`);
-                await refreshGvStudio();
+        async function saveGvWeekEdit(btn) {
+            if (btn) btn.disabled = true;
+            try {
+                const season = studioDataCache?.season || 3;
+                const week = Number(document.getElementById('stEditWeekNum').value || 1);
+                const updates = {
+                    week_type: document.getElementById('stEditWeekType').value,
+                    concept: document.getElementById('stEditConcept').value.trim(),
+                    rule_note: document.getElementById('stEditRuleNote').value.trim(),
+                    no_view_limit: document.getElementById('stEditNoViewLimit').value === 'true'
+                };
+                const res = await fetch('/api/goldenvision/studio/week', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, season, week, updates })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    showToast(`✔ DB Kaydedildi: Hafta ${week} Güncellendi!`);
+                    await refreshGvStudio();
+                }
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
@@ -762,42 +941,49 @@
             ).join('') || '<div>Aktif ceza yok.</div>';
         }
 
-        async function setGvHost(can_manage) {
+        async function setGvHost(can_manage, btn) {
             if (!isFounder) return alert("Sadece Kurucu host yetkisi verebilir!");
             const target_user_id = Number(document.getElementById('stHostUserId').value || 0);
             if (!target_user_id) return alert("Kullanıcı ID girin.");
-            const res = await fetch('/api/goldenvision/studio/hosts', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, sub: 'set', target_user_id, can_manage })
-            });
-            const d = await res.json();
-            if (d.success) {
-                playStaffSfx('ok');
-                showToast(`⚜️ YT Yetkisi ${can_manage ? 'AÇILDI ✅' : 'KAPATILDI ❌'} (ID: ${target_user_id})`);
-                await loadStudioHostsAndBans();
-                await loadStaffAndGroupPerms();
-            } else alert(d.error);
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/goldenvision/studio/hosts', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, sub: 'set', target_user_id, can_manage })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    showToast(`✔ DB Kaydedildi: YT Yetkisi ${can_manage ? 'AÇIK ✅' : 'KAPALI ❌'}`);
+                    await loadStudioHostsAndBans();
+                    await loadStaffAndGroupPerms();
+                } else alert(d.error);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
         }
 
-        async function applyGvPenalty(mode) {
+        async function applyGvPenalty(mode, btn) {
             if (!isFounder) return alert("Sadece Kurucu ceza işleyebilir!");
             const target_user_id = Number(document.getElementById('stPenaltyUserId').value || 0);
             if (!target_user_id) return alert("Kullanıcı ID girin.");
-            const res = await fetch('/api/goldenvision/studio/hosts', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, sub: 'penalty', target_user_id, mode })
-            });
-            const d = await res.json();
-            if (d.success) {
-                playStaffSfx('ok');
-                showToast("⚖️ Ceza Kaydı Güncellendi");
-                await loadStudioHostsAndBans();
-            } else alert(d.error);
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/goldenvision/studio/hosts', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, sub: 'penalty', target_user_id, mode })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    showToast("✔ DB Kaydedildi: Ceza Güncellendi");
+                    await loadStudioHostsAndBans();
+                } else alert(d.error);
+            } finally {
+                if (btn) btn.disabled = false;
+            }
         }
 
-        // =========================================================
-        // 🛡️ GRUPLAR & GRUP DETAY PORTU
-        // =========================================================
         async function loadAllGroups() {
             try {
                 const res = await fetch('/api/groups');
@@ -852,23 +1038,28 @@
             await loadGroupDetailLogs();
         }
 
-        async function saveGroupDetailSettings() {
-            const welcome_msg = document.getElementById('grpWelcomeInput').value.trim();
-            const btn_text = document.getElementById('grpBtnTextInput').value.trim();
-            const btn_url = document.getElementById('grpBtnUrlInput').value.trim();
-            const payload = { user_id: user.id, chat_id: activeDetailGroupId };
-            if (welcome_msg) payload.welcome_msg = welcome_msg;
-            if (btn_text) payload.btn_text = btn_text;
-            if (btn_url) payload.btn_url = btn_url;
+        async function saveGroupDetailSettings(btn) {
+            if (btn) btn.disabled = true;
+            try {
+                const welcome_msg = document.getElementById('grpWelcomeInput').value.trim();
+                const btn_text = document.getElementById('grpBtnTextInput').value.trim();
+                const btn_url = document.getElementById('grpBtnUrlInput').value.trim();
+                const payload = { user_id: user.id, chat_id: activeDetailGroupId };
+                if (welcome_msg) payload.welcome_msg = welcome_msg;
+                if (btn_text) payload.btn_text = btn_text;
+                if (btn_url) payload.btn_url = btn_url;
 
-            const res = await fetch('/api/settings/update', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const d = await res.json();
-            if (d.success) {
-                playStaffSfx('ok');
-                showToast(`✔ ${activeDetailGroupTitle} ayarları kaydedildi!`);
+                const res = await fetch('/api/settings/update', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    showToast(`✔ DB Kaydedildi: ${activeDetailGroupTitle} ayarları güncellendi!`);
+                }
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
@@ -887,25 +1078,29 @@
             ).join('') || '<div class="log-item" style="cursor:default;">Kayıtlı şablon yok.</div>';
         }
 
-        async function createGroupTemplate() {
+        async function createGroupTemplate(btn) {
             const type = document.getElementById('grpTplTypeSelect').value;
             const name = document.getElementById('grpTplNameInput').value.trim();
             const mins = Number(document.getElementById('grpTplMinsInput').value || 60);
             const msg = document.getElementById('grpTplMsgInput').value.trim();
             if (!name || !msg) return alert("Şablon adı ve mesaj zorunludur.");
-
-            const ep = type === 'schedule' ? '/api/templates/save-schedule' : '/api/templates/save-announcement';
-            const res = await fetch(ep, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, chat_id: activeDetailGroupId, name, msg, mins })
-            });
-            const d = await res.json();
-            if (d.success) {
-                playStaffSfx('ok');
-                document.getElementById('grpTplNameInput').value = '';
-                document.getElementById('grpTplMsgInput').value = '';
-                showToast("✔ Şablon Kaydedildi!");
-                await loadGroupDetailTemplates();
+            if (btn) btn.disabled = true;
+            try {
+                const ep = type === 'schedule' ? '/api/templates/save-schedule' : '/api/templates/save-announcement';
+                const res = await fetch(ep, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, chat_id: activeDetailGroupId, name, msg, mins })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    document.getElementById('grpTplNameInput').value = '';
+                    document.getElementById('grpTplMsgInput').value = '';
+                    showToast("✔ DB Kaydedildi: Şablon Eklendi!");
+                    await loadGroupDetailTemplates();
+                }
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
@@ -918,9 +1113,6 @@
             ).join('') || '<div class="log-item" style="cursor:default;">Bu gruba ait log yok.</div>';
         }
 
-        // =========================================================
-        // ⚜️ STAFF & YETKİ MATRİSİ (ANLIK DURUM + ONAY)
-        // =========================================================
         async function loadStaffAndGroupPerms() {
             await loadAllGroups();
             try {
@@ -978,16 +1170,16 @@
                         </div>
 
                         <div class="perm-btn-pair">
-                            <button class="gold-btn" onclick="toggleScopedPerm(${s.user_id}, ${cid}, 'can_ban')">
+                            <button class="gold-btn" onclick="toggleScopedPerm(${s.user_id}, ${cid}, 'can_ban', this)">
                                 Ban ${banOn ? 'Kapat ❌' : 'Aç ✅'}
                             </button>
-                            <button class="gold-btn" onclick="toggleScopedPerm(${s.user_id}, ${cid}, 'can_mute')">
+                            <button class="gold-btn" onclick="toggleScopedPerm(${s.user_id}, ${cid}, 'can_mute', this)">
                                 Mute ${muteOn ? 'Kapat ❌' : 'Aç ✅'}
                             </button>
                         </div>
 
                         ${isFounder ? `
-                            <button class="gold-btn" style="background:rgba(92,8,24,0.9); color:#fff1b8; border:1px solid #ffd166;" onclick="toggleScopedYtAccess(${s.user_id}, ${!ytOn})">
+                            <button class="gold-btn" style="background:rgba(110,12,30,0.92); color:#fff1b8; border:1px solid #ffd166;" onclick="toggleScopedYtAccess(${s.user_id}, ${!ytOn}, this)">
                                 GOLDENVISION YT Erişimi: ${ytOn ? 'KAPAT ❌' : 'AÇ ✅'}
                             </button>
                         ` : ''}
@@ -996,55 +1188,74 @@
             }).join('');
         }
 
-        async function toggleScopedPerm(targetId, chatId, permField) {
+        async function toggleScopedPerm(targetId, chatId, permField, btn) {
             if (!isFounder) return alert("Sadece Kurucu yetki değiştirebilir!");
-            const res = await fetch('/api/staff/toggle', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, target_id: targetId, chat_id: Number(chatId), perm: permField })
-            });
-            const d = await res.json();
-            if (d.success) {
-                playStaffSfx('ok');
-                const pName = permField === 'can_ban' ? 'BAN' : 'MUTE';
-                const stateTxt = d.new_val ? 'AÇIK ✅' : 'KAPALI ❌';
-                const msg = `✔ İşlendi: ID ${targetId} için ${pName} yetkisi ${stateTxt} olarak güncellendi.`;
-                document.getElementById('permLastActionBanner').innerText = msg;
-                showToast(msg);
-                await loadStaffAndGroupPerms();
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/staff/toggle', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, target_id: targetId, chat_id: Number(chatId), perm: permField })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    const pName = permField === 'can_ban' ? 'BAN' : 'MUTE';
+                    const stateTxt = d.new_val ? 'AÇIK ✅' : 'KAPALI ❌';
+                    const msg = `✔ DB İşlendi: ID ${targetId} için ${pName} yetkisi ${stateTxt}.`;
+                    document.getElementById('permLastActionBanner').innerText = msg;
+                    showToast(msg);
+                    await loadStaffAndGroupPerms();
+                } else {
+                    alert(d.error || "Yetki güncellenemedi!");
+                }
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
-        async function toggleScopedYtAccess(targetId, enableYt) {
+        async function toggleScopedYtAccess(targetId, enableYt, btn) {
             if (!isFounder) return alert("Sadece Kurucu YT yetkisi verebilir!");
-            const res = await fetch('/api/goldenvision/studio/hosts', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, sub: 'set', target_user_id: targetId, can_manage: enableYt })
-            });
-            const d = await res.json();
-            if (d.success) {
-                playStaffSfx('ok');
-                const msg = `✔ İşlendi: ID ${targetId} için GOLDENVISION YT yetkisi ${enableYt ? 'AÇIK ✅' : 'KAPALI ❌'}.`;
-                document.getElementById('permLastActionBanner').innerText = msg;
-                showToast(msg);
-                await loadStaffAndGroupPerms();
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/goldenvision/studio/hosts', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, sub: 'set', target_user_id: targetId, can_manage: enableYt })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    const msg = `✔ DB İşlendi: ID ${targetId} için GOLDENVISION YT yetkisi ${enableYt ? 'AÇIK ✅' : 'KAPALI ❌'}.`;
+                    document.getElementById('permLastActionBanner').innerText = msg;
+                    showToast(msg);
+                    await loadStaffAndGroupPerms();
+                } else {
+                    alert(d.error || "YT yetkisi güncellenemedi!");
+                }
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
-        async function addNewStaff() {
+        async function addNewStaff(btn) {
             const staff_input = document.getElementById('staffInputId').value.trim();
             const full_name = document.getElementById('staffNameInput').value.trim() || '🛡️ Muhafız';
             if (!staff_input) return alert("Kullanıcı ID veya @username girin!");
-            const res = await fetch('/api/staff/add', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, chat_id: 0, staff_input, full_name })
-            });
-            const d = await res.json();
-            if (d.success) {
-                playStaffSfx('ok');
-                document.getElementById('staffInputId').value = '';
-                document.getElementById('staffNameInput').value = '';
-                showToast("✔ Muhafız Eklendi!");
-                await loadStaffAndGroupPerms();
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/staff/add', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, chat_id: 0, staff_input, full_name })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    document.getElementById('staffInputId').value = '';
+                    document.getElementById('staffNameInput').value = '';
+                    showToast("✔ DB Kaydedildi: Muhafız Eklendi!");
+                    await loadStaffAndGroupPerms();
+                }
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
@@ -1058,7 +1269,7 @@
             const d = await res.json();
             if (d.success) {
                 playStaffSfx('ok');
-                showToast("✔ Yetkili Kaldırıldı");
+                showToast("✔ DB Kaydedildi: Yetkili Kaldırıldı");
                 await loadStaffAndGroupPerms();
             }
         }
