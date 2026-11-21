@@ -14,11 +14,21 @@
             --text-lavender: #e8c5ff;
             --foil-gold: #ffd166;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
 
         html, body {
-            height: 100vh; width: 100vw; overflow: hidden;
-            background-color: var(--purple-deep); color: var(--text-pearl);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            background-color: var(--purple-deep);
+            color: var(--text-pearl);
         }
 
         body {
@@ -26,12 +36,18 @@
                 radial-gradient(circle at 20% 15%, rgba(245, 203, 92, 0.35) 0%, transparent 45%),
                 radial-gradient(circle at 85% 25%, rgba(199, 125, 255, 0.45) 0%, transparent 50%),
                 linear-gradient(145deg, #2b094d 0%, #4e1485 48%, #1a0430 100%);
-            display: flex; flex-direction: column; justify-content: space-between; padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 14px;
             position: relative;
         }
 
         body::before {
-            content: ""; position: absolute; inset: 0; pointer-events: none;
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
             background-image:
                 radial-gradient(1.5px 1.5px at 14% 20%, #fff3b0, transparent),
                 radial-gradient(2px 2px at 45% 12%, #f5cb5c, transparent),
@@ -45,65 +61,114 @@
         @keyframes sparkleShift { 0% { opacity: 0.55; } 100% { opacity: 1; } }
 
         .velvet-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 16px; background: rgba(42, 12, 74, 0.72); backdrop-filter: blur(24px);
-            border-radius: 18px; border: 1.5px solid var(--border-gold);
-            box-shadow: 0 10px 28px rgba(15, 3, 28, 0.65), inset 0 1px 0 rgba(255, 243, 176, 0.5);
-            z-index: 2; flex-shrink: 0; gap: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(42, 12, 74, 0.78);
+            border-radius: 18px;
+            border: 1.5px solid var(--border-gold);
+            z-index: 2;
+            flex-shrink: 0;
+            gap: 8px;
         }
         .club-brand {
-            font-size: 11px; font-weight: 900; letter-spacing: 2px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 2px;
             background: linear-gradient(90deg, #fff3b0, #f5cb5c, #ffffff);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .header-right { display: flex; align-items: center; gap: 6px; }
         .sound-toggle-btn {
-            background: rgba(255, 243, 176, 0.16); color: #fff3b0;
-            border: 1px solid var(--border-gold); border-radius: 9px;
-            padding: 5px 8px; font-size: 8px; font-weight: 900; cursor: pointer;
+            background: rgba(255, 243, 176, 0.16);
+            color: #fff3b0;
+            border: 1px solid var(--border-gold);
+            border-radius: 9px;
+            padding: 5px 8px;
+            font-size: 8px;
+            font-weight: 900;
+            cursor: pointer;
         }
         .vip-member-pill {
             background: linear-gradient(135deg, rgba(245, 203, 92, 0.3), rgba(157, 78, 221, 0.45));
-            color: #fff3b0; padding: 5px 10px; border-radius: 10px;
-            font-size: 8px; font-weight: 900; border: 1px solid var(--border-gold);
+            color: #fff3b0;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 8px;
+            font-weight: 900;
+            border: 1px solid var(--border-gold);
         }
 
         .springboard-main {
-            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            gap: 12px; padding: 4px; z-index: 2; width: 100%; overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 4px;
+            z-index: 2;
+            width: 100%;
+            overflow: hidden;
         }
         .spotlight-banner {
-            width: 100%; max-width: 390px;
-            background: linear-gradient(135deg, rgba(82, 24, 138, 0.78), rgba(45, 11, 82, 0.88));
-            backdrop-filter: blur(24px); border: 1.5px solid var(--border-gold);
-            border-radius: 20px; padding: 12px 16px;
-            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+            width: 100%;
+            max-width: 390px;
+            background: linear-gradient(135deg, rgba(82, 24, 138, 0.84), rgba(45, 11, 82, 0.92));
+            border: 1.5px solid var(--border-gold);
+            border-radius: 20px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
         }
         .spotlight-text h3 { font-size: 11px; font-weight: 900; color: #fff3b0; text-transform: uppercase; }
         .spotlight-text p { font-size: 8px; color: var(--text-lavender); margin-top: 3px; }
 
-        /* 📱 ANDROID SOLA KAYDIRMALI 9 SİMGELİK (3x3) SAYFA SİSTEMİ */
         .member-pager-viewport {
-            width: 100%; max-width: 390px; overflow: hidden; position: relative; flex: 1;
-            display: flex; align-items: center; touch-action: pan-y;
+            width: 100%;
+            max-width: 390px;
+            overflow: hidden;
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            touch-action: pan-y;
         }
         .member-pager-track {
-            display: flex; width: 100%; height: 100%;
-            transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
         }
         .member-spring-page {
-            min-width: 100%; height: 100%;
-            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
-            gap: 10px; align-content: center; justify-items: center; padding: 4px;
+            min-width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            align-content: center;
+            justify-items: center;
+            padding: 4px;
         }
 
-        .member-app-card { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; width: 100%; }
-        .member-app-card:active { transform: scale(0.88); }
+        .member-app-card { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; width: 100%; transition: transform 0.12s ease; }
+        .member-app-card:active { transform: scale(0.90); }
         .member-app-icon {
-            width: 60px; height: 60px;
-            background: linear-gradient(145deg, rgba(114, 38, 184, 0.75), rgba(56, 14, 99, 0.9));
-            border-radius: 18px; border: 1.5px solid var(--border-gold);
-            display: flex; align-items: center; justify-content: center; font-size: 26px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, rgba(114, 38, 184, 0.8), rgba(56, 14, 99, 0.92));
+            border-radius: 18px;
+            border: 1.5px solid var(--border-gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
             position: relative;
         }
         .member-app-icon.gv-special {
@@ -111,37 +176,82 @@
             border: 2px solid #ffd166;
             box-shadow: 0 10px 26px rgba(181, 18, 47, 0.55), 0 0 18px rgba(255, 209, 102, 0.45);
         }
+
+        .empty-plus-card { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; pointer-events: none; }
+        .empty-plus-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 18px;
+            background: rgba(245, 203, 92, 0.05);
+            border: 1.5px dashed rgba(245, 203, 92, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 300;
+            color: rgba(255, 243, 176, 0.48);
+        }
+
         .app-live-badge {
-            position: absolute; top: -5px; right: -6px;
-            background: linear-gradient(135deg, #fff3b0, #f5cb5c); color: #240742;
-            font-size: 6px; font-weight: 900; padding: 2px 6px; border-radius: 8px; text-transform: uppercase;
+            position: absolute;
+            top: -5px;
+            right: -6px;
+            background: linear-gradient(135deg, #fff3b0, #f5cb5c);
+            color: #240742;
+            font-size: 6px;
+            font-weight: 900;
+            padding: 2px 6px;
+            border-radius: 8px;
+            text-transform: uppercase;
         }
         .member-app-title { font-size: 8.5px; font-weight: 800; color: #fff; text-align: center; max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         .velvet-dock {
-            width: 100%; max-width: 390px; height: 36px;
-            background: rgba(58, 17, 99, 0.65); backdrop-filter: blur(24px);
-            border-radius: 18px; border: 1.5px solid var(--border-gold);
-            margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 8px; z-index: 2; flex-shrink: 0;
+            width: 100%;
+            max-width: 390px;
+            height: 36px;
+            background: rgba(58, 17, 99, 0.72);
+            border-radius: 18px;
+            border: 1.5px solid var(--border-gold);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            z-index: 2;
+            flex-shrink: 0;
         }
         .glitter-dot {
-            width: 7px; height: 7px; background: rgba(245, 203, 92, 0.35);
-            border-radius: 50%; cursor: pointer; transition: all 0.2s ease;
+            width: 7px;
+            height: 7px;
+            background: rgba(245, 203, 92, 0.35);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.16s ease;
         }
-        .glitter-dot.active { width: 16px; border-radius: 6px; background: #fff3b0; box-shadow: 0 0 10px #fff3b0; }
+        .glitter-dot.active { width: 16px; border-radius: 6px; background: #fff3b0; }
 
-        /* TAM EKRAN GOLDENVISION SAHNESİ */
+        /* TAM EKRAN GOLDENVISION: KIRMIZI + GOLD VARAK + KIRMIZI SİM */
         .gv-fullscreen-stage {
-            position: fixed; inset: 0; width: 100vw; height: 100vh;
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
             background:
                 radial-gradient(circle at 50% 10%, rgba(255, 209, 102, 0.28) 0%, transparent 45%),
                 radial-gradient(circle at 15% 80%, rgba(255, 46, 99, 0.35) 0%, transparent 50%),
                 radial-gradient(circle at 85% 75%, rgba(212, 175, 55, 0.25) 0%, transparent 50%),
                 linear-gradient(160deg, #4a0614 0%, #240209 55%, #120104 100%);
-            z-index: 300; display: none; flex-direction: column; overflow: hidden;
+            z-index: 300;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
         }
         .gv-fullscreen-stage::before {
-            content: ""; position: absolute; inset: 0; pointer-events: none;
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
             background-image:
                 radial-gradient(2px 2px at 12% 18%, #ff4d6d, transparent),
                 radial-gradient(1.5px 1.5px at 34% 28%, #ffd166, transparent),
@@ -153,104 +263,186 @@
         .gv-fullscreen-stage.open { display: flex; }
 
         .gv-topbar {
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 12px 16px;
-            background: linear-gradient(90deg, rgba(92, 8, 24, 0.92), rgba(48, 4, 12, 0.95));
-            border-bottom: 2px solid var(--foil-gold); z-index: 2; flex-shrink: 0; gap: 8px;
+            background: linear-gradient(90deg, rgba(92, 8, 24, 0.94), rgba(48, 4, 12, 0.96));
+            border-bottom: 2px solid var(--foil-gold);
+            z-index: 2;
+            flex-shrink: 0;
+            gap: 8px;
         }
         .gv-logo-text {
-            font-size: 12px; font-weight: 900; letter-spacing: 1.5px;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
             background: linear-gradient(90deg, #fff1b8, #ffd166, #d4af37);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .gv-week-sub { font-size: 8px; color: #ffd6de; font-weight: 700; }
         .gv-top-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
         .gv-exit-btn {
             background: linear-gradient(135deg, #fff1b8, #ffd166);
-            color: #2b0209; border: none; border-radius: 9px;
-            padding: 6px 12px; font-size: 8px; font-weight: 900; text-transform: uppercase; cursor: pointer;
+            color: #2b0209;
+            border: none;
+            border-radius: 9px;
+            padding: 6px 12px;
+            font-size: 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
         }
 
         .gv-nav-bar {
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
-            padding: 10px 14px; background: rgba(24, 2, 7, 0.75);
-            border-bottom: 1px solid rgba(255, 209, 102, 0.35); z-index: 2; flex-shrink: 0;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            padding: 10px 14px;
+            background: rgba(24, 2, 7, 0.8);
+            border-bottom: 1px solid rgba(255, 209, 102, 0.35);
+            z-index: 2;
+            flex-shrink: 0;
         }
         .gv-nav-btn {
-            background: rgba(92, 8, 24, 0.55); border: 1px solid rgba(255, 209, 102, 0.4);
-            color: #ffd6de; border-radius: 10px; padding: 8px 4px;
-            font-size: 8px; font-weight: 900; text-align: center; cursor: pointer; text-transform: uppercase;
+            background: rgba(92, 8, 24, 0.62);
+            border: 1px solid rgba(255, 209, 102, 0.45);
+            color: #ffd6de;
+            border-radius: 10px;
+            padding: 8px 4px;
+            font-size: 8px;
+            font-weight: 900;
+            text-align: center;
+            cursor: pointer;
+            text-transform: uppercase;
         }
         .gv-nav-btn.active { background: linear-gradient(135deg, #fff1b8, #ffd166); color: #2b0209; border-color: #fff1b8; }
 
-        .gv-scroll-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; z-index: 2; }
+        .gv-scroll-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; z-index: 2; -webkit-overflow-scrolling: touch; }
         .gv-panel { display: none; flex-direction: column; gap: 10px; }
         .gv-panel.active { display: flex; }
 
         .palace-card {
-            background: linear-gradient(145deg, rgba(84, 7, 22, 0.82), rgba(34, 3, 9, 0.92));
-            border: 1.5px solid var(--foil-gold); border-radius: 16px; padding: 13px;
+            background: linear-gradient(145deg, rgba(84, 7, 22, 0.86), rgba(34, 3, 9, 0.94));
+            border: 1.5px solid var(--foil-gold);
+            border-radius: 16px;
+            padding: 13px;
         }
         .palace-card-title { font-size: 10px; font-weight: 900; color: #fff1b8; text-transform: uppercase; margin-bottom: 6px; }
         .palace-muted { font-size: 8.5px; color: #f3c6cf; line-height: 1.45; }
 
+        /* SARAY KONSEPTİNE UYGUN YAKUT & GOLD VARAK SEÇİM KUTULARI */
         .gv-input, .gv-select {
-            width: 100%; background: rgba(18, 1, 5, 0.9);
-            border: 1.5px solid rgba(255, 209, 102, 0.55); border-radius: 10px;
-            padding: 10px 12px; color: #fff; font-size: 9.5px; outline: none; margin-bottom: 6px;
+            width: 100%;
+            background: linear-gradient(145deg, rgba(72, 7, 20, 0.94), rgba(34, 3, 9, 0.98));
+            border: 1.5px solid rgba(255, 209, 102, 0.65);
+            border-radius: 10px;
+            padding: 10px 12px;
+            color: #fff1b8;
+            font-size: 9.5px;
+            font-weight: 700;
+            outline: none;
+            margin-bottom: 6px;
         }
+        .gv-input::placeholder { color: rgba(255, 214, 222, 0.55); font-weight: 500; }
+        .gv-select option { background: #3b0510; color: #fff1b8; }
+
         .country-flag-box {
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(18, 1, 5, 0.95); border: 1.5px solid var(--foil-gold);
-            border-radius: 10px; font-size: 22px; min-height: 38px; margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, rgba(96, 9, 27, 0.95), rgba(38, 3, 10, 0.98));
+            border: 1.5px solid var(--foil-gold);
+            border-radius: 10px;
+            font-size: 22px;
+            min-height: 38px;
+            margin-bottom: 6px;
         }
         .palace-gold-btn {
-            width: 100%; padding: 11px 14px; border: none; border-radius: 11px;
+            width: 100%;
+            padding: 11px 14px;
+            border: none;
+            border-radius: 11px;
             background: linear-gradient(135deg, #fff1b8 0%, #ffd166 55%, #d4af37 100%);
-            color: #240208; font-size: 9px; font-weight: 900; text-transform: uppercase; cursor: pointer;
+            color: #240208;
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.1s ease;
         }
+        .palace-gold-btn:active { transform: scale(0.97); }
+        .palace-gold-btn:disabled { opacity: 0.6; }
 
-        .vote-entry-card { background: rgba(58, 5, 15, 0.85); border: 1.5px solid rgba(255, 209, 102, 0.5); border-radius: 14px; padding: 11px; display: flex; flex-direction: column; gap: 8px; }
+        .vote-entry-card { background: rgba(58, 5, 15, 0.88); border: 1.5px solid rgba(255, 209, 102, 0.52); border-radius: 14px; padding: 11px; display: flex; flex-direction: column; gap: 8px; }
         .vote-entry-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .vote-song-title { font-size: 10px; font-weight: 900; color: #fff1b8; }
         .vote-artist-sub { font-size: 8px; color: #f3c6cf; }
         .pts-chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
-        .pts-chip { padding: 6px 9px; border-radius: 8px; font-size: 8.5px; font-weight: 900; background: rgba(24, 2, 7, 0.9); color: #ffd166; border: 1px solid rgba(255, 209, 102, 0.45); cursor: pointer; }
+        .pts-chip {
+            padding: 6px 9px;
+            border-radius: 8px;
+            font-size: 8.5px;
+            font-weight: 900;
+            background: rgba(34, 3, 9, 0.92);
+            color: #ffd166;
+            border: 1px solid rgba(255, 209, 102, 0.48);
+            cursor: pointer;
+        }
         .pts-chip.selected { background: linear-gradient(135deg, #fff1b8, #ffd166); color: #240208; border-color: #fff1b8; }
 
         .matrix-scroll { width: 100%; overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255, 209, 102, 0.45); }
-        .score-matrix-table { width: 100%; border-collapse: collapse; font-size: 8px; background: rgba(20, 2, 6, 0.92); }
+        .score-matrix-table { width: 100%; border-collapse: collapse; font-size: 8px; background: rgba(24, 3, 8, 0.95); }
         .score-matrix-table th, .score-matrix-table td { border: 1px solid rgba(255, 209, 102, 0.25); padding: 6px; text-align: center; white-space: nowrap; }
-        .score-matrix-table th { background: rgba(110, 10, 29, 0.85); color: #fff1b8; font-weight: 900; }
+        .score-matrix-table th { background: rgba(110, 10, 29, 0.88); color: #fff1b8; font-weight: 900; }
         .cell-twelve { background: linear-gradient(135deg, #ffd166, #d4af37); color: #240208; font-weight: 900; }
         .cell-pts { color: #ffd6de; font-weight: 800; }
 
-        .rank-row { display: flex; justify-content: space-between; align-items: center; background: rgba(68, 6, 18, 0.78); border: 1px solid rgba(255, 209, 102, 0.4); border-radius: 11px; padding: 9px 12px; font-size: 9px; }
+        .rank-row { display: flex; justify-content: space-between; align-items: center; background: rgba(68, 6, 18, 0.82); border: 1px solid rgba(255, 209, 102, 0.42); border-radius: 11px; padding: 9px 12px; font-size: 9px; }
         .rank-pos { font-weight: 900; color: #ffd166; margin-right: 8px; }
         .rank-score { font-weight: 900; color: #fff1b8; background: rgba(255, 209, 102, 0.18); padding: 4px 8px; border-radius: 8px; }
 
         .weeks-25-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-        .week-mini-box { background: rgba(58, 5, 15, 0.85); border: 1px solid rgba(255, 209, 102, 0.4); border-radius: 10px; padding: 7px 4px; text-align: center; }
-        .week-mini-box.is-current { border: 2px solid #fff1b8; background: rgba(145, 14, 39, 0.9); }
+        .week-mini-box { background: rgba(58, 5, 15, 0.88); border: 1px solid rgba(255, 209, 102, 0.42); border-radius: 10px; padding: 7px 4px; text-align: center; }
+        .week-mini-box.is-current { border: 2px solid #fff1b8; background: rgba(145, 14, 39, 0.92); }
         .week-mini-num { font-size: 8.5px; font-weight: 900; color: #fff1b0; }
         .week-mini-type { font-size: 6px; color: #f3c6cf; margin-top: 2px; }
 
         .festival-reveal-overlay {
-            position: fixed; inset: 0; z-index: 400;
+            position: fixed;
+            inset: 0;
+            z-index: 400;
             background: radial-gradient(circle at 50% 20%, rgba(255, 209, 102, 0.32), rgba(26, 2, 10, 0.98) 70%);
-            display: none; flex-direction: column; justify-content: space-between; padding: 16px; overflow-y: auto;
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+            overflow-y: auto;
         }
         .festival-reveal-overlay.open { display: flex; }
-        .firework-banner { text-align: center; padding: 14px; border-radius: 18px; background: linear-gradient(135deg, rgba(138, 12, 36, 0.9), rgba(56, 4, 14, 0.95)); border: 2px solid #ffd166; }
-        .reveal-spotlight-card { background: linear-gradient(145deg, rgba(92, 8, 24, 0.92), rgba(34, 2, 8, 0.98)); border: 2px solid #fff1b8; border-radius: 20px; padding: 18px; text-align: center; }
+        .firework-banner { text-align: center; padding: 14px; border-radius: 18px; background: linear-gradient(135deg, rgba(138, 12, 36, 0.92), rgba(56, 4, 14, 0.96)); border: 2px solid #ffd166; }
+        .reveal-spotlight-card { background: linear-gradient(145deg, rgba(92, 8, 24, 0.94), rgba(34, 2, 8, 0.98)); border: 2px solid #fff1b8; border-radius: 20px; padding: 18px; text-align: center; }
         .reveal-flag-big { font-size: 46px; margin-bottom: 6px; }
         .reveal-pts-big { font-size: 24px; font-weight: 900; color: #ffd166; margin-top: 6px; }
 
         .glitter-toast {
-            position: fixed; top: 18px; left: 50%; transform: translateX(-50%) translateY(-60px);
-            background: linear-gradient(135deg, #fff1b8, #ffd166); color: #240208;
-            padding: 9px 18px; border-radius: 12px; font-size: 9px; font-weight: 900;
-            z-index: 1000; opacity: 0; transition: all 0.3s ease; pointer-events: none;
+            position: fixed;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-60px);
+            background: linear-gradient(135deg, #fff1b8, #ffd166);
+            color: #240208;
+            padding: 9px 18px;
+            border-radius: 12px;
+            font-size: 9px;
+            font-weight: 900;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.22s ease;
+            pointer-events: none;
+            max-width: 92vw;
+            text-align: center;
         }
         .glitter-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
@@ -276,7 +468,6 @@
             <div style="font-size:24px;">👑</div>
         </div>
 
-        <!-- 📱 9 SİMGELİK 3x3 ANDROID SOLA KAYDIRMALI SAYFALAR -->
         <div class="member-pager-viewport" id="memberPagerViewport">
             <div class="member-pager-track" id="memberPagerTrack"></div>
         </div>
@@ -331,7 +522,7 @@
                     <input class="gv-input" id="gvArtistInput" placeholder="Şarkıcı / Sanatçı">
                     <input class="gv-input" id="gvSongInput" placeholder="Şarkı Adı">
                     <input class="gv-input" id="gvSongUrlInput" placeholder="🔗 Şarkı Linki">
-                    <div style="display:grid; grid-template-columns: 1fr 96px; gap:6px;">
+                    <div style="display:grid; grid-template-columns: 1fr 104px; gap:6px;">
                         <input class="gv-input" type="number" step="0.1" id="gvViewsAmountInput" placeholder="İzlenme (Örn: 42.5)">
                         <select class="gv-select" id="gvViewsUnitSelect">
                             <option value="M">Milyon (M)</option>
@@ -340,7 +531,7 @@
                         </select>
                     </div>
                     <input class="gv-input" id="gvPairInput" placeholder="Çift Haftası Partneri (@...)">
-                    <button class="palace-gold-btn" onclick="sendGvEntry()">Onaya Gönder 👑</button>
+                    <button class="palace-gold-btn" onclick="sendGvEntry(this)">Onaya Gönder 👑</button>
                 </div>
 
                 <div class="palace-card">
@@ -350,7 +541,7 @@
                     <div style="display:flex; gap:6px;">
                         <select class="gv-select" id="gvCommentTargetSelect" style="margin-bottom:0; max-width:120px;"></select>
                         <input class="gv-input" id="gvCommentInput" placeholder="Yorum yaz..." style="margin-bottom:0;">
-                        <button class="palace-gold-btn" style="width:auto; padding:8px 12px;" onclick="sendGvComment()">Gönder</button>
+                        <button class="palace-gold-btn" style="width:auto; padding:8px 12px;" onclick="sendGvComment(this)">Gönder</button>
                     </div>
                 </div>
             </div>
@@ -361,7 +552,7 @@
                     <div class="palace-muted">Her puanı yalnızca bir şarkıya verebilirsin.</div>
                 </div>
                 <div id="gvVotingListContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
-                <button class="palace-gold-btn" onclick="sendGvBallot()">Oylarımı Mühürle 🏆</button>
+                <button class="palace-gold-btn" onclick="sendGvBallot(this)">Oylarımı Mühürle 🏆</button>
             </div>
 
             <div class="gv-panel" id="panel-tablo">
@@ -424,7 +615,7 @@
             let pagesHtml = '';
             for (let p = 0; p < totalPages; p++) {
                 const slice = allMemberApps.slice(p * perPage, (p + 1) * perPage);
-                const cards = slice.map((app, idx) => `
+                let cellsHtml = slice.map((app, idx) => `
                     <div class="member-app-card" onclick="triggerMemberApp(${p * perPage + idx})">
                         <div class="member-app-icon ${app.special ? 'gv-special' : ''}">
                             ${app.badge ? `<span class="app-live-badge">${app.badge}</span>` : ''}
@@ -433,7 +624,17 @@
                         <div class="member-app-title">${app.title}</div>
                     </div>
                 `).join('');
-                pagesHtml += `<div class="member-spring-page">${cards}</div>`;
+
+                const remainder = perPage - slice.length;
+                for (let b = 0; b < remainder; b++) {
+                    cellsHtml += `
+                        <div class="empty-plus-card">
+                            <div class="empty-plus-box">+</div>
+                            <div class="member-app-title" style="opacity:0.35;">Boş</div>
+                        </div>
+                    `;
+                }
+                pagesHtml += `<div class="member-spring-page">${cellsHtml}</div>`;
             }
             track.innerHTML = pagesHtml;
 
@@ -459,18 +660,15 @@
         mVp.addEventListener('touchstart', (e) => { mTouchStartX = e.changedTouches[0].screenX; }, { passive: true });
         mVp.addEventListener('touchend', (e) => {
             const dx = e.changedTouches[0].screenX - mTouchStartX;
-            if (dx < -45) goMemberPage(currentMemberPage + 1); // Sola kaydır -> Sonraki sayfa
-            else if (dx > 45) goMemberPage(currentMemberPage - 1); // Sağa kaydır -> Önceki sayfa
+            if (dx < -45) goMemberPage(currentMemberPage + 1);
+            else if (dx > 45) goMemberPage(currentMemberPage - 1);
         }, { passive: true });
 
         function triggerMemberApp(index) {
             const item = allMemberApps[index];
             if (!item) return;
-            if (item.isGv) {
-                openGoldenVision();
-            } else {
-                showGlitterToast(`${item.icon} ${item.title} Açıldı`);
-            }
+            if (item.isGv) openGoldenVision();
+            else { playMlSfx('tap'); showGlitterToast(`${item.icon} ${item.title} Açıldı`); }
         }
 
         const COUNTRY_FLAGS = {
@@ -517,7 +715,7 @@
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
             return audioCtx;
         }
-        function playTone(freq, duration, type = 'triangle', delay = 0, gainPeak = 0.16) {
+        function playTone(freq, duration, type = 'triangle', delay = 0, gainPeak = 0.15) {
             const ctx = ensureAudioCtx();
             if (!ctx) return;
             const start = ctx.currentTime + delay;
@@ -533,11 +731,11 @@
         }
         function playMlSfx(kind) {
             if (!soundEnabled) return;
-            if (kind === 'enter') { playTone(523.25, 0.14, 'triangle', 0, 0.14); playTone(659.25, 0.14, 'triangle', 0.07, 0.15); playTone(783.99, 0.24, 'sawtooth', 0.14, 0.12); }
-            else if (kind === 'seal') { playTone(440, 0.1, 'square', 0, 0.11); playTone(880, 0.22, 'triangle', 0.08, 0.16); }
-            else if (kind === 'twelve') { playTone(587.33, 0.12, 'triangle', 0, 0.15); playTone(783.99, 0.12, 'triangle', 0.08, 0.15); playTone(1046.5, 0.28, 'sine', 0.16, 0.18); }
+            if (kind === 'enter') { playTone(523.25, 0.13, 'triangle', 0, 0.14); playTone(659.25, 0.13, 'triangle', 0.06, 0.14); playTone(783.99, 0.22, 'sawtooth', 0.12, 0.12); }
+            else if (kind === 'seal') { playTone(440, 0.09, 'square', 0, 0.11); playTone(880, 0.2, 'triangle', 0.07, 0.15); }
+            else if (kind === 'twelve') { playTone(587.33, 0.11, 'triangle', 0, 0.15); playTone(783.99, 0.11, 'triangle', 0.07, 0.15); playTone(1046.5, 0.26, 'sine', 0.14, 0.17); }
             else if (kind === 'tap') { playTone(620, 0.05, 'sine', 0, 0.08); }
-            else if (kind === 'error') { playTone(210, 0.15, 'sawtooth', 0, 0.14); playTone(165, 0.2, 'sawtooth', 0.11, 0.14); }
+            else if (kind === 'error') { playTone(210, 0.14, 'sawtooth', 0, 0.13); playTone(165, 0.18, 'sawtooth', 0.1, 0.13); }
         }
         function toggleSound() {
             soundEnabled = !soundEnabled;
@@ -558,15 +756,7 @@
 
         async function loadMemberEvents() {
             const baseApps = [
-                { title: 'GOLDENVISION', icon: '👑', badge: 'SARAY', special: true, isGv: true },
-                { title: 'Tarot Gecesi', icon: '🔮', badge: 'VIP' },
-                { title: 'Shade & Tea', icon: '☕', badge: 'HOT' },
-                { title: 'Kraliyet Tacı', icon: '🏆', badge: 'GALA' },
-                { title: 'Lip-Sync', icon: '🎙️', badge: '' },
-                { title: 'İtiraf Kutusu', icon: '💌', badge: '' },
-                { title: 'Kader Çarkı', icon: '🎡', badge: '' },
-                { title: 'Sahne Kulisi', icon: '✨', badge: '' },
-                { title: 'VIP Liste', icon: '💎', badge: '' }
+                { title: 'GOLDENVISION', icon: '👑', badge: 'SARAY', special: true, isGv: true }
             ];
             try {
                 const res = await fetch('/api/events/list?only_active=true');
@@ -687,66 +877,82 @@
             if (gvOverviewData) renderGoldenVision(gvOverviewData);
         }
 
-        async function sendGvEntry() {
-            const rawCountries = document.getElementById('gvCountriesInput').value.trim();
-            const countries = rawCountries ? rawCountries.split(',').map(s => s.trim()).filter(Boolean) : [];
-            const country = document.getElementById('gvPrimaryCountryInput').value.trim() || (countries[0] || '');
-            const flag = resolveCountryFlag(country);
-            document.getElementById('gvAutoFlagBox').innerText = flag;
+        async function sendGvEntry(btn) {
+            if (btn) btn.disabled = true;
+            try {
+                const rawCountries = document.getElementById('gvCountriesInput').value.trim();
+                const countries = rawCountries ? rawCountries.split(',').map(s => s.trim()).filter(Boolean) : [];
+                const country = document.getElementById('gvPrimaryCountryInput').value.trim() || (countries[0] || '');
+                const flag = resolveCountryFlag(country);
+                document.getElementById('gvAutoFlagBox').innerText = flag;
 
-            const res = await fetch('/api/goldenvision/entry', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: memberUser.id,
-                    username: memberUser.username || memberUser.first_name || '',
-                    full_name: memberUser.first_name || '',
-                    countries, country, flag,
-                    artist: document.getElementById('gvArtistInput').value.trim(),
-                    song: document.getElementById('gvSongInput').value.trim(),
-                    song_url: document.getElementById('gvSongUrlInput').value.trim(),
-                    views_amount: parseFloat(document.getElementById('gvViewsAmountInput').value || '0'),
-                    views_unit: document.getElementById('gvViewsUnitSelect').value,
-                    pair_partner: document.getElementById('gvPairInput').value.trim()
-                })
-            });
-            const d = await res.json();
-            if (!d.success) { playMlSfx('error'); return alert(d.error || 'Katılım reddedildi.'); }
-            playMlSfx('seal');
-            showGlitterToast("👑 Başvurun Onaya Gönderildi!");
-            await refreshGoldenVision();
+                const res = await fetch('/api/goldenvision/entry', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: memberUser.id,
+                        username: memberUser.username || memberUser.first_name || '',
+                        full_name: memberUser.first_name || '',
+                        countries, country, flag,
+                        artist: document.getElementById('gvArtistInput').value.trim(),
+                        song: document.getElementById('gvSongInput').value.trim(),
+                        song_url: document.getElementById('gvSongUrlInput').value.trim(),
+                        views_amount: parseFloat(document.getElementById('gvViewsAmountInput').value || '0'),
+                        views_unit: document.getElementById('gvViewsUnitSelect').value,
+                        pair_partner: document.getElementById('gvPairInput').value.trim()
+                    })
+                });
+                const d = await res.json();
+                if (!d.success) { playMlSfx('error'); return alert(d.error || 'Katılım reddedildi.'); }
+                playMlSfx('seal');
+                showGlitterToast("✔ DB Kaydedildi: Başvurun Host Onayında!");
+                await refreshGoldenVision();
+            } finally {
+                if (btn) btn.disabled = false;
+            }
         }
 
-        async function sendGvBallot() {
-            const res = await fetch('/api/goldenvision/ballot', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: memberUser.id,
-                    username: memberUser.username || memberUser.first_name || '',
-                    voter_flag: resolveCountryFlag(document.getElementById('gvPrimaryCountryInput').value),
-                    allocations: draftAllocations
-                })
-            });
-            const d = await res.json();
-            if (!d.success) { playMlSfx('error'); return alert(d.error || 'Oylar kaydedilemedi.'); }
-            playMlSfx('twelve');
-            showGlitterToast("🏆 12-1 Oyların Mühürlendi!");
-            await refreshGoldenVision();
+        async function sendGvBallot(btn) {
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/goldenvision/ballot', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: memberUser.id,
+                        username: memberUser.username || memberUser.first_name || '',
+                        voter_flag: resolveCountryFlag(document.getElementById('gvPrimaryCountryInput').value),
+                        allocations: draftAllocations
+                    })
+                });
+                const d = await res.json();
+                if (!d.success) { playMlSfx('error'); return alert(d.error || 'Oylar kaydedilemedi.'); }
+                playMlSfx('twelve');
+                showGlitterToast("✔ DB Kaydedildi: 12-1 Oyların Mühürlendi!");
+                await refreshGoldenVision();
+            } finally {
+                if (btn) btn.disabled = false;
+            }
         }
 
-        async function sendGvComment() {
-            const res = await fetch('/api/goldenvision/comment', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: memberUser.id,
-                    username: memberUser.username || memberUser.first_name || 'Üye',
-                    entry_id: Number(document.getElementById('gvCommentTargetSelect').value || 0),
-                    text: document.getElementById('gvCommentInput').value.trim()
-                })
-            });
-            const d = await res.json();
-            if (!d.success) { playMlSfx('error'); return alert(d.error || 'Yorum gönderilemedi.'); }
-            document.getElementById('gvCommentInput').value = '';
-            await refreshGoldenVision();
+        async function sendGvComment(btn) {
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/goldenvision/comment', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: memberUser.id,
+                        username: memberUser.username || memberUser.first_name || 'Üye',
+                        entry_id: Number(document.getElementById('gvCommentTargetSelect').value || 0),
+                        text: document.getElementById('gvCommentInput').value.trim()
+                    })
+                });
+                const d = await res.json();
+                if (!d.success) { playMlSfx('error'); return alert(d.error || 'Yorum gönderilemedi.'); }
+                document.getElementById('gvCommentInput').value = '';
+                showToast("✔ DB Kaydedildi: Yorum Eklendi!");
+                await refreshGoldenVision();
+            } finally {
+                if (btn) btn.disabled = false;
+            }
         }
 
         function renderScoreMatrixAndRanking(ranking) {
