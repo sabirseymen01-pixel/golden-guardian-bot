@@ -13,8 +13,8 @@
             --gold-light: #f8ecbe;
             --gold-dim: rgba(212, 175, 55, 0.22);
             --glass-panel: rgba(16, 12, 5, 0.92);
-            --glass-icon: rgba(26, 20, 8, 0.82);
-            --glass-modal: rgba(12, 9, 3, 0.98);
+            --glass-icon: rgba(26, 20, 8, 0.85);
+            --glass-modal: rgba(12, 9, 3, 0.99);
             --danger: #ff4757;
             --success: #2ed573;
             --text-main: #f5f6fa;
@@ -33,62 +33,122 @@
         }
         .brand-title { font-size: 11px; font-weight: 900; color: var(--gold-light); letter-spacing: 2px; }
         .user-badge { background: var(--gold-dim); color: var(--gold-light); padding: 4px 10px; border-radius: 6px; font-size: 8px; border: 1px solid var(--border-gold); font-weight: 900; }
-        .homescreen-container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 14px; padding: 4px; }
-        .system-widget { width: 100%; max-width: 380px; background: var(--glass-panel); border: 1.5px solid var(--border-gold); border-radius: 14px; padding: 12px; display: flex; align-items: center; justify-content: space-between; }
+
+        .homescreen-container {
+            flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            gap: 12px; padding: 4px; width: 100%; overflow: hidden;
+        }
+        .system-widget {
+            width: 100%; max-width: 390px; background: var(--glass-panel); border: 1.5px solid var(--border-gold);
+            border-radius: 14px; padding: 11px 14px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+        }
         .widget-info h3 { font-size: 10px; color: var(--gold-light); font-weight: 900; text-transform: uppercase; }
         .widget-info p { font-size: 8px; color: var(--text-muted); margin-top: 2px; }
         .widget-status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success); }
-        .app-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 380px; justify-items: center; }
+
+        /* 📱 ANDROID SOLA KAYDIRMALI 9 SİMGELİK (3x3) SAYFA SİSTEMİ */
+        .pager-viewport {
+            width: 100%; max-width: 390px; overflow: hidden; position: relative; flex: 1;
+            display: flex; align-items: center; touch-action: pan-y;
+        }
+        .pager-track {
+            display: flex; width: 100%; height: 100%;
+            transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .spring-page {
+            min-width: 100%; height: 100%;
+            display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+            gap: 10px; align-content: center; justify-items: center; padding: 4px;
+        }
         .app-icon-card { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
         .app-icon-card:active { transform: scale(0.90); }
-        .app-icon-box { width: 54px; height: 54px; background: var(--glass-icon); border-radius: 14px; border: 1.5px solid var(--border-gold); display: flex; align-items: center; justify-content: center; font-size: 22px; }
-        .app-icon-box.gv-studio-icon { background: linear-gradient(145deg, #5c0818, #240309); border-color: #ffd166; }
-        .app-label { font-size: 8px; font-weight: 800; color: var(--text-main); text-align: center; }
-        .home-dock { width: 100%; max-width: 380px; height: 36px; background: rgba(22, 17, 8, 0.7); border-radius: 18px; border: 1.5px solid var(--border-gold); margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .dock-dot { width: 5px; height: 5px; background: var(--gold-base); border-radius: 50%; }
-
-        .ios-modal {
-            position: fixed; bottom: 0; left: 0; width: 100vw; height: 0; background: var(--glass-modal); backdrop-filter: blur(45px);
-            border-top: 3px solid var(--gold-base); border-radius: 24px 24px 0 0; z-index: 100;
-            transform: scale(0.90) translateY(20px); opacity: 0; pointer-events: none;
-            transition: all 0.3s ease; display: flex; flex-direction: column; overflow: hidden;
+        .app-icon-box {
+            width: 56px; height: 56px; background: var(--glass-icon); border-radius: 15px;
+            border: 1.5px solid var(--border-gold); display: flex; align-items: center; justify-content: center; font-size: 22px;
         }
-        .ios-modal.open { height: 92vh; transform: scale(1) translateY(0); opacity: 1; pointer-events: auto; }
-        .modal-header { padding: 12px 16px; background: rgba(32, 25, 10, 0.9); display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid var(--border-gold); cursor: pointer; flex-shrink: 0; }
-        .modal-heading { font-size: 10px; font-weight: 900; color: var(--gold-light); text-transform: uppercase; }
-        .modal-dismiss { font-size: 7px; color: var(--obsidian); background: var(--gold-light); padding: 4px 10px; border-radius: 6px; font-weight: 900; }
-        .modal-content { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-        input, select, textarea { width: 100%; background: rgba(10, 8, 3, 0.92); border: 1.5px solid var(--border-gold); border-radius: 8px; padding: 10px; color: #fff; font-size: 9px; outline: none; margin-bottom: 4px; }
-        .gold-btn { width: 100%; background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-base) 100%); color: #000; border: none; padding: 10px; border-radius: 8px; font-weight: 900; font-size: 8px; cursor: pointer; text-transform: uppercase; }
+        .app-icon-box.gv-studio-icon { background: linear-gradient(145deg, #5c0818, #240309); border-color: #ffd166; }
+        .app-label { font-size: 8px; font-weight: 800; color: var(--text-main); text-align: center; max-width: 92px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .modal-tabs { display: flex; gap: 4px; margin-bottom: 6px; overflow-x: auto; flex-shrink: 0; }
-        .modal-tab { flex: 1; background: rgba(10,8,3,0.8); border: 1.5px solid var(--border-gold); color: var(--text-muted); padding: 6px 4px; font-size: 6px; font-weight: 800; border-radius: 6px; text-align: center; cursor: pointer; text-transform: uppercase; white-space: nowrap; }
+        .home-dock {
+            width: 100%; max-width: 390px; height: 34px; background: rgba(22, 17, 8, 0.75);
+            border-radius: 17px; border: 1.5px solid var(--border-gold); margin: 0 auto;
+            display: flex; align-items: center; justify-content: center; gap: 8px; flex-shrink: 0;
+        }
+        .dock-dot {
+            width: 7px; height: 7px; background: rgba(212, 175, 55, 0.35);
+            border-radius: 50%; cursor: pointer; transition: all 0.2s ease;
+        }
+        .dock-dot.active { width: 16px; border-radius: 6px; background: var(--gold-light); box-shadow: 0 0 8px var(--gold-base); }
+
+        /* TAM SAYFA PORT MODALLARI */
+        .fullpage-port {
+            position: fixed; inset: 0; width: 100vw; height: 100vh;
+            background: var(--glass-modal); z-index: 120;
+            display: none; flex-direction: column; overflow: hidden;
+        }
+        .fullpage-port.open { display: flex; }
+        .fullpage-header {
+            padding: 12px 16px; background: rgba(28, 22, 8, 0.96);
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid var(--gold-base); flex-shrink: 0; gap: 8px;
+        }
+        .fullpage-title { font-size: 10.5px; font-weight: 900; color: var(--gold-light); text-transform: uppercase; }
+        .fullpage-exit-btn {
+            background: linear-gradient(135deg, var(--gold-light), var(--gold-base));
+            color: #000; border: none; padding: 6px 12px; border-radius: 8px;
+            font-size: 8px; font-weight: 900; text-transform: uppercase; cursor: pointer; flex-shrink: 0;
+        }
+        .fullpage-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+        input, select, textarea {
+            width: 100%; background: rgba(10, 8, 3, 0.92); border: 1.5px solid var(--border-gold);
+            border-radius: 9px; padding: 10px; color: #fff; font-size: 9px; outline: none; margin-bottom: 6px;
+        }
+        .gold-btn {
+            width: 100%; background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold-base) 100%);
+            color: #000; border: none; padding: 10px; border-radius: 9px; font-weight: 900; font-size: 8.5px; cursor: pointer; text-transform: uppercase;
+        }
+
+        .modal-tabs { display: flex; gap: 5px; overflow-x: auto; flex-shrink: 0; }
+        .modal-tab {
+            flex: 1; background: rgba(10,8,3,0.85); border: 1.5px solid var(--border-gold);
+            color: var(--text-muted); padding: 7px 6px; font-size: 7px; font-weight: 800;
+            border-radius: 8px; text-align: center; cursor: pointer; text-transform: uppercase; white-space: nowrap;
+        }
         .modal-tab.active { background: var(--gold-dim); color: var(--gold-light); border-color: var(--gold-base); }
         .modal-tab-content { display: none; flex-direction: column; gap: 8px; }
         .modal-tab-content.active { display: flex; }
 
-        .pending-card {
-            background: rgba(24, 18, 6, 0.92); border: 1.5px solid var(--border-gold);
-            border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 8.5px;
+        .staff-card-box {
+            background: rgba(20, 16, 6, 0.9); border: 1.5px solid var(--border-gold);
+            border-radius: 12px; padding: 11px; display: flex; flex-direction: column; gap: 8px;
         }
-        .pending-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px; }
+        .staff-card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .staff-card-name { font-size: 9.5px; font-weight: 900; color: var(--gold-light); }
+        .staff-card-sub { font-size: 7.5px; color: var(--text-muted); }
+        .status-pill-row { display: flex; flex-wrap: wrap; gap: 6px; font-size: 7.5px; font-weight: 800; }
+        .status-chip { padding: 4px 8px; border-radius: 7px; border: 1px solid rgba(212,175,55,0.4); background: rgba(10,8,3,0.85); }
+        .status-chip.on { color: var(--success); border-color: rgba(46,213,115,0.5); }
+        .status-chip.off { color: var(--danger); border-color: rgba(255,71,87,0.5); }
 
-        .perm-row { background: rgba(20,16,6,0.85); border: 1px solid var(--border-gold); padding: 10px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .perm-row-title { font-size: 9px; color: var(--gold-light); font-weight: 900; }
-        .perm-btn-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .perm-btn-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .pending-card { background: rgba(24, 18, 6, 0.92); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 8.5px; }
+        .pending-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .log-item { background: rgba(12, 10, 4, 0.9); border-left: 3px solid var(--gold-base); padding: 8px 10px; border-radius: 8px; font-size: 8px; border: 1.5px solid var(--border-gold); display: flex; flex-direction: column; gap: 2px; }
-        .group-card { background: rgba(25, 20, 8, 0.75); border: 1.5px solid var(--border-gold); border-radius: 10px; padding: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; gap: 8px; }
-        .group-meta { display: flex; align-items: center; gap: 8px; overflow: hidden; flex: 1; }
-        .group-avatar { width: 34px; height: 34px; border-radius: 50%; background: #000; border: 1.5px solid var(--gold-base); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .group-title { font-size: 9px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .toast-popup { position: fixed; top: 15px; left: 50%; transform: translateX(-50%) translateY(-50px); background: rgba(212, 175, 55, 0.95); color: #000; padding: 8px 16px; border-radius: 8px; font-size: 8px; font-weight: 900; z-index: 1000; opacity: 0; transition: all 0.3s ease; pointer-events: none; }
+        .toast-popup {
+            position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-60px);
+            background: linear-gradient(135deg, var(--gold-light), var(--gold-base)); color: #000;
+            padding: 9px 18px; border-radius: 10px; font-size: 8.5px; font-weight: 900;
+            z-index: 1000; opacity: 0; transition: all 0.3s ease; pointer-events: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+        }
         .toast-popup.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
 
-    <div class="toast-popup" id="toastPopup">⚜️ GOLDEN STAFF AKTİF</div>
+    <div class="toast-popup" id="toastPopup">⚜️ İŞLEM ONAYLANDI</div>
 
     <header class="spring-header">
         <div class="brand-title">GOLDEN STAFF</div>
@@ -104,39 +164,21 @@
             <div class="widget-status-dot"></div>
         </div>
 
-        <div class="app-grid">
-            <div class="app-icon-card" onclick="openGvStudio()">
-                <div class="app-icon-box gv-studio-icon">👑</div>
-                <div class="app-label">GOLDENVISION</div>
-            </div>
-            <div class="app-icon-card" onclick="openPort('staffModal')">
-                <div class="app-icon-box">⚜️</div>
-                <div class="app-label">Staff Matrisi</div>
-            </div>
-            <div class="app-icon-card" onclick="openPort('groupsModal')">
-                <div class="app-icon-box">🛡️</div>
-                <div class="app-label">Gruplar</div>
-            </div>
-            <div class="app-icon-card" onclick="openPort('logsModal')">
-                <div class="app-icon-box">📜</div>
-                <div class="app-label">Loglar</div>
-            </div>
+        <!-- 📱 9 SİMGELİK 3x3 ANDROID SOLA KAYDIRMALI SAYFALAR -->
+        <div class="pager-viewport" id="staffPagerViewport">
+            <div class="pager-track" id="staffPagerTrack"></div>
         </div>
 
-        <div class="home-dock">
-            <div class="dock-dot"></div>
-            <div class="dock-dot"></div>
-            <div class="dock-dot"></div>
-        </div>
+        <div class="home-dock" id="staffPagerDots"></div>
     </main>
 
-    <!-- 👑 GOLDENVISION YT MASASI -->
-    <div class="ios-modal" id="gvStudioModal">
-        <div class="modal-header" onclick="closePort('gvStudioModal')">
-            <div class="modal-heading" id="gvStudioHeader">👑 GOLDENVISION YT MASASI</div>
-            <div class="modal-dismiss">KAPAT [ X ]</div>
+    <!-- 👑 TAM SAYFA GOLDENVISION YT MASASI -->
+    <div class="fullpage-port" id="gvStudioModal">
+        <div class="fullpage-header">
+            <div class="fullpage-title" id="gvStudioHeader">👑 GOLDENVISION YT MASASI</div>
+            <button class="fullpage-exit-btn" onclick="closePort('gvStudioModal')">ÇIKIŞ</button>
         </div>
-        <div class="modal-content">
+        <div class="fullpage-body">
             <div class="modal-tabs">
                 <div class="modal-tab active" onclick="switchStudioTab('onay', event)">Onay Kartları</div>
                 <div class="modal-tab" onclick="switchStudioTab('kontrol', event)">Kontrol & Bitir</div>
@@ -144,26 +186,22 @@
                 <div class="modal-tab" onclick="switchStudioTab('yetki', event)">Host & Ceza</div>
             </div>
 
-            <!-- 1. ONAY / REDDET KARTLARI -->
             <div id="studio-tab-onay" class="modal-tab-content active">
-                <div style="font-size:8px; color:var(--gold-light); font-weight:900;">Onay Bekleyen Üye Bildirimleri (Milyon Bazlı Görünüm)</div>
                 <input type="text" id="stRejectReasonInput" placeholder="Red sebebi (Reddet butonuna basınca üyeye iletilir)">
                 <div id="stPendingCardsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
-
-                <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:8px;">Onaylanan Yarışan Liste</div>
+                <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:6px;">Onaylanan Yarışan Liste</div>
                 <div id="stApprovedListContainer" style="display:flex; flex-direction:column; gap:6px;"></div>
             </div>
 
-            <!-- 2. KONTROL, RESTART & BİTİR (ŞENLİK FİNALİ) -->
             <div id="studio-tab-kontrol" class="modal-tab-content">
-                <div style="background:var(--gold-dim); border:1px solid var(--border-gold); padding:10px; border-radius:10px; font-size:8.5px;" id="gvStudioSummary">Yükleniyor...</div>
+                <div class="log-item" id="gvStudioSummary">Yükleniyor...</div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
                     <select id="stWeekSelect"></select>
                     <input type="number" id="stDurationInput" placeholder="Şarkı Süresi (sn)" value="120">
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
-                    <input type="number" step="1" id="stGenLimitInput" placeholder="Genel Limit (Milyon)" value="75">
-                    <input type="number" step="1" id="stSpecialLimitInput" placeholder="ABD & TR Limit (Milyon)" value="50">
+                    <input type="number" id="stGenLimitInput" placeholder="Genel Limit (Milyon)" value="75">
+                    <input type="number" id="stSpecialLimitInput" placeholder="ABD & TR Limit (Milyon)" value="50">
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
                     <select id="stSubmissionsOpen">
@@ -186,12 +224,9 @@
                     </select>
                 </div>
                 <button class="gold-btn" onclick="saveGvStudioState()">Ayarları Mühürle 💾</button>
-
-                <button class="gold-btn" style="background:linear-gradient(135deg,#ff4757,#ffd166); color:#000; margin-top:4px;" onclick="triggerFinaleBtn()">
+                <button class="gold-btn" style="background:linear-gradient(135deg,#ff4757,#ffd166); color:#000;" onclick="triggerFinaleBtn()">
                     🎆 BİTİR • OYLARI TOPLA & ŞENLİK FİNALİNİ BAŞLAT
                 </button>
-
-                <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:6px;">Restart & Sezon Geçişleri (Veriler Silinmez)</div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
                     <button class="gold-btn" style="background:#e67e22; color:#fff;" onclick="gvStudioAction('restart_week')">Aktif Haftayı Baştan Al</button>
                     <button class="gold-btn" style="background:#9b59b6; color:#fff;" onclick="gvStudioAction('next_season')">Yeni Sezona Direkt Atla</button>
@@ -202,7 +237,6 @@
                 </div>
             </div>
 
-            <!-- 3. 25 HAFTA KONSEPT TABLOSU -->
             <div id="studio-tab-haftalar" class="modal-tab-content">
                 <select id="stEditWeekNum" onchange="loadWeekFormFromCache()"></select>
                 <select id="stEditWeekType">
@@ -212,23 +246,22 @@
                     <option value="ÖZEL HAFTA">ÖZEL HAFTA (Konsept / Saygı)</option>
                     <option value="SECOND CHANCE">SECOND CHANCE</option>
                 </select>
-                <input type="text" id="stEditConcept" placeholder="Konsept / Saygı Haftası (Örn: Madonna Haftası)">
+                <input type="text" id="stEditConcept" placeholder="Konsept / Saygı Haftası">
                 <textarea id="stEditRuleNote" rows="2" placeholder="Hafta kural notu..."></textarea>
                 <select id="stEditNoViewLimit">
                     <option value="false">İzlenme Sınırı: Aktif (75M / ABD-TR 50M)</option>
-                    <option value="true">İzlenme Sınırı: Sınırsız (Konsept / Madonna vb.)</option>
+                    <option value="true">İzlenme Sınırı: Sınırsız</option>
                 </select>
                 <button class="gold-btn" onclick="saveGvWeekEdit()">Hafta Konseptini Güncelle ✨</button>
                 <div id="stWeeksOverviewList" style="display:flex; flex-direction:column; gap:4px; max-height:170px; overflow-y:auto;"></div>
             </div>
 
-            <!-- 4. HOST & CEZA -->
             <div id="studio-tab-yetki" class="modal-tab-content">
-                <div style="font-size:8px; color:var(--gold-light); font-weight:900;">GOLDENVISION Host Yetkisi (Sadece Kurucu)</div>
+                <div style="font-size:8px; color:var(--gold-light); font-weight:900;">GOLDENVISION YT Masası Erişim Yetkisi</div>
                 <div style="display:flex; gap:6px;">
                     <input type="number" id="stHostUserId" placeholder="Yetkili Telegram ID" style="margin-bottom:0;">
-                    <button class="gold-btn" style="width:auto; padding:8px 12px;" onclick="setGvHost(true)">Yetki Aç</button>
-                    <button class="gold-btn" style="width:auto; padding:8px 12px; background:var(--danger); color:#fff;" onclick="setGvHost(false)">Kapat</button>
+                    <button class="gold-btn" style="width:auto; padding:8px 12px;" onclick="setGvHost(true)">YT Aç</button>
+                    <button class="gold-btn" style="width:auto; padding:8px 12px; background:var(--danger); color:#fff;" onclick="setGvHost(false)">YT Kapat</button>
                 </div>
                 <div id="stHostsList" style="font-size:8px; color:#ccc;"></div>
 
@@ -244,53 +277,50 @@
         </div>
     </div>
 
-    <!-- STAFF & YETKİ MATRİSİ -->
-    <div class="ios-modal" id="staffModal">
-        <div class="modal-header" onclick="closePort('staffModal')">
-            <div class="modal-heading">⚜️ Yetkili Matrisi</div>
-            <div class="modal-dismiss">KAPAT [ X ]</div>
+    <!-- ⚜️ TAM SAYFA STAFF & GRUP BAZLI BAN/MUTE + YT YETKİ PORTU -->
+    <div class="fullpage-port" id="staffModal">
+        <div class="fullpage-header">
+            <div class="fullpage-title">⚜️ Yetkili Matrisi • Ban / Mute & YT Yetkisi</div>
+            <button class="fullpage-exit-btn" onclick="closePort('staffModal')">ÇIKIŞ</button>
         </div>
-        <div class="modal-content">
-            <input type="text" id="staffInputId" placeholder="Kullanıcı ID veya @username">
-            <input type="text" id="staffNameInput" placeholder="Rozet Ünvanı">
-            <button class="gold-btn" onclick="addNewStaff()">Muhafızı Ekle 🛡️</button>
-            <div id="staffListContainer" style="display:flex; flex-direction:column; gap:6px; margin-top:4px;"></div>
-        </div>
-    </div>
-
-    <div class="ios-modal" id="staffDetailModal" style="z-index:210;">
-        <div class="modal-header" onclick="closeStaffDetailModal()">
-            <div class="modal-heading">Muhafız İzin Editörü</div>
-            <div class="modal-dismiss">KAPAT [ X ]</div>
-        </div>
-        <div class="modal-content">
-            <input type="hidden" id="editingStaffUserId">
-            <div style="background:var(--gold-dim); padding:10px; border-radius:8px; border:1.5px solid var(--border-gold);">
-                <div id="editingStaffNameInfo" style="font-size:10px; font-weight:900; color:#fff;">-</div>
-                <div id="editingStaffIdInfo" style="font-size:7px; color:var(--text-muted);">ID: -</div>
+        <div class="fullpage-body">
+            <div class="staff-card-box">
+                <div class="staff-card-name">Yeni Muhafız / Yönetici Ekle</div>
+                <input type="text" id="staffInputId" placeholder="Kullanıcı ID veya @username">
+                <input type="text" id="staffNameInput" placeholder="Ünvan (Örn: Muhafız / Host)">
+                <button class="gold-btn" onclick="addNewStaff()">Yetkiliyi Kaydet 🛡️</button>
             </div>
-            <div class="perm-btn-pair">
-                <button class="gold-btn" id="globalBanBtn" onclick="toggleGlobalStaffPerm('can_ban')">Ban: AÇIK ✅</button>
-                <button class="gold-btn" id="globalMuteBtn" onclick="toggleGlobalStaffPerm('can_mute')">Mute: AÇIK ✅</button>
+
+            <div class="staff-card-box">
+                <div class="staff-card-name">Grup Seçimi (Grup Bazlı Ban / Mute Özelleştirme)</div>
+                <select id="permTargetGroupSelect" onchange="renderStaffPermissionCards()">
+                    <option value="0">🌐 Tüm Gruplar (Global Yetki)</option>
+                </select>
+                <div id="permLastActionBanner" style="font-size:8px; color:var(--success); font-weight:800;">
+                    Durum: Hazır — Yetki butonuna bastığınızda değişiklik veritabanına işlenir ve anında güncellenir.
+                </div>
             </div>
-            <div id="staffGroupPermissionsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
+
+            <div id="staffListContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
         </div>
     </div>
 
-    <div class="ios-modal" id="groupsModal">
-        <div class="modal-header" onclick="closePort('groupsModal')">
-            <div class="modal-heading">🛡️ Gruplar</div>
-            <div class="modal-dismiss">KAPAT [ X ]</div>
+    <!-- TAM SAYFA GRUPLAR PORTU -->
+    <div class="fullpage-port" id="groupsModal">
+        <div class="fullpage-header">
+            <div class="fullpage-title">🛡️ Yörünge Grupları</div>
+            <button class="fullpage-exit-btn" onclick="closePort('groupsModal')">ÇIKIŞ</button>
         </div>
-        <div class="modal-content"><div id="groupsListContainer"></div></div>
+        <div class="fullpage-body" id="groupsListContainer"></div>
     </div>
 
-    <div class="ios-modal" id="logsModal">
-        <div class="modal-header" onclick="closePort('logsModal')">
-            <div class="modal-heading">📜 Genel Loglar</div>
-            <div class="modal-dismiss">KAPAT [ X ]</div>
+    <!-- TAM SAYFA LOGLAR PORTU -->
+    <div class="fullpage-port" id="logsModal">
+        <div class="fullpage-header">
+            <div class="fullpage-title">📜 Canlı Genel Loglar</div>
+            <button class="fullpage-exit-btn" onclick="closePort('logsModal')">ÇIKIŞ</button>
         </div>
-        <div class="modal-content"><div id="globalLogsContainer"></div></div>
+        <div class="fullpage-body" id="globalLogsContainer"></div>
     </div>
 
     <script>
@@ -302,7 +332,74 @@
         let canGvStudio = isFounder;
         let studioDataCache = null;
         let globalGroupsCache = [];
-        let editingStaffId = null;
+        let staffCache = [];
+        let gvHostsMap = {};
+        let currentStaffPage = 0;
+
+        // Staff ana ekran simgeleri (Sayfa başına 9 simge, 10+ simgede otomatik yeni sayfa)
+        const STAFF_APPS = [
+            { id: 'gv', icon: '👑', label: 'GOLDENVISION', special: true, action: () => openGvStudio() },
+            { id: 'staff', icon: '⚜️', label: 'Staff & Yetki', action: () => openPort('staffModal') },
+            { id: 'groups', icon: '🛡️', label: 'Gruplar', action: () => openPort('groupsModal') },
+            { id: 'logs', icon: '📜', label: 'Loglar', action: () => openPort('logsModal') },
+            { id: 'onay', icon: '✅', label: 'Onay Kuyruğu', action: () => { openGvStudio().then(() => switchStudioTab('onay')); } },
+            { id: 'haftalar', icon: '🗓️', label: '25 Hafta', action: () => { openGvStudio().then(() => switchStudioTab('haftalar')); } },
+            { id: 'kontrol', icon: '🎛️', label: 'Sahne Kontrol', action: () => { openGvStudio().then(() => switchStudioTab('kontrol')); } },
+            { id: 'ceza', icon: '⚖️', label: 'Host & Ceza', action: () => { openGvStudio().then(() => switchStudioTab('yetki')); } },
+            { id: 'yenile', icon: '🔄', label: 'Senkronize', action: () => { loadAllGroups(); showToast("🔄 Veriler Güncellendi"); } },
+            { id: 'final', icon: '🎆', label: 'Şenlik Finali', action: () => { openGvStudio().then(() => switchStudioTab('kontrol')); } }
+        ];
+
+        function buildStaffPages() {
+            const perPage = 9;
+            const totalPages = Math.max(1, Math.ceil(STAFF_APPS.length / perPage));
+            const track = document.getElementById('staffPagerTrack');
+            const dots = document.getElementById('staffPagerDots');
+
+            let pagesHtml = '';
+            for (let p = 0; p < totalPages; p++) {
+                const slice = STAFF_APPS.slice(p * perPage, (p + 1) * perPage);
+                const cards = slice.map((app, idx) => `
+                    <div class="app-icon-card" onclick="runStaffApp(${p * perPage + idx})">
+                        <div class="app-icon-box ${app.special ? 'gv-studio-icon' : ''}">${app.icon}</div>
+                        <div class="app-label">${app.label}</div>
+                    </div>
+                `).join('');
+                pagesHtml += `<div class="spring-page">${cards}</div>`;
+            }
+            track.innerHTML = pagesHtml;
+
+            dots.innerHTML = Array.from({ length: totalPages }, (_, idx) =>
+                `<div class="dock-dot ${idx === currentStaffPage ? 'active' : ''}" onclick="goStaffPage(${idx})"></div>`
+            ).join('');
+
+            goStaffPage(currentStaffPage);
+        }
+
+        function runStaffApp(index) {
+            const item = STAFF_APPS[index];
+            if (item && typeof item.action === 'function') item.action();
+        }
+
+        function goStaffPage(pageIdx) {
+            const perPage = 9;
+            const totalPages = Math.max(1, Math.ceil(STAFF_APPS.length / perPage));
+            currentStaffPage = Math.max(0, Math.min(pageIdx, totalPages - 1));
+            document.getElementById('staffPagerTrack').style.transform = `translateX(-${currentStaffPage * 100}%)`;
+            document.querySelectorAll('#staffPagerDots .dock-dot').forEach((d, i) => {
+                d.classList.toggle('active', i === currentStaffPage);
+            });
+        }
+
+        // Android sola/sağa kaydırma (swipe)
+        let touchStartX = 0;
+        const vp = document.getElementById('staffPagerViewport');
+        vp.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+        vp.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].screenX - touchStartX;
+            if (dx < -45) goStaffPage(currentStaffPage + 1); // Sola kaydır -> Sonraki sayfa
+            else if (dx > 45) goStaffPage(currentStaffPage - 1); // Sağa kaydır -> Önceki sayfa
+        }, { passive: true });
 
         function showToast(msg) {
             const t = document.getElementById('toastPopup');
@@ -312,7 +409,7 @@
 
         function openPort(id) {
             document.getElementById(id).classList.add('open');
-            if (id === 'staffModal') loadStaffList();
+            if (id === 'staffModal') loadStaffAndGroupPerms();
             if (id === 'groupsModal') loadAllGroups();
             if (id === 'logsModal') loadGlobalLogs();
         }
@@ -344,7 +441,8 @@
 
         async function openGvStudio() {
             if (!canGvStudio) {
-                return alert("⛔ GOLDENVISION YT Masasına erişim yetkiniz yok! Kurucu (Founder) tarafından yetki açılmalıdır.");
+                alert("⛔ GOLDENVISION YT Masasına erişim yetkiniz yok! Kurucu (Founder) tarafından yetki açılmalıdır.");
+                return;
             }
             document.getElementById('gvStudioModal').classList.add('open');
             await refreshGvStudio();
@@ -380,7 +478,6 @@
             document.getElementById('stCommentsOpen').value = String(Boolean(st.comments_open));
             document.getElementById('stPausedSelect').value = String(Boolean(st.paused));
 
-            // Onay / Reddet Kartları
             const pendingList = studioDataCache.pending_entries || [];
             document.getElementById('stPendingCardsContainer').innerHTML = pendingList.map(p => `
                 <div class="pending-card">
@@ -395,7 +492,6 @@
                 </div>
             `).join('') || `<div class="log-item">Onay bekleyen kart bulunmuyor.</div>`;
 
-            // Onaylanmış Liste
             const approvedList = studioDataCache.entries || [];
             document.getElementById('stApprovedListContainer').innerHTML = approvedList.map(e => `
                 <div class="log-item">
@@ -454,9 +550,7 @@
             document.getElementById('stEditNoViewLimit').value = String(Boolean(wk.no_view_limit));
 
             document.getElementById('stWeeksOverviewList').innerHTML = (studioDataCache.weeks || []).map(x =>
-                `<div style="background:rgba(20,16,6,0.8); border:1px solid rgba(212,175,55,0.25); padding:5px 8px; border-radius:6px; font-size:7.5px;">
-                    <b style="color:var(--gold-light);">H${x.week}</b> [${x.week_type}] — ${x.concept || ''} ${x.no_view_limit ? '• Sınırsız İzlenme' : ''}
-                </div>`
+                `<div class="log-item"><b style="color:var(--gold-light);">H${x.week}</b><span>[${x.week_type}] — ${x.concept || ''} ${x.no_view_limit ? '• Sınırsız İzlenme' : ''}</span></div>`
             ).join('');
         }
 
@@ -525,8 +619,11 @@
             });
             const d = await res.json();
             if (!d.success) return;
+            gvHostsMap = {};
+            (d.hosts || []).forEach(h => { gvHostsMap[Number(h.user_id)] = Boolean(h.can_manage); });
+
             document.getElementById('stHostsList').innerHTML = (d.hosts || []).map(h =>
-                `<div>ID ${h.user_id}: ${h.can_manage ? '✅ Yetkili Host' : '❌ Kapalı'}</div>`
+                `<div>ID ${h.user_id}: ${h.can_manage ? '✅ YT Yetkisi Açık' : '❌ YT Yetkisi Kapalı'}</div>`
             ).join('') || '<div>Kurucu her zaman yetkili.</div>';
 
             document.getElementById('stBansList').innerHTML = (d.bans || []).map(b =>
@@ -544,8 +641,9 @@
             });
             const d = await res.json();
             if (d.success) {
-                showToast("⚜️ Host Yetkisi Güncellendi");
+                showToast(`⚜️ YT Yetkisi ${can_manage ? 'AÇILDI ✅' : 'KAPATILDI ❌'} (ID: ${target_user_id})`);
                 await loadStudioHostsAndBans();
+                await loadStaffAndGroupPerms();
             } else alert(d.error);
         }
 
@@ -559,7 +657,7 @@
             });
             const d = await res.json();
             if (d.success) {
-                showToast("⚖️ Ceza Güncellendi");
+                showToast("⚖️ Ceza Kaydı Güncellendi");
                 await loadStudioHostsAndBans();
             } else alert(d.error);
         }
@@ -570,82 +668,123 @@
                 globalGroupsCache = await res.json();
                 document.getElementById('widgetGroupCount').innerText = globalGroupsCache.length + " Yörünge Grubu Aktif";
                 document.getElementById('groupsListContainer').innerHTML = (globalGroupsCache || []).map(g =>
-                    `<div class="group-card"><div class="group-meta"><div class="group-avatar">🛡️</div><div class="group-title">${g.title}</div></div></div>`
+                    `<div class="log-item"><b>🛡️ ${g.title}</b><span>ID: ${g.chat_id}</span></div>`
                 ).join('') || '<div class="log-item">Grup yok.</div>';
+
+                const sel = document.getElementById('permTargetGroupSelect');
+                if (sel) {
+                    const prev = sel.value || "0";
+                    sel.innerHTML = `<option value="0">🌐 Tüm Gruplar (Global Yetki)</option>` +
+                        (globalGroupsCache || []).map(g => `<option value="${g.chat_id}">🛡️ ${g.title}</option>`).join('');
+                    sel.value = prev;
+                }
             } catch (e) {}
         }
 
-        async function loadStaffList() {
+        async function loadStaffAndGroupPerms() {
+            await loadAllGroups();
+            try {
+                const hRes = await fetch('/api/goldenvision/studio/hosts', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, sub: 'list' })
+                });
+                const hData = await hRes.json();
+                gvHostsMap = {};
+                if (hData.success) {
+                    (hData.hosts || []).forEach(h => { gvHostsMap[Number(h.user_id)] = Boolean(h.can_manage); });
+                }
+            } catch (e) {}
+
             const res = await fetch('/api/staff/list', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: user.id, chat_id: 0 })
             });
-            const staffList = await res.json();
-            document.getElementById('staffListContainer').innerHTML = (staffList || []).map(s =>
-                `<div class="group-card" onclick="openStaffDetail(${s.user_id}, '${s.full_name}', '${s.username}')">
-                    <div class="group-meta"><div class="group-avatar">⚜️</div><div class="group-title">${s.full_name || 'Muhafız'} (@${s.username || s.user_id})</div></div>
-                    <div style="font-size:8px; color:var(--gold-light); font-weight:900;">İZİN ›</div>
-                </div>`
-            ).join('') || '<div class="log-item">Staff yok.</div>';
+            staffCache = await res.json();
+            renderStaffPermissionCards();
         }
 
-        async function openStaffDetail(staffUserId, fullName, username) {
-            if (!isFounder) return alert("Sadece Kurucu yetki düzenleyebilir!");
-            editingStaffId = staffUserId;
-            document.getElementById('editingStaffUserId').value = staffUserId;
-            document.getElementById('editingStaffNameInfo').innerText = `${fullName} (@${username})`;
-            document.getElementById('editingStaffIdInfo').innerText = `ID: ${staffUserId}`;
+        function renderStaffPermissionCards() {
+            const cid = String(document.getElementById('permTargetGroupSelect').value || "0");
+            const groupLabel = cid === "0"
+                ? "Global (Tüm Gruplar)"
+                : ((globalGroupsCache.find(g => String(g.chat_id) === cid)?.title) || `Grup ${cid}`);
 
-            const res = await fetch('/api/staff/list', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, chat_id: 0 })
-            });
-            const list = await res.json();
-            const staff = list.find(s => s.user_id == staffUserId && s.chat_id == 0) || list.find(s => s.user_id == staffUserId) || { can_ban: true, can_mute: true };
+            const container = document.getElementById('staffListContainer');
+            if (!staffCache || !staffCache.length) {
+                container.innerHTML = `<div class="log-item">Kayıtlı yetkili bulunmuyor.</div>`;
+                return;
+            }
 
-            document.getElementById('globalBanBtn').innerText = `Ban: ${staff.can_ban ? 'AÇIK ✅' : 'KAPALI ❌'}`;
-            document.getElementById('globalMuteBtn').innerText = `Mute: ${staff.can_mute ? 'AÇIK ✅' : 'KAPALI ❌'}`;
+            container.innerHTML = staffCache.map(s => {
+                const gp = (s.group_perms && s.group_perms[cid]) || { can_ban: s.can_ban, can_mute: s.can_mute };
+                const banOn = Boolean(gp.can_ban);
+                const muteOn = Boolean(gp.can_mute);
+                const ytOn = Boolean(gvHostsMap[Number(s.user_id)]);
 
-            document.getElementById('staffGroupPermissionsContainer').innerHTML = (globalGroupsCache || []).map(g => {
-                const gStaff = list.find(s => s.user_id == staffUserId && s.chat_id == g.chat_id) || staff;
                 return `
-                    <div class="perm-row">
-                        <div class="perm-row-title">🛡️ ${g.title}</div>
-                        <div class="perm-btn-pair">
-                            <button class="gold-btn" onclick="toggleGroupStaffPerm(${staffUserId}, ${g.chat_id}, 'can_ban', this)">Ban: ${gStaff.can_ban ? 'AÇIK ✅' : 'KAPALI ❌'}</button>
-                            <button class="gold-btn" onclick="toggleGroupStaffPerm(${staffUserId}, ${g.chat_id}, 'can_mute', this)">Mute: ${gStaff.can_mute ? 'AÇIK ✅' : 'KAPALI ❌'}</button>
+                    <div class="staff-card-box">
+                        <div class="staff-card-top">
+                            <div>
+                                <div class="staff-card-name">${s.full_name || 'Muhafız'} (@${s.username || s.user_id})</div>
+                                <div class="staff-card-sub">ID: ${s.user_id} • Kapsam: ${groupLabel}</div>
+                            </div>
+                            ${isFounder ? `<button class="gold-btn" style="width:auto; padding:5px 9px; font-size:7px; background:var(--danger); color:#fff;" onclick="removeStaff(${s.user_id})">Sil</button>` : ''}
                         </div>
+
+                        <div class="status-pill-row">
+                            <span class="status-chip ${banOn ? 'on' : 'off'}">BAN: ${banOn ? 'AÇIK ✅' : 'KAPALI ❌'}</span>
+                            <span class="status-chip ${muteOn ? 'on' : 'off'}">MUTE: ${muteOn ? 'AÇIK ✅' : 'KAPALI ❌'}</span>
+                            <span class="status-chip ${ytOn ? 'on' : 'off'}">GV YT: ${ytOn ? 'AÇIK ✅' : 'KAPALI ❌'}</span>
+                        </div>
+
+                        <div class="perm-btn-pair">
+                            <button class="gold-btn" onclick="toggleScopedPerm(${s.user_id}, ${cid}, 'can_ban')">
+                                Ban ${banOn ? 'Kapat ❌' : 'Aç ✅'}
+                            </button>
+                            <button class="gold-btn" onclick="toggleScopedPerm(${s.user_id}, ${cid}, 'can_mute')">
+                                Mute ${muteOn ? 'Kapat ❌' : 'Aç ✅'}
+                            </button>
+                        </div>
+
+                        ${isFounder ? `
+                            <button class="gold-btn" style="background:rgba(92,8,24,0.9); color:#fff1b8; border:1px solid #ffd166;" onclick="toggleScopedYtAccess(${s.user_id}, ${!ytOn})">
+                                GOLDENVISION YT Erişimi: ${ytOn ? 'KAPAT ❌' : 'AÇ ✅'}
+                            </button>
+                        ` : ''}
                     </div>
                 `;
-            }).join('') || '<div class="log-item">Grup yok.</div>';
-
-            document.getElementById('staffDetailModal').classList.add('open');
+            }).join('');
         }
 
-        function closeStaffDetailModal() { document.getElementById('staffDetailModal').classList.remove('open'); }
-
-        async function toggleGlobalStaffPerm(perm) {
+        async function toggleScopedPerm(targetId, chatId, permField) {
+            if (!isFounder) return alert("Sadece Kurucu yetki değiştirebilir!");
             const res = await fetch('/api/staff/toggle', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, target_id: editingStaffId, chat_id: 0, perm })
+                body: JSON.stringify({ user_id: user.id, target_id: targetId, chat_id: Number(chatId), perm: permField })
             });
             const d = await res.json();
             if (d.success) {
-                const btn = document.getElementById(perm === 'can_ban' ? 'globalBanBtn' : 'globalMuteBtn');
-                btn.innerText = `${perm === 'can_ban' ? 'Ban' : 'Mute'}: ${d.new_val ? 'AÇIK ✅' : 'KAPALI ❌'}`;
-                showToast("💾 Yetki Güncellendi");
+                const pName = permField === 'can_ban' ? 'BAN' : 'MUTE';
+                const stateTxt = d.new_val ? 'AÇIK ✅' : 'KAPALI ❌';
+                const msg = `✔ İşlendi: ID ${targetId} için ${pName} yetkisi ${stateTxt} olarak güncellendi.`;
+                document.getElementById('permLastActionBanner').innerText = msg;
+                showToast(msg);
+                await loadStaffAndGroupPerms();
             }
         }
 
-        async function toggleGroupStaffPerm(target_id, chat_id, perm, btnEl) {
-            const res = await fetch('/api/staff/toggle', {
+        async function toggleScopedYtAccess(targetId, enableYt) {
+            if (!isFounder) return alert("Sadece Kurucu YT yetkisi verebilir!");
+            const res = await fetch('/api/goldenvision/studio/hosts', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: user.id, target_id, chat_id, perm })
+                body: JSON.stringify({ user_id: user.id, sub: 'set', target_user_id: targetId, can_manage: enableYt })
             });
             const d = await res.json();
             if (d.success) {
-                btnEl.innerText = `${perm === 'can_ban' ? 'Ban' : 'Mute'}: ${d.new_val ? 'AÇIK ✅' : 'KAPALI ❌'}`;
-                showToast("💾 Grup Yetkisi Güncellendi");
+                const msg = `✔ İşlendi: ID ${targetId} için GOLDENVISION YT yetkisi ${enableYt ? 'AÇIK ✅' : 'KAPALI ❌'}.`;
+                document.getElementById('permLastActionBanner').innerText = msg;
+                showToast(msg);
+                await loadStaffAndGroupPerms();
             }
         }
 
@@ -662,7 +801,21 @@
                 document.getElementById('staffInputId').value = '';
                 document.getElementById('staffNameInput').value = '';
                 showToast("⚜️ Muhafız Eklendi!");
-                await loadStaffList();
+                await loadStaffAndGroupPerms();
+            }
+        }
+
+        async function removeStaff(target_id) {
+            if (!isFounder) return alert("Sadece Kurucu silebilir!");
+            if (!confirm("Silinsin mi?")) return;
+            const res = await fetch('/api/staff/remove', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user.id, target_id, chat_id: 0 })
+            });
+            const d = await res.json();
+            if (d.success) {
+                showToast("🗑️ Yetkili Kaldırıldı");
+                await loadStaffAndGroupPerms();
             }
         }
 
@@ -674,6 +827,7 @@
             ).join('') || '<div class="log-item">Log yok.</div>';
         }
 
+        buildStaffPages();
         verifyAccess();
     </script>
 </body>
