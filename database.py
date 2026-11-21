@@ -334,6 +334,36 @@ def restart_gv_week(season: int, week: int):
     )
 
 
+def update_gv_entry_flag(season: int, week: int, entry_id: int = 0, pending_id: int = 0, new_flag: str = "🏳️"):
+    season = int(season)
+    week = int(week)
+    fl = (new_flag or "🏳️").strip()
+    if entry_id:
+        res = gv_entries_col.find_one_and_update(
+            {"season": season, "week": week, "entry_id": int(entry_id)},
+            {"$set": {"flag": fl}},
+            return_document=True
+        )
+        if res:
+            gv_notifications_col.insert_one({
+                "user_id": int(res["user_id"]),
+                "type": "flag_updated",
+                "title": "Bayrak Güncellendi 🚩",
+                "message": f"{res.get('country', '')} yarışma bayrağı Host tarafından {fl} olarak ayarlandı.",
+                "timestamp": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+            })
+            return {"ok": True, "flag": fl}
+    if pending_id:
+        res = gv_pending_col.find_one_and_update(
+            {"season": season, "week": week, "pending_id": int(pending_id)},
+            {"$set": {"flag": fl}},
+            return_document=True
+        )
+        if res:
+            return {"ok": True, "flag": fl}
+    return {"ok": False, "error": "Kayıt bulunamadı."}
+
+
 def _is_usa_or_turkey(country_name: str) -> str:
     c = (country_name or "").strip().lower()
     if c in ["usa", "abd", "united states", "united states of america", "amerika", "birleşik devletler"]:
@@ -371,8 +401,8 @@ def submit_gv_entry(
     if not primary_country or not artist.strip() or not song.strip():
         return {"ok": False, "error": "Ülke, şarkıcı ve şarkı adı zorunludur."}
 
-    if "ÇİFT" not in wtype and "SECOND CHANCE" not in wtype and len(clean_countries) < 3:
-        return {"ok": False, "error": "Bu formatta 3 ülke tercihi girilmelidir (Örn: USA, UK, Gana)."}
+    if "ÇİFT" not in wtype and "SECOND CHANCE" not in wtype and len(clean_countries) < 1:
+        return {"ok": False, "error": "En az 1 ülke adı girilmelidir."}
 
     v_mil = float(views_m or 0)
     if not no_view_limit:
@@ -494,9 +524,13 @@ def submit_gv_ballot(season: int, week: int, voter_id: int, voter_username: str,
     entries = list(gv_entries_col.find({"season": season, "week": week}))
     valid_eids = {int(e["entry_id"]) for e in entries}
     own_eids = {int(e["entry_id"]) for e in entries if int(e.get("user_id", 0)) == int(voter_id)}
+    votable_eids = valid_eids - own_eids
+
+    if not votable_eids:
+        return {"ok": False, "error": "Oy verebileceğin rakip şarkı bulunmuyor."}
 
     for eid_str, pts in (allocations or {}).items():
-        if pts is None or str(pts).strip() == "":
+        if pts is None or str(pts).strip() == "" or int(pts) == 0:
             continue
         eid = int(eid_str)
         p = int(pts)
@@ -512,7 +546,7 @@ def submit_gv_ballot(season: int, week: int, voter_id: int, voter_username: str,
         clean_alloc[str(eid)] = p
 
     if not clean_alloc:
-        return {"ok": False, "error": "En az 1 puan atamalısınız."}
+        return {"ok": False, "error": "En az 1 şarkıya puan atamalısınız."}
 
     ballot_doc = {
         "season": season,
@@ -606,9 +640,6 @@ def list_gv_bans():
     return list(gv_bans_col.find({"banned": True}, {"_id": 0}))
 
 
-# ==========================================
-# AI ŞÜPHELİ YETKİ KULLANIMI ANALİZİ
-# ==========================================
 def record_suspicious_ai_alert(user_id: int, chat_id: int, action_name: str, reason: str, risk_score: int = 85):
     try:
         recent_count = suspicious_col.count_documents({"user_id": int(user_id)})
@@ -641,9 +672,6 @@ def get_suspicious_ai_alerts(limit: int = 40):
         return []
 
 
-# ==========================================
-# MEVCUT SİSTEM & YETKİ FONKSİYONLARI
-# ==========================================
 def init_db():
     try:
         users_col.create_index("user_id", unique=True)
@@ -929,7 +957,6 @@ def is_authorized_staff(user_id, chat_id=0):
 
 
 def is_perm_explicitly_disabled_in_staff(user_id: int, chat_id: int, perm_field: str) -> bool:
-    """Grup adminliği açık olsa bile Staff yetkisi açıkça KAPALI yapılmışsa True döner."""
     try:
         uid = int(user_id)
         cid = int(chat_id or 0)
