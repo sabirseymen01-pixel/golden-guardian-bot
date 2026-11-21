@@ -14,7 +14,6 @@
             --gold-dim: rgba(212, 175, 55, 0.22);
             --glass-panel: rgba(24, 17, 6, 0.92);
             --glass-icon: rgba(34, 24, 9, 0.88);
-            --glass-modal: rgba(16, 11, 4, 0.98);
             --danger: #ff4757;
             --success: #2ed573;
             --text-main: #f5f6fa;
@@ -226,7 +225,6 @@
         }
         .fullpage-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; -webkit-overflow-scrolling: touch; }
 
-        /* KONSEPTE UYGUN ALTIN & KOYU KEHRİBAR SEÇİM KUTULARI */
         input, select, textarea {
             width: 100%;
             background: linear-gradient(145deg, rgba(44, 30, 9, 0.92), rgba(25, 17, 5, 0.96));
@@ -298,7 +296,9 @@
         .perm-btn-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .pending-card { background: rgba(34, 24, 8, 0.94); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 8.5px; }
         .pending-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .log-item { background: rgba(26, 18, 6, 0.92); border-left: 3px solid var(--gold-base); padding: 8px 10px; border-radius: 8px; font-size: 8px; border: 1px solid rgba(212,175,55,0.35); display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
+        .flag-edit-row { display: flex; align-items: center; gap: 6px; }
+        .flag-mini-input { width: 56px !important; text-align: center; font-size: 16px !important; padding: 6px !important; margin-bottom: 0 !important; }
+        .log-item { background: rgba(26, 18, 6, 0.92); border-left: 3px solid var(--gold-base); padding: 8px 10px; border-radius: 8px; font-size: 8px; border: 1px solid rgba(212,175,55,0.35); display: flex; flex-direction: column; gap: 3px; cursor: pointer; }
         .group-card { background: linear-gradient(145deg, rgba(38, 27, 9, 0.9), rgba(22, 15, 5, 0.95)); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 11px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; gap: 8px; }
         .group-meta { display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1; min-width: 0; }
         .group-avatar { width: 34px; height: 34px; border-radius: 50%; background: #171004; border: 1.5px solid var(--gold-base); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -362,7 +362,7 @@
         </div>
         <div class="fullpage-body">
             <div class="modal-tabs">
-                <div class="modal-tab active" onclick="switchStudioTab('onay', event)">Onay Kartları</div>
+                <div class="modal-tab active" onclick="switchStudioTab('onay', event)">Onay & Bayrak</div>
                 <div class="modal-tab" onclick="switchStudioTab('kontrol', event)">Kontrol & Bitir</div>
                 <div class="modal-tab" onclick="switchStudioTab('haftalar', event)">25 Hafta Konsept</div>
                 <div class="modal-tab" onclick="switchStudioTab('yetki', event)">Host & Ceza</div>
@@ -371,7 +371,7 @@
             <div id="studio-tab-onay" class="modal-tab-content active">
                 <input type="text" id="stRejectReasonInput" placeholder="Red sebebi (Reddet butonuna basınca üyeye iletilir)">
                 <div id="stPendingCardsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
-                <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:6px;">Onaylanan Yarışan Liste</div>
+                <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:6px;">Onaylanan Yarışan Liste (Host Bayrak Düzenleme Açık)</div>
                 <div id="stApprovedListContainer" style="display:flex; flex-direction:column; gap:6px;"></div>
             </div>
 
@@ -759,9 +759,12 @@
             const pendingList = studioDataCache.pending_entries || [];
             document.getElementById('stPendingCardsContainer').innerHTML = pendingList.map(p => `
                 <div class="pending-card">
-                    <div><b style="color:var(--gold-light);">${p.flag} ${p.country}</b> — <b>${p.song}</b> (${p.artist})</div>
+                    <div class="flag-edit-row">
+                        <input class="flag-mini-input" id="pendingFlag_${p.pending_id}" value="${p.flag || '🏳️'}" title="Host Bayrak Seçimi (Örn: 🇷🇺 veya 🇲🇶)">
+                        <div style="flex:1;"><b style="color:var(--gold-light);">${p.country}</b> — <b>${p.song}</b> (${p.artist})</div>
+                    </div>
                     <div>Üye: @${p.username || p.user_id} (ID: ${p.user_id}) • İzlenme: <b>${p.views_m} Milyon</b></div>
-                    <div>Tercihler: ${(p.countries || []).join(', ')} ${p.pair_partner ? `• Çift: ${p.pair_partner}` : ''}</div>
+                    <div>Tercihler: ${(p.countries || []).join(' ')} ${p.pair_partner ? `• Çift: ${p.pair_partner}` : ''}</div>
                     <div>Şarkı Linki: ${p.song_url ? `<a href="${p.song_url}" target="_blank" style="color:#ffd166;">${p.song_url}</a>` : 'Yok'}</div>
                     <div class="pending-actions">
                         <button class="gold-btn" style="background:var(--success); color:#120b02;" onclick="reviewPending(${p.pending_id}, true, this)">Onayla ✅</button>
@@ -773,7 +776,11 @@
             const approvedList = studioDataCache.entries || [];
             document.getElementById('stApprovedListContainer').innerHTML = approvedList.map(e => `
                 <div class="log-item" style="cursor:default;">
-                    <b>${e.flag} ${e.country} — ${e.song} (${e.artist})</b>
+                    <div class="flag-edit-row">
+                        <input class="flag-mini-input" id="approvedFlag_${e.entry_id}" value="${e.flag || '🏳️'}">
+                        <div style="flex:1;"><b>${e.country} — ${e.song} (${e.artist})</b></div>
+                        <button class="gold-btn" style="width:auto; padding:6px 10px; font-size:7.5px;" onclick="updateEntryFlag(${e.entry_id}, this)">Bayrak Kaydet</button>
+                    </div>
                     <span>@${e.username || e.user_id} • ${e.views_m} Milyon ${e.song_url ? `• ${e.song_url}` : ''}</span>
                 </div>
             `).join('') || `<div class="log-item" style="cursor:default;">Henüz onaylanmış şarkı yok.</div>`;
@@ -781,10 +788,40 @@
             loadWeekFormFromCache();
         }
 
+        async function updateEntryFlag(entryId, btn) {
+            if (btn) btn.disabled = true;
+            try {
+                const flagEl = document.getElementById('approvedFlag_' + entryId);
+                const new_flag = (flagEl ? flagEl.value.trim() : '🏳️') || '🏳️';
+                const res = await fetch('/api/goldenvision/studio/flag', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        season: studioDataCache?.season || 3,
+                        week: studioDataCache?.current_week || 1,
+                        entry_id: entryId,
+                        flag: new_flag
+                    })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    showToast(`✔ Bayrak Güncellendi: ${new_flag}`);
+                    await refreshGvStudio();
+                } else {
+                    alert(d.error || "Bayrak güncellenemedi!");
+                }
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
         async function reviewPending(pendingId, approve, btn) {
             if (btn) btn.disabled = true;
             try {
                 const reject_reason = document.getElementById('stRejectReasonInput').value.trim();
+                const flagEl = document.getElementById('pendingFlag_' + pendingId);
+                const custom_flag = flagEl ? flagEl.value.trim() : '';
                 const res = await fetch('/api/goldenvision/studio/review', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -793,7 +830,8 @@
                         week: studioDataCache?.current_week || 1,
                         pending_id: pendingId,
                         approve,
-                        reject_reason
+                        reject_reason,
+                        custom_flag
                     })
                 });
                 const d = await res.json();
