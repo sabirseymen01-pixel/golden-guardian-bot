@@ -231,7 +231,6 @@
         }
         .glitter-dot.active { width: 16px; border-radius: 6px; background: #fff3b0; }
 
-        /* TAM EKRAN GOLDENVISION: KIRMIZI + GOLD VARAK + KIRMIZI SİM */
         .gv-fullscreen-stage {
             position: fixed;
             inset: 0;
@@ -329,35 +328,43 @@
             border-radius: 16px;
             padding: 13px;
         }
-        .palace-card-title { font-size: 10px; font-weight: 900; color: #fff1b8; text-transform: uppercase; margin-bottom: 6px; }
+        .palace-card-title { font-size: 10px; font-weight: 900; color: #fff1b8; text-transform: uppercase; margin-bottom: 8px; }
         .palace-muted { font-size: 8.5px; color: #f3c6cf; line-height: 1.45; }
 
-        /* SARAY KONSEPTİNE UYGUN YAKUT & GOLD VARAK SEÇİM KUTULARI */
         .gv-input, .gv-select {
             width: 100%;
+            min-height: 40px;
             background: linear-gradient(145deg, rgba(72, 7, 20, 0.94), rgba(34, 3, 9, 0.98));
             border: 1.5px solid rgba(255, 209, 102, 0.65);
             border-radius: 10px;
             padding: 10px 12px;
             color: #fff1b8;
-            font-size: 9.5px;
+            font-size: 10px;
             font-weight: 700;
             outline: none;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
-        .gv-input::placeholder { color: rgba(255, 214, 222, 0.55); font-weight: 500; }
+        .gv-input::placeholder { color: rgba(255, 214, 222, 0.6); font-weight: 500; }
         .gv-select option { background: #3b0510; color: #fff1b8; }
 
-        .country-flag-box {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .country-row-grid {
+            display: grid;
+            grid-template-columns: 74px 1fr;
+            gap: 8px;
+            align-items: stretch;
+            margin-bottom: 8px;
+        }
+        .country-flag-input {
+            width: 100%;
+            min-height: 40px;
+            text-align: center;
             background: linear-gradient(145deg, rgba(96, 9, 27, 0.95), rgba(38, 3, 10, 0.98));
             border: 1.5px solid var(--foil-gold);
             border-radius: 10px;
-            font-size: 22px;
-            min-height: 38px;
-            margin-bottom: 6px;
+            font-size: 20px;
+            color: #fff;
+            outline: none;
+            padding: 4px;
         }
         .palace-gold-btn {
             width: 100%;
@@ -379,11 +386,11 @@
         .vote-entry-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
         .vote-song-title { font-size: 10px; font-weight: 900; color: #fff1b8; }
         .vote-artist-sub { font-size: 8px; color: #f3c6cf; }
-        .pts-chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
+        .pts-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
         .pts-chip {
-            padding: 6px 9px;
-            border-radius: 8px;
-            font-size: 8.5px;
+            padding: 7px 11px;
+            border-radius: 9px;
+            font-size: 9px;
             font-weight: 900;
             background: rgba(34, 3, 9, 0.92);
             color: #ffd166;
@@ -413,7 +420,7 @@
             position: fixed;
             inset: 0;
             z-index: 400;
-            background: radial-gradient(circle at 50% 20%, rgba(255, 209, 102, 0.32), rgba(26, 2, 10, 0.98) 70%);
+            background: radial-gradient(circle at 50% 20%, rgba(255, 209, 102, 0.34), rgba(26, 2, 10, 0.98) 70%);
             display: none;
             flex-direction: column;
             justify-content: space-between;
@@ -514,15 +521,15 @@
 
                 <div class="palace-card">
                     <div class="palace-card-title">🌍 Ülke & Şarkı Bildirimi</div>
-                    <input class="gv-input" id="gvCountriesInput" placeholder="3 Ülke (Örn: USA, UK, Gana / Türkiye)">
-                    <div style="display:grid; grid-template-columns: 74px 1fr; gap:6px; align-items:center;">
-                        <div class="country-flag-box" id="gvAutoFlagBox">🏳️</div>
-                        <input class="gv-input" id="gvPrimaryCountryInput" placeholder="Ülke Adı (TR veya EN)" oninput="syncAutoFlag()">
+                    <input class="gv-input" id="gvCountriesInput" placeholder="3 Ülke (Örn: USA UK Gana veya Yakutistan)">
+                    <div class="country-row-grid">
+                        <input class="country-flag-input" id="gvAutoFlagBox" value="🏳️" title="Bayrak ikonu açık — gerekirse değiştirebilirsin">
+                        <input class="gv-input" id="gvPrimaryCountryInput" placeholder="Ülke Adı (TR veya EN)" style="margin-bottom:0;" oninput="syncAutoFlag()">
                     </div>
                     <input class="gv-input" id="gvArtistInput" placeholder="Şarkıcı / Sanatçı">
                     <input class="gv-input" id="gvSongInput" placeholder="Şarkı Adı">
                     <input class="gv-input" id="gvSongUrlInput" placeholder="🔗 Şarkı Linki">
-                    <div style="display:grid; grid-template-columns: 1fr 104px; gap:6px;">
+                    <div style="display:grid; grid-template-columns: 1fr 108px; gap:8px;">
                         <input class="gv-input" type="number" step="0.1" id="gvViewsAmountInput" placeholder="İzlenme (Örn: 42.5)">
                         <select class="gv-select" id="gvViewsUnitSelect">
                             <option value="M">Milyon (M)</option>
@@ -548,8 +555,8 @@
 
             <div class="gv-panel" id="panel-oylama">
                 <div class="palace-card">
-                    <div class="palace-card-title">🗳️ Eurovision Puan Dağıtımı (12, 10, 8, 7, 6, 5, 4, 3, 2, 1)</div>
-                    <div class="palace-muted">Her puanı yalnızca bir şarkıya verebilirsin.</div>
+                    <div class="palace-card-title">🗳️ Eurovision Puan Dağıtımı</div>
+                    <div class="palace-muted" id="gvVotingSubNote">Her puanı yalnızca bir şarkıya verebilirsin.</div>
                 </div>
                 <div id="gvVotingListContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
                 <button class="palace-gold-btn" onclick="sendGvBallot(this)">Oylarımı Mühürle 🏆</button>
@@ -605,6 +612,7 @@
 
         let currentMemberPage = 0;
         let allMemberApps = [];
+        let festivalAutoShown = false;
 
         function renderMemberPages() {
             const perPage = 9;
@@ -671,37 +679,109 @@
             else { playMlSfx('tap'); showGlitterToast(`${item.icon} ${item.title} Açıldı`); }
         }
 
+        // 189 Ülke Sözlüğü (TR & EN); bölgesel/listede olmayan ülkeler varsayılan 🏳️ döner
         const COUNTRY_FLAGS = {
-            "turkiye": "🇹🇷", "turkey": "🇹🇷", "tr": "🇹🇷",
-            "abd": "🇺🇸", "usa": "🇺🇸", "amerika": "🇺🇸", "united states": "🇺🇸",
-            "ingiltere": "🇬🇧", "uk": "🇬🇧", "united kingdom": "🇬🇧",
-            "gana": "🇬🇭", "ghana": "🇬🇭", "eritrea": "🇪🇷",
-            "isvec": "🇸🇪", "sweden": "🇸🇪", "norvec": "🇳🇴", "norway": "🇳🇴",
-            "fransa": "🇫🇷", "france": "🇫🇷", "almanya": "🇩🇪", "germany": "🇩🇪",
-            "italya": "🇮🇹", "italy": "🇮🇹", "ispanya": "🇪🇸", "spain": "🇪🇸",
-            "japonya": "🇯🇵", "japan": "🇯🇵", "guney kore": "🇰🇷", "south korea": "🇰🇷",
-            "brezilya": "🇧🇷", "brazil": "🇧🇷", "kanada": "🇨🇦", "canada": "🇨🇦"
+            "afganistan": "🇦🇫", "afghanistan": "🇦🇫",
+            "almanya": "🇩🇪", "germany": "🇩🇪",
+            "amerika birlesik devletleri": "🇺🇸", "abd": "🇺🇸", "usa": "🇺🇸", "united states": "🇺🇸", "amerika": "🇺🇸",
+            "andorra": "🇦🇩", "angola": "🇦🇴", "antigua ve barbuda": "🇦🇬", "antigua and barbuda": "🇦🇬",
+            "arjantin": "🇦🇷", "argentina": "🇦🇷", "arnavutluk": "🇦🇱", "albania": "🇦🇱",
+            "avustralya": "🇦🇺", "australia": "🇦🇺", "avusturya": "🇦🇹", "austria": "🇦🇹",
+            "azerbaycan": "🇦🇿", "azerbaijan": "🇦🇿", "bahamalar": "🇧🇸", "bahamas": "🇧🇸",
+            "bahreyn": "🇧🇭", "bahrain": "🇧🇭", "banglades": "🇧🇩", "bangladesh": "🇧🇩",
+            "barbados": "🇧🇧", "belarus": "🇧🇾", "belcika": "🇧🇪", "belgium": "🇧🇪",
+            "belize": "🇧🇿", "benin": "🇧🇯", "bhutan": "🇧🇹",
+            "birlesik arap emirlikleri": "🇦🇪", "bae": "🇦🇪", "uae": "🇦🇪",
+            "birlesik krallik": "🇬🇧", "ingiltere": "🇬🇧", "uk": "🇬🇧", "united kingdom": "🇬🇧",
+            "bolivya": "🇧🇴", "bolivia": "🇧🇴", "bosna-hersek": "🇧🇦", "bosna hersek": "🇧🇦", "bosnia": "🇧🇦",
+            "botsvana": "🇧🇼", "botswana": "🇧🇼", "brezilya": "🇧🇷", "brazil": "🇧🇷",
+            "brunei": "🇧🇳", "bulgaristan": "🇧🇬", "bulgaria": "🇧🇬", "burkina faso": "🇧🇫", "burundi": "🇧🇮",
+            "cape verde": "🇨🇻", "yesil burun adalari": "🇨🇻", "cad": "🇹🇩", "chad": "🇹🇩",
+            "cekya": "🇨🇿", "czechia": "🇨🇿", "cezayir": "🇩🇿", "algeria": "🇩🇿",
+            "cibuti": "🇩🇯", "djibouti": "🇩🇯", "cin": "🇨🇳", "china": "🇨🇳",
+            "danimarka": "🇩🇰", "denmark": "🇩🇰", "dogu timor": "🇹🇱", "timor-leste": "🇹🇱",
+            "dominika": "🇩🇲", "dominica": "🇩🇲", "dominik cumhuriyeti": "🇩🇴", "dominican republic": "🇩🇴",
+            "ekvador": "🇪🇨", "ecuador": "🇪🇨", "ekvator ginesi": "🇬🇶", "equatorial guinea": "🇬🇶",
+            "el salvador": "🇸🇻", "endonezya": "🇮🇩", "indonesia": "🇮🇩",
+            "eritre": "🇪🇷", "eritrea": "🇪🇷", "ermenistan": "🇦🇲", "armenia": "🇦🇲",
+            "estonya": "🇪🇪", "estonia": "🇪🇪", "esvatini": "🇸🇿", "eswatini": "🇸🇿",
+            "etiyopya": "🇪🇹", "ethiopia": "🇪🇹", "fas": "🇲🇦", "morocco": "🇲🇦",
+            "fiji": "🇫🇯", "fildisi sahili": "🇨🇮", "cote d'ivoire": "🇨🇮", "ivory coast": "🇨🇮",
+            "filistin": "🇵🇸", "palestine": "🇵🇸", "filipinler": "🇵🇭", "philippines": "🇵🇭",
+            "finlandiya": "🇫🇮", "finland": "🇫🇮", "fransa": "🇫🇷", "france": "🇫🇷",
+            "gabon": "🇬🇦", "gambiya": "🇬🇲", "gambia": "🇬🇲", "gana": "🇬🇭", "ghana": "🇬🇭",
+            "gine": "🇬🇳", "guinea": "🇬🇳", "gine-bissau": "🇬🇼", "guinea-bissau": "🇬🇼",
+            "grenada": "🇬🇩", "guyana": "🇬🇾", "guatemala": "🇬🇹",
+            "guney afrika": "🇿🇦", "south africa": "🇿🇦", "guney kore": "🇰🇷", "south korea": "🇰🇷",
+            "guney sudan": "🇸🇸", "south sudan": "🇸🇸", "gurcistan": "🇬🇪", "georgia": "🇬🇪",
+            "haiti": "🇭🇹", "hirvatistan": "🇭🇷", "croatia": "🇭🇷",
+            "hindistan": "🇮🇳", "india": "🇮🇳", "hollanda": "🇳🇱", "netherlands": "🇳🇱",
+            "honduras": "🇭🇳", "irak": "🇮🇶", "iraq": "🇮🇶", "iran": "🇮🇷",
+            "irlanda": "🇮🇪", "ireland": "🇮🇪", "ispanya": "🇪🇸", "spain": "🇪🇸",
+            "israil": "🇮🇱", "israel": "🇮🇱", "isvec": "🇸🇪", "sweden": "🇸🇪",
+            "isvicre": "🇨🇭", "switzerland": "🇨🇭", "italya": "🇮🇹", "italy": "🇮🇹",
+            "izlanda": "🇮🇸", "iceland": "🇮🇸", "jamaika": "🇯🇲", "jamaica": "🇯🇲",
+            "japonya": "🇯🇵", "japan": "🇯🇵", "kambocya": "🇰🇭", "cambodia": "🇰🇭",
+            "kamerun": "🇨🇲", "cameroon": "🇨🇲", "kanada": "🇨🇦", "canada": "🇨🇦",
+            "karadag": "🇲🇪", "montenegro": "🇲🇪", "katar": "🇶🇦", "qatar": "🇶🇦",
+            "kazakistan": "🇰🇿", "kazakhstan": "🇰🇿", "kenya": "🇰🇪",
+            "kibris": "🇨🇾", "cyprus": "🇨🇾", "kirgizistan": "🇰🇬", "kyrgyzstan": "🇰🇬",
+            "kiribati": "🇰🇮", "kolombiya": "🇨🇴", "colombia": "🇨🇴", "komorlar": "🇰🇲", "comoros": "🇰🇲",
+            "kongo cumhuriyeti": "🇨🇬", "kongo demokratik cumhuriyeti": "🇨🇩", "congo": "🇨🇬",
+            "kosta rika": "🇨🇷", "costa rica": "🇨🇷", "kuveyt": "🇰🇼", "kuwait": "🇰🇼",
+            "kuzey kore": "🇰🇵", "north korea": "🇰🇵", "kuzey makedonya": "🇲🇰", "north macedonia": "🇲🇰",
+            "kuba": "🇨🇺", "cuba": "🇨🇺", "lesotho": "🇱🇸", "letonya": "🇱🇻", "latvia": "🇱🇻",
+            "liberya": "🇱🇷", "liberia": "🇱🇷", "libya": "🇱🇾", "lihtenstayn": "🇱🇮", "liechtenstein": "🇱🇮",
+            "litvanya": "🇱🇹", "lithuania": "🇱🇹", "lubnan": "🇱🇧", "lebanon": "🇱🇧",
+            "luksemburg": "🇱🇺", "luxembourg": "🇱🇺", "madagaskar": "🇲🇬", "madagascar": "🇲🇬",
+            "malawi": "🇲🇼", "maldivler": "🇲🇻", "maldives": "🇲🇻", "malezya": "🇲🇾", "malaysia": "🇲🇾",
+            "mali": "🇲🇱", "malta": "🇲🇹", "marshall adalari": "🇲🇭", "marshall islands": "🇲🇭",
+            "mauritius": "🇲🇺", "meksika": "🇲🇽", "mexico": "🇲🇽", "misir": "🇪🇬", "egypt": "🇪🇬",
+            "mikronezya": "🇫🇲", "micronesia": "🇫🇲", "mogolistan": "🇲🇳", "mongolia": "🇲🇳",
+            "moldova": "🇲🇩", "monaco": "🇲🇨", "mozambik": "🇲🇿", "mozambique": "🇲🇿",
+            "myanmar": "🇲🇲", "namibya": "🇳🇦", "namibia": "🇳🇦", "nauru": "🇳🇷", "nepal": "🇳🇵",
+            "nijer": "🇳🇪", "niger": "🇳🇪", "nijerya": "🇳🇬", "nigeria": "🇳🇬",
+            "nikaragua": "🇳🇮", "nicaragua": "🇳🇮", "norvec": "🇳🇴", "norway": "🇳🇴",
+            "orta afrika cumhuriyeti": "🇨🇫", "ozbekistan": "🇺🇿", "uzbekistan": "🇺🇿",
+            "pakistan": "🇵🇰", "palau": "🇵🇼", "panama": "🇵🇦",
+            "papua yeni gine": "🇵🇬", "papua new guinea": "🇵🇬", "paraguay": "🇵🇾", "peru": "🇵🇪",
+            "polonya": "🇵🇱", "poland": "🇵🇱", "portekiz": "🇵🇹", "portugal": "🇵🇹",
+            "romanya": "🇷🇴", "romania": "🇷🇴", "ruanda": "🇷🇼", "rwanda": "🇷🇼",
+            "rusya": "🇷🇺", "russia": "🇷🇺", "saint kitts ve nevis": "🇰🇳", "saint lucia": "🇱🇨",
+            "saint vincent ve grenadinler": "🇻🇨", "samoa": "🇼🇸", "san marino": "🇸🇲",
+            "sao tome ve principe": "🇸🇹", "senegal": "🇸🇳", "seyseller": "🇸🇨", "seychelles": "🇸🇨",
+            "sirbistan": "🇷🇸", "serbia": "🇷🇸", "sierra leone": "🇸🇱", "singapur": "🇸🇬", "singapore": "🇸🇬",
+            "slovakya": "🇸🇰", "slovakia": "🇸🇰", "slovenya": "🇸🇮", "slovenia": "🇸🇮",
+            "solomon adalari": "🇸🇧", "somali": "🇸🇴", "somalia": "🇸🇴", "sri lanka": "🇱🇰",
+            "sudan": "🇸🇩", "surinam": "🇸🇷", "suriname": "🇸🇷", "suriye": "🇸🇾", "syria": "🇸🇾",
+            "suudi arabistan": "🇸🇦", "saudi arabia": "🇸🇦", "tacikistan": "🇹🇯", "tajikistan": "🇹🇯",
+            "tanzanya": "🇹🇿", "tanzania": "🇹🇿", "tayland": "🇹🇭", "thailand": "🇹🇭",
+            "togo": "🇹🇬", "tonga": "🇹🇴", "trinidad ve tobago": "🇹🇹", "tunus": "🇹🇳", "tunisia": "🇹🇳",
+            "tuvalu": "🇹🇻", "turkiye": "🇹🇷", "turkey": "🇹🇷", "tr": "🇹🇷",
+            "turkmenistan": "🇹🇲", "uganda": "🇺🇬", "ukrayna": "🇺🇦", "ukraine": "🇺🇦",
+            "umman": "🇴🇲", "oman": "🇴🇲", "uruguay": "🇺🇾", "vanuatu": "🇻🇺",
+            "vatikan": "🇻🇦", "vatican": "🇻🇦", "venezuela": "🇻🇪", "vietnam": "🇻🇳",
+            "yemen": "🇾🇪", "yeni zelanda": "🇳🇿", "new zealand": "🇳🇿",
+            "zambiya": "🇿🇲", "zambia": "🇿🇲", "zimbabve": "🇿🇼", "zimbabwe": "🇿🇼"
         };
 
         function foldTurkishText(str) {
             return (str || "").toLowerCase()
                 .replace(/ğ/g, "g").replace(/ü/g, "u").replace(/ş/g, "s")
-                .replace(/ı/g, "i").replace(/i̇/g, "i").replace(/ö/g, "o").replace(/ç/g, "c").trim();
+                .replace(/ı/g, "i").replace(/i̇/g, "i").replace(/ö/g, "o").replace(/ç/g, "c")
+                .replace(/ã/g, "a").replace(/é/g, "e").trim();
         }
 
         function resolveCountryFlag(rawName) {
             const folded = foldTurkishText(rawName);
             if (!folded) return "🏳️";
             if (COUNTRY_FLAGS[folded]) return COUNTRY_FLAGS[folded];
-            for (const [k, fl] of Object.entries(COUNTRY_FLAGS)) {
-                if (k.length >= 2 && (folded.includes(k) || k.includes(folded))) return fl;
-            }
             return "🏳️";
         }
 
         function syncAutoFlag() {
             const val = document.getElementById('gvPrimaryCountryInput').value;
-            document.getElementById('gvAutoFlagBox').innerText = resolveCountryFlag(val);
+            document.getElementById('gvAutoFlagBox').value = resolveCountryFlag(val);
         }
 
         let soundEnabled = true;
@@ -845,21 +925,26 @@
                 `<div style="background:rgba(24,2,7,0.8); padding:6px 8px; border-radius:8px; font-size:8px;"><b style="color:#ffd166;">@${c.username}</b>: ${c.text}</div>`
             ).join('') || `<div class="palace-muted">Henüz yorum yok.</div>`;
 
+            // Dinamik puan skalası (2-3 şarkıda da kusursuz puan verilebilir)
             const votingContainer = document.getElementById('gvVotingListContainer');
             const entries = data.entries || [];
             if (!entries.length) {
                 votingContainer.innerHTML = `<div class="palace-card"><div class="palace-muted">Onaylanmış yarışan şarkı bulunmuyor.</div></div>`;
             } else {
-                const pointScale = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
+                const fullScale = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];
+                const votableCount = entries.filter(e => Number(e.user_id) !== Number(memberUser.id)).length;
+                const activeScale = votableCount > 0 ? fullScale.slice(0, Math.min(fullScale.length, votableCount)) : fullScale;
+                document.getElementById('gvVotingSubNote').innerText = `Aktif Puan Skalası: ${activeScale.join(' • ')} (Her puan tek şarkıya verilir)`;
+
                 votingContainer.innerHTML = entries.map(ev => {
                     const isOwn = Number(ev.user_id) === Number(memberUser.id);
                     const currentPts = draftAllocations[ev.entry_id] || 0;
-                    const chips = pointScale.map(p => {
+                    const chips = activeScale.map(p => {
                         const sel = currentPts === p ? 'selected' : '';
                         const dis = isOwn ? 'disabled style="opacity:0.35;"' : '';
                         return `<button class="pts-chip ${sel}" ${dis} onclick="pickBallotPoints(${ev.entry_id}, ${p})">${p}</button>`;
                     }).join('');
-                    return `<div class="vote-entry-card"><div class="vote-entry-top"><div><div class="vote-song-title">${ev.flag} ${ev.country} — ${ev.song}</div><div class="vote-artist-sub">${ev.artist}</div></div><div style="font-size:9px; font-weight:900; color:#ffd166;">${currentPts ? currentPts + ' PUAN' : '-'}</div></div><div class="pts-chip-row">${chips}</div></div>`;
+                    return `<div class="vote-entry-card"><div class="vote-entry-top"><div><div class="vote-song-title">${ev.flag} ${ev.country} — ${ev.song} ${isOwn ? '(Senin Şarkın)' : ''}</div><div class="vote-artist-sub">${ev.artist}</div></div><div style="font-size:9px; font-weight:900; color:#ffd166;">${currentPts ? currentPts + ' PUAN' : '-'}</div></div><div class="pts-chip-row">${chips}</div></div>`;
                 }).join('');
             }
 
@@ -868,6 +953,12 @@
             document.getElementById('gv25WeeksGrid').innerHTML = (data.weeks || []).map(w =>
                 `<div class="week-mini-box ${Number(w.week) === Number(week) ? 'is-current' : ''}"><div class="week-mini-num">H${w.week}</div><div class="week-mini-type">${w.week_type}</div></div>`
             ).join('');
+
+            // Host BİTİR butonuna bastığında şenlik finali otomatik açılır
+            if (st.grand_finale_triggered && !festivalAutoShown && (data.reveal_sequence || []).length > 0) {
+                festivalAutoShown = true;
+                startFestivalSequence();
+            }
         }
 
         function pickBallotPoints(entryId, pts) {
@@ -881,10 +972,8 @@
             if (btn) btn.disabled = true;
             try {
                 const rawCountries = document.getElementById('gvCountriesInput').value.trim();
-                const countries = rawCountries ? rawCountries.split(',').map(s => s.trim()).filter(Boolean) : [];
-                const country = document.getElementById('gvPrimaryCountryInput').value.trim() || (countries[0] || '');
-                const flag = resolveCountryFlag(country);
-                document.getElementById('gvAutoFlagBox').innerText = flag;
+                const country = document.getElementById('gvPrimaryCountryInput').value.trim();
+                const flag = (document.getElementById('gvAutoFlagBox').value || resolveCountryFlag(country) || "🏳️").trim();
 
                 const res = await fetch('/api/goldenvision/entry', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -892,7 +981,9 @@
                         user_id: memberUser.id,
                         username: memberUser.username || memberUser.first_name || '',
                         full_name: memberUser.first_name || '',
-                        countries, country, flag,
+                        countries: rawCountries,
+                        country,
+                        flag,
                         artist: document.getElementById('gvArtistInput').value.trim(),
                         song: document.getElementById('gvSongInput').value.trim(),
                         song_url: document.getElementById('gvSongUrlInput').value.trim(),
@@ -919,14 +1010,14 @@
                     body: JSON.stringify({
                         user_id: memberUser.id,
                         username: memberUser.username || memberUser.first_name || '',
-                        voter_flag: resolveCountryFlag(document.getElementById('gvPrimaryCountryInput').value),
+                        voter_flag: (document.getElementById('gvAutoFlagBox').value || '🏳️').trim(),
                         allocations: draftAllocations
                     })
                 });
                 const d = await res.json();
                 if (!d.success) { playMlSfx('error'); return alert(d.error || 'Oylar kaydedilemedi.'); }
                 playMlSfx('twelve');
-                showGlitterToast("✔ DB Kaydedildi: 12-1 Oyların Mühürlendi!");
+                showGlitterToast("✔ DB Kaydedildi: Oyların Mühürlendi!");
                 await refreshGoldenVision();
             } finally {
                 if (btn) btn.disabled = false;
@@ -948,7 +1039,7 @@
                 const d = await res.json();
                 if (!d.success) { playMlSfx('error'); return alert(d.error || 'Yorum gönderilemedi.'); }
                 document.getElementById('gvCommentInput').value = '';
-                showToast("✔ DB Kaydedildi: Yorum Eklendi!");
+                showGlitterToast("✔ DB Kaydedildi: Yorum Eklendi!");
                 await refreshGoldenVision();
             } finally {
                 if (btn) btn.disabled = false;
