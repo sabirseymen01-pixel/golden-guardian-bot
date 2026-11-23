@@ -771,8 +771,8 @@
                     <div>Üye: @${p.username || p.user_id} (ID: ${p.user_id}) • İzlenme: <b>${p.views_m} Milyon</b></div>
                     <div>Şarkı Linki: ${p.song_url ? `<a href="${p.song_url}" target="_blank" style="color:#ffd166;">${p.song_url}</a>` : 'Yok'}</div>
                     <div class="media-box">
-                        <div style="font-size:7.5px; color:var(--gold-light); font-weight:800;">🎵 Opsiyonel MP3 / Doküman & Final Kesit Süresi</div>
-                        <input type="file" id="pendingMp3_${p.pending_id}" accept="audio/*,.mp3" style="padding:6px; margin-bottom:0; font-size:8px;">
+                        <div style="font-size:7.5px; color:var(--gold-light); font-weight:800;">🎵 Opsiyonel MP3 / Doküman & Final Kesit Süresi (Max 15 MB)</div>
+                        <input type="file" id="pendingMp3_${p.pending_id}" accept="audio/*,.mp3" style="padding:6px; margin-bottom:0; font-size:8px;" onchange="validateSelectedMp3(this)">
                         <input type="text" id="pendingDoc_${p.pending_id}" placeholder="Doküman / Not adı (opsiyonel)" value="${p.doc_name || ''}" style="margin-bottom:0; padding:7px 9px;">
                         <div class="media-grid-3">
                             <input type="number" id="pendingStart_${p.pending_id}" placeholder="Başlangıç sn" value="${p.clip_start_sec || 0}" style="margin-bottom:0; padding:7px 9px;">
@@ -800,7 +800,7 @@
                     </div>
                     <span>@${e.username || e.user_id} • ${e.views_m}M • MP3: ${e.audio_url ? '✅ Yüklü' : 'Yok'} • Kesit: ${e.clip_start_sec || 0}sn / ${e.clip_duration_sec || 20}sn</span>
                     <div class="media-box">
-                        <input type="file" id="approvedMp3_${e.entry_id}" accept="audio/*,.mp3" style="padding:6px; margin-bottom:0; font-size:8px;">
+                        <input type="file" id="approvedMp3_${e.entry_id}" accept="audio/*,.mp3" style="padding:6px; margin-bottom:0; font-size:8px;" onchange="validateSelectedMp3(this)">
                         <input type="text" id="approvedDoc_${e.entry_id}" placeholder="Doküman adı (opsiyonel)" value="${e.doc_name || ''}" style="margin-bottom:0; padding:7px 9px;">
                         <div class="media-grid-3">
                             <input type="number" id="approvedStart_${e.entry_id}" placeholder="Başlangıç sn" value="${e.clip_start_sec || 0}" style="margin-bottom:0; padding:7px 9px;">
@@ -816,6 +816,18 @@
             `).join('') || `<div class="log-item" style="cursor:default;">Henüz onaylanmış şarkı yok.</div>`;
 
             loadWeekFormFromCache();
+        }
+
+        function validateSelectedMp3(inputEl) {
+            if (!inputEl || !inputEl.files || !inputEl.files[0]) return;
+            const f = inputEl.files[0];
+            const maxBytes = 15 * 1024 * 1024;
+            if (f.size > maxBytes) {
+                alert("Seçilen dosya 15 MB sınırını aşıyor! Daha küçük bir MP3 seçin.");
+                inputEl.value = "";
+                return;
+            }
+            showToast(`🎵 Dosya hazır: ${f.name}`);
         }
 
         async function updateEntryFlag(entryId, btn) {
@@ -861,11 +873,18 @@
                 fd.append("mp3_file", fileInput.files[0]);
             }
             const res = await fetch('/api/goldenvision/studio/media', { method: 'POST', body: fd });
+            if (!res.ok) {
+                return { success: false, error: `Sunucu hatası (${res.status})` };
+            }
             return await res.json();
         }
 
         async function saveApprovedMedia(entryId, btn) {
-            if (btn) btn.disabled = true;
+            const origText = btn ? btn.innerText : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "Yükleniyor...";
+            }
             try {
                 const fileInput = document.getElementById('approvedMp3_' + entryId);
                 const docName = document.getElementById('approvedDoc_' + entryId)?.value.trim() || '';
@@ -880,41 +899,60 @@
                 } else {
                     alert(d.error || "Medya kaydedilemedi!");
                 }
+            } catch (e) {
+                alert("MP3 yüklenirken bağlantı hatası oluştu.");
             } finally {
-                if (btn) btn.disabled = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = origText;
+                }
             }
         }
 
         async function reviewPending(pendingId, approve, btn) {
-            if (btn) btn.disabled = true;
+            const origText = btn ? btn.innerText : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = approve ? "Onaylanıyor..." : "Reddediliyor...";
+            }
             try {
                 const reject_reason = document.getElementById('stRejectReasonInput').value.trim();
                 const flagEl = document.getElementById('pendingFlag_' + pendingId);
                 const custom_flag = flagEl ? flagEl.value.trim() : '';
 
+                const fileInput = document.getElementById('pendingMp3_' + pendingId);
+                const hasMp3File = Boolean(fileInput && fileInput.files && fileInput.files[0]);
+                const docNameVal = document.getElementById('pendingDoc_' + pendingId)?.value.trim() || '';
+                const startSecVal = Number(document.getElementById('pendingStart_' + pendingId)?.value || 0);
+                const durValNum = Number(document.getElementById('pendingDurVal_' + pendingId)?.value || 20);
+                const durUnitVal = document.getElementById('pendingDurUnit_' + pendingId)?.value || 'sec';
+
                 let mediaInfo = {
                     audio_url: '',
                     audio_filename: '',
-                    doc_name: document.getElementById('pendingDoc_' + pendingId)?.value.trim() || '',
-                    clip_start_sec: Number(document.getElementById('pendingStart_' + pendingId)?.value || 0),
-                    clip_duration_value: Number(document.getElementById('pendingDurVal_' + pendingId)?.value || 20),
-                    clip_duration_unit: document.getElementById('pendingDurUnit_' + pendingId)?.value || 'sec'
+                    doc_name: docNameVal,
+                    clip_start_sec: startSecVal,
+                    clip_duration_value: durValNum,
+                    clip_duration_unit: durUnitVal
                 };
 
-                const fileInput = document.getElementById('pendingMp3_' + pendingId);
-                if (approve && ((fileInput && fileInput.files && fileInput.files[0]) || mediaInfo.doc_name || mediaInfo.clip_start_sec > 0 || mediaInfo.clip_duration_value !== 20)) {
+                if (approve && hasMp3File) {
                     const mRes = await uploadMediaForm({
                         pendingId,
                         fileInput,
-                        docName: mediaInfo.doc_name,
-                        startSec: mediaInfo.clip_start_sec,
-                        durVal: mediaInfo.clip_duration_value,
-                        durUnit: mediaInfo.clip_duration_unit
+                        docName: docNameVal,
+                        startSec: startSecVal,
+                        durVal: durValNum,
+                        durUnit: durUnitVal
                     });
-                    if (mRes.success && mRes.media) {
+                    if (!mRes || !mRes.success) {
+                        alert(mRes?.error || "MP3 dosyası yüklenemedi!");
+                        return;
+                    }
+                    if (mRes.media) {
                         mediaInfo.audio_url = mRes.media.audio_url || '';
                         mediaInfo.audio_filename = mRes.media.audio_filename || '';
-                        mediaInfo.doc_name = mRes.media.doc_name || mediaInfo.doc_name;
+                        mediaInfo.doc_name = mRes.media.doc_name || docNameVal;
                     }
                 }
 
@@ -939,8 +977,13 @@
                 } else {
                     alert(d.error || "İşlem başarısız!");
                 }
+            } catch (err) {
+                alert("Onaylama sırasında ağ veya sunucu hatası oluştu.");
             } finally {
-                if (btn) btn.disabled = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = origText;
+                }
             }
         }
 
