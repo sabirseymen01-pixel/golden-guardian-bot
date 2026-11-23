@@ -7,7 +7,7 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import FastAPI, Request, UploadFile, File, Form
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, Response, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -271,55 +271,93 @@ async def api_gv_audio_stream(filename: str):
 
 
 @app.post("/api/goldenvision/studio/media")
-async def api_gv_studio_media(
-    user_id: int = Form(...),
-    season: Optional[int] = Form(None),
-    week: Optional[int] = Form(None),
-    entry_id: int = Form(0),
-    pending_id: int = Form(0),
-    doc_name: str = Form(""),
-    clip_start_sec: int = Form(0),
-    clip_duration_value: float = Form(20.0),
-    clip_duration_unit: str = Form("sec"),
-    mp3_file: Optional[UploadFile] = File(None),
-):
-    uid = int(user_id or 0)
+async def api_gv_studio_media(request: Request):
+    content_type = (request.headers.get("content-type") or "").lower()
+    uid = 0
+    s = database.get_active_season_number()
+    w = 1
+    entry_id = 0
+    pending_id = 0
+    final_doc_name = ""
+    start_sec = 0
+    dur_val = 20.0
+    unit_norm = "sec"
+    raw_bytes = b""
+    upload_filename = ""
+
+    if "application/json" in content_type:
+        data = await request.json()
+        uid = int(data.get("user_id", 0) or 0)
+        s = int(data.get("season") or s)
+        overview = database.get_gv_overview(season=s, user_id=uid)
+        w = int(data.get("week") or overview["current_week"])
+        entry_id = int(data.get("entry_id", 0) or 0)
+        pending_id = int(data.get("pending_id", 0) or 0)
+        final_doc_name = str(data.get("doc_name", "") or "").strip()
+        start_sec = max(0, int(data.get("clip_start_sec", 0) or 0))
+        dur_val = max(1.0, float(data.get("clip_duration_value", 20.0) or 20.0))
+        unit_norm = str(data.get("clip_duration_unit", "sec") or "sec").strip().lower()
+    else:
+        body = await request.body()
+        boundary_match = re.search(r"boundary=([^\s;]+)", content_type)
+        if boundary_match:
+            boundary = boundary_match.group(1).strip('"').encode("utf-8")
+            fields = {}
+            for part in body.split(b"--" + boundary):
+                if not part or part in [b"--", b"--\r\n"]:
+                    continue
+                if b"\r\n\r\n" not in part:
+                    continue
+                head_bin, val_bin = part.split(b"\r\n\r\n", 1)
+                val_bin = val_bin.rstrip(b"\r\n")
+                head_txt = head_bin.decode("utf-8", errors="ignore")
+                name_m = re.search(r'name="([^"]+)"', head_txt)
+                if not name_m:
+                    continue
+                fname = name_m.group(1)
+                file_m = re.search(r'filename="([^"]*)"', head_txt)
+                if file_m and file_m.group(1):
+                    upload_filename = file_m.group(1)
+                    raw_bytes = val_bin
+                else:
+                    fields[fname] = val_bin.decode("utf-8", errors="ignore").strip()
+
+            uid = int(fields.get("user_id", "0") or 0)
+            s = int(fields.get("season") or s)
+            overview = database.get_gv_overview(season=s, user_id=uid)
+            w = int(fields.get("week") or overview["current_week"])
+            entry_id = int(fields.get("entry_id", "0") or 0)
+            pending_id = int(fields.get("pending_id", "0") or 0)
+            final_doc_name = fields.get("doc_name", "")
+            start_sec = max(0, int(float(fields.get("clip_start_sec", "0") or 0)))
+            dur_val = max(1.0, float(fields.get("clip_duration_value", "20.0") or 20.0))
+            unit_norm = (fields.get("clip_duration_unit", "sec") or "sec").strip().lower()
+
     if not database.can_access_gv_studio(uid, FOUNDER_ID):
         database.record_suspicious_ai_alert(uid, 0, "GV_MEDIA", "Yetkisiz MP3/doküman yükleme girişimi", 90)
         return {"success": False, "error": "Bu masaya erişim yetkiniz yok!"}
 
-    s = int(season) if season else database.get_active_season_number()
-    overview = database.get_gv_overview(season=s, user_id=uid)
-    w = int(week) if week else int(overview["current_week"])
-
-    start_sec = max(0, int(clip_start_sec or 0))
-    dur_val = max(1.0, float(clip_duration_value or 20.0))
-    unit_norm = (clip_duration_unit or "sec").strip().lower()
     dur_sec = max(1, int(round(dur_val * 60.0 if unit_norm in ["min", "dk", "dakika"] else dur_val)))
-
     audio_url = ""
     stored_filename = ""
-    final_doc_name = (doc_name or "").strip()
 
-    if mp3_file and mp3_file.filename:
+    if raw_bytes and upload_filename:
         os.makedirs(GV_AUDIO_DIR, exist_ok=True)
-        raw_bytes = await mp3_file.read()
-        if raw_bytes:
-            ts_prefix = int(datetime.now().timestamp() * 1000)
-            clean_orig = _safe_audio_filename(mp3_file.filename)
-            stored_filename = f"s{s}_w{w}_{ts_prefix}_{clean_orig}"
-            save_path = os.path.join(GV_AUDIO_DIR, stored_filename)
-            with open(save_path, "wb") as out_f:
-                out_f.write(raw_bytes)
-            audio_url = f"/api/goldenvision/audio/{stored_filename}"
-            if not final_doc_name:
-                final_doc_name = mp3_file.filename
+        ts_prefix = int(datetime.now().timestamp() * 1000)
+        clean_orig = _safe_audio_filename(upload_filename)
+        stored_filename = f"s{s}_w{w}_{ts_prefix}_{clean_orig}"
+        save_path = os.path.join(GV_AUDIO_DIR, stored_filename)
+        with open(save_path, "wb") as out_f:
+            out_f.write(raw_bytes)
+        audio_url = f"/api/goldenvision/audio/{stored_filename}"
+        if not final_doc_name:
+            final_doc_name = upload_filename
 
     media_doc = database.save_gv_song_media(
         season=s,
         week=w,
-        entry_id=int(entry_id or 0),
-        pending_id=int(pending_id or 0),
+        entry_id=entry_id,
+        pending_id=pending_id,
         audio_url=audio_url,
         audio_filename=stored_filename,
         doc_name=final_doc_name,
@@ -1042,7 +1080,7 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 return TempUser(int(clean_arg))
         else:
-            db_uid = database.get_user_id_by_username(chat_id, clean_target) if False else (database.get_user_id_by_username(chat_id, clean_arg) or database.get_user_id_by_username(0, clean_arg))
+            db_uid = database.get_user_id_by_username(chat_id, clean_arg) or database.get_user_id_by_username(0, clean_arg)
             if db_uid:
                 try:
                     return (await context.bot.get_chat_member(chat_id, db_uid)).user
