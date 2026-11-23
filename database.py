@@ -28,6 +28,7 @@ gv_ballots_col = db["goldenvision_ballots"]
 gv_comments_col = db["goldenvision_comments"]
 gv_bans_col = db["goldenvision_bans"]
 gv_hosts_col = db["goldenvision_hosts"]
+gv_audio_col = db["goldenvision_audio"]
 
 
 def _default_25_weeks():
@@ -155,10 +156,15 @@ def get_gv_overview(season: int = None, user_id: int = 0):
             "song": e.get("song", ""),
             "artist": e.get("artist", ""),
             "song_url": e.get("song_url", ""),
+            "audio_url": e.get("audio_url", ""),
+            "doc_name": e.get("doc_name", ""),
+            "clip_start_sec": int(e.get("clip_start_sec", 0) or 0),
+            "clip_duration_sec": int(e.get("clip_duration_sec", 20) or 20),
             "views_m": e.get("views_m", 0),
             "pair_partner": e.get("pair_partner", ""),
             "user_id": e.get("user_id"),
             "username": e.get("username", ""),
+            "full_name": e.get("full_name", e.get("username", "")),
             "total": 0,
             "twelve_count": 0,
             "votes_from": {}
@@ -195,6 +201,12 @@ def get_gv_overview(season: int = None, user_id: int = 0):
             "flag": r["flag"],
             "song": r["song"],
             "artist": r["artist"],
+            "audio_url": r.get("audio_url", ""),
+            "clip_start_sec": int(r.get("clip_start_sec", 0) or 0),
+            "clip_duration_sec": int(r.get("clip_duration_sec", 20) or 20),
+            "user_id": r.get("user_id"),
+            "username": r.get("username", ""),
+            "full_name": r.get("full_name", r.get("username", "")),
             "total": r["total"],
             "twelve_count": r["twelve_count"]
         }
@@ -348,6 +360,67 @@ def restart_gv_week(season: int, week: int):
     )
 
 
+def save_gv_song_media(
+    season: int, week: int, entry_id: int = 0, pending_id: int = 0,
+    audio_url: str = "", audio_filename: str = "", doc_name: str = "",
+    clip_start_sec: int = 0, clip_duration_sec: int = 20
+):
+    season = int(season)
+    week = int(week)
+    start_s = max(0, int(clip_start_sec or 0))
+    dur_s = max(1, int(clip_duration_sec or 20))
+    media_doc = {
+        "season": season,
+        "week": week,
+        "entry_id": int(entry_id or 0),
+        "pending_id": int(pending_id or 0),
+        "audio_url": (audio_url or "").strip(),
+        "audio_filename": (audio_filename or "").strip(),
+        "doc_name": (doc_name or "").strip(),
+        "clip_start_sec": start_s,
+        "clip_duration_sec": dur_s,
+        "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+    }
+    if entry_id:
+        gv_audio_col.update_one({"season": season, "week": week, "entry_id": int(entry_id)}, {"$set": media_doc}, upsert=True)
+        gv_entries_col.update_one(
+            {"season": season, "week": week, "entry_id": int(entry_id)},
+            {"$set": {
+                "audio_url": media_doc["audio_url"],
+                "audio_filename": media_doc["audio_filename"],
+                "doc_name": media_doc["doc_name"],
+                "clip_start_sec": start_s,
+                "clip_duration_sec": dur_s
+            }}
+        )
+    if pending_id:
+        gv_pending_col.update_one(
+            {"season": season, "week": week, "pending_id": int(pending_id)},
+            {"$set": {
+                "audio_url": media_doc["audio_url"],
+                "audio_filename": media_doc["audio_filename"],
+                "doc_name": media_doc["doc_name"],
+                "clip_start_sec": start_s,
+                "clip_duration_sec": dur_s
+            }}
+        )
+    return media_doc
+
+
+def clear_gv_week_songs_and_audio(season: int, week: int):
+    season = int(season)
+    week = int(week)
+    audio_docs = list(gv_audio_col.find({"season": season, "week": week}, {"_id": 0}))
+    deleted_entries = gv_entries_col.delete_many({"season": season, "week": week}).deleted_count
+    deleted_audio = gv_audio_col.delete_many({"season": season, "week": week}).deleted_count
+    gv_ballots_col.delete_many({"season": season, "week": week})
+    return {
+        "deleted_entries": int(deleted_entries),
+        "deleted_audio": int(deleted_audio),
+        "removed_files": [a.get("audio_filename", "") for a in audio_docs if a.get("audio_filename")]
+    }
+
+
 def update_gv_entry_flag(season: int, week: int, entry_id: int = 0, pending_id: int = 0, new_flag: str = "🏳️"):
     season = int(season)
     week = int(week)
@@ -460,6 +533,11 @@ def submit_gv_entry(
         "artist": artist.strip(),
         "song": song.strip(),
         "song_url": (song_url or "").strip(),
+        "audio_url": "",
+        "audio_filename": "",
+        "doc_name": "",
+        "clip_start_sec": 0,
+        "clip_duration_sec": 20,
         "views_m": v_mil,
         "pair_partner": pair_partner.strip(),
         "status": "pending",
@@ -469,7 +547,11 @@ def submit_gv_entry(
     return {"ok": True, "pending": doc}
 
 
-def review_gv_pending_entry(season: int, week: int, pending_id: int, approve: bool, reject_reason: str = ""):
+def review_gv_pending_entry(
+    season: int, week: int, pending_id: int, approve: bool, reject_reason: str = "",
+    audio_url: str = "", audio_filename: str = "", doc_name: str = "",
+    clip_start_sec: int = 0, clip_duration_sec: int = 20
+):
     season = int(season)
     week = int(week)
     p_doc = gv_pending_col.find_one({"pending_id": int(pending_id)})
@@ -482,6 +564,12 @@ def review_gv_pending_entry(season: int, week: int, pending_id: int, approve: bo
     if approve:
         existing = gv_entries_col.find_one({"season": season, "week": week, "user_id": target_uid})
         entry_id = int(existing["entry_id"]) if existing else int(datetime.datetime.now().timestamp() * 1000)
+        final_audio_url = (audio_url or p_doc.get("audio_url") or "").strip()
+        final_audio_file = (audio_filename or p_doc.get("audio_filename") or "").strip()
+        final_doc_name = (doc_name or p_doc.get("doc_name") or "").strip()
+        start_s = max(0, int(clip_start_sec if clip_start_sec is not None else p_doc.get("clip_start_sec", 0) or 0))
+        dur_s = max(1, int(clip_duration_sec if clip_duration_sec is not None else p_doc.get("clip_duration_sec", 20) or 20))
+
         approved_doc = {
             "entry_id": entry_id,
             "season": season,
@@ -495,11 +583,22 @@ def review_gv_pending_entry(season: int, week: int, pending_id: int, approve: bo
             "artist": p_doc.get("artist", ""),
             "song": p_doc.get("song", ""),
             "song_url": p_doc.get("song_url", ""),
+            "audio_url": final_audio_url,
+            "audio_filename": final_audio_file,
+            "doc_name": final_doc_name,
+            "clip_start_sec": start_s,
+            "clip_duration_sec": dur_s,
             "views_m": p_doc.get("views_m", 0),
             "pair_partner": p_doc.get("pair_partner", ""),
             "approved_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
         }
         gv_entries_col.update_one({"season": season, "week": week, "user_id": target_uid}, {"$set": approved_doc}, upsert=True)
+        if final_audio_url or final_audio_file or final_doc_name:
+            save_gv_song_media(
+                season=season, week=week, entry_id=entry_id,
+                audio_url=final_audio_url, audio_filename=final_audio_file,
+                doc_name=final_doc_name, clip_start_sec=start_s, clip_duration_sec=dur_s
+            )
         gv_notifications_col.insert_one({
             "user_id": target_uid,
             "type": "approved",
@@ -702,6 +801,7 @@ def init_db():
         gv_ballots_col.create_index([("season", 1), ("week", 1), ("voter_id", 1)], unique=True)
         gv_bans_col.create_index("user_id", unique=True)
         gv_hosts_col.create_index("user_id", unique=True)
+        gv_audio_col.create_index([("season", 1), ("week", 1), ("entry_id", 1)])
         ensure_season_initialized(get_active_season_number())
         seed_default_events()
     except Exception:
