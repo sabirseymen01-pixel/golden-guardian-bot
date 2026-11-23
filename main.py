@@ -1,4 +1,5 @@
 import os
+import re
 import asyncio
 import logging
 import hashlib
@@ -6,8 +7,8 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, Response
+from fastapi import FastAPI, Request, UploadFile, File, Form
+from fastapi.responses import HTMLResponse, Response, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import uvicorn
@@ -37,6 +38,7 @@ logger = logging.getLogger(__name__)
 
 BOT_TOKEN = (os.environ.get("BOT_TOKEN") or (config and getattr(config, "BOT_TOKEN", None)) or "").strip()
 FOUNDER_ID = (os.environ.get("FOUNDER_ID") or (config and getattr(config, "FOUNDER_ID", None)) or "8245373459").strip()
+GV_AUDIO_DIR = os.environ.get("GV_AUDIO_DIR", os.path.join("public", "gv_audio"))
 
 scheduler = AsyncIOScheduler()
 tg_application = None
@@ -48,6 +50,14 @@ GROUP_CACHE_TTL_SEC = 300.0
 def log_event(level: str, message: str):
     timestamp = datetime.now().strftime("%H:%M:%S")
     print(f"[{timestamp}] [{level}] {message}", flush=True)
+
+
+def _safe_audio_filename(raw_name: str) -> str:
+    base = os.path.basename(raw_name or "song.mp3")
+    cleaned = re.sub(r"[^A-Za-z0-9._-]", "_", base)
+    if not cleaned.lower().endswith(".mp3"):
+        cleaned = f"{cleaned or 'song'}.mp3"
+    return cleaned
 
 
 async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -89,6 +99,7 @@ async def track_bot_group_join(update: Update, context: ContextTypes.DEFAULT_TYP
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global tg_application
+    os.makedirs(GV_AUDIO_DIR, exist_ok=True)
     database.init_db()
     if not scheduler.running:
         scheduler.start()
@@ -249,6 +260,117 @@ async def api_gv_overview(season: Optional[int] = None, user_id: int = 0):
     return data
 
 
+@app.get("/api/goldenvision/audio/{filename}")
+async def api_gv_audio_stream(filename: str):
+    safe_name = _safe_audio_filename(filename)
+    full_path = os.path.abspath(os.path.join(GV_AUDIO_DIR, safe_name))
+    base_abs = os.path.abspath(GV_AUDIO_DIR)
+    if not full_path.startswith(base_abs) or not os.path.exists(full_path):
+        return Response(status_code=404)
+    return FileResponse(full_path, media_type="audio/mpeg", filename=safe_name)
+
+
+@app.post("/api/goldenvision/studio/media")
+async def api_gv_studio_media(
+    user_id: int = Form(...),
+    season: Optional[int] = Form(None),
+    week: Optional[int] = Form(None),
+    entry_id: int = Form(0),
+    pending_id: int = Form(0),
+    doc_name: str = Form(""),
+    clip_start_sec: int = Form(0),
+    clip_duration_value: float = Form(20.0),
+    clip_duration_unit: str = Form("sec"),
+    mp3_file: Optional[UploadFile] = File(None),
+):
+    uid = int(user_id or 0)
+    if not database.can_access_gv_studio(uid, FOUNDER_ID):
+        database.record_suspicious_ai_alert(uid, 0, "GV_MEDIA", "Yetkisiz MP3/doküman yükleme girişimi", 90)
+        return {"success": False, "error": "Bu masaya erişim yetkiniz yok!"}
+
+    s = int(season) if season else database.get_active_season_number()
+    overview = database.get_gv_overview(season=s, user_id=uid)
+    w = int(week) if week else int(overview["current_week"])
+
+    start_sec = max(0, int(clip_start_sec or 0))
+    dur_val = max(1.0, float(clip_duration_value or 20.0))
+    unit_norm = (clip_duration_unit or "sec").strip().lower()
+    dur_sec = max(1, int(round(dur_val * 60.0 if unit_norm in ["min", "dk", "dakika"] else dur_val)))
+
+    audio_url = ""
+    stored_filename = ""
+    final_doc_name = (doc_name or "").strip()
+
+    if mp3_file and mp3_file.filename:
+        os.makedirs(GV_AUDIO_DIR, exist_ok=True)
+        raw_bytes = await mp3_file.read()
+        if raw_bytes:
+            ts_prefix = int(datetime.now().timestamp() * 1000)
+            clean_orig = _safe_audio_filename(mp3_file.filename)
+            stored_filename = f"s{s}_w{w}_{ts_prefix}_{clean_orig}"
+            save_path = os.path.join(GV_AUDIO_DIR, stored_filename)
+            with open(save_path, "wb") as out_f:
+                out_f.write(raw_bytes)
+            audio_url = f"/api/goldenvision/audio/{stored_filename}"
+            if not final_doc_name:
+                final_doc_name = mp3_file.filename
+
+    media_doc = database.save_gv_song_media(
+        season=s,
+        week=w,
+        entry_id=int(entry_id or 0),
+        pending_id=int(pending_id or 0),
+        audio_url=audio_url,
+        audio_filename=stored_filename,
+        doc_name=final_doc_name,
+        clip_start_sec=start_sec,
+        clip_duration_sec=dur_sec,
+    )
+    database.log_action(
+        0,
+        "GV_MEDIA_SAVE",
+        uid,
+        "Host",
+        f"Sezon {s} H{w} medya kaydı ({start_sec}sn başlangıç / {dur_sec}sn kesit).",
+    )
+    return {"success": True, "media": media_doc}
+
+
+@app.post("/api/goldenvision/studio/clear-week-songs")
+async def api_gv_studio_clear_week_songs(request: Request):
+    data = await request.json()
+    user_id = int(data.get("user_id", 0))
+    if not database.can_access_gv_studio(user_id, FOUNDER_ID):
+        database.record_suspicious_ai_alert(user_id, 0, "GV_CLEAR_SONGS", "Yetkisiz şarkı listesi silme girişimi", 95)
+        return {"success": False, "error": "Bu masaya erişim yetkiniz yok!"}
+
+    season = int(data.get("season") or database.get_active_season_number())
+    overview = database.get_gv_overview(season=season, user_id=user_id)
+    week = int(data.get("week") or overview["current_week"])
+
+    result = database.clear_gv_week_songs_and_audio(season, week)
+    for fname in result.get("removed_files", []):
+        if not fname:
+            continue
+        safe_name = _safe_audio_filename(fname)
+        full_path = os.path.abspath(os.path.join(GV_AUDIO_DIR, safe_name))
+        base_abs = os.path.abspath(GV_AUDIO_DIR)
+        if full_path.startswith(base_abs) and os.path.exists(full_path):
+            try:
+                os.remove(full_path)
+            except Exception:
+                pass
+
+    database.log_action(
+        0,
+        "GV_CLEAR_SONGS",
+        user_id,
+        "Host",
+        f"Sezon {season} H{week} şarkı ve MP3 kayıtları temizlendi ({result['deleted_entries']} şarkı).",
+    )
+    return {"success": True, "result": result}
+
+
 @app.post("/api/goldenvision/entry")
 async def api_gv_entry(request: Request):
     data = await request.json()
@@ -328,7 +450,23 @@ async def api_gv_studio_review(request: Request):
     approve = bool(data.get("approve", False))
     reject_reason = str(data.get("reject_reason", ""))
 
-    res = database.review_gv_pending_entry(season, week, pending_id, approve, reject_reason)
+    dur_val = max(1.0, float(data.get("clip_duration_value", data.get("clip_duration_sec", 20)) or 20))
+    dur_unit = str(data.get("clip_duration_unit", "sec")).strip().lower()
+    dur_sec = max(1, int(round(dur_val * 60.0 if dur_unit in ["min", "dk", "dakika"] else dur_val)))
+    start_sec = max(0, int(data.get("clip_start_sec", 0) or 0))
+
+    res = database.review_gv_pending_entry(
+        season=season,
+        week=week,
+        pending_id=pending_id,
+        approve=approve,
+        reject_reason=reject_reason,
+        audio_url=str(data.get("audio_url", "")),
+        audio_filename=str(data.get("audio_filename", "")),
+        doc_name=str(data.get("doc_name", "")),
+        clip_start_sec=start_sec,
+        clip_duration_sec=dur_sec,
+    )
     if not res.get("ok"):
         return {"success": False, "error": res.get("error")}
 
@@ -348,7 +486,7 @@ async def api_gv_studio_review(request: Request):
         "Host",
         f"Başvuru #{pending_id} -> {'ONAYLANDI' if approve else 'REDDEDİLDİ'}",
     )
-    return {"success": True, "approved": res.get("approved")}
+    return {"success": True, "approved": res.get("approved"), "entry": res.get("entry")}
 
 
 @app.post("/api/goldenvision/studio/finale")
@@ -904,7 +1042,7 @@ async def get_target_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
                 return TempUser(int(clean_arg))
         else:
-            db_uid = database.get_user_id_by_username(chat_id, clean_arg) or database.get_user_id_by_username(0, clean_arg)
+            db_uid = database.get_user_id_by_username(chat_id, clean_target) if False else (database.get_user_id_by_username(chat_id, clean_arg) or database.get_user_id_by_username(0, clean_arg))
             if db_uid:
                 try:
                     return (await context.bot.get_chat_member(chat_id, db_uid)).user
