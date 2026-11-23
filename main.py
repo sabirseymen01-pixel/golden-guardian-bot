@@ -298,40 +298,25 @@ async def api_gv_studio_media(request: Request):
         dur_val = max(1.0, float(data.get("clip_duration_value", 20.0) or 20.0))
         unit_norm = str(data.get("clip_duration_unit", "sec") or "sec").strip().lower()
     else:
-        body = await request.body()
-        boundary_match = re.search(r"boundary=([^\s;]+)", content_type)
-        if boundary_match:
-            boundary = boundary_match.group(1).strip('"').encode("utf-8")
-            fields = {}
-            for part in body.split(b"--" + boundary):
-                if not part or part in [b"--", b"--\r\n"]:
-                    continue
-                if b"\r\n\r\n" not in part:
-                    continue
-                head_bin, val_bin = part.split(b"\r\n\r\n", 1)
-                val_bin = val_bin.rstrip(b"\r\n")
-                head_txt = head_bin.decode("utf-8", errors="ignore")
-                name_m = re.search(r'name="([^"]+)"', head_txt)
-                if not name_m:
-                    continue
-                fname = name_m.group(1)
-                file_m = re.search(r'filename="([^"]*)"', head_txt)
-                if file_m and file_m.group(1):
-                    upload_filename = file_m.group(1)
-                    raw_bytes = val_bin
-                else:
-                    fields[fname] = val_bin.decode("utf-8", errors="ignore").strip()
+        form = await request.form()
+        uid = int(str(form.get("user_id", "0") or "0").strip() or 0)
+        raw_season = str(form.get("season") or "").strip()
+        s = int(raw_season) if raw_season.isdigit() else database.get_active_season_number()
+        overview = database.get_gv_overview(season=s, user_id=uid)
+        raw_week = str(form.get("week") or "").strip()
+        w = int(raw_week) if raw_week.isdigit() else int(overview["current_week"])
 
-            uid = int(fields.get("user_id", "0") or 0)
-            s = int(fields.get("season") or s)
-            overview = database.get_gv_overview(season=s, user_id=uid)
-            w = int(fields.get("week") or overview["current_week"])
-            entry_id = int(fields.get("entry_id", "0") or 0)
-            pending_id = int(fields.get("pending_id", "0") or 0)
-            final_doc_name = fields.get("doc_name", "")
-            start_sec = max(0, int(float(fields.get("clip_start_sec", "0") or 0)))
-            dur_val = max(1.0, float(fields.get("clip_duration_value", "20.0") or 20.0))
-            unit_norm = (fields.get("clip_duration_unit", "sec") or "sec").strip().lower()
+        entry_id = int(str(form.get("entry_id", "0") or "0").strip() or 0)
+        pending_id = int(str(form.get("pending_id", "0") or "0").strip() or 0)
+        final_doc_name = str(form.get("doc_name", "") or "").strip()
+        start_sec = max(0, int(float(str(form.get("clip_start_sec", "0") or "0").strip() or 0)))
+        dur_val = max(1.0, float(str(form.get("clip_duration_value", "20.0") or "20.0").strip() or 20.0))
+        unit_norm = str(form.get("clip_duration_unit", "sec") or "sec").strip().lower()
+
+        mp3_item = form.get("mp3_file")
+        if mp3_item is not None and getattr(mp3_item, "filename", ""):
+            upload_filename = mp3_item.filename
+            raw_bytes = await mp3_item.read()
 
     if not database.can_access_gv_studio(uid, FOUNDER_ID):
         database.record_suspicious_ai_alert(uid, 0, "GV_MEDIA", "Yetkisiz MP3/doküman yükleme girişimi", 90)
