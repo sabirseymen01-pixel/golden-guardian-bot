@@ -263,11 +263,19 @@ async def api_gv_overview(season: Optional[int] = None, user_id: int = 0):
 @app.get("/api/goldenvision/audio/{filename}")
 async def api_gv_audio_stream(filename: str):
     safe_name = _safe_audio_filename(filename)
-    full_path = os.path.abspath(os.path.join(GV_AUDIO_DIR, safe_name))
     base_abs = os.path.abspath(GV_AUDIO_DIR)
-    if not full_path.startswith(base_abs) or not os.path.exists(full_path):
+    full_path = os.path.abspath(os.path.join(base_abs, safe_name))
+    if not full_path.startswith(base_abs) or not os.path.isfile(full_path):
         return Response(status_code=404)
-    return FileResponse(full_path, media_type="audio/mpeg", filename=safe_name)
+    return FileResponse(
+        full_path,
+        media_type="audio/mpeg",
+        filename=safe_name,
+        headers={
+            "Accept-Ranges": "bytes",
+            "Cache-Control": "no-cache",
+        },
+    )
 
 
 @app.post("/api/goldenvision/studio/media")
@@ -285,58 +293,70 @@ async def api_gv_studio_media(request: Request):
     raw_bytes = b""
     upload_filename = ""
 
-    if "application/json" in content_type:
-        data = await request.json()
-        uid = int(data.get("user_id", 0) or 0)
-        s = int(data.get("season") or s)
-        overview = database.get_gv_overview(season=s, user_id=uid)
-        w = int(data.get("week") or overview["current_week"])
-        entry_id = int(data.get("entry_id", 0) or 0)
-        pending_id = int(data.get("pending_id", 0) or 0)
-        final_doc_name = str(data.get("doc_name", "") or "").strip()
-        start_sec = max(0, int(data.get("clip_start_sec", 0) or 0))
-        dur_val = max(1.0, float(data.get("clip_duration_value", 20.0) or 20.0))
-        unit_norm = str(data.get("clip_duration_unit", "sec") or "sec").strip().lower()
-    else:
-        form = await request.form()
-        uid = int(str(form.get("user_id", "0") or "0").strip() or 0)
-        raw_season = str(form.get("season") or "").strip()
-        s = int(raw_season) if raw_season.isdigit() else database.get_active_season_number()
-        overview = database.get_gv_overview(season=s, user_id=uid)
-        raw_week = str(form.get("week") or "").strip()
-        w = int(raw_week) if raw_week.isdigit() else int(overview["current_week"])
+    try:
+        if "application/json" in content_type:
+            data = await request.json()
+            uid = int(data.get("user_id", 0) or 0)
+            s = int(data.get("season") or s)
+            overview = database.get_gv_overview(season=s, user_id=uid)
+            w = int(data.get("week") or overview["current_week"])
+            entry_id = int(data.get("entry_id", 0) or 0)
+            pending_id = int(data.get("pending_id", 0) or 0)
+            final_doc_name = str(data.get("doc_name", "") or "").strip()
+            start_sec = max(0, int(data.get("clip_start_sec", 0) or 0))
+            dur_val = max(1.0, float(data.get("clip_duration_value", 20.0) or 20.0))
+            unit_norm = str(data.get("clip_duration_unit", "sec") or "sec").strip().lower()
+        else:
+            form = await request.form()
+            uid = int(str(form.get("user_id", "0") or "0").strip() or 0)
+            raw_season = str(form.get("season") or "").strip()
+            s = int(raw_season) if raw_season.isdigit() else database.get_active_season_number()
+            overview = database.get_gv_overview(season=s, user_id=uid)
+            raw_week = str(form.get("week") or "").strip()
+            w = int(raw_week) if raw_week.isdigit() else int(overview["current_week"])
 
-        entry_id = int(str(form.get("entry_id", "0") or "0").strip() or 0)
-        pending_id = int(str(form.get("pending_id", "0") or "0").strip() or 0)
-        final_doc_name = str(form.get("doc_name", "") or "").strip()
-        start_sec = max(0, int(float(str(form.get("clip_start_sec", "0") or "0").strip() or 0)))
-        dur_val = max(1.0, float(str(form.get("clip_duration_value", "20.0") or "20.0").strip() or 20.0))
-        unit_norm = str(form.get("clip_duration_unit", "sec") or "sec").strip().lower()
+            entry_id = int(str(form.get("entry_id", "0") or "0").strip() or 0)
+            pending_id = int(str(form.get("pending_id", "0") or "0").strip() or 0)
+            final_doc_name = str(form.get("doc_name", "") or "").strip()
+            start_sec = max(0, int(float(str(form.get("clip_start_sec", "0") or "0").strip() or 0)))
+            dur_val = max(1.0, float(str(form.get("clip_duration_value", "20.0") or "20.0").strip() or 20.0))
+            unit_norm = str(form.get("clip_duration_unit", "sec") or "sec").strip().lower()
 
-        mp3_item = form.get("mp3_file")
-        if mp3_item is not None and getattr(mp3_item, "filename", ""):
-            upload_filename = mp3_item.filename
-            raw_bytes = await mp3_item.read()
+            mp3_item = form.get("mp3_file")
+            if mp3_item is not None and getattr(mp3_item, "filename", ""):
+                upload_filename = mp3_item.filename
+                raw_bytes = await mp3_item.read()
+    except Exception as e:
+        logger.error(f"Medya isteği okunamadı: {e}")
+        return {"success": False, "error": "Dosya/form verisi okunurken hata oluştu."}
 
     if not database.can_access_gv_studio(uid, FOUNDER_ID):
         database.record_suspicious_ai_alert(uid, 0, "GV_MEDIA", "Yetkisiz MP3/doküman yükleme girişimi", 90)
         return {"success": False, "error": "Bu masaya erişim yetkiniz yok!"}
+
+    max_bytes = 15 * 1024 * 1024
+    if raw_bytes and len(raw_bytes) > max_bytes:
+        return {"success": False, "error": "MP3 dosyası 15 MB sınırını aşıyor."}
 
     dur_sec = max(1, int(round(dur_val * 60.0 if unit_norm in ["min", "dk", "dakika"] else dur_val)))
     audio_url = ""
     stored_filename = ""
 
     if raw_bytes and upload_filename:
-        os.makedirs(GV_AUDIO_DIR, exist_ok=True)
-        ts_prefix = int(datetime.now().timestamp() * 1000)
-        clean_orig = _safe_audio_filename(upload_filename)
-        stored_filename = f"s{s}_w{w}_{ts_prefix}_{clean_orig}"
-        save_path = os.path.join(GV_AUDIO_DIR, stored_filename)
-        with open(save_path, "wb") as out_f:
-            out_f.write(raw_bytes)
-        audio_url = f"/api/goldenvision/audio/{stored_filename}"
-        if not final_doc_name:
-            final_doc_name = upload_filename
+        try:
+            os.makedirs(GV_AUDIO_DIR, exist_ok=True)
+            ts_prefix = int(datetime.now().timestamp() * 1000)
+            clean_orig = _safe_audio_filename(upload_filename)
+            stored_filename = f"s{s}_w{w}_{ts_prefix}_{clean_orig}"
+            save_path = os.path.join(GV_AUDIO_DIR, stored_filename)
+            with open(save_path, "wb") as out_f:
+                out_f.write(raw_bytes)
+            audio_url = f"/api/goldenvision/audio/{stored_filename}"
+            if not final_doc_name:
+                final_doc_name = upload_filename
+        except Exception as e:
+            logger.error(f"MP3 diske yazılamadı: {e}")
+            return {"success": False, "error": "MP3 dosyası sunucuya kaydedilemedi."}
 
     media_doc = database.save_gv_song_media(
         season=s,
@@ -376,8 +396,8 @@ async def api_gv_studio_clear_week_songs(request: Request):
         if not fname:
             continue
         safe_name = _safe_audio_filename(fname)
-        full_path = os.path.abspath(os.path.join(GV_AUDIO_DIR, safe_name))
         base_abs = os.path.abspath(GV_AUDIO_DIR)
+        full_path = os.path.abspath(os.path.join(base_abs, safe_name))
         if full_path.startswith(base_abs) and os.path.exists(full_path):
             try:
                 os.remove(full_path)
