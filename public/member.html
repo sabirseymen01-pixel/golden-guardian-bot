@@ -1191,7 +1191,12 @@
                     } else if (!options.isClip) {
                         centralAudio.currentTime = 0;
                     }
-                    centralAudio.play().catch(() => {});
+                    const playPromise = centralAudio.play();
+                    if (playPromise && typeof playPromise.catch === 'function') {
+                        playPromise.catch(() => {
+                            document.getElementById('spPlayPauseBtn').innerText = "▶";
+                        });
+                    }
                     if (options.isClip && durSec > 0) {
                         clipEndBoundarySec = (centralAudio.currentTime || startSec) + durSec;
                         clipStopTimer = setTimeout(() => {
@@ -1243,6 +1248,13 @@
             const ratio = Math.max(0, Math.min(1, (evt.clientX - rect.left) / rect.width));
             centralAudio.currentTime = ratio * centralAudio.duration;
         }
+
+        centralAudio.addEventListener('error', () => {
+            clearClipTimer();
+            document.getElementById('spPlayPauseBtn').innerText = "▶";
+            document.getElementById('spNowSub').innerText = "Ses dosyası açılamadı veya desteklenmiyor.";
+            if (gvOverviewData) renderPlaylistPanel(gvOverviewData.entries || []);
+        });
 
         centralAudio.addEventListener('timeupdate', () => {
             const cur = centralAudio.currentTime || 0;
