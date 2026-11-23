@@ -772,7 +772,15 @@
                     <div>Şarkı Linki: ${p.song_url ? `<a href="${p.song_url}" target="_blank" style="color:#ffd166;">${p.song_url}</a>` : 'Yok'}</div>
                     <div class="media-box">
                         <div style="font-size:7.5px; color:var(--gold-light); font-weight:800;">🎵 Opsiyonel MP3 / Doküman & Final Kesit Süresi (Max 15 MB)</div>
-                        <input type="file" id="pendingMp3_${p.pending_id}" accept="audio/*,.mp3" style="padding:6px; margin-bottom:0; font-size:8px;" onchange="validateSelectedMp3(this)">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button type="button" class="gold-btn" style="width:auto; padding:7px 10px; font-size:7.5px; touch-action:auto;" onclick="triggerMp3Picker('pendingMp3_${p.pending_id}')">
+                                📁 MP3 Seç
+                            </button>
+                            <span id="pendingMp3Name_${p.pending_id}" style="font-size:7.5px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">
+                                ${p.doc_name || 'Dosya seçilmedi'}
+                            </span>
+                        </div>
+                        <input type="file" id="pendingMp3_${p.pending_id}" accept="audio/*,.mp3" style="display:none; touch-action:auto;" onchange="onMp3FilePicked(this, 'pendingMp3Name_${p.pending_id}')">
                         <input type="text" id="pendingDoc_${p.pending_id}" placeholder="Doküman / Not adı (opsiyonel)" value="${p.doc_name || ''}" style="margin-bottom:0; padding:7px 9px;">
                         <div class="media-grid-3">
                             <input type="number" id="pendingStart_${p.pending_id}" placeholder="Başlangıç sn" value="${p.clip_start_sec || 0}" style="margin-bottom:0; padding:7px 9px;">
@@ -800,7 +808,15 @@
                     </div>
                     <span>@${e.username || e.user_id} • ${e.views_m}M • MP3: ${e.audio_url ? '✅ Yüklü' : 'Yok'} • Kesit: ${e.clip_start_sec || 0}sn / ${e.clip_duration_sec || 20}sn</span>
                     <div class="media-box">
-                        <input type="file" id="approvedMp3_${e.entry_id}" accept="audio/*,.mp3" style="padding:6px; margin-bottom:0; font-size:8px;" onchange="validateSelectedMp3(this)">
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <button type="button" class="gold-btn" style="width:auto; padding:7px 10px; font-size:7.5px; touch-action:auto;" onclick="triggerMp3Picker('approvedMp3_${e.entry_id}')">
+                                📁 MP3 Seç
+                            </button>
+                            <span id="approvedMp3Name_${e.entry_id}" style="font-size:7.5px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1;">
+                                ${e.doc_name || (e.audio_url ? 'Yüklü MP3 mevcut' : 'Dosya seçilmedi')}
+                            </span>
+                        </div>
+                        <input type="file" id="approvedMp3_${e.entry_id}" accept="audio/*,.mp3" style="display:none; touch-action:auto;" onchange="onMp3FilePicked(this, 'approvedMp3Name_${e.entry_id}')">
                         <input type="text" id="approvedDoc_${e.entry_id}" placeholder="Doküman adı (opsiyonel)" value="${e.doc_name || ''}" style="margin-bottom:0; padding:7px 9px;">
                         <div class="media-grid-3">
                             <input type="number" id="approvedStart_${e.entry_id}" placeholder="Başlangıç sn" value="${e.clip_start_sec || 0}" style="margin-bottom:0; padding:7px 9px;">
@@ -818,15 +834,33 @@
             loadWeekFormFromCache();
         }
 
-        function validateSelectedMp3(inputEl) {
-            if (!inputEl || !inputEl.files || !inputEl.files[0]) return;
+        function triggerMp3Picker(inputId) {
+            playStaffSfx('tap');
+            const el = document.getElementById(inputId);
+            if (!el) return;
+            try {
+                el.value = "";
+                el.click();
+            } catch (e) {
+                alert("Dosya seçici açılamadı.");
+            }
+        }
+
+        function onMp3FilePicked(inputEl, labelId) {
+            const lbl = document.getElementById(labelId);
+            if (!inputEl || !inputEl.files || !inputEl.files[0]) {
+                if (lbl) lbl.innerText = "Dosya seçilmedi";
+                return;
+            }
             const f = inputEl.files[0];
             const maxBytes = 15 * 1024 * 1024;
             if (f.size > maxBytes) {
                 alert("Seçilen dosya 15 MB sınırını aşıyor! Daha küçük bir MP3 seçin.");
                 inputEl.value = "";
+                if (lbl) lbl.innerText = "Dosya seçilmedi";
                 return;
             }
+            if (lbl) lbl.innerText = `🎵 ${f.name}`;
             showToast(`🎵 Dosya hazır: ${f.name}`);
         }
 
