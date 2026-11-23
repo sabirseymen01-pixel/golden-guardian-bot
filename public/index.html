@@ -298,6 +298,9 @@
         .pending-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .flag-edit-row { display: flex; align-items: center; gap: 6px; }
         .flag-mini-input { width: 56px !important; text-align: center; font-size: 16px !important; padding: 6px !important; margin-bottom: 0 !important; }
+        .media-box { background: rgba(20, 14, 4, 0.85); border: 1px dashed rgba(212, 175, 55, 0.45); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+        .media-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .media-grid-3 { display: grid; grid-template-columns: 1fr 1fr 86px; gap: 6px; }
         .log-item { background: rgba(26, 18, 6, 0.92); border-left: 3px solid var(--gold-base); padding: 8px 10px; border-radius: 8px; font-size: 8px; border: 1px solid rgba(212,175,55,0.35); display: flex; flex-direction: column; gap: 3px; cursor: pointer; }
         .group-card { background: linear-gradient(145deg, rgba(38, 27, 9, 0.9), rgba(22, 15, 5, 0.95)); border: 1.5px solid var(--border-gold); border-radius: 12px; padding: 11px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; gap: 8px; }
         .group-meta { display: flex; align-items: center; gap: 10px; overflow: hidden; flex: 1; min-width: 0; }
@@ -362,7 +365,7 @@
         </div>
         <div class="fullpage-body">
             <div class="modal-tabs">
-                <div class="modal-tab active" onclick="switchStudioTab('onay', event)">Onay & Bayrak</div>
+                <div class="modal-tab active" onclick="switchStudioTab('onay', event)">Onay & MP3</div>
                 <div class="modal-tab" onclick="switchStudioTab('kontrol', event)">Kontrol & Bitir</div>
                 <div class="modal-tab" onclick="switchStudioTab('haftalar', event)">25 Hafta Konsept</div>
                 <div class="modal-tab" onclick="switchStudioTab('yetki', event)">Host & Ceza</div>
@@ -371,8 +374,8 @@
             <div id="studio-tab-onay" class="modal-tab-content active">
                 <input type="text" id="stRejectReasonInput" placeholder="Red sebebi (Reddet butonuna basınca üyeye iletilir)">
                 <div id="stPendingCardsContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
-                <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:6px;">Onaylanan Yarışan Liste (Host Bayrak Düzenleme Açık)</div>
-                <div id="stApprovedListContainer" style="display:flex; flex-direction:column; gap:6px;"></div>
+                <div style="font-size:8px; color:var(--gold-light); font-weight:900; margin-top:6px;">Onaylanan Yarışan Liste (Bayrak & MP3 / Kesit Ayarı Açık)</div>
+                <div id="stApprovedListContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
             </div>
 
             <div id="studio-tab-kontrol" class="modal-tab-content">
@@ -408,6 +411,9 @@
                 <button class="gold-btn" onclick="saveGvStudioState(this)">Ayarları Mühürle 💾</button>
                 <button class="gold-btn" style="background:linear-gradient(135deg,#ff4757,#ffd166); color:#120b02;" onclick="triggerFinaleBtn(this)">
                     🎆 BİTİR • OYLARI TOPLA & ŞENLİK FİNALİNİ BAŞLAT
+                </button>
+                <button class="gold-btn" style="background:#c0392b; color:#fff;" onclick="clearWeekSongsAndAudioBtn(this)">
+                    🗑️ BU HAFTANIN ŞARKI LİSTESİNİ & MP3 KAYITLARINI SİL
                 </button>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
                     <button class="gold-btn" style="background:#e67e22; color:#fff;" onclick="gvStudioAction('restart_week', this)">Aktif Haftayı Baştan Al</button>
@@ -760,12 +766,24 @@
             document.getElementById('stPendingCardsContainer').innerHTML = pendingList.map(p => `
                 <div class="pending-card">
                     <div class="flag-edit-row">
-                        <input class="flag-mini-input" id="pendingFlag_${p.pending_id}" value="${p.flag || '🏳️'}" title="Host Bayrak Seçimi (Örn: 🇷🇺 veya 🇲🇶)">
+                        <input class="flag-mini-input" id="pendingFlag_${p.pending_id}" value="${p.flag || '🏳️'}" title="Host Bayrak Seçimi">
                         <div style="flex:1;"><b style="color:var(--gold-light);">${p.country}</b> — <b>${p.song}</b> (${p.artist})</div>
                     </div>
                     <div>Üye: @${p.username || p.user_id} (ID: ${p.user_id}) • İzlenme: <b>${p.views_m} Milyon</b></div>
-                    <div>Tercihler: ${(p.countries || []).join(' ')} ${p.pair_partner ? `• Çift: ${p.pair_partner}` : ''}</div>
                     <div>Şarkı Linki: ${p.song_url ? `<a href="${p.song_url}" target="_blank" style="color:#ffd166;">${p.song_url}</a>` : 'Yok'}</div>
+                    <div class="media-box">
+                        <div style="font-size:7.5px; color:var(--gold-light); font-weight:800;">🎵 Opsiyonel MP3 / Doküman & Final Kesit Süresi</div>
+                        <input type="file" id="pendingMp3_${p.pending_id}" accept="audio/*,.mp3" style="padding:6px; margin-bottom:0; font-size:8px;">
+                        <input type="text" id="pendingDoc_${p.pending_id}" placeholder="Doküman / Not adı (opsiyonel)" value="${p.doc_name || ''}" style="margin-bottom:0; padding:7px 9px;">
+                        <div class="media-grid-3">
+                            <input type="number" id="pendingStart_${p.pending_id}" placeholder="Başlangıç sn" value="${p.clip_start_sec || 0}" style="margin-bottom:0; padding:7px 9px;">
+                            <input type="number" id="pendingDurVal_${p.pending_id}" placeholder="Kesit süresi" value="${p.clip_duration_sec || 20}" style="margin-bottom:0; padding:7px 9px;">
+                            <select id="pendingDurUnit_${p.pending_id}" style="margin-bottom:0; padding:7px 6px;">
+                                <option value="sec">Saniye</option>
+                                <option value="min">Dakika</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="pending-actions">
                         <button class="gold-btn" style="background:var(--success); color:#120b02;" onclick="reviewPending(${p.pending_id}, true, this)">Onayla ✅</button>
                         <button class="gold-btn" style="background:var(--danger); color:#fff;" onclick="reviewPending(${p.pending_id}, false, this)">Reddet ❌</button>
@@ -775,13 +793,26 @@
 
             const approvedList = studioDataCache.entries || [];
             document.getElementById('stApprovedListContainer').innerHTML = approvedList.map(e => `
-                <div class="log-item" style="cursor:default;">
+                <div class="log-item" style="cursor:default; gap:6px;">
                     <div class="flag-edit-row">
                         <input class="flag-mini-input" id="approvedFlag_${e.entry_id}" value="${e.flag || '🏳️'}">
                         <div style="flex:1;"><b>${e.country} — ${e.song} (${e.artist})</b></div>
                         <button class="gold-btn" style="width:auto; padding:6px 10px; font-size:7.5px;" onclick="updateEntryFlag(${e.entry_id}, this)">Bayrak Kaydet</button>
                     </div>
-                    <span>@${e.username || e.user_id} • ${e.views_m} Milyon ${e.song_url ? `• ${e.song_url}` : ''}</span>
+                    <span>@${e.username || e.user_id} • ${e.views_m}M • MP3: ${e.audio_url ? '✅ Yüklü' : 'Yok'} • Kesit: ${e.clip_start_sec || 0}sn / ${e.clip_duration_sec || 20}sn</span>
+                    <div class="media-box">
+                        <input type="file" id="approvedMp3_${e.entry_id}" accept="audio/*,.mp3" style="padding:6px; margin-bottom:0; font-size:8px;">
+                        <input type="text" id="approvedDoc_${e.entry_id}" placeholder="Doküman adı (opsiyonel)" value="${e.doc_name || ''}" style="margin-bottom:0; padding:7px 9px;">
+                        <div class="media-grid-3">
+                            <input type="number" id="approvedStart_${e.entry_id}" placeholder="Başlangıç sn" value="${e.clip_start_sec || 0}" style="margin-bottom:0; padding:7px 9px;">
+                            <input type="number" id="approvedDurVal_${e.entry_id}" placeholder="Kesit süresi" value="${e.clip_duration_sec || 20}" style="margin-bottom:0; padding:7px 9px;">
+                            <select id="approvedDurUnit_${e.entry_id}" style="margin-bottom:0; padding:7px 6px;">
+                                <option value="sec">Saniye</option>
+                                <option value="min">Dakika</option>
+                            </select>
+                        </div>
+                        <button class="gold-btn" style="padding:7px 10px; font-size:7.5px;" onclick="saveApprovedMedia(${e.entry_id}, this)">MP3 & Kesit Süresini Kaydet 🎵</button>
+                    </div>
                 </div>
             `).join('') || `<div class="log-item" style="cursor:default;">Henüz onaylanmış şarkı yok.</div>`;
 
@@ -816,12 +847,78 @@
             }
         }
 
+        async function uploadMediaForm({ entryId = 0, pendingId = 0, fileInput, docName, startSec, durVal, durUnit }) {
+            const fd = new FormData();
+            fd.append("user_id", String(user.id));
+            fd.append("season", String(studioDataCache?.season || 3));
+            fd.append("week", String(studioDataCache?.current_week || 1));
+            fd.append("entry_id", String(entryId || 0));
+            fd.append("pending_id", String(pendingId || 0));
+            fd.append("doc_name", docName || "");
+            fd.append("clip_start_sec", String(Math.max(0, Number(startSec || 0))));
+            fd.append("clip_duration_value", String(Math.max(1, Number(durVal || 20))));
+            fd.append("clip_duration_unit", durUnit || "sec");
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                fd.append("mp3_file", fileInput.files[0]);
+            }
+            const res = await fetch('/api/goldenvision/studio/media', { method: 'POST', body: fd });
+            return await res.json();
+        }
+
+        async function saveApprovedMedia(entryId, btn) {
+            if (btn) btn.disabled = true;
+            try {
+                const fileInput = document.getElementById('approvedMp3_' + entryId);
+                const docName = document.getElementById('approvedDoc_' + entryId)?.value.trim() || '';
+                const startSec = document.getElementById('approvedStart_' + entryId)?.value || 0;
+                const durVal = document.getElementById('approvedDurVal_' + entryId)?.value || 20;
+                const durUnit = document.getElementById('approvedDurUnit_' + entryId)?.value || 'sec';
+                const d = await uploadMediaForm({ entryId, fileInput, docName, startSec, durVal, durUnit });
+                if (d.success) {
+                    playStaffSfx('ok');
+                    showToast("✔ DB Kaydedildi: MP3 & Kesit Ayarı Güncellendi!");
+                    await refreshGvStudio();
+                } else {
+                    alert(d.error || "Medya kaydedilemedi!");
+                }
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
         async function reviewPending(pendingId, approve, btn) {
             if (btn) btn.disabled = true;
             try {
                 const reject_reason = document.getElementById('stRejectReasonInput').value.trim();
                 const flagEl = document.getElementById('pendingFlag_' + pendingId);
                 const custom_flag = flagEl ? flagEl.value.trim() : '';
+
+                let mediaInfo = {
+                    audio_url: '',
+                    audio_filename: '',
+                    doc_name: document.getElementById('pendingDoc_' + pendingId)?.value.trim() || '',
+                    clip_start_sec: Number(document.getElementById('pendingStart_' + pendingId)?.value || 0),
+                    clip_duration_value: Number(document.getElementById('pendingDurVal_' + pendingId)?.value || 20),
+                    clip_duration_unit: document.getElementById('pendingDurUnit_' + pendingId)?.value || 'sec'
+                };
+
+                const fileInput = document.getElementById('pendingMp3_' + pendingId);
+                if (approve && ((fileInput && fileInput.files && fileInput.files[0]) || mediaInfo.doc_name || mediaInfo.clip_start_sec > 0 || mediaInfo.clip_duration_value !== 20)) {
+                    const mRes = await uploadMediaForm({
+                        pendingId,
+                        fileInput,
+                        docName: mediaInfo.doc_name,
+                        startSec: mediaInfo.clip_start_sec,
+                        durVal: mediaInfo.clip_duration_value,
+                        durUnit: mediaInfo.clip_duration_unit
+                    });
+                    if (mRes.success && mRes.media) {
+                        mediaInfo.audio_url = mRes.media.audio_url || '';
+                        mediaInfo.audio_filename = mRes.media.audio_filename || '';
+                        mediaInfo.doc_name = mRes.media.doc_name || mediaInfo.doc_name;
+                    }
+                }
+
                 const res = await fetch('/api/goldenvision/studio/review', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -831,7 +928,8 @@
                         pending_id: pendingId,
                         approve,
                         reject_reason,
-                        custom_flag
+                        custom_flag,
+                        ...mediaInfo
                     })
                 });
                 const d = await res.json();
@@ -864,6 +962,29 @@
                     playStaffSfx('ok');
                     showToast("✔ DB Kaydedildi: Şenlik Finali Başlatıldı!");
                     await refreshGvStudio();
+                }
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        async function clearWeekSongsAndAudioBtn(btn) {
+            const w = studioDataCache?.current_week || 1;
+            const s = studioDataCache?.season || 3;
+            if (!confirm(`Sezon ${s} Hafta ${w} için onaylı şarkı listesini ve yüklenmiş MP3 kayıtlarını silmek istiyor musunuz?`)) return;
+            if (btn) btn.disabled = true;
+            try {
+                const res = await fetch('/api/goldenvision/studio/clear-week-songs', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, season: s, week: w })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    playStaffSfx('ok');
+                    showToast("✔ DB Temizlendi: Şarkı Listesi ve MP3 Kayıtları Silindi!");
+                    await refreshGvStudio();
+                } else {
+                    alert(d.error || "Temizleme başarısız!");
                 }
             } finally {
                 if (btn) btn.disabled = false;
