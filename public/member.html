@@ -301,10 +301,10 @@
 
         .gv-nav-bar {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            padding: 10px 14px;
-            background: rgba(24, 2, 7, 0.8);
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            padding: 9px 12px;
+            background: rgba(24, 2, 7, 0.84);
             border-bottom: 1px solid rgba(255, 209, 102, 0.35);
             z-index: 2;
             flex-shrink: 0;
@@ -314,12 +314,13 @@
             border: 1px solid rgba(255, 209, 102, 0.45);
             color: #ffd6de;
             border-radius: 10px;
-            padding: 8px 4px;
-            font-size: 8px;
+            padding: 7px 3px;
+            font-size: 7.5px;
             font-weight: 900;
             text-align: center;
             cursor: pointer;
             text-transform: uppercase;
+            white-space: nowrap;
         }
         .gv-nav-btn.active { background: linear-gradient(135deg, #fff1b8, #ffd166); color: #2b0209; border-color: #fff1b8; }
 
@@ -386,6 +387,90 @@
         }
         .palace-gold-btn:active { transform: scale(0.97); }
         .palace-gold-btn:disabled { opacity: 0.6; }
+
+        /* SPOTIFY TARZI ŞARKI LİSTESİ & ÇALAR */
+        .track-list-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(54, 5, 15, 0.88);
+            border: 1px solid rgba(255, 209, 102, 0.38);
+            cursor: pointer;
+            transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease;
+        }
+        .track-list-row:active { transform: scale(0.98); }
+        .track-list-row.is-playing {
+            background: linear-gradient(135deg, rgba(132, 12, 35, 0.94), rgba(45, 4, 12, 0.96));
+            border-color: #fff1b8;
+            box-shadow: 0 8px 22px rgba(255, 209, 102, 0.18);
+        }
+        .track-left-info { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+        .track-flag-badge { font-size: 22px; flex-shrink: 0; }
+        .track-meta-col { min-width: 0; flex: 1; }
+        .track-main-title { font-size: 10px; font-weight: 900; color: #fff1b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-sub-line { font-size: 8px; color: #f3c6cf; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-play-pill {
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 7.5px;
+            font-weight: 900;
+            background: rgba(255, 209, 102, 0.16);
+            color: #ffd166;
+            border: 1px solid rgba(255, 209, 102, 0.5);
+            flex-shrink: 0;
+        }
+        .track-list-row.is-playing .track-play-pill {
+            background: linear-gradient(135deg, #fff1b8, #ffd166);
+            color: #240208;
+        }
+
+        .spotify-dock-player {
+            background: linear-gradient(145deg, rgba(28, 4, 10, 0.96), rgba(14, 2, 5, 0.99));
+            border-top: 2px solid var(--foil-gold);
+            padding: 10px 14px 12px;
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 305;
+            flex-shrink: 0;
+        }
+        .spotify-dock-player.open { display: flex; }
+        .spotify-top-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .spotify-now-title { font-size: 9.5px; font-weight: 900; color: #fff1b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .spotify-now-sub { font-size: 7.5px; color: #ffd6de; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .spotify-ctrl-group { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .sp-ctrl-btn {
+            background: rgba(255, 209, 102, 0.16);
+            color: #fff1b8;
+            border: 1px solid rgba(255, 209, 102, 0.55);
+            border-radius: 8px;
+            padding: 6px 9px;
+            font-size: 8.5px;
+            font-weight: 900;
+            cursor: pointer;
+        }
+        .sp-ctrl-btn.primary {
+            background: linear-gradient(135deg, #fff1b8, #ffd166);
+            color: #240208;
+        }
+        .sp-progress-wrap { display: flex; align-items: center; gap: 8px; font-size: 7.5px; color: #ffd166; font-weight: 800; }
+        .sp-progress-bar {
+            flex: 1;
+            height: 5px;
+            border-radius: 999px;
+            background: rgba(255, 209, 102, 0.2);
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .sp-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ffd166, #fff1b8);
+            transition: width 0.15s linear;
+        }
 
         .vote-entry-card { background: rgba(58, 5, 15, 0.88); border: 1.5px solid rgba(255, 209, 102, 0.52); border-radius: 14px; padding: 11px; display: flex; flex-direction: column; gap: 8px; }
         .vote-entry-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -552,6 +637,18 @@
             margin-top: 8px;
         }
 
+        .reveal-clip-badge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 8px;
+            font-weight: 900;
+            background: rgba(255, 209, 102, 0.16);
+            color: #fff1b8;
+            border: 1px solid rgba(255, 209, 102, 0.45);
+        }
+
         .reveal-pts-big {
             font-size: 26px;
             font-weight: 900;
@@ -644,6 +741,7 @@
 
         <div class="gv-nav-bar">
             <button class="gv-nav-btn active" id="nav-sahne" onclick="switchGvTab('sahne')">🎭 Sahne</button>
+            <button class="gv-nav-btn" id="nav-sarkilar" onclick="switchGvTab('sarkilar')">🎵 Şarkılar</button>
             <button class="gv-nav-btn" id="nav-oylama" onclick="switchGvTab('oylama')">🗳️ 12–1 Oy</button>
             <button class="gv-nav-btn" id="nav-tablo" onclick="switchGvTab('tablo')">📊 Matris</button>
             <button class="gv-nav-btn" id="nav-sezon" onclick="switchGvTab('sezon')">🗓️ 25 Hafta</button>
@@ -700,6 +798,15 @@
                 </div>
             </div>
 
+            <!-- 🎵 SPOTIFY TARZI ŞARKI LİSTESİ PANELİ -->
+            <div class="gv-panel" id="panel-sarkilar">
+                <div class="palace-card">
+                    <div class="palace-card-title">🎧 GOLDENVISION ŞARKI LİSTESİ</div>
+                    <div class="palace-muted">Onaylanan şarkı satırına dokunarak uygulama içinden dinleyebilirsin.</div>
+                </div>
+                <div id="gvPlaylistContainer" style="display:flex; flex-direction:column; gap:8px;"></div>
+            </div>
+
             <div class="gv-panel" id="panel-oylama">
                 <div class="palace-card">
                     <div class="palace-card-title">🗳️ Eurovision Puan Dağıtımı</div>
@@ -731,6 +838,29 @@
             </div>
         </div>
 
+        <!-- 🎧 SABİT SPOTIFY MİNİ ÇALAR (TEK SES KANALI) -->
+        <div class="spotify-dock-player" id="spotifyDockPlayer">
+            <div class="spotify-top-row">
+                <div style="min-width:0; flex:1;">
+                    <div class="spotify-now-title" id="spNowTitle">Şarkı Seçilmedi</div>
+                    <div class="spotify-now-sub" id="spNowSub">Listeden bir parçaya dokun</div>
+                </div>
+                <div class="spotify-ctrl-group">
+                    <button class="sp-ctrl-btn" onclick="playPrevTrack()">⏮</button>
+                    <button class="sp-ctrl-btn primary" id="spPlayPauseBtn" onclick="togglePlayPauseTrack()">▶</button>
+                    <button class="sp-ctrl-btn" onclick="playNextTrack()">⏭</button>
+                    <button class="sp-ctrl-btn" onclick="stopCentralAudio(true)">✕</button>
+                </div>
+            </div>
+            <div class="sp-progress-wrap">
+                <span id="spTimeCur">0:00</span>
+                <div class="sp-progress-bar" onclick="seekAudioTrack(event)">
+                    <div class="sp-progress-fill" id="spProgressFill"></div>
+                </div>
+                <span id="spTimeDur">0:00</span>
+            </div>
+        </div>
+
         <!-- 🎆 MATLAŞMIŞ FİNAL ŞÖLENİ KATMANI -->
         <div class="festival-reveal-overlay" id="festivalOverlay">
             <canvas class="firework-canvas" id="fireworkCanvas"></canvas>
@@ -747,6 +877,7 @@
                         <div class="reveal-user-profile" id="revUserProfile">Yarışmacı</div>
                         <div class="reveal-user-handle" id="revUserHandle">@kullanici</div>
                         <div class="reveal-country-line" id="revCountryLine">Ülke • "Şarkı"</div>
+                        <div class="reveal-clip-badge" id="revClipBadge">🎵 Kesit Modu</div>
                         <div class="reveal-pts-big" id="revScore">0 PUAN</div>
                         <div style="font-size:8px; color:#ffd166; margin-top:6px;" id="revCounter">1 / 1</div>
                     </div>
@@ -988,12 +1119,182 @@
             soundEnabled = !soundEnabled;
             document.getElementById('soundBtn').innerText = soundEnabled ? "🔊 SES" : "🔇 SESSİZ";
             document.getElementById('gvSoundBtn').innerText = soundEnabled ? "🔊" : "🔇";
+            if (centralAudio) centralAudio.muted = !soundEnabled;
             if (soundEnabled) playMlSfx('tap');
         }
         function showGlitterToast(msg) {
             const t = document.getElementById('glitterToast');
             t.innerText = msg; t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        // 🎧 TEK MERKEZİ SES OYNATICI (ÇAKIŞMA YOK)
+        const centralAudio = new Audio();
+        centralAudio.preload = "metadata";
+        let activeTrackList = [];
+        let activeTrackIndex = -1;
+        let clipStopTimer = null;
+        let clipEndBoundarySec = null;
+
+        function fmtSec(sec) {
+            const s = Math.max(0, Math.floor(Number(sec || 0)));
+            const m = Math.floor(s / 60);
+            const r = s % 60;
+            return `${m}:${String(r).padStart(2, '0')}`;
+        }
+
+        function clearClipTimer() {
+            if (clipStopTimer) {
+                clearTimeout(clipStopTimer);
+                clipStopTimer = null;
+            }
+            clipEndBoundarySec = null;
+        }
+
+        function stopCentralAudio(hideDock = false) {
+            clearClipTimer();
+            try {
+                centralAudio.pause();
+                centralAudio.currentTime = 0;
+            } catch (e) {}
+            document.getElementById('spPlayPauseBtn').innerText = "▶";
+            if (hideDock) {
+                activeTrackIndex = -1;
+                document.getElementById('spotifyDockPlayer').classList.remove('open');
+                if (gvOverviewData) renderPlaylistPanel(gvOverviewData.entries || []);
+            }
+        }
+
+        function playSongByIndex(idx, options = {}) {
+            const list = activeTrackList || [];
+            if (!list.length || idx < 0 || idx >= list.length) return;
+            const track = list[idx];
+            if (!track || !track.audio_url) {
+                stopCentralAudio(false);
+                if (!options.silentMissing) showGlitterToast("Bu şarkı için MP3 dosyası yüklenmemiş.");
+                return;
+            }
+
+            clearClipTimer();
+            activeTrackIndex = idx;
+            document.getElementById('spotifyDockPlayer').classList.add('open');
+            document.getElementById('spNowTitle').innerText = `${track.flag || '🏳️'} ${track.country} — ${track.song}`;
+            document.getElementById('spNowSub').innerText = `${track.artist}${options.isClip ? ` • Final Kesit (${options.clipDurationSec || 20}sn)` : ''}`;
+            document.getElementById('spPlayPauseBtn').innerText = "⏸";
+
+            const startSec = options.isClip ? Math.max(0, Number(track.clip_start_sec || 0)) : 0;
+            const durSec = options.isClip ? Math.max(1, Number(options.clipDurationSec || track.clip_duration_sec || 20)) : 0;
+
+            if (centralAudio.src !== new URL(track.audio_url, window.location.origin).href) {
+                centralAudio.src = track.audio_url;
+            }
+            centralAudio.muted = !soundEnabled;
+
+            const startPlayback = () => {
+                try {
+                    if (startSec > 0 && startSec < (centralAudio.duration || Infinity)) {
+                        centralAudio.currentTime = startSec;
+                    } else if (!options.isClip) {
+                        centralAudio.currentTime = 0;
+                    }
+                    centralAudio.play().catch(() => {});
+                    if (options.isClip && durSec > 0) {
+                        clipEndBoundarySec = (centralAudio.currentTime || startSec) + durSec;
+                        clipStopTimer = setTimeout(() => {
+                            stopCentralAudio(false);
+                        }, durSec * 1000);
+                    }
+                } catch (e) {}
+            };
+
+            if (centralAudio.readyState >= 1) {
+                startPlayback();
+            } else {
+                const onLoaded = () => {
+                    centralAudio.removeEventListener('loadedmetadata', onLoaded);
+                    startPlayback();
+                };
+                centralAudio.addEventListener('loadedmetadata', onLoaded);
+            }
+
+            renderPlaylistPanel(gvOverviewData?.entries || []);
+        }
+
+        function togglePlayPauseTrack() {
+            if (!centralAudio.src) return;
+            if (centralAudio.paused) {
+                centralAudio.play().catch(() => {});
+                document.getElementById('spPlayPauseBtn').innerText = "⏸";
+            } else {
+                centralAudio.pause();
+                document.getElementById('spPlayPauseBtn').innerText = "▶";
+            }
+        }
+
+        function playPrevTrack() {
+            if (!activeTrackList.length) return;
+            const prevIdx = (activeTrackIndex - 1 + activeTrackList.length) % activeTrackList.length;
+            playSongByIndex(prevIdx);
+        }
+
+        function playNextTrack() {
+            if (!activeTrackList.length) return;
+            const nextIdx = (activeTrackIndex + 1) % activeTrackList.length;
+            playSongByIndex(nextIdx);
+        }
+
+        function seekAudioTrack(evt) {
+            if (!centralAudio.duration) return;
+            const rect = evt.currentTarget.getBoundingClientRect();
+            const ratio = Math.max(0, Math.min(1, (evt.clientX - rect.left) / rect.width));
+            centralAudio.currentTime = ratio * centralAudio.duration;
+        }
+
+        centralAudio.addEventListener('timeupdate', () => {
+            const cur = centralAudio.currentTime || 0;
+            const dur = centralAudio.duration || 0;
+            if (clipEndBoundarySec !== null && cur >= clipEndBoundarySec) {
+                stopCentralAudio(false);
+                return;
+            }
+            const pct = dur > 0 ? Math.min(100, (cur / dur) * 100) : 0;
+            document.getElementById('spProgressFill').style.width = `${pct}%`;
+            document.getElementById('spTimeCur').innerText = fmtSec(cur);
+            document.getElementById('spTimeDur').innerText = fmtSec(dur);
+        });
+
+        centralAudio.addEventListener('ended', () => {
+            clearClipTimer();
+            document.getElementById('spPlayPauseBtn').innerText = "▶";
+            document.getElementById('spProgressFill').style.width = "0%";
+        });
+
+        function renderPlaylistPanel(entries) {
+            const container = document.getElementById('gvPlaylistContainer');
+            if (!container) return;
+            activeTrackList = entries || [];
+            if (!activeTrackList.length) {
+                container.innerHTML = `<div class="palace-card"><div class="palace-muted">Henüz onaylanmış şarkı bulunmuyor.</div></div>`;
+                return;
+            }
+
+            container.innerHTML = activeTrackList.map((ev, idx) => {
+                const isCur = idx === activeTrackIndex && !centralAudio.paused;
+                const hasAudio = Boolean(ev.audio_url);
+                const clipInfo = `Kesit: ${ev.clip_start_sec || 0}sn • ${ev.clip_duration_sec || 20}sn`;
+                return `
+                    <div class="track-list-row ${idx === activeTrackIndex ? 'is-playing' : ''}" onclick="playSongByIndex(${idx})">
+                        <div class="track-left-info">
+                            <div class="track-flag-badge">${ev.flag || '🏳️'}</div>
+                            <div class="track-meta-col">
+                                <div class="track-main-title">${ev.country} — ${ev.song}</div>
+                                <div class="track-sub-line">${ev.artist} • ${hasAudio ? `MP3 Hazır (${clipInfo})` : 'MP3 Bekleniyor'}</div>
+                            </div>
+                        </div>
+                        <div class="track-play-pill">${isCur ? '⏸ ÇALIYOR' : (hasAudio ? '▶ ÇAL' : '—')}</div>
+                    </div>
+                `;
+            }).join('');
         }
 
         let gvOverviewData = null;
@@ -1031,12 +1332,13 @@
         }
         function closeGoldenVision() {
             playMlSfx('tap');
+            stopCentralAudio(true);
             document.getElementById('gvStageModal').classList.remove('open');
             document.getElementById('gvStageModal').classList.remove('stage-frosted');
         }
         function switchGvTab(tabKey) {
             playMlSfx('tap');
-            ['sahne', 'oylama', 'tablo', 'sezon'].forEach(k => {
+            ['sahne', 'sarkilar', 'oylama', 'tablo', 'sezon'].forEach(k => {
                 document.getElementById('nav-' + k).classList.toggle('active', k === tabKey);
                 document.getElementById('panel-' + k).classList.toggle('active', k === tabKey);
             });
@@ -1095,6 +1397,8 @@
             document.getElementById('gvCommentsList').innerHTML = (data.comments || []).map(c =>
                 `<div style="background:rgba(24,2,7,0.8); padding:6px 8px; border-radius:8px; font-size:8px;"><b style="color:#ffd166;">@${c.username}</b>: ${c.text}</div>`
             ).join('') || `<div class="palace-muted">Henüz yorum yok.</div>`;
+
+            renderPlaylistPanel(data.entries || []);
 
             const votingContainer = document.getElementById('gvVotingListContainer');
             const entries = data.entries || [];
@@ -1325,6 +1629,7 @@
             const ranking = (gvOverviewData && gvOverviewData.ranking) || [];
             if (!ranking.length) return showGlitterToast("Açıklanacak sıralama bulunmuyor.");
 
+            stopCentralAudio(false);
             festivalOrderedList = [...ranking].reverse();
             festivalIndex = 0;
             fwParticles = [];
@@ -1354,15 +1659,30 @@
 
             const profileName = item.full_name || item.username || "Yarışmacı";
             const handleText = item.username ? `@${item.username}` : `ID: ${item.user_id || ""}`;
+            const startSec = Math.max(0, Number(item.clip_start_sec || 0));
+            const durSec = Math.max(1, Number(item.clip_duration_sec || 20));
 
             document.getElementById('revRankBadge').innerText = isFirstPlace ? "👑 #1 ŞAMPİYON" : `SIRALAMA #${rankNumber}`;
             document.getElementById('revFlag').innerText = item.flag || "🏳️";
             document.getElementById('revUserProfile').innerText = profileName;
             document.getElementById('revUserHandle').innerText = handleText;
             document.getElementById('revCountryLine').innerText = `${item.country} • "${item.song}" (${item.artist})`;
+            document.getElementById('revClipBadge').innerText = item.audio_url
+                ? `🎵 Nakarat / Hareketli Kesit: ${startSec}sn → +${durSec}sn`
+                : `🎵 Kesit Süresi: ${durSec}sn (MP3 Yok)`;
             document.getElementById('revScore').innerText = `${item.total} PUAN`;
             document.getElementById('revCounter').innerText = `Bayrak ${festivalIndex + 1} / ${totalCount}`;
             document.getElementById('festivalNextBtn').innerText = (festivalIndex + 1 < totalCount) ? "Sıradaki Bayrağı Aç ›" : "Şöleni Bitir & Tebrik ›";
+
+            // Finalde o şarkının kesitini tek ses kanalı üzerinden çal
+            const entries = gvOverviewData?.entries || [];
+            const matchIdx = entries.findIndex(e => Number(e.entry_id) === Number(item.entry_id));
+            if (matchIdx !== -1 && item.audio_url) {
+                activeTrackList = entries;
+                playSongByIndex(matchIdx, { isClip: true, clipDurationSec: durSec, silentMissing: true });
+            } else {
+                stopCentralAudio(false);
+            }
         }
 
         function stepFestivalReveal() {
@@ -1375,6 +1695,7 @@
         }
 
         function showFestivalOutro() {
+            stopCentralAudio(false);
             spawnFireworkBurst(8);
             playMlSfx('twelve');
             document.getElementById('festivalSpotlightView').style.display = 'none';
@@ -1384,6 +1705,7 @@
         }
 
         function closeFestivalAndShowRanking() {
+            stopCentralAudio(true);
             playMlSfx('seal');
             fwParticles = [];
             document.getElementById('festivalOverlay').classList.remove('open');
