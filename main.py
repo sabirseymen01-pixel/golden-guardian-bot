@@ -393,6 +393,65 @@ async def api_gv_studio_media(request: Request):
     return {"success": True, "media": media_doc}
 
 
+@app.post("/api/goldenvision/studio/delete-song")
+async def api_gv_studio_delete_song(request: Request):
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0) or 0)
+        if not database.can_access_gv_studio(user_id, FOUNDER_ID):
+            database.record_suspicious_ai_alert(user_id, 0, "GV_DELETE_SONG", "Yetkisiz onaylı şarkı silme girişimi", 90)
+            return {"success": False, "error": "Bu masaya erişim yetkiniz yok!"}
+
+        season = int(data.get("season") or database.get_active_season_number())
+        overview = database.get_gv_overview(season=season, user_id=user_id)
+        week = int(data.get("week") or overview["current_week"])
+        entry_id = int(data.get("entry_id", 0) or 0)
+
+        if not entry_id:
+            return {"success": False, "error": "Silinecek şarkı kimliği (entry_id) bulunamadı."}
+
+        res = database.delete_gv_approved_entry(season=season, week=week, entry_id=entry_id)
+        if not res.get("ok"):
+            return {"success": False, "error": res.get("error") or "Şarkı silinemedi."}
+
+        removed_audio = res.get("removed_audio_filename") or ""
+        audio_deleted = False
+        if removed_audio:
+            safe_name = _safe_audio_filename(removed_audio)
+            base_abs = os.path.abspath(GV_AUDIO_DIR)
+            full_path = os.path.abspath(os.path.join(base_abs, safe_name))
+            if full_path.startswith(base_abs) and os.path.isfile(full_path):
+                try:
+                    os.remove(full_path)
+                    audio_deleted = True
+                except Exception:
+                    audio_deleted = False
+
+        report = {
+            "season": season,
+            "week": week,
+            "entry_id": entry_id,
+            "country": res.get("country", ""),
+            "flag": res.get("flag", ""),
+            "artist": res.get("artist", ""),
+            "song": res.get("song", ""),
+            "audio_deleted": audio_deleted,
+            "timestamp": datetime.now().strftime("%H:%M:%S"),
+        }
+
+        database.log_action(
+            0,
+            "GV_DELETE_SONG",
+            user_id,
+            "Host",
+            f"Sezon {season} H{week} onaylı şarkı silindi: {report['country']} - {report['song']}",
+        )
+        return {"success": True, "report": report}
+    except Exception as e:
+        logger.error(f"Şarkı silme hatası: {e}")
+        return {"success": False, "error": str(e)}
+
+
 @app.post("/api/goldenvision/studio/clear-week-songs")
 async def api_gv_studio_clear_week_songs(request: Request):
     data = await request.json()
