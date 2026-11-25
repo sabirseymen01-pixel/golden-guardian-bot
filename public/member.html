@@ -904,6 +904,14 @@
         const memberUser = tg.initDataUnsafe?.user || { id: 1000001, first_name: "Yıldız Üye", username: "vip_member" };
         document.getElementById('memberBadge').innerText = (memberUser.first_name || "VIP") + " ✨";
 
+        function escapeHtml(str) {
+            return String(str || "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
         let currentMemberPage = 0;
         let allMemberApps = [];
         let festivalAutoShown = false;
@@ -920,10 +928,10 @@
                 let cellsHtml = slice.map((app, idx) => `
                     <div class="member-app-card" onclick="triggerMemberApp(${p * perPage + idx})">
                         <div class="member-app-icon ${app.special ? 'gv-special' : ''}">
-                            ${app.badge ? `<span class="app-live-badge">${app.badge}</span>` : ''}
-                            <span>${app.icon || '✨'}</span>
+                            ${app.badge ? `<span class="app-live-badge">${escapeHtml(app.badge)}</span>` : ''}
+                            <span>${escapeHtml(app.icon || '✨')}</span>
                         </div>
-                        <div class="member-app-title">${app.title}</div>
+                        <div class="member-app-title">${escapeHtml(app.title)}</div>
                     </div>
                 `).join('');
 
@@ -1291,10 +1299,10 @@
                 return `
                     <div class="track-list-row ${idx === activeTrackIndex ? 'is-playing' : ''}" onclick="playSongByIndex(${idx})">
                         <div class="track-left-info">
-                            <div class="track-flag-badge">${ev.flag || '🏳️'}</div>
+                            <div class="track-flag-badge">${escapeHtml(ev.flag || '🏳️')}</div>
                             <div class="track-meta-col">
-                                <div class="track-main-title">${ev.country} — ${ev.song}</div>
-                                <div class="track-sub-line">${ev.artist} • ${hasAudio ? `MP3 Hazır (${clipInfo})` : 'MP3 Bekleniyor'}</div>
+                                <div class="track-main-title">${escapeHtml(ev.country)} — ${escapeHtml(ev.song)}</div>
+                                <div class="track-sub-line">${escapeHtml(ev.artist)} • ${hasAudio ? `MP3 Hazır (${clipInfo})` : 'MP3 Bekleniyor'}</div>
                             </div>
                         </div>
                         <div class="track-play-pill">${isCur ? '⏸ ÇALIYOR' : (hasAudio ? '▶ ÇAL' : '—')}</div>
@@ -1380,7 +1388,7 @@
                 notifCard.style.display = 'block';
                 document.getElementById('gvNotificationsList').innerHTML = notifs.map(n =>
                     `<div style="background:rgba(24,2,7,0.85); border:1px solid rgba(255,209,102,0.4); border-radius:8px; padding:7px 9px; font-size:8px;">
-                        <b style="color:#ffd166;">${n.title}</b> — ${n.message}
+                        <b style="color:#ffd166;">${escapeHtml(n.title)}</b> — ${escapeHtml(n.message)}
                     </div>`
                 ).join('');
             } else notifCard.style.display = 'none';
@@ -1399,9 +1407,9 @@
 
             const commentsOpen = Boolean(st.comments_open);
             document.getElementById('gvCommentsLockNote').innerText = commentsOpen ? "🟢 Yorumlar açık." : "🔒 Yorumlar kapalı.";
-            document.getElementById('gvCommentTargetSelect').innerHTML = (data.entries || []).map(e => `<option value="${e.entry_id}">${e.flag} ${e.country}</option>`).join('') || `<option value="0">Genel</option>`;
+            document.getElementById('gvCommentTargetSelect').innerHTML = (data.entries || []).map(e => `<option value="${e.entry_id}">${escapeHtml(e.flag)} ${escapeHtml(e.country)}</option>`).join('') || `<option value="0">Genel</option>`;
             document.getElementById('gvCommentsList').innerHTML = (data.comments || []).map(c =>
-                `<div style="background:rgba(24,2,7,0.8); padding:6px 8px; border-radius:8px; font-size:8px;"><b style="color:#ffd166;">@${c.username}</b>: ${c.text}</div>`
+                `<div style="background:rgba(24,2,7,0.8); padding:6px 8px; border-radius:8px; font-size:8px;"><b style="color:#ffd166;">@${escapeHtml(c.username)}</b>: ${escapeHtml(c.text)}</div>`
             ).join('') || `<div class="palace-muted">Henüz yorum yok.</div>`;
 
             renderPlaylistPanel(data.entries || []);
@@ -1424,14 +1432,14 @@
                         const dis = isOwn ? 'disabled style="opacity:0.35;"' : '';
                         return `<button class="pts-chip ${sel}" ${dis} onclick="pickBallotPoints(${ev.entry_id}, ${p})">${p}</button>`;
                     }).join('');
-                    return `<div class="vote-entry-card"><div class="vote-entry-top"><div><div class="vote-song-title">${ev.flag} ${ev.country} — ${ev.song} ${isOwn ? '(Senin Şarkın)' : ''}</div><div class="vote-artist-sub">${ev.artist}</div></div><div style="font-size:9px; font-weight:900; color:#ffd166;">${currentPts ? currentPts + ' PUAN' : '-'}</div></div><div class="pts-chip-row">${chips}</div></div>`;
+                    return `<div class="vote-entry-card"><div class="vote-entry-top"><div><div class="vote-song-title">${escapeHtml(ev.flag)} ${escapeHtml(ev.country)} — ${escapeHtml(ev.song)} ${isOwn ? '(Senin Şarkın)' : ''}</div><div class="vote-artist-sub">${escapeHtml(ev.artist)}</div></div><div style="font-size:9px; font-weight:900; color:#ffd166;">${currentPts ? currentPts + ' PUAN' : '-'}</div></div><div class="pts-chip-row">${chips}</div></div>`;
                 }).join('');
             }
 
             renderScoreMatrixAndRanking(data.ranking || [], data.comments || []);
 
             document.getElementById('gv25WeeksGrid').innerHTML = (data.weeks || []).map(w =>
-                `<div class="week-mini-box ${Number(w.week) === Number(week) ? 'is-current' : ''}"><div class="week-mini-num">H${w.week}</div><div class="week-mini-type">${w.week_type}</div></div>`
+                `<div class="week-mini-box ${Number(w.week) === Number(week) ? 'is-current' : ''}"><div class="week-mini-num">H${w.week}</div><div class="week-mini-type">${escapeHtml(w.week_type)}</div></div>`
             ).join('');
 
             if (st.grand_finale_triggered && !festivalAutoShown && (data.ranking || []).length > 0) {
@@ -1536,7 +1544,7 @@
             const votersMap = {};
             ranking.forEach(row => Object.entries(row.votes_from || {}).forEach(([vid, vobj]) => { votersMap[vid] = vobj.flag || '🏳️'; }));
             const voterIds = Object.keys(votersMap);
-            const ths = `<th>ÜLKE</th>` + voterIds.map(vid => `<th>${votersMap[vid]}</th>`).join('') + `<th>TOPLAM</th>`;
+            const ths = `<th>ÜLKE</th>` + voterIds.map(vid => `<th>${escapeHtml(votersMap[vid])}</th>`).join('') + `<th>TOPLAM</th>`;
             const trs = ranking.map((row, idx) => {
                 const pos = String(idx + 1).padStart(2, '0');
                 const tds = voterIds.map(vid => {
@@ -1544,14 +1552,14 @@
                     if (!info) return `<td class="cell-pts">-</td>`;
                     return `<td class="${Number(info.pts) === 12 ? 'cell-twelve' : 'cell-pts'}">${info.pts}</td>`;
                 }).join('');
-                return `<tr><td style="text-align:left; font-weight:800;">${pos} ${row.flag} ${row.country}</td>${tds}<td style="font-weight:900; color:#fff1b8;">${row.total}</td></tr>`;
+                return `<tr><td style="text-align:left; font-weight:800;">${pos} ${escapeHtml(row.flag)} ${escapeHtml(row.country)}</td>${tds}<td style="font-weight:900; color:#fff1b8;">${row.total}</td></tr>`;
             }).join('');
             matrixEl.innerHTML = `<table class="score-matrix-table"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table>`;
 
             rankEl.innerHTML = ranking.map((row, idx) => {
                 const entryComments = (comments || []).filter(c => Number(c.entry_id) === Number(row.entry_id));
-                const voteDetails = Object.values(row.votes_from || {}).map(v => `${v.flag} ${v.pts}p`).join(' • ');
-                const commentLines = entryComments.map(c => `💬 <b>@${c.username}</b>: ${c.text}`).join('<br>');
+                const voteDetails = Object.values(row.votes_from || {}).map(v => `${escapeHtml(v.flag)} ${v.pts}p`).join(' • ');
+                const commentLines = entryComments.map(c => `💬 <b>@${escapeHtml(c.username)}</b>: ${escapeHtml(c.text)}`).join('<br>');
                 const notesHtml = (voteDetails || commentLines)
                     ? `<div class="rank-notes-box">
                         ${voteDetails ? `<div>🗳️ <b>Oylar:</b> ${voteDetails}</div>` : ''}
@@ -1559,13 +1567,13 @@
                        </div>`
                     : `<div class="rank-notes-box">Henüz kullanıcı açıklaması veya yorum eklenmedi.</div>`;
 
-                const ownerTag = row.username ? `@${row.username}` : (row.full_name || '');
+                const ownerTag = row.username ? `@${escapeHtml(row.username)}` : escapeHtml(row.full_name || '');
                 return `
                     <div class="rank-card-block">
                         <div class="rank-row">
                             <div>
                                 <span class="rank-pos">#${idx + 1}</span>
-                                <b>${row.flag} ${row.country}</b> — ${row.song} <span style="color:#ffd6de; font-size:7.5px;">(${ownerTag})</span>
+                                <b>${escapeHtml(row.flag)} ${escapeHtml(row.country)}</b> — ${escapeHtml(row.song)} <span style="color:#ffd6de; font-size:7.5px;">(${ownerTag})</span>
                             </div>
                             <div class="rank-score">${row.total} PUAN</div>
                         </div>
