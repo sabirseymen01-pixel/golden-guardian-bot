@@ -407,6 +407,39 @@ def save_gv_song_media(
     return media_doc
 
 
+def delete_gv_approved_entry(season: int, week: int, entry_id: int):
+    try:
+        s = int(season)
+        w = int(week)
+        eid = int(entry_id)
+        doc = gv_entries_col.find_one({"season": s, "week": w, "entry_id": eid})
+        if not doc:
+            doc = gv_entries_col.find_one({"entry_id": eid})
+        if not doc:
+            return {"ok": False, "error": "Onaylanmış şarkı kaydı bulunamadı."}
+
+        removed_audio = (doc.get("audio_filename") or "").strip()
+        if not removed_audio:
+            aud = gv_audio_col.find_one({"season": int(doc.get("season", s)), "week": int(doc.get("week", w)), "entry_id": eid})
+            if aud:
+                removed_audio = (aud.get("audio_filename") or "").strip()
+
+        gv_entries_col.delete_one({"_id": doc["_id"]})
+        gv_audio_col.delete_many({"season": int(doc.get("season", s)), "week": int(doc.get("week", w)), "entry_id": eid})
+
+        return {
+            "ok": True,
+            "entry_id": eid,
+            "country": doc.get("country", ""),
+            "flag": doc.get("flag", "🏳️"),
+            "artist": doc.get("artist", ""),
+            "song": doc.get("song", ""),
+            "removed_audio_filename": removed_audio,
+        }
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
 def clear_gv_week_songs_and_audio(season: int, week: int):
     season = int(season)
     week = int(week)
