@@ -60,6 +60,20 @@ def _safe_audio_filename(raw_name: str) -> str:
     return cleaned
 
 
+def _extract_reply_video_id(reply) -> Optional[str]:
+    if not reply:
+        return None
+    if getattr(reply, "video", None):
+        return reply.video.file_id
+    doc = getattr(reply, "document", None)
+    if doc:
+        mime = (getattr(doc, "mime_type", None) or "").lower()
+        fname = (getattr(doc, "file_name", None) or "").lower()
+        if mime.startswith("video/") or fname.endswith((".mp4", ".mov", ".mkv", ".webm", ".avi")):
+            return doc.file_id
+    return None
+
+
 async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     if isinstance(context.error, Conflict):
         return
@@ -1120,8 +1134,12 @@ async def send_periodic_announcement(bot, chat_id, text, btn_text, btn_url, medi
                     clean_url = "https://" + clean_url
                 reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=clean_url)]])
 
-        if media_url:
-            await current_bot.send_photo(chat_id=chat_id, photo=media_url, caption=text, reply_markup=reply_markup)
+        media_str = str(media_url or "").strip()
+        if media_str.startswith("video:"):
+            video_file_id = media_str.split(":", 1)[1].strip()
+            await current_bot.send_video(chat_id=chat_id, video=video_file_id, caption=text or None, reply_markup=reply_markup)
+        elif media_str:
+            await current_bot.send_photo(chat_id=chat_id, photo=media_str, caption=text or None, reply_markup=reply_markup)
         else:
             await current_bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup)
     except Exception as e:
@@ -1238,14 +1256,17 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
     raw_text = update.message.text.partition(" ")[2].strip()
 
     photo_file_id = None
+    video_file_id = None
     if reply:
         if reply.photo:
             photo_file_id = reply.photo[-1].file_id
+        else:
+            video_file_id = _extract_reply_video_id(reply)
         if not raw_text:
             raw_text = reply.caption or reply.text or ""
 
-    if not raw_text and not photo_file_id:
-        await send_auto_delete_message(context, chat_id, "❌ Duyuru metni veya görsel belirtmelisiniz!", 4)
+    if not raw_text and not photo_file_id and not video_file_id:
+        await send_auto_delete_message(context, chat_id, "❌ Duyuru metni, görsel veya video belirtmelisiniz!", 4)
         try:
             await update.message.delete()
         except Exception:
@@ -1273,10 +1294,29 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton(text=btn_text, url=clean_url)]])
 
     try:
-        if photo_file_id:
-            sent_msg = await context.bot.send_photo(chat_id=chat_id, photo=photo_file_id, caption=msg_text, reply_markup=reply_markup)
+        stored_media = ""
+        if video_file_id:
+            sent_msg = await context.bot.send_video(
+                chat_id=chat_id,
+                video=video_file_id,
+                caption=msg_text or None,
+                reply_markup=reply_markup,
+            )
+            stored_media = f"video:{video_file_id}"
+        elif photo_file_id:
+            sent_msg = await context.bot.send_photo(
+                chat_id=chat_id,
+                photo=photo_file_id,
+                caption=msg_text or None,
+                reply_markup=reply_markup,
+            )
+            stored_media = photo_file_id
         else:
-            sent_msg = await context.bot.send_message(chat_id=chat_id, text=msg_text, reply_markup=reply_markup)
+            sent_msg = await context.bot.send_message(
+                chat_id=chat_id,
+                text=msg_text,
+                reply_markup=reply_markup,
+            )
 
         await context.bot.pin_chat_message(chat_id=chat_id, message_id=sent_msg.message_id, disable_notification=False)
         admin_user = update.effective_user
@@ -1285,11 +1325,11 @@ async def cmd_duyuru(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "ANNOUNCEMENT",
             admin_user.id,
             f"@{admin_user.username or admin_user.first_name}",
-            f"Duyuru: {msg_text[:30]}...",
+            f"Duyuru: {(msg_text or 'Video')[:30]}...",
         )
 
         auto_name = f"Chat Duyurusu: {msg_text[:20]}..." if msg_text else "Chat Duyurusu"
-        database.save_template_db(chat_id, "announcement", auto_name, msg_text, photo_file_id or "", btn_text, btn_url, 0)
+        database.save_template_db(chat_id, "announcement", auto_name, msg_text, stored_media, btn_text, btn_url, 0)
     except Exception as e:
         logger.error(f"Duyuru hata: {e}")
     try:
@@ -1338,8 +1378,13 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return await cmd_zamanladur(update, context)
 
     media_url = ""
-    if reply and reply.photo:
-        media_url = reply.photo[-1].file_id
+    if reply:
+        if reply.photo:
+            media_url = reply.photo[-1].file_id
+        else:
+            vid_id = _extract_reply_video_id(reply)
+            if vid_id:
+                media_url = f"video:{vid_id}"
 
     btn_text, btn_url, minutes, msg_text = "", "", 0, ""
     if "|" in raw_args:
@@ -1378,7 +1423,7 @@ async def cmd_zamanla(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not btn_url:
             btn_url = sched_settings.get("scheduled_btn_url", "")
 
-    job_id = hashlib.md5(f"{chat_id}_{minutes}_{msg_text[:20]}".encode()).hexdigest()
+    job_id = hashlib.md5(f"{chat_id}_{minutes}_{msg_text[:20]}_{media_url[-12:]}".encode()).hexdigest()
     scheduler.add_job(
         send_periodic_announcement,
         "interval",
