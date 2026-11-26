@@ -1,5 +1,6 @@
 import os
 import datetime
+from typing import Optional
 from pymongo import MongoClient
 
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
@@ -262,7 +263,15 @@ def sync_ml_state(payload: dict) -> dict:
     return get_ml_full_state()
 
 
-def update_ml_progress(user_id: str, name: str = "", handle: str = "", xp_gain: int = 0, won: bool = False, level: Optional[int] = None, xp: Optional[int] = None) -> dict:
+def update_ml_progress(
+    user_id: str,
+    name: str = "",
+    handle: str = "",
+    xp_gain: int = 0,
+    won: bool = False,
+    level: Optional[int] = None,
+    xp: Optional[int] = None,
+) -> dict:
     ensure_ml_initialized()
     uid = str(user_id).strip()
     prof = ensure_ml_profile(uid, name or "Oyuncu", handle or "@oyuncu")
