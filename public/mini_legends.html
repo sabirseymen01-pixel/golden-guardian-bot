@@ -23,6 +23,8 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-left: env(safe-area-inset-left, 0px);
       --safe-right: env(safe-area-inset-right, 0px);
+      --tg-top-pad: 8px;
+      --tg-right-pad: 34px;
     }
 
     * {
@@ -69,7 +71,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: calc(var(--safe-top) + 4px) calc(var(--safe-right) + 22px) 4px calc(var(--safe-left) + 12px);
+      padding: calc(var(--safe-top) + var(--tg-top-pad)) calc(var(--safe-right) + var(--tg-right-pad)) 4px calc(var(--safe-left) + 14px);
       background: linear-gradient(180deg, rgba(5, 9, 18, 0.96) 0%, rgba(5, 9, 18, 0.72) 100%);
       border-bottom: 1px solid rgba(245, 196, 81, 0.18);
       z-index: 20;
@@ -88,7 +90,7 @@
       cursor: pointer;
       transition: transform 0.15s, border-color 0.15s;
       flex-shrink: 0;
-      max-width: 210px;
+      max-width: 185px;
     }
     .player-card:hover { border-color: var(--gold); }
     .player-card:active { transform: scale(0.97); }
@@ -163,8 +165,8 @@
       gap: 6px;
       flex-shrink: 0;
     }
-    .brand-title { text-align: right; max-width: 118px; }
-    .brand-title h2 { font-size: 11.5px; letter-spacing: 0.8px; color: var(--gold); font-weight: 900; line-height: 1.1; white-space: nowrap; }
+    .brand-title { text-align: right; max-width: 112px; }
+    .brand-title h2 { font-size: 11px; letter-spacing: 0.7px; color: var(--gold); font-weight: 900; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .brand-title span { font-size: 8px; color: var(--text-muted); font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .port-btn {
@@ -203,9 +205,9 @@
     .main-arena {
       flex: 1;
       display: grid;
-      grid-template-columns: minmax(156px, 188px) 1fr minmax(156px, 188px);
+      grid-template-columns: minmax(154px, 184px) 1fr minmax(154px, 184px);
       gap: 8px;
-      padding: 4px calc(var(--safe-right) + 26px) 4px calc(var(--safe-left) + 12px);
+      padding: 4px calc(var(--safe-right) + var(--tg-right-pad)) 4px calc(var(--safe-left) + 14px);
       position: relative;
       overflow: hidden;
       min-height: 0;
@@ -462,7 +464,7 @@
       background: rgba(5, 9, 18, 0.97);
       border-top: 1px solid rgba(245, 196, 81, 0.2);
       z-index: 20;
-      padding: 3px calc(var(--safe-right) + 18px) calc(var(--safe-bottom) + 3px) calc(var(--safe-left) + 8px);
+      padding: 3px calc(var(--safe-right) + var(--tg-right-pad)) calc(var(--safe-bottom) + 3px) calc(var(--safe-left) + 12px);
       flex-shrink: 0;
       overflow-x: auto;
     }
@@ -498,7 +500,7 @@
       z-index: 100;
       align-items: center;
       justify-content: center;
-      padding: max(50px, calc(var(--safe-top) + 44px)) calc(var(--safe-right) + 22px) max(12px, calc(var(--safe-bottom) + 10px)) calc(var(--safe-left) + 14px);
+      padding: max(54px, calc(var(--safe-top) + var(--tg-top-pad) + 42px)) calc(var(--safe-right) + var(--tg-right-pad) + 6px) max(14px, calc(var(--safe-bottom) + 12px)) calc(var(--safe-left) + 16px);
     }
     .modal-backdrop.open { display: flex; }
     .modal-box {
@@ -507,7 +509,7 @@
       border-radius: 14px;
       width: 96%;
       max-width: 820px;
-      max-height: calc(100dvh - 66px);
+      max-height: calc(100dvh - 72px);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -992,23 +994,34 @@
     const DEFAULT_FOUNDER_ID = '8245373459';
     const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
-    function forceFullScreenMode() {
+    function applyTelegramInsets() {
       try {
-        if (tg) {
-          tg.ready();
-          tg.expand();
-          if (typeof tg.requestFullscreen === 'function') {
-            tg.requestFullscreen();
-          }
-        }
+        if (!tg) return;
+        tg.ready();
+        tg.expand();
+        const topInset = Math.max(
+          (tg.contentSafeAreaInset && tg.contentSafeAreaInset.top) || 0,
+          (tg.safeAreaInset && tg.safeAreaInset.top) || 0
+        );
+        const rightInset = Math.max(
+          (tg.contentSafeAreaInset && tg.contentSafeAreaInset.right) || 0,
+          (tg.safeAreaInset && tg.safeAreaInset.right) || 0
+        );
+        document.documentElement.style.setProperty('--tg-top-pad', `${Math.max(8, topInset + 4)}px`);
+        document.documentElement.style.setProperty('--tg-right-pad', `${Math.max(34, rightInset + 22)}px`);
       } catch (e) {}
     }
 
-    forceFullScreenMode();
+    applyTelegramInsets();
     if (tg && typeof tg.onEvent === 'function') {
       tg.onEvent('viewportChanged', () => {
-        try { tg.expand(); } catch (e) {}
+        try {
+          tg.expand();
+          applyTelegramInsets();
+        } catch (e) {}
       });
+      tg.onEvent('safeAreaChanged', applyTelegramInsets);
+      tg.onEvent('contentSafeAreaChanged', applyTelegramInsets);
     }
 
     const tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : {
@@ -1334,6 +1347,7 @@
     }
 
     function openModal(id) {
+      applyTelegramInsets();
       playGameTone('click');
       if (id === 'roles-modal') renderAllRolesGrid();
       if (id === 'scoreboard-modal') updateHudUI();
@@ -1345,6 +1359,7 @@
     }
 
     function switchTab(el) {
+      applyTelegramInsets();
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
       playGameTone('click');
