@@ -39,8 +39,8 @@
 
     html, body {
       background:
-        radial-gradient(circle at 50% 28%, rgba(245, 196, 81, 0.11) 0%, rgba(15, 23, 42, 0.45) 38%, rgba(4, 7, 15, 0.99) 85%),
-        linear-gradient(180deg, #080d1b 0%, #04060e 100%);
+        radial-gradient(circle at 50% 30%, rgba(245, 196, 81, 0.12) 0%, rgba(15, 23, 42, 0.48) 40%, rgba(4, 7, 15, 0.99) 86%),
+        linear-gradient(180deg, #080e1c 0%, #04060e 100%);
       color: var(--text-main);
       width: 100vw;
       height: 100dvh;
@@ -73,7 +73,7 @@
       align-items: center;
       justify-content: space-between;
       padding: calc(var(--safe-top) + var(--tg-top-pad)) calc(var(--safe-right) + var(--tg-right-pad)) 4px calc(var(--safe-left) + 56px);
-      background: linear-gradient(180deg, rgba(5, 9, 18, 0.97) 0%, rgba(7, 12, 24, 0.78) 100%);
+      background: linear-gradient(180deg, rgba(5, 9, 18, 0.97) 0%, rgba(7, 12, 24, 0.8) 100%);
       border-bottom: 1px solid rgba(245, 196, 81, 0.24);
       z-index: 20;
       flex-shrink: 0;
@@ -220,7 +220,7 @@
     .main-arena {
       flex: 1;
       display: grid;
-      grid-template-columns: minmax(162px, 190px) 1fr minmax(162px, 190px);
+      grid-template-columns: minmax(170px, 206px) 1fr minmax(156px, 184px);
       gap: 7px;
       padding: 4px calc(var(--safe-right) + var(--tg-right-pad)) 4px calc(var(--safe-left) + 14px);
       position: relative;
@@ -228,22 +228,29 @@
       min-height: 0;
     }
 
-    /* TAROT KARİKATÜR KAHRAMAN PANELLERİ */
-    .char-panel {
-      background:
-        linear-gradient(180deg, rgba(16, 26, 48, 0.97) 0%, rgba(7, 11, 20, 0.99) 100%);
+    /* SOL DİKEY KAHRAMAN + SAĞINDA LOGOSAL SİMGE SOKETLERİ */
+    .left-hero-stage {
+      background: linear-gradient(180deg, rgba(16, 26, 48, 0.97) 0%, rgba(7, 11, 20, 0.99) 100%);
       border: 1.5px solid var(--border-gold);
       border-radius: 14px;
       padding: 6px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px;
       z-index: 10;
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.75), inset 0 0 0 1px rgba(245, 196, 81, 0.14);
       min-width: 0;
       min-height: 0;
       overflow: hidden;
-      position: relative;
+    }
+
+    .left-hero-vertical {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-width: 0;
+      min-height: 0;
+      gap: 4px;
     }
 
     .char-header {
@@ -253,7 +260,7 @@
     .char-role-tag {
       font-size: 7.5px;
       font-weight: 900;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       color: var(--gold);
       text-transform: uppercase;
       white-space: nowrap;
@@ -284,84 +291,32 @@
       border-color: rgba(192, 132, 252, 0.4);
     }
 
-    .char-portrait-banner {
+    .vertical-cartoon-card {
+      flex: 1;
+      min-height: 0;
+      border-radius: 11px;
+      border: 1.5px solid rgba(245, 196, 81, 0.36);
+      background: radial-gradient(circle at 50% 28%, rgba(245, 196, 81, 0.16), rgba(7, 12, 24, 0.96) 80%);
       display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 3.5px 5px;
-      margin-top: 3px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(245, 196, 81, 0.16), rgba(15, 23, 42, 0.92));
-      border: 1px solid rgba(245, 196, 81, 0.36);
-    }
-    .char-cartoon-box {
-      width: 34px;
-      height: 34px;
-      border-radius: 9px;
-      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.18), rgba(6, 10, 20, 0.96));
-      border: 1.5px solid var(--gold);
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.65);
-      flex-shrink: 0;
+      padding: 4px;
+      gap: 3px;
       overflow: hidden;
     }
+
     .char-quote-preview {
-      font-size: 8px;
-      line-height: 1.18;
+      font-size: 7.8px;
+      line-height: 1.15;
       color: #e2e8f0;
       font-style: italic;
+      text-align: center;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-
-    .skill-list {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      margin: 3px 0;
-      overflow-y: auto;
-      min-height: 0;
-    }
-    .skill-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(255, 255, 255, 0.045);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      padding: 3px 5px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.15s;
-    }
-    .skill-item:hover {
-      border-color: var(--gold);
-      background: rgba(245, 196, 81, 0.14);
-    }
-    .skill-gem-mini {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, rgba(245, 196, 81, 0.38), rgba(15, 23, 42, 0.96));
-      border: 1.5px solid var(--gold);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 900;
-      color: var(--gold);
-      flex-shrink: 0;
-    }
-    .skill-gem-mini.ulti-gem {
-      border-color: var(--purple-glow);
-      box-shadow: 0 0 8px rgba(192, 132, 252, 0.35);
-    }
-    .skill-meta { flex: 1; min-width: 0; }
-    .skill-meta h5 { font-size: 9px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .skill-meta p { font-size: 7.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .char-select-bar {
       display: flex;
@@ -383,7 +338,53 @@
     }
     .mini-btn:hover { background: var(--gold); color: #070b14; }
 
-    /* MERKEZ HD TAROT & KARİKATÜR EFEKT SAHNESİ */
+    /* SOL KAHRAMANIN SAĞINDAKİ LOGOSAL SİMGE SOKET ŞERİDİ (OYUN BAŞLAYINCA AKTİF) */
+    .side-logo-sockets {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding-left: 3px;
+      border-left: 1px dashed rgba(245, 196, 81, 0.25);
+    }
+    .side-logo-sockets.inactive-state {
+      opacity: 0.45;
+    }
+    .logo-socket-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 25%, rgba(56, 189, 248, 0.3), rgba(9, 15, 30, 0.97) 72%);
+      border: 2px solid var(--blue-glow);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.75);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .logo-socket-btn:hover {
+      transform: scale(1.07);
+      border-color: var(--gold);
+      box-shadow: 0 0 12px rgba(245, 196, 81, 0.4);
+    }
+    .logo-socket-btn.ulti-socket {
+      width: 42px;
+      height: 42px;
+      border: 2.5px solid var(--gold);
+      background: radial-gradient(circle at 30% 25%, rgba(245, 196, 81, 0.36), rgba(24, 15, 38, 0.97) 72%);
+    }
+    .logo-socket-btn.ulti-locked {
+      opacity: 0.48;
+      border-style: dashed;
+      border-color: #94a3b8;
+    }
+    .logo-socket-icon { font-size: 13px; line-height: 1; }
+    .logo-socket-key { font-size: 6.5px; font-weight: 900; color: var(--gold); margin-top: 1px; }
+
+    /* MERKEZ ÇEKİRDEK & RENKLİ SİMGELİ SÜREÇ / EFEKT KARTLARI SAHNESİ */
     .realm-map {
       position: relative;
       display: flex;
@@ -400,7 +401,7 @@
       overflow: hidden;
     }
 
-    #hd-tarot-canvas {
+    #hd-core-canvas {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -442,67 +443,85 @@
       z-index: 6;
     }
 
-    /* MOBA TARZI SAĞ ALT KÖŞE YUVARLAK SİMGELİ SOKET PORTLARI (OYUN BAŞLAYINCA GÖRÜNÜR) */
-    .moba-socket-dock {
-      display: none;
-      position: fixed;
-      right: calc(var(--safe-right) + var(--tg-right-pad) + 8px);
-      bottom: calc(var(--safe-bottom) + var(--tg-bottom-pad) + 40px);
+    /* SAĞ PANEL (KARŞI KUŞAK / SÜREÇ KART ÖZETİ) */
+    .char-panel {
+      background: linear-gradient(180deg, rgba(16, 26, 48, 0.97) 0%, rgba(7, 11, 20, 0.99) 100%);
+      border: 1.5px solid var(--border-gold);
+      border-radius: 14px;
+      padding: 6px;
+      display: flex;
       flex-direction: column;
+      justify-content: space-between;
+      z-index: 10;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.75), inset 0 0 0 1px rgba(245, 196, 81, 0.14);
+      min-width: 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .char-portrait-banner {
+      display: flex;
       align-items: center;
       gap: 6px;
-      z-index: 45;
+      padding: 3.5px 5px;
+      margin-top: 3px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(245, 196, 81, 0.16), rgba(15, 23, 42, 0.92));
+      border: 1px solid rgba(245, 196, 81, 0.36);
     }
-    .moba-socket-dock.active {
+    .char-cartoon-box {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
       display: flex;
-    }
-    .moba-port-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 25%, rgba(56, 189, 248, 0.34), rgba(9, 15, 30, 0.97) 72%);
-      border: 2px solid var(--blue-glow);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(56, 189, 248, 0.28);
-      display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
+      background: radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.18), rgba(6, 10, 20, 0.96));
+      border: 1.5px solid var(--gold);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .skill-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      margin: 3px 0;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .skill-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      padding: 3px 5px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: transform 0.16s, box-shadow 0.16s, border-color 0.16s;
-      position: relative;
+      transition: 0.15s;
     }
-    .moba-port-btn:hover {
-      transform: scale(1.08);
+    .skill-item:hover {
       border-color: var(--gold);
-      box-shadow: 0 0 16px rgba(245, 196, 81, 0.45);
+      background: rgba(245, 196, 81, 0.14);
     }
-    .moba-port-btn:active {
-      transform: scale(0.95);
-    }
-    .moba-port-btn.ulti-port {
-      width: 46px;
-      height: 46px;
-      border: 2.5px solid var(--gold);
-      background: radial-gradient(circle at 30% 25%, rgba(245, 196, 81, 0.38), rgba(24, 15, 38, 0.97) 72%);
-      box-shadow: 0 0 18px rgba(245, 196, 81, 0.38);
-    }
-    .moba-port-btn.ulti-locked {
-      opacity: 0.48;
-      border-style: dashed;
-      border-color: #94a3b8;
-      box-shadow: none;
-    }
-    .moba-port-icon {
-      font-size: 14px;
-      line-height: 1;
-    }
-    .moba-port-key {
-      font-size: 7px;
+    .skill-gem-mini {
+      width: 21px;
+      height: 21px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, rgba(245, 196, 81, 0.38), rgba(15, 23, 42, 0.96));
+      border: 1.5px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9.5px;
       font-weight: 900;
       color: var(--gold);
-      letter-spacing: 0.3px;
-      margin-top: 1px;
+      flex-shrink: 0;
     }
+    .skill-meta { flex: 1; min-width: 0; }
+    .skill-meta h5 { font-size: 9px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .skill-meta p { font-size: 7.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     /* SESLİ & ALTYAZILI ANLATIM BANDI */
     .subtitle-banner {
@@ -595,7 +614,7 @@
       border: 1.5px solid var(--gold);
       border-radius: 14px;
       width: 96%;
-      max-width: 860px;
+      max-width: 880px;
       max-height: calc(100dvh - 88px);
       display: flex;
       flex-direction: column;
@@ -664,53 +683,83 @@
       background: rgba(52, 211, 153, 0.14);
     }
 
-    /* 15 TAROT KARİKATÜR KARTI */
+    /* 15 KAHRAMAN KATALOĞU: KARİKATÜR RESMİNİN ALTINDA ŞEKİLLİ GÜÇLER & MİM CÜMLELERİ */
     .grid-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
-      gap: 9px;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 10px;
     }
-    .tarot-card {
-      background: linear-gradient(180deg, rgba(17, 27, 50, 0.96) 0%, rgba(8, 12, 23, 0.99) 100%);
-      border: 1.5px solid rgba(245, 196, 81, 0.42);
+    .catalog-card {
+      background: linear-gradient(180deg, rgba(17, 28, 52, 0.97) 0%, rgba(7, 11, 21, 0.99) 100%);
+      border: 1.5px solid rgba(245, 196, 81, 0.45);
       border-radius: 14px;
       padding: 9px;
       cursor: pointer;
       transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
+      gap: 6px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
     }
-    .tarot-card:hover {
+    .catalog-card:hover {
       transform: translateY(-2px);
       border-color: var(--gold-bright);
-      box-shadow: 0 0 14px rgba(245, 196, 81, 0.25);
+      box-shadow: 0 0 15px rgba(245, 196, 81, 0.25);
     }
-    .tarot-card-top {
+    .catalog-art-stage {
+      width: 100%;
+      height: 76px;
+      border-radius: 10px;
+      border: 1px solid rgba(245, 196, 81, 0.3);
+      background: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.14), rgba(6, 10, 22, 0.96) 80%);
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 8px;
-      border-bottom: 1px solid rgba(245, 196, 81, 0.2);
-      padding-bottom: 5px;
+      justify-content: center;
+      gap: 2px;
+      position: relative;
     }
-    .tarot-card h4 { color: var(--gold); font-size: 11.5px; }
-    .tarot-card .quote { font-style: italic; color: #cbd5e1; font-size: 9.5px; line-height: 1.25; }
-    .tarot-skill-pill {
-      display: flex;
-      align-items: center;
-      gap: 5px;
+    .catalog-card h4 { color: var(--gold); font-size: 11.5px; }
+    .catalog-meme-quote {
+      font-style: italic;
+      color: #fde68a;
       font-size: 9.5px;
-      padding: 3px 6px;
-      border-radius: 7px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      line-height: 1.25;
+      background: rgba(245, 196, 81, 0.08);
+      border-left: 2.5px solid var(--gold);
+      padding: 4px 6px;
+      border-radius: 0 6px 6px 0;
     }
-    .tarot-skill-pill.ulti-row {
-      background: rgba(192, 132, 252, 0.12);
-      border-color: rgba(192, 132, 252, 0.35);
-      color: #f3e8ff;
+    .shaped-power-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 9.5px;
+      padding: 4px 6px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+    }
+    .shaped-power-row.ulti-power {
+      background: rgba(192, 132, 252, 0.14);
+      border-color: rgba(192, 132, 252, 0.38);
       font-weight: 700;
+      color: #f3e8ff;
+    }
+    .shape-badge {
+      min-width: 22px;
+      height: 22px;
+      padding: 0 4px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 900;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      flex-shrink: 0;
     }
 
     input, select {
@@ -797,7 +846,7 @@
         <span class="lobby-badge">LOBBY</span>
       </div>
 
-      <div class="port-btn" onclick="openModal('roles-modal')" title="15 Kahraman Tarot Arşivi">
+      <div class="port-btn" onclick="openModal('roles-modal')" title="15 Kahraman Kataloğu">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
           <path d="M12 2L4 5V11C4 16.55 7.41 21.74 12 23C16.59 21.74 20 16.55 20 11V5L12 2Z" stroke="#f5c451" stroke-width="2" fill="rgba(245,196,81,0.16)"/>
           <path d="M14.5 7.5L9.5 16.5M9.5 7.5L14.5 16.5" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
@@ -816,42 +865,56 @@
 
   <!-- ANA ARENA -->
   <main class="main-arena">
-    <!-- SOL KAHRAMAN TAROT PANELİ -->
-    <section class="char-panel" id="left-char-panel">
-      <div>
+    <!-- SOL DİKEY KAHRAMAN KARİKATÜRÜ + SAĞINDA LOGOSAL SİMGE SOKETLERİ -->
+    <section class="left-hero-stage" id="left-hero-stage">
+      <div class="left-hero-vertical">
         <div class="char-header">
-          <div class="char-role-tag" id="left-tag">GÜNDÜZ KUŞAĞI • KAHRAMAN</div>
+          <div class="char-role-tag" id="left-tag">GÜNDÜZ • ŞAFAK SİPERİ</div>
           <div class="char-name-row">
-            <h3 id="left-name">🛡️ Muhafız Galadriel</h3>
-            <span class="status-pill" id="left-status">SAVUNMADA</span>
+            <h3 id="left-name">Muhafız Galadriel</h3>
+            <span class="status-pill" id="left-status">AKTİF KART</span>
           </div>
         </div>
-        <div class="char-portrait-banner">
-          <div class="char-cartoon-box" id="left-cartoon"></div>
-          <div class="char-quote-preview" id="left-quote">"Işığım sönmeden bu kalenin tek bir taşına bile dokunamazsınız!"</div>
+
+        <div class="vertical-cartoon-card" id="left-vertical-cartoon"></div>
+
+        <div class="char-quote-preview" id="left-quote">"Işığım sönmeden bu kalenin tek bir taşına bile dokunamazsınız!"</div>
+
+        <div class="char-select-bar">
+          <button class="mini-btn" onclick="onArenaSkillOrVoice('left')">🔊 Mim Ses</button>
+          <button class="mini-btn" onclick="cycleSideHero('Gündüz')">🔄 Hero</button>
         </div>
       </div>
 
-      <div class="skill-list" id="left-skills"></div>
-
-      <div class="char-select-bar">
-        <button class="mini-btn" onclick="onArenaSkillOrVoice('left')">🔊 Sesli Giriş</button>
-        <button class="mini-btn" onclick="cycleSideHero('Gündüz')">🔄 Karakter</button>
+      <!-- SOL KAHRAMANIN SAĞINDAKİ LOGOSAL SİMGE SOKETLERİ -->
+      <div class="side-logo-sockets inactive-state" id="side-logo-sockets">
+        <button type="button" class="logo-socket-btn ulti-socket" id="socket-ulti-btn" onclick="triggerHeroSocket('ulti')" title="Ulti Soketi (2. Şafak Sonrası)">
+          <span class="logo-socket-icon" id="socket-ulti-icon">⚡</span>
+          <span class="logo-socket-key">ULTI</span>
+        </button>
+        <button type="button" class="logo-socket-btn" onclick="triggerHeroSocket('p1')" title="Genel Yetenek Soketi 1">
+          <span class="logo-socket-icon" id="socket-p1-icon">🔰</span>
+          <span class="logo-socket-key">S1</span>
+        </button>
+        <button type="button" class="logo-socket-btn" onclick="triggerHeroSocket('p2')" title="Genel Yetenek Soketi 2">
+          <span class="logo-socket-icon" id="socket-p2-icon">⚖️</span>
+          <span class="logo-socket-key">S2</span>
+        </button>
       </div>
     </section>
 
-    <!-- MERKEZ HD TAROT & KARİKATÜR SÜREÇ / EFEKT SAHNESİ -->
+    <!-- MERKEZ ÇEKİRDEK & RENKLİ SİMGELİ SÜREÇ / EFEKT KARTLARI SAHNESİ -->
     <section class="realm-map" id="realm-map">
-      <canvas id="hd-tarot-canvas"></canvas>
+      <canvas id="hd-core-canvas"></canvas>
 
       <div class="island-sky-bar">
         <span id="sky-event-label" style="color:var(--blue-glow); font-weight:800;">🌙 Mavi Dolunay</span>
         <span id="mode-scenario-label" style="color:var(--gold); font-weight:700;">Senaryo: Anonim Eşit Taraf</span>
-        <button class="mini-btn" style="flex:none; padding:1.5px 6px;" onclick="onSkyEventClick()">🃏 Gökyüzü Kartı</button>
+        <button class="mini-btn" style="flex:none; padding:1.5px 6px;" onclick="onSkyEventClick()">🃏 Süreç Kartı</button>
       </div>
 
       <div class="live-turn-telemetry" id="live-turn-telemetry">
-        Level 1 • HD Tarot &amp; Karikatür sahnesi hazır. Lobby simgesinden katılıp başlatabilirsiniz.
+        Level 1 • Merkez çekirdek kart sahnesi hazır. Lobby simgesinden katılıp başlatabilirsiniz.
       </div>
 
       <div class="subtitle-banner" id="subtitle-banner">
@@ -863,13 +926,13 @@
       </div>
     </section>
 
-    <!-- SAĞ KAHRAMAN TAROT PANELİ -->
+    <!-- SAĞ PANEL (KARŞI KUŞAK KAHRAMAN & 3 YETENEK ÖZETİ) -->
     <section class="char-panel" id="right-char-panel">
       <div>
         <div class="char-header">
-          <div class="char-role-tag" id="right-tag" style="color: var(--purple-glow);">GECE OYUNU • KAHRAMAN</div>
+          <div class="char-role-tag" id="right-tag" style="color: var(--purple-glow);">GECE • KOZMİK TUTULMA</div>
           <div class="char-name-row">
-            <h3 id="right-name">⏳ Tanrıça Sabrina</h3>
+            <h3 id="right-name">Tanrıça Sabrina</h3>
             <span class="status-pill night-tag" id="right-status">PUSUDA</span>
           </div>
         </div>
@@ -882,31 +945,15 @@
       <div class="skill-list" id="right-skills"></div>
 
       <div class="char-select-bar">
-        <button class="mini-btn" onclick="onArenaSkillOrVoice('right')">🔊 Sesli Giriş</button>
-        <button class="mini-btn" onclick="cycleSideHero('Gece')">🔄 Karakter</button>
+        <button class="mini-btn" onclick="onArenaSkillOrVoice('right')">🔊 Mim Ses</button>
+        <button class="mini-btn" onclick="cycleSideHero('Gece')">🔄 Hero</button>
       </div>
     </section>
   </main>
 
-  <!-- MOBA TARZI SAĞ ALT KÖŞE YUVARLAK SİMGELİ SOKET PORTLARI (OYUN BAŞLAYINCA GÖRÜNÜR) -->
-  <div class="moba-socket-dock" id="moba-socket-dock">
-    <button type="button" class="moba-port-btn ulti-port" id="moba-ulti-btn" onclick="triggerMobaSocket('ulti')" title="Ulti Soketi (2. Şafak Sonrası)">
-      <span class="moba-port-icon" id="moba-ulti-icon">⚡</span>
-      <span class="moba-port-key">ULTI</span>
-    </button>
-    <button type="button" class="moba-port-btn" onclick="triggerMobaSocket('p1')" title="Genel Yetenek Soketi 1">
-      <span class="moba-port-icon" id="moba-p1-icon">🛡️</span>
-      <span class="moba-port-key">S1</span>
-    </button>
-    <button type="button" class="moba-port-btn" onclick="triggerMobaSocket('p2')" title="Genel Yetenek Soketi 2">
-      <span class="moba-port-icon" id="moba-p2-icon">✨</span>
-      <span class="moba-port-key">S2</span>
-    </button>
-  </div>
-
   <!-- ALT NAVİGASYON BAR -->
   <footer class="bottom-hud">
-    <button class="nav-tab active" onclick="switchTab(this)">🃏 TAROT SAHNE</button>
+    <button class="nav-tab active" onclick="switchTab(this)">🃏 ÇEKİRDEK KART</button>
     <button class="nav-tab" onclick="openModal('roles-modal')">🎭 15 KAHRAMAN</button>
     <button class="nav-tab" onclick="onCollectiveAction()">🗳️ OYLAMA / HAMLE</button>
     <button class="nav-tab" onclick="openModal('guide-modal')">📖 OYUN KILAVUZU</button>
@@ -939,7 +986,7 @@
           <select id="lobby-mode-select" style="width:auto;" onchange="onLobbyConfigChange()">
             <option value="anon_equal">Mod: Anonim Eşit Taraf</option>
             <option value="sky_eclipse">Mod: Kozmik Tutulma &amp; Ulti</option>
-            <option value="siege_tactic">Mod: Tarot Kuşatması</option>
+            <option value="siege_tactic">Mod: Çekirdek Kart Kuşatması</option>
           </select>
           <select id="lobby-phase-select" style="width:auto;" onchange="onLobbyConfigChange()">
             <option value="night">Başlangıç: Gece</option>
@@ -958,15 +1005,15 @@
     </div>
   </div>
 
-  <!-- 15 KARAKTER TAROT ARŞİV MODALI -->
+  <!-- 15 KAHRAMAN KATALOĞU MODALI -->
   <div class="modal-backdrop" id="roles-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>🎭 Mini Legends — 15 Kahraman Tarot &amp; Karikatür Arşivi</h3>
+        <h3>🎭 Mini Legends — 15 Kahraman Kataloğu (2 Genel Yetenek + 1 Ulti &amp; Mim Cümleleri)</h3>
         <button class="close-btn" onclick="closeModal('roles-modal')">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="color:var(--text-muted); font-size:11px;">Her kahramanda 2 Genel Yetenek (S1, S2) ve 1 Ulti (2. Şafak sonrası aktif) bulunur. Kartlara tıklayarak karikatür ve sesli repliğini dinleyebilirsiniz.</p>
+        <p style="color:var(--text-muted); font-size:11px;">15 kahramanın karikatür görsellerinin altında şekilli güçleri ve mim replikleri yer alır. Kartlara tıklayarak sesli repliğini duyabilirsiniz.</p>
         <div class="grid-cards" id="all-roles-grid"></div>
       </div>
     </div>
@@ -976,16 +1023,16 @@
   <div class="modal-backdrop" id="guide-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>📖 Oyun Kılavuzu • Tarot Sahne, Level &amp; MongoDB</h3>
+        <h3>📖 Oyun Kılavuzu • Çekirdek Kartlar, Level &amp; MongoDB</h3>
         <button class="close-btn" onclick="closeModal('guide-modal')">&times;</button>
       </div>
       <div class="modal-body">
-        <h4 style="color:var(--gold);">1. HD Tarot &amp; Karikatür Sahnesi</h4>
-        <p>Merkezde yüksek DPI pikselsiz tarot kart sahnesi çalışır. Gökyüzü evreleri ve karakter soketleri kart içinde karikatür tarzı ışık, kalkan, yıldırım ve tutulma efektleri üretir.</p>
-        <h4 style="color:var(--blue-glow);">2. Level 1 Başlangıç ve MongoDB Kaydı</h4>
-        <p>Her oyuncu <strong>Level 1</strong> olarak başlar. Oyun oynandıkça ve taraf kazanımlarına göre XP ve seviye yükselir; kayıtlar sunucudaki MongoDB veritabanına (<code>/api/lobby</code> ve <code>/api/progress</code>) işlenir.</p>
-        <h4 style="color:var(--purple-glow);">3. Sağ Alt Yuvarlak Simgeli Soketler &amp; 15 Kahraman</h4>
-        <p>Oyun başladığında sağ alt köşede simgeli yuvarlak <strong>ULTI</strong> (2. Şafak sonrası aktif), <strong>S1</strong> ve <strong>S2</strong> soketleri görünür; her karakterin 2 genel yeteneği ve 1 ultisi kendi karikatür temasıyla yansır.</p>
+        <h4 style="color:var(--gold);">1. Sol Dikey Kahraman &amp; Logosal Simge Soketleri</h4>
+        <p>Oyun başladığında sol dikey alanda kahramanınızın karikatürü ve sağında <strong>ULTI</strong> (2. Şafak sonrası aktif), <strong>S1</strong> ve <strong>S2</strong> logosal simge soketleri aktif olur.</p>
+        <h4 style="color:var(--blue-glow);">2. Merkez Çekirdek Renkli Simgeli Kart Süreci</h4>
+        <p>Efekt yerine merkez çekirdekte gökyüzü evreleri ve tetiklenen yetenekler için <strong>renkli simgesel kart görselleri</strong> belirir ve oyun sürecini yansıtır.</p>
+        <h4 style="color:var(--purple-glow);">3. Level 1 Başlangıç ve MongoDB Kaydı</h4>
+        <p>Her oyuncu <strong>Level 1</strong> olarak başlar. Oyun hamleleri ve kazanımlarla XP ve seviye yükselir; tüm veriler <code>/api/lobby</code> ve <code>/api/progress</code> üzerinden MongoDB'de saklanır.</p>
       </div>
     </div>
   </div>
@@ -1045,151 +1092,157 @@
       {
         id: 'galadriel', name: 'Muhafız Galadriel', group: 'Gündüz', emoji: '🛡️', color: '#f5c451', badge: 'ŞAFAK SİPERİ',
         quote: 'Işığım sönmeden bu kalenin tek bir taşına bile dokunamazsınız!',
-        ulti: { name: 'Şafak Siperi (Ulti)', icon: '🛡️', desc: '2. Şafak sonrası: Gündüz tarafının savunma ve oylama gücünü mühürler.', effectType: 'dawn_aegis' },
+        ulti: { name: 'Şafak Siperi (Ulti)', icon: '🛡️', shape: '◈', desc: '2. Şafak sonrası: Gündüz tarafının savunma ve oylama gücünü mühürler.', effectType: 'dawn_aegis' },
         passives: [
-          { name: 'Kutsal Kalkan', icon: '🔰', desc: 'Seçilen müttefiki gece ilk darbeden korur.' },
-          { name: 'Adalet Mührü', icon: '⚖️', desc: 'Gündüz oylamasında taraf dengesini güçlendirir.' }
+          { name: 'Kutsal Kalkan', icon: '🔰', shape: '◆', desc: 'Seçilen müttefiki gece ilk darbeden korur.' },
+          { name: 'Adalet Mührü', icon: '⚖️', shape: '✦', desc: 'Gündüz oylamasında taraf dengesini güçlendirir.' }
         ]
       },
       {
         id: 'eudora', name: 'Büyücü Eudora', group: 'Gece', emoji: '⚡', color: '#38bdf8', badge: 'FIRTINA KAHİNİ',
         quote: 'Gökyüzünün gazabı ve kadim yıldırım parmaklarımın ucunda!',
-        ulti: { name: 'Fırtına Kırılımı (Ulti)', icon: '⛈️', desc: '2. Şafak sonrası: Karşı tarafın yetenek zincirini bozar.', effectType: 'storm_shift' },
+        ulti: { name: 'Fırtına Kırılımı (Ulti)', icon: '⛈️', shape: '◈', desc: '2. Şafak sonrası: Karşı tarafın yetenek zincirini bozar.', effectType: 'storm_shift' },
         passives: [
-          { name: 'Arkane Patlaması', icon: '🔮', desc: 'Hedefin büyü enerjisini tüketir.' },
-          { name: 'Yıldırım Zinciri', icon: '⚡', desc: 'İki bölge arasında enerji akışı kurar.' }
+          { name: 'Arkane Patlaması', icon: '🔮', shape: '◆', desc: 'Hedefin büyü enerjisini tüketir.' },
+          { name: 'Yıldırım Zinciri', icon: '⚡', shape: '✦', desc: 'İki bölge arasında enerji akışı kurar.' }
         ]
       },
       {
         id: 'alkarisi', name: 'Alkarısı', group: 'Gece', emoji: '👹', color: '#fb7185', badge: 'KIZIL GÖLGE',
         quote: 'Gecenin en derin gölgesinden geldim; nefesinizi kesmeye hazırım!',
-        ulti: { name: 'Kabus Çöküşü (Ulti)', icon: '🌑', desc: '2. Şafak sonrası: Gece baskısını artırır ve gündüz stratejisini sarsar.', effectType: 'nightmare_tide' },
+        ulti: { name: 'Kabus Çöküşü (Ulti)', icon: '🌑', shape: '◈', desc: '2. Şafak sonrası: Gece baskısını artırır ve gündüz stratejisini sarsar.', effectType: 'nightmare_tide' },
         passives: [
-          { name: 'Gece Karabasanı', icon: '👁️', desc: 'Hedefin gece görüşünü ve hamlesini aksatır.' },
-          { name: 'Kızıl Fısıltı', icon: '🩸', desc: 'Gündüz tartışmasında şaşırtıcı ipucu bırakır.' }
+          { name: 'Gece Karabasanı', icon: '👁️', shape: '◆', desc: 'Hedefin gece görüşünü ve hamlesini aksatır.' },
+          { name: 'Kızıl Fısıltı', icon: '🩸', shape: '✦', desc: 'Gündüz tartışmasında şaşırtıcı ipucu bırakır.' }
         ]
       },
       {
         id: 'helen', name: 'Stratejist Helen', group: 'Gündüz', emoji: '👑', color: '#fbbf24', badge: 'ALTIN KONSEY',
         quote: 'Akıl ve zarafet kılıçtan keskindir; bu masanın kaderini ben çizerim.',
-        ulti: { name: 'Altın Konsey (Ulti)', icon: '👑', desc: '2. Şafak sonrası: Toplu hareketlerde oylama etkisini artırır.', effectType: 'council_boost' },
+        ulti: { name: 'Altın Konsey (Ulti)', icon: '👑', shape: '◈', desc: '2. Şafak sonrası: Toplu hareketlerde oylama etkisini artırır.', effectType: 'council_boost' },
         passives: [
-          { name: 'Stratejik Deha', icon: '📜', desc: 'Toplu oylama ve hamle koordinasyonu sağlar.' },
-          { name: 'Diplomatik Hamle', icon: '🕊️', desc: 'Bir oyuncunun elenme baskısını askıya alır.' }
+          { name: 'Stratejik Deha', icon: '📜', shape: '◆', desc: 'Toplu oylama ve hamle koordinasyonu sağlar.' },
+          { name: 'Diplomatik Hamle', icon: '🕊️', shape: '✦', desc: 'Bir oyuncunun elenme baskısını askıya alır.' }
         ]
       },
       {
         id: 'estes', name: 'Şifacı Estes', group: 'Gündüz', emoji: '🌿', color: '#34d399', badge: 'AY PINARI',
         quote: 'Ay ışığının şefkati en derin yaraları bile yeniden hayata döndürür.',
-        ulti: { name: 'Yaşam Pınarı (Ulti)', icon: '✨', desc: '2. Şafak sonrası: Zayıflayan müttefiki yeniden güçlendirir.', effectType: 'spring_revive' },
+        ulti: { name: 'Yaşam Pınarı (Ulti)', icon: '✨', shape: '◈', desc: '2. Şafak sonrası: Zayıflayan müttefiki yeniden güçlendirir.', effectType: 'spring_revive' },
         passives: [
-          { name: 'Işık Şifası', icon: '🌿', desc: 'Saldırıya uğrayan hedefi iyileştirir.' },
-          { name: 'Kutsal Bağ', icon: '💠', desc: 'İki oyuncunun dayanıklılığını dengeler.' }
+          { name: 'Işık Şifası', icon: '🌿', shape: '◆', desc: 'Saldırıya uğrayan hedefi iyileştirir.' },
+          { name: 'Kutsal Bağ', icon: '💠', shape: '✦', desc: 'İki oyuncunun dayanıklılığını dengeler.' }
         ]
       },
       {
         id: 'sabrina', name: 'Tanrıça Sabrina', group: 'Gece', emoji: '⏳', color: '#c084fc', badge: 'KOZMİK TUTULMA',
         quote: 'Zaman benim emrimde akar; geçmişi siler, geleceği yeniden yazarım!',
-        ulti: { name: 'Bilinmeyen Kozmik Tutulma (Ulti)', icon: '🌌', desc: '2. Şafak sonrası: Mavi Dolunay, Ay Tutulması veya Güneş Tutulmasından rastgele birini tetikler.', effectType: 'sabrina_cosmic' },
+        ulti: { name: 'Bilinmeyen Kozmik Tutulma (Ulti)', icon: '🌌', shape: '◈', desc: '2. Şafak sonrası: Mavi Dolunay, Ay Tutulması veya Güneş Tutulmasından rastgele birini tetikler.', effectType: 'sabrina_cosmic' },
         passives: [
-          { name: 'Zamanı Bükme', icon: '⏳', desc: 'Faz süresini ve tur akışını kaydırır.' },
-          { name: 'Kader Döngüsü', icon: '🌀', desc: 'Son hamlenin etkisini ters yönde çevirir.' }
+          { name: 'Zamanı Bükme', icon: '⏳', shape: '◆', desc: 'Faz süresini ve tur akışını kaydırır.' },
+          { name: 'Kader Döngüsü', icon: '🌀', shape: '✦', desc: 'Son hamlenin etkisini ters yönde çevirir.' }
         ]
       },
       {
         id: 'shadow_hunter', name: 'Gölge Avcısı', group: 'Gece', emoji: '🏹', color: '#94a3b8', badge: 'GÜMÜŞ NİŞAN',
         quote: 'Karanlıkta saklanan hiçbir av oklarımdan kaçamaz.',
-        ulti: { name: 'Gümüş Yağmuru (Ulti)', icon: '🏹', desc: '2. Şafak sonrası: Savunma kalkanlarını delip gece hedefini kilitler.', effectType: 'silver_volley' },
+        ulti: { name: 'Gümüş Yağmuru (Ulti)', icon: '🏹', shape: '◈', desc: '2. Şafak sonrası: Savunma kalkanlarını delip gece hedefini kilitler.', effectType: 'silver_volley' },
         passives: [
-          { name: 'Gölge Oku', icon: '🎯', desc: 'Gece seçilen hedefi nişan alır.' },
-          { name: 'İz Sürücü', icon: '👣', desc: 'Hedefin gece rotasını takip eder.' }
+          { name: 'Gölge Oku', icon: '🎯', shape: '◆', desc: 'Gece seçilen hedefi nişan alır.' },
+          { name: 'İz Sürücü', icon: '👣', shape: '✦', desc: 'Hedefin gece rotasını takip eder.' }
         ]
       },
       {
         id: 'executioner', name: 'İnfazcı', group: 'Gece', emoji: '🪓', color: '#f87171', badge: 'SON HÜKÜM',
         quote: 'Hüküm verildiğinde baltam asla tereddüt etmez.',
-        ulti: { name: 'Son Hüküm (Ulti)', icon: '🪓', desc: '2. Şafak sonrası: Zayıflamış hedefi oy dengesiyle saf dışı bırakır.', effectType: 'final_judgment' },
+        ulti: { name: 'Son Hüküm (Ulti)', icon: '🪓', shape: '◈', desc: '2. Şafak sonrası: Zayıflamış hedefi oy dengesiyle saf dışı bırakır.', effectType: 'final_judgment' },
         passives: [
-          { name: 'Kesin Hüküm', icon: '⚔️', desc: 'Gece hedef belirleme gücünü artırır.' },
-          { name: 'Korku Aurası', icon: '🔥', desc: 'Çevredeki kararsız oyları baskılar.' }
+          { name: 'Kesin Hüküm', icon: '⚔️', shape: '◆', desc: 'Gece hedef belirleme gücünü artırır.' },
+          { name: 'Korku Aurası', icon: '🔥', shape: '✦', desc: 'Çevredeki kararsız oyları baskılar.' }
         ]
       },
       {
         id: 'doomsday', name: 'Kıyamet Süvarisi', group: 'Gece', emoji: '🐎', color: '#fb923c', badge: 'MAHŞER ALEVİ',
         quote: 'Nallarımın sesi duyulduğunda tüm dengeler yerle bir olur!',
-        ulti: { name: 'Mahşer Fırtınası (Ulti)', icon: '🐎', desc: '2. Şafak sonrası: Turdaki pasif dengeleri sıfırlayıp yeniden kurar.', effectType: 'apocalypse_reset' },
+        ulti: { name: 'Mahşer Fırtınası (Ulti)', icon: '🐎', shape: '◈', desc: '2. Şafak sonrası: Turdaki pasif dengeleri sıfırlayıp yeniden kurar.', effectType: 'apocalypse_reset' },
         passives: [
-          { name: 'Kaos Dalgası', icon: '🌪️', desc: 'Turdaki dengeleri sarsar.' },
-          { name: 'Alev İzi', icon: '🌋', desc: 'Seçilen bölgeyi ateşe verir.' }
+          { name: 'Kaos Dalgası', icon: '🌪️', shape: '◆', desc: 'Turdaki dengeleri sarsar.' },
+          { name: 'Alev İzi', icon: '🌋', shape: '✦', desc: 'Seçilen bölgeyi ateşe verir.' }
         ]
       },
       {
         id: 'spy', name: 'Casus', group: 'Gece', emoji: '🕵️', color: '#60a5fa', badge: 'GİZLİ İFŞA',
         quote: 'Duvarların bile kulağı vardır, ama benim gözüm her sırrı görür.',
-        ulti: { name: 'Büyük İfşa (Ulti)', icon: '🕵️', desc: '2. Şafak sonrası: Gizli hamle kalıbını ortaya çıkarır.', effectType: 'grand_reveal' },
+        ulti: { name: 'Büyük İfşa (Ulti)', icon: '🕵️', shape: '◈', desc: '2. Şafak sonrası: Gizli hamle kalıbını ortaya çıkarır.', effectType: 'grand_reveal' },
         passives: [
-          { name: 'Bilgi Sızdırma', icon: '🔍', desc: 'Hedefin rol ipucunu toplar.' },
-          { name: 'Kimlik Gizleme', icon: '🎭', desc: 'İncelemelerde kimliğini gizler.' }
+          { name: 'Bilgi Sızdırma', icon: '🔍', shape: '◆', desc: 'Hedefin rol ipucunu toplar.' },
+          { name: 'Kimlik Gizleme', icon: '🎭', shape: '✦', desc: 'İncelemelerde kimliğini gizler.' }
         ]
       },
       {
         id: 'saboteur', name: 'Sabotajcı', group: 'Gece', emoji: '💣', color: '#facc15', badge: 'KIVILCIM KİLİDİ',
         quote: 'En kusursuz planlar bile tek bir kıvılcımla küle döner.',
-        ulti: { name: 'Tam Çöküş (Ulti)', icon: '💣', desc: '2. Şafak sonrası: Karşı tarafın oylama/yetenek akışını 1 faz kilitler.', effectType: 'sabotage_lock' },
+        ulti: { name: 'Tam Çöküş (Ulti)', icon: '💣', shape: '◈', desc: '2. Şafak sonrası: Karşı tarafın oylama/yetenek akışını 1 faz kilitler.', effectType: 'sabotage_lock' },
         passives: [
-          { name: 'Mekanizma Kilidi', icon: '⚙️', desc: 'Hedefin yeteneğini 1 tur aksatır.' },
-          { name: 'Tuzak Kurma', icon: '🪤', desc: 'Saldıran hedefe tuzak kurar.' }
+          { name: 'Mekanizma Kilidi', icon: '⚙️', shape: '◆', desc: 'Hedefin yeteneğini 1 tur aksatır.' },
+          { name: 'Tuzak Kurma', icon: '🪤', shape: '✦', desc: 'Saldıran hedefe tuzak kurar.' }
         ]
       },
       {
         id: 'light_warden', name: 'Işık Muhafızı', group: 'Gündüz', emoji: '☀️', color: '#fde047', badge: 'GÜNEŞ IŞIĞI',
         quote: 'Şafak söktüğünde hiçbir gölge ayakta kalamaz!',
-        ulti: { name: 'Güneş Patlaması (Ulti)', icon: '☀️', desc: '2. Şafak sonrası: Gece etkisini dağıtıp gündüz üstünlüğü kurar.', effectType: 'solar_flare' },
+        ulti: { name: 'Güneş Patlaması (Ulti)', icon: '☀️', shape: '◈', desc: '2. Şafak sonrası: Gece etkisini dağıtıp gündüz üstünlüğü kurar.', effectType: 'solar_flare' },
         passives: [
-          { name: 'Şafak Kalkanı', icon: '🌞', desc: 'Gündüz oylamasına karşı korur.' },
-          { name: 'Hakikat Işığı', icon: '🔦', desc: 'Şüpheli hamleyi aydınlatır.' }
+          { name: 'Şafak Kalkanı', icon: '🌞', shape: '◆', desc: 'Gündüz oylamasına karşı korur.' },
+          { name: 'Hakikat Işığı', icon: '🔦', shape: '✦', desc: 'Şüpheli hamleyi aydınlatır.' }
         ]
       },
       {
         id: 'vampire', name: 'Kan Emici', group: 'Gece', emoji: '🧛', color: '#f43f5e', badge: 'KIZIL DOLUNAY',
         quote: 'Sizin yaşam enerjiniz benim ölümsüzlüğümün yakıtıdır.',
-        ulti: { name: 'Kızıl Dolunay (Ulti)', icon: '🌕', desc: '2. Şafak sonrası: İki hedeften enerji çekip gece takımını güçlendirir.', effectType: 'crimson_moon' },
+        ulti: { name: 'Kızıl Dolunay (Ulti)', icon: '🌕', shape: '◈', desc: '2. Şafak sonrası: İki hedeften enerji çekip gece takımını güçlendirir.', effectType: 'crimson_moon' },
         passives: [
-          { name: 'Yaşam Çekimi', icon: '🧛', desc: 'Hedeften enerji çeker.' },
-          { name: 'Gece Pelerini', icon: '🦇', desc: 'Gece saldırılarından sıyrılır.' }
+          { name: 'Yaşam Çekimi', icon: '🧛', shape: '◆', desc: 'Hedeften enerji çeker.' },
+          { name: 'Gece Pelerini', icon: '🦇', shape: '✦', desc: 'Gece saldırılarından sıyrılır.' }
         ]
       },
       {
         id: 'time_bender', name: 'Zaman Büken', group: 'Gündüz', emoji: '🌀', color: '#2dd4bf', badge: 'KRONOS MÜHRÜ',
         quote: 'Saatler benim için işlemez; anı durdurur, hamleyi değiştiririm.',
-        ulti: { name: 'Kronos Mührü (Ulti)', icon: '🌀', desc: '2. Şafak sonrası: Turdaki hamle zamanlamasını dondurur.', effectType: 'chronos_seal' },
+        ulti: { name: 'Kronos Mührü (Ulti)', icon: '🌀', shape: '◈', desc: '2. Şafak sonrası: Turdaki hamle zamanlamasını dondurur.', effectType: 'chronos_seal' },
         passives: [
-          { name: 'Akış Kontrolü', icon: '⏱️', desc: 'Tartışma süresini düzenler.' },
-          { name: 'Yankı Hamlesi', icon: '🔁', desc: 'Önceki turun hamlesini tekrarlar.' }
+          { name: 'Akış Kontrolü', icon: '⏱️', shape: '◆', desc: 'Tartışma süresini düzenler.' },
+          { name: 'Yankı Hamlesi', icon: '🔁', shape: '✦', desc: 'Önceki turun hamlesini tekrarlar.' }
         ]
       },
       {
         id: 'spirit_guide', name: 'Ruhlar Rehberi', group: 'Gündüz', emoji: '👻', color: '#a78bfa', badge: 'RUHANİ AYİN',
         quote: 'Ölüler sessiz değildir; fısıltıları bize gerçeği gösterir.',
-        ulti: { name: 'Diriliş Ayini (Ulti)', icon: '👻', desc: '2. Şafak sonrası: Düşen bir stratejiyi/müttefiki geri çağırır.', effectType: 'spirit_resurrect' },
+        ulti: { name: 'Diriliş Ayini (Ulti)', icon: '👻', shape: '◈', desc: '2. Şafak sonrası: Düşen bir stratejiyi/müttefiki geri çağırır.', effectType: 'spirit_resurrect' },
         passives: [
-          { name: 'Ruh İletişimi', icon: '🕯️', desc: 'Elenen oyunculardan ipucu alır.' },
-          { name: 'Ruhani Kalkan', icon: '🔮', desc: 'Ruhsal koruma sağlar.' }
+          { name: 'Ruh İletişimi', icon: '🕯️', shape: '◆', desc: 'Elenen oyunculardan ipucu alır.' },
+          { name: 'Ruhani Kalkan', icon: '🔮', shape: '✦', desc: 'Ruhsal koruma sağlar.' }
         ]
       }
     ];
 
-    function renderCartoonSVG(charObj, size = 32) {
+    function renderCartoonArtSVG(charObj, width = 56, height = 56) {
       const col = charObj.color || '#f5c451';
       return `
-        <svg width="${size}" height="${size}" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="18" fill="rgba(15,23,42,0.9)" stroke="${col}" stroke-width="2"/>
-          <circle cx="20" cy="17" r="8" fill="#fde68a" stroke="#1e293b" stroke-width="1.5"/>
-          <circle cx="17.2" cy="16.5" r="1.4" fill="#0f172a"/>
-          <circle cx="22.8" cy="16.5" r="1.4" fill="#0f172a"/>
-          <path d="M17 20.5C18.5 22 21.5 22 23 20.5" stroke="#0f172a" stroke-width="1.4" stroke-linecap="round"/>
-          <path d="M10 33C11.5 27.5 15.5 25.5 20 25.5C24.5 25.5 28.5 27.5 30 33" fill="${col}" stroke="#0f172a" stroke-width="1.5"/>
-          <text x="31" y="13" font-size="11" text-anchor="middle">${charObj.emoji}</text>
+        <svg width="${width}" height="${height}" viewBox="0 0 64 64" fill="none">
+          <defs>
+            <radialGradient id="bg_${charObj.id}" cx="50%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="${col}" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#090e1a" stop-opacity="0.95"/>
+            </radialGradient>
+          </defs>
+          <rect x="3" y="3" width="58" height="58" rx="14" fill="url(#bg_${charObj.id})" stroke="${col}" stroke-width="2"/>
+          <circle cx="32" cy="25" r="11" fill="#fde68a" stroke="#0f172a" stroke-width="2"/>
+          <circle cx="28" cy="24" r="1.8" fill="#0f172a"/>
+          <circle cx="36" cy="24" r="1.8" fill="#0f172a"/>
+          <path d="M28 29.5C30 32 34 32 36 29.5" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M16 54C18 44 24 41 32 41C40 41 46 44 48 54" fill="${col}" stroke="#0f172a" stroke-width="2"/>
+          <text x="50" y="18" font-size="14" text-anchor="middle">${charObj.emoji}</text>
         </svg>
       `;
     }
@@ -1340,8 +1393,8 @@
         gold: 1450,
         mana: 780,
         gem: 4,
-        activeMechStage: '🃏 Tarot Sahne • Lvl 1',
-        lastActionSummary: 'Level 1 • HD Tarot & Karikatür sahnesi hazır. Lobby simgesinden katılıp başlatabilirsiniz.',
+        activeMechStage: '🃏 Çekirdek Kart • Lvl 1',
+        lastActionSummary: 'Level 1 • Merkez çekirdek kart sahnesi hazır. Lobby simgesinden katılıp başlatabilirsiniz.',
         lobbyMembers: []
       };
       try {
@@ -1373,37 +1426,37 @@
     let activeLeftChar = CHARACTERS.find(c => c.id === 'galadriel');
     let activeRightChar = CHARACTERS.find(c => c.id === 'sabrina');
 
-    // --- HD TAROT KARTI & KARİKATÜR EFEKT SAHNESİ (3X DPR KESKİNLİK) ---
-    const canvasTarot = document.getElementById('hd-tarot-canvas');
-    const ctxTarot = canvasTarot ? canvasTarot.getContext('2d') : null;
-    let fxPulse = 0;
-    let fxColor = '#c084fc';
-    let fxHero = activeRightChar;
-    let fxSkillName = 'KOZMİK SÜREÇ KARTI';
-    let fxSkillIcon = '🌌';
+    // --- MERKEZ ÇEKİRDEK & RENKLİ SİMGELİ SÜREÇ KARTLARI (3X DPR) ---
+    const canvasCore = document.getElementById('hd-core-canvas');
+    const ctxCore = canvasCore ? canvasCore.getContext('2d') : null;
+    let cardHighlightTimer = 0;
+    let activeCardColor = '#38bdf8';
+    let activeCardIcon = '🌙';
+    let activeCardTitle = 'MAVİ DOLUNAY KARTI';
+    let activeCardSub = 'SÜREÇ KARTI • TUR 1';
 
-    function resizeTarotCanvas() {
+    function resizeCoreCanvas() {
       const container = document.getElementById('realm-map');
-      if (!canvasTarot || !ctxTarot || !container) return;
+      if (!canvasCore || !ctxCore || !container) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 3);
       const rect = container.getBoundingClientRect();
       const w = Math.max(1, Math.floor(rect.width));
       const h = Math.max(1, Math.floor(rect.height));
-      canvasTarot.width = Math.floor(w * dpr);
-      canvasTarot.height = Math.floor(h * dpr);
-      ctxTarot.setTransform(dpr, 0, 0, dpr, 0, 0);
+      canvasCore.width = Math.floor(w * dpr);
+      canvasCore.height = Math.floor(h * dpr);
+      ctxCore.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
-    window.addEventListener('resize', resizeTarotCanvas);
+    window.addEventListener('resize', resizeCoreCanvas);
 
-    function triggerTarotEffect(charObj, skillObj, isUlti = false) {
-      fxHero = charObj || activeRightChar;
-      fxColor = (charObj && charObj.color) || '#f5c451';
-      fxPulse = isUlti ? 1.0 : 0.72;
-      fxSkillName = skillObj ? skillObj.name : (charObj ? charObj.name : 'TAROT EFEKTİ');
-      fxSkillIcon = skillObj ? skillObj.icon : (charObj ? charObj.emoji : '✨');
+    function setCoreSymbolicCard(title, sub, icon, color, isStrong = false) {
+      activeCardTitle = title;
+      activeCardSub = sub;
+      activeCardIcon = icon;
+      activeCardColor = color;
+      cardHighlightTimer = isStrong ? 1.0 : 0.75;
     }
 
-    function drawRoundedRect(ctx, x, y, w, h, r) {
+    function roundRectPath(ctx, x, y, w, h, r) {
       ctx.beginPath();
       ctx.moveTo(x + r, y);
       ctx.arcTo(x + w, y, x + w, y + h, r);
@@ -1413,8 +1466,8 @@
       ctx.closePath();
     }
 
-    function drawTarotScene(nowSec) {
-      if (!canvasTarot || !ctxTarot) return;
+    function drawCoreSymbolicCards(nowSec) {
+      if (!canvasCore || !ctxCore) return;
       const container = document.getElementById('realm-map');
       if (!container) return;
       const rect = container.getBoundingClientRect();
@@ -1422,105 +1475,128 @@
       const h = rect.height;
       if (w < 10 || h < 10) return;
 
-      ctxTarot.clearRect(0, 0, w, h);
+      ctxCore.clearRect(0, 0, w, h);
 
       const cx = w * 0.5;
       const cy = h * 0.51;
-      const cardW = Math.min(w * 0.64, 245);
-      const cardH = Math.min(h * 0.64, 178);
-      const cardX = cx - cardW * 0.5;
-      const cardY = cy - cardH * 0.5;
 
       const ev = appState.skyEvent || 'blue_moon';
-      const evMap = {
-        blue_moon: { title: 'MAVİ DOLUNAY', icon: '🌙', accent: '#38bdf8', bg1: '#0c1d38', bg2: '#070e1c' },
-        lunar_eclipse: { title: 'AY TUTULMASI', icon: '🌘', accent: '#f87171', bg1: '#2d0d16', bg2: '#0b0610' },
-        solar_eclipse: { title: 'GÜNEŞ TUTULMASI', icon: '☀️', accent: '#f5c451', bg1: '#291c08', bg2: '#08090f' },
-        dawn: { title: 'GÜN DOĞUMU', icon: '🌅', accent: '#fb923c', bg1: '#2b160c', bg2: '#0b0c16' },
-        dusk: { title: 'GÜN BATIMI', icon: '🌇', accent: '#c084fc', bg1: '#231036', bg2: '#090814' }
+      const skyCards = {
+        blue_moon: { label: 'MAVİ DOLUNAY', icon: '🌙', col: '#38bdf8', top: '#0c2444', bot: '#060c1a' },
+        lunar_eclipse: { label: 'AY TUTULMASI', icon: '🌘', col: '#f87171', top: '#360e18', bot: '#0a050f' },
+        solar_eclipse: { label: 'GÜNEŞ TUTULMASI', icon: '☀️', col: '#f5c451', top: '#332208', bot: '#08090f' },
+        dawn: { label: 'GÜN DOĞUMU', icon: '🌅', col: '#fb923c', top: '#331a0d', bot: '#0a0b14' },
+        dusk: { label: 'GÜN BATIMI', icon: '🌇', col: '#c084fc', top: '#28113d', bot: '#080712' }
       };
-      const skyInfo = evMap[ev] || evMap.blue_moon;
-      const activeAccent = fxPulse > 0.05 ? fxColor : skyInfo.accent;
+      const sc = skyCards[ev] || skyCards.blue_moon;
 
-      // Arka tarot aura halkası
-      ctxTarot.save();
-      const auraGrad = ctxTarot.createRadialGradient(cx, cy, cardW * 0.15, cx, cy, cardW * 0.78);
-      auraGrad.addColorStop(0, `${activeAccent}38`);
-      auraGrad.addColorStop(1, 'rgba(0,0,0,0)');
-      ctxTarot.fillStyle = auraGrad;
-      ctxTarot.beginPath();
-      ctxTarot.arc(cx, cy, cardW * 0.78, 0, Math.PI * 2);
-      ctxTarot.fill();
-      ctxTarot.restore();
+      // Arka yan renkli süreç kartları (sol ve sağ çekirdek kartlar)
+      const sideW = Math.min(w * 0.22, 86);
+      const sideH = Math.min(h * 0.42, 116);
+      const floatY = Math.sin(nowSec * 2) * 2.5;
 
-      // Merkez HD Tarot Kartı
-      ctxTarot.save();
-      drawRoundedRect(ctxTarot, cardX, cardY, cardW, cardH, 14);
-      const cardGrad = ctxTarot.createLinearGradient(cardX, cardY, cardX, cardY + cardH);
-      cardGrad.addColorStop(0, skyInfo.bg1);
-      cardGrad.addColorStop(1, skyInfo.bg2);
-      ctxTarot.fillStyle = cardGrad;
-      ctxTarot.fill();
+      // Sol süreç kartı: Faz & Şafak
+      const lx = cx - sideW * 1.48;
+      const ly = cy - sideH * 0.5 + floatY;
+      ctxCore.save();
+      roundRectPath(ctxCore, lx, ly, sideW, sideH, 10);
+      ctxCore.fillStyle = 'rgba(12, 21, 41, 0.92)';
+      ctxCore.fill();
+      ctxCore.lineWidth = 1.6;
+      ctxCore.strokeStyle = appState.isNight ? '#c084fc' : '#f5c451';
+      ctxCore.stroke();
+      ctxCore.font = '18px "Segoe UI", sans-serif';
+      ctxCore.textAlign = 'center';
+      ctxCore.fillText(appState.isNight ? '🌙' : '☀️', lx + sideW * 0.5, ly + 36);
+      ctxCore.font = '800 8px "Segoe UI", sans-serif';
+      ctxCore.fillStyle = '#fde68a';
+      ctxCore.fillText(appState.isNight ? 'GECE KARTI' : 'ŞAFAK KARTI', lx + sideW * 0.5, ly + 58);
+      ctxCore.font = '700 7.5px "Segoe UI", sans-serif';
+      ctxCore.fillStyle = '#cbd5e1';
+      ctxCore.fillText(`ŞAFAK ${appState.dawnCount || 1}/2`, lx + sideW * 0.5, ly + 74);
+      ctxCore.restore();
 
-      ctxTarot.lineWidth = 2.2;
-      ctxTarot.strokeStyle = activeAccent;
-      ctxTarot.stroke();
+      // Sağ süreç kartı: Gökyüzü Evresi
+      const rx = cx + sideW * 0.48;
+      const ry = cy - sideH * 0.5 - floatY;
+      ctxCore.save();
+      roundRectPath(ctxCore, rx, ry, sideW, sideH, 10);
+      ctxCore.fillStyle = 'rgba(12, 21, 41, 0.92)';
+      ctxCore.fill();
+      ctxCore.lineWidth = 1.6;
+      ctxCore.strokeStyle = sc.col;
+      ctxCore.stroke();
+      ctxCore.font = '18px "Segoe UI", sans-serif';
+      ctxCore.textAlign = 'center';
+      ctxCore.fillText(sc.icon, rx + sideW * 0.5, ry + 36);
+      ctxCore.font = '800 8px "Segoe UI", sans-serif';
+      ctxCore.fillStyle = sc.col;
+      ctxCore.fillText(sc.label, rx + sideW * 0.5, ry + 58);
+      ctxCore.font = '700 7.5px "Segoe UI", sans-serif';
+      ctxCore.fillStyle = '#cbd5e1';
+      ctxCore.fillText(`TUR ${appState.turn || 1}`, rx + sideW * 0.5, ry + 74);
+      ctxCore.restore();
 
-      // İç tarot çizgi çerçevesi
-      drawRoundedRect(ctxTarot, cardX + 6, cardY + 6, cardW - 12, cardH - 12, 10);
-      ctxTarot.lineWidth = 1;
-      ctxTarot.strokeStyle = 'rgba(245, 196, 81, 0.35)';
-      ctxTarot.stroke();
+      // Merkez ana çekirdek kart (Yetenek / Süreç simgesel kartı)
+      const mainW = Math.min(w * 0.36, 146);
+      const mainH = Math.min(h * 0.54, 152);
+      const mx = cx - mainW * 0.5;
+      const my = cy - mainH * 0.5;
+      const accent = cardHighlightTimer > 0.05 ? activeCardColor : sc.col;
 
-      // Kart üst başlık: Gökyüzü evresi
-      ctxTarot.font = '800 9.5px "Segoe UI", sans-serif';
-      ctxTarot.fillStyle = '#fde68a';
-      ctxTarot.textAlign = 'center';
-      ctxTarot.fillText(`${skyInfo.icon} ${skyInfo.title} • TUR ${appState.turn || 1}`, cx, cardY + 20);
+      ctxCore.save();
+      const glowGrad = ctxCore.createRadialGradient(cx, cy, 12, cx, cy, mainW * 0.85);
+      glowGrad.addColorStop(0, `${accent}40`);
+      glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctxCore.fillStyle = glowGrad;
+      ctxCore.beginPath();
+      ctxCore.arc(cx, cy, mainW * 0.85, 0, Math.PI * 2);
+      ctxCore.fill();
 
-      // Kart ortasında karikatür/efekt simgesi ve ışın çemberi
-      const emblemY = cardY + cardH * 0.52 + Math.sin(nowSec * 2.2) * 3;
-      const pulseR = 26 + (fxPulse > 0.05 ? (1 - fxPulse) * 22 : Math.sin(nowSec * 3) * 2);
+      roundRectPath(ctxCore, mx, my, mainW, mainH, 13);
+      const cardGrad = ctxCore.createLinearGradient(mx, my, mx, my + mainH);
+      cardGrad.addColorStop(0, sc.top);
+      cardGrad.addColorStop(1, sc.bot);
+      ctxCore.fillStyle = cardGrad;
+      ctxCore.fill();
 
-      ctxTarot.strokeStyle = activeAccent;
-      ctxTarot.globalAlpha = fxPulse > 0.05 ? fxPulse : 0.55;
-      ctxTarot.lineWidth = 2;
-      ctxTarot.beginPath();
-      ctxTarot.arc(cx, emblemY, pulseR, 0, Math.PI * 2);
-      ctxTarot.stroke();
+      ctxCore.lineWidth = cardHighlightTimer > 0.05 ? 2.6 : 1.8;
+      ctxCore.strokeStyle = accent;
+      ctxCore.stroke();
 
-      // Karikatür ışın çizgileri
-      for (let i = 0; i < 8; i++) {
-        const ang = nowSec * 0.7 + (i * Math.PI) / 4;
-        const r1 = 18;
-        const r2 = 25 + (fxPulse > 0.05 ? fxPulse * 10 : 3);
-        ctxTarot.beginPath();
-        ctxTarot.moveTo(cx + Math.cos(ang) * r1, emblemY + Math.sin(ang) * r1);
-        ctxTarot.lineTo(cx + Math.cos(ang) * r2, emblemY + Math.sin(ang) * r2);
-        ctxTarot.stroke();
-      }
-      ctxTarot.globalAlpha = 1;
+      roundRectPath(ctxCore, mx + 5, my + 5, mainW - 10, mainH - 10, 9);
+      ctxCore.lineWidth = 1;
+      ctxCore.strokeStyle = 'rgba(245, 196, 81, 0.34)';
+      ctxCore.stroke();
 
-      ctxTarot.font = '22px "Segoe UI", sans-serif';
-      ctxTarot.fillText(fxPulse > 0.05 ? fxSkillIcon : skyInfo.icon, cx, emblemY + 7);
+      ctxCore.font = '800 8px "Segoe UI", sans-serif';
+      ctxCore.fillStyle = '#fde68a';
+      ctxCore.textAlign = 'center';
+      ctxCore.fillText((cardHighlightTimer > 0.05 ? activeCardSub : `ÇEKİRDEK • TUR ${appState.turn || 1}`).slice(0, 26), cx, my + 18);
 
-      // Kart alt etiket: Kahraman & Efekt
-      const bottomTitle = fxPulse > 0.05
-        ? `${fxHero.name} • ${fxSkillName}`
-        : `${fxHero.emoji} ${fxHero.name} • ${fxHero.badge}`;
-      ctxTarot.font = '800 9px "Segoe UI", sans-serif';
-      ctxTarot.fillStyle = '#f8fafc';
-      ctxTarot.fillText(bottomTitle.slice(0, 44), cx, cardY + cardH - 13);
-      ctxTarot.restore();
+      const iconY = my + mainH * 0.5 + Math.sin(nowSec * 2.5) * 2.5;
+      ctxCore.beginPath();
+      ctxCore.arc(cx, iconY, 24 + (cardHighlightTimer > 0.05 ? (1 - cardHighlightTimer) * 10 : 0), 0, Math.PI * 2);
+      ctxCore.strokeStyle = accent;
+      ctxCore.lineWidth = 1.6;
+      ctxCore.stroke();
 
-      if (fxPulse > 0) {
-        fxPulse = Math.max(0, fxPulse - 0.02);
+      ctxCore.font = '24px "Segoe UI", sans-serif';
+      ctxCore.fillText(cardHighlightTimer > 0.05 ? activeCardIcon : sc.icon, cx, iconY + 8);
+
+      ctxCore.font = '800 8.5px "Segoe UI", sans-serif';
+      ctxCore.fillStyle = '#ffffff';
+      ctxCore.fillText((cardHighlightTimer > 0.05 ? activeCardTitle : `${sc.label} KARTI`).slice(0, 24), cx, my + mainH - 13);
+      ctxCore.restore();
+
+      if (cardHighlightTimer > 0) {
+        cardHighlightTimer = Math.max(0, cardHighlightTimer - 0.016);
       }
     }
 
-    function loopTarot(ts) {
-      drawTarotScene((ts || 0) * 0.001);
-      requestAnimationFrame(loopTarot);
+    function loopCore(ts) {
+      drawCoreSymbolicCards((ts || 0) * 0.001);
+      requestAnimationFrame(loopCore);
     }
 
     // --- SUNUCU / MONGODB SENKRONİZASYONU ---
@@ -1577,7 +1653,6 @@
           if (res.ok) {
             const remote = await res.json();
             if (remote && Array.isArray(remote.lobbyMembers)) {
-              const prevStarted = appState.gameStarted;
               appState = {
                 ...appState,
                 gameStarted: Boolean(remote.gameStarted),
@@ -1600,9 +1675,6 @@
               updateAllUI();
               if (document.getElementById('lobby-modal').classList.contains('open')) {
                 renderLobbyModalContent();
-              }
-              if (!prevStarted && appState.gameStarted) {
-                renderMobaSocketDock();
               }
             }
           }
@@ -1648,12 +1720,9 @@
       } catch (e) {}
     }
 
-    function showSubtitleAndSpeak(speaker, text, tone = 'magic', charObj = null, skillObj = null, isUlti = false) {
+    function showSubtitleAndSpeak(speaker, text, tone = 'magic') {
       document.getElementById('sub-speaker').textContent = `${speaker}:`;
       document.getElementById('sub-content').textContent = text;
-      if (appState.gameStarted && charObj) {
-        triggerTarotEffect(charObj, skillObj, isUlti);
-      }
       playGameTone(tone);
       if (appState.profile.soundEnabled && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -1678,28 +1747,57 @@
 
     function onSkyEventClick() {
       if (!appState.gameStarted) {
-        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Tarot gökyüzü ve soket efektleri oyun başladığında aktif olur.', 'click', null, null, false);
+        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Süreç kartları ve soketler oyun başladığında aktif olur.', 'click');
         return;
       }
       const order = ['blue_moon', 'dawn', 'lunar_eclipse', 'dusk', 'solar_eclipse'];
       const next = order[(order.indexOf(appState.skyEvent || 'blue_moon') + 1) % order.length];
       appState.skyEvent = next;
-      appState.activeMechStage = `🃏 ${next.replace('_', ' ')}`;
-      appState.lastActionSummary = `Tarot gökyüzü kartı değişti • Sıra #${appState.turn}`;
+      const label = next.replace('_', ' ').toUpperCase();
+      appState.activeMechStage = `🃏 ${label}`;
+      appState.lastActionSummary = `Süreç kartı ${label} olarak güncellendi • Tur #${appState.turn}`;
+      setCoreSymbolicCard(`${label} KARTI`, 'GÖKYÜZÜ SÜRECİ', '🃏', '#38bdf8', false);
       grantXpToPlayer(currentUserId, 15, false);
       saveState();
-      showSubtitleAndSpeak('TAROT GÖKYÜZÜ', `Gökyüzü tarot kartı ${next.replace('_', ' ')} evresine geçti.`, 'magic', activeRightChar, { name: next.replace('_', ' '), icon: '🃏' }, false);
+      showSubtitleAndSpeak('SÜREÇ KARTI', `Merkez çekirdekte ${label} kartı açıldı.`, 'magic');
     }
 
-    function renderPanelSkillPreview(charObj, containerId) {
+    function renderLeftHeroAndSockets() {
+      const meMember = appState.lobbyMembers.find(m => m.id === currentUserId);
+      const hero = appState.gameStarted && meMember
+        ? (CHARACTERS.find(c => c.id === meMember.charId) || activeLeftChar)
+        : activeLeftChar;
+
+      document.getElementById('left-tag').textContent = `${hero.group.toUpperCase()} • ${hero.badge}`;
+      document.getElementById('left-name').textContent = hero.name;
+      document.getElementById('left-status').textContent = appState.gameStarted ? 'SAHADA' : 'BEKLEME';
+      document.getElementById('left-vertical-cartoon').innerHTML = renderCartoonArtSVG(hero, 66, 66);
+      document.getElementById('left-quote').textContent = `"${hero.quote}"`;
+
+      const socketBox = document.getElementById('side-logo-sockets');
+      socketBox.classList.toggle('inactive-state', !appState.gameStarted);
+
+      const unlocked = isUltiUnlocked();
+      document.getElementById('socket-ulti-btn').classList.toggle('ulti-locked', !unlocked);
+      document.getElementById('socket-ulti-icon').textContent = hero.ulti.icon || '⚡';
+      document.getElementById('socket-p1-icon').textContent = hero.passives[0].icon || '🔰';
+      document.getElementById('socket-p2-icon').textContent = hero.passives[1].icon || '⚖️';
+    }
+
+    function renderRightPanelSummary() {
+      document.getElementById('right-tag').textContent = `${activeRightChar.group.toUpperCase()} • ${activeRightChar.badge}`;
+      document.getElementById('right-name').textContent = activeRightChar.name;
+      document.getElementById('right-cartoon').innerHTML = renderCartoonArtSVG(activeRightChar, 32, 32);
+      document.getElementById('right-quote').textContent = `"${activeRightChar.quote}"`;
+
       const rows = [
-        { tag: 'ULTİ', name: charObj.ulti.name, icon: charObj.ulti.icon, desc: '2. Şafak sonrası aktif', isUlti: true },
-        { tag: 'S1', name: charObj.passives[0].name, icon: charObj.passives[0].icon, desc: charObj.passives[0].desc, isUlti: false },
-        { tag: 'S2', name: charObj.passives[1].name, icon: charObj.passives[1].icon, desc: charObj.passives[1].desc, isUlti: false }
+        { shape: activeRightChar.ulti.shape, name: activeRightChar.ulti.name, desc: '2. Şafak sonrası aktif' },
+        { shape: activeRightChar.passives[0].shape, name: activeRightChar.passives[0].name, desc: activeRightChar.passives[0].desc },
+        { shape: activeRightChar.passives[1].shape, name: activeRightChar.passives[1].name, desc: activeRightChar.passives[1].desc }
       ];
-      document.getElementById(containerId).innerHTML = rows.map(r => `
-        <div class="skill-item" onclick="onPanelRowClick('${charObj.id}', '${r.tag}')">
-          <div class="skill-gem-mini ${r.isUlti ? 'ulti-gem' : ''}">${r.icon}</div>
+      document.getElementById('right-skills').innerHTML = rows.map(r => `
+        <div class="skill-item" onclick="onArenaSkillOrVoice('right')">
+          <div class="skill-gem-mini">${r.shape}</div>
           <div class="skill-meta">
             <h5>${r.name}</h5>
             <p>${r.desc}</p>
@@ -1708,50 +1806,18 @@
       `).join('');
     }
 
-    function renderCharacterPanels() {
-      document.getElementById('left-tag').textContent = `${activeLeftChar.group.toUpperCase()} KUŞAĞI • ${activeLeftChar.badge}`;
-      document.getElementById('left-name').textContent = `${activeLeftChar.name}`;
-      document.getElementById('left-cartoon').innerHTML = renderCartoonSVG(activeLeftChar, 32);
-      document.getElementById('left-quote').textContent = `"${activeLeftChar.quote}"`;
-      renderPanelSkillPreview(activeLeftChar, 'left-skills');
-
-      document.getElementById('right-tag').textContent = `${activeRightChar.group.toUpperCase()} OYUNU • ${activeRightChar.badge}`;
-      document.getElementById('right-name').textContent = `${activeRightChar.name}`;
-      document.getElementById('right-cartoon').innerHTML = renderCartoonSVG(activeRightChar, 32);
-      document.getElementById('right-quote').textContent = `"${activeRightChar.quote}"`;
-      renderPanelSkillPreview(activeRightChar, 'right-skills');
-    }
-
-    function renderMobaSocketDock() {
-      const dock = document.getElementById('moba-socket-dock');
+    function triggerHeroSocket(portKey) {
       if (!appState.gameStarted) {
-        dock.classList.remove('active');
-        return;
-      }
-      dock.classList.add('active');
-      const meMember = appState.lobbyMembers.find(m => m.id === currentUserId);
-      const currentHero = CHARACTERS.find(c => c.id === (meMember && meMember.charId)) || activeRightChar;
-
-      const unlocked = isUltiUnlocked();
-      const ultiBtn = document.getElementById('moba-ulti-btn');
-      ultiBtn.classList.toggle('ulti-locked', !unlocked);
-      document.getElementById('moba-ulti-icon').textContent = currentHero.ulti.icon || '⚡';
-      document.getElementById('moba-p1-icon').textContent = currentHero.passives[0].icon || '🛡️';
-      document.getElementById('moba-p2-icon').textContent = currentHero.passives[1].icon || '✨';
-    }
-
-    function triggerMobaSocket(portKey) {
-      if (!appState.gameStarted) {
-        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Soket portları oyun başladığında aktif olur.', 'click', null, null, false);
+        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Logosal simge soketleri oyun başladığında aktif olur.', 'click');
         return;
       }
       const meMember = appState.lobbyMembers.find(m => m.id === currentUserId);
-      const charObj = CHARACTERS.find(c => c.id === (meMember && meMember.charId)) || activeRightChar;
+      const charObj = CHARACTERS.find(c => c.id === (meMember && meMember.charId)) || activeLeftChar;
       if (appState.mana >= 15) appState.mana -= 15;
 
       if (portKey === 'ulti') {
         if (!isUltiUnlocked()) {
-          showSubtitleAndSpeak(charObj.name, `Ulti portu 2. Şafaktan sonra açılır (Şu an Şafak ${appState.dawnCount || 1}/2).`, 'click', charObj, charObj.ulti, false);
+          showSubtitleAndSpeak(charObj.name, `Ulti soketi 2. Şafaktan sonra açılır (Şu an Şafak ${appState.dawnCount || 1}/2).`, 'click');
           return;
         }
 
@@ -1765,10 +1831,11 @@
             solar_eclipse: '☀️ Güneş Tutulması'
           };
           appState.activeMechStage = `⚡ ${names[picked]}`;
-          appState.lastActionSummary = `Tanrıça Sabrina Kozmik Ulti -> ${names[picked]} tarot kartı tetiklendi!`;
+          appState.lastActionSummary = `Tanrıça Sabrina Kozmik Ulti -> ${names[picked]} kartı merkezde belirdi!`;
+          setCoreSymbolicCard(`${names[picked]} KARTI`, 'SABRINA ULTİ KARTI', '🌌', charObj.color, true);
           grantXpToPlayer(currentUserId, 40, true);
           saveState();
-          showSubtitleAndSpeak(charObj.name, `Bilinmeyen kozmik ulti tetiklendi: ${names[picked]} tarot sahnesinde açıldı!`, 'ulti', charObj, charObj.ulti, true);
+          showSubtitleAndSpeak(charObj.name, `Bilinmeyen kozmik ulti tetiklendi: ${names[picked]} çekirdek kartta belirdi!`, 'ulti');
           return;
         }
 
@@ -1783,9 +1850,10 @@
         appState.gold += 35;
         appState.activeMechStage = `⚡ ${charObj.ulti.name.split(' (')[0]}`;
         appState.lastActionSummary = `${charObj.name} Ultisi aktif (+35 Altın)`;
+        setCoreSymbolicCard(charObj.ulti.name.toUpperCase(), charObj.name.toUpperCase(), charObj.ulti.icon, charObj.color, true);
         grantXpToPlayer(currentUserId, 35, true);
         saveState();
-        showSubtitleAndSpeak(charObj.name, `${charObj.ulti.name} tetiklendi! ${charObj.ulti.desc}`, 'ulti', charObj, charObj.ulti, true);
+        showSubtitleAndSpeak(charObj.name, `${charObj.ulti.name} tetiklendi! ${charObj.ulti.desc}`, 'ulti');
         return;
       }
 
@@ -1794,39 +1862,32 @@
       appState.gold += 10;
       appState.activeMechStage = `💎 ${passive.name}`;
       appState.lastActionSummary = `${charObj.name} • ${passive.name}`;
+      setCoreSymbolicCard(passive.name.toUpperCase(), charObj.name.toUpperCase(), passive.icon, charObj.color, false);
       grantXpToPlayer(currentUserId, 20, false);
       saveState();
-      showSubtitleAndSpeak(charObj.name, `${passive.name}: ${passive.desc}`, 'magic', charObj, passive, false);
-    }
-
-    function onPanelRowClick(charId, tag) {
-      const charObj = CHARACTERS.find(c => c.id === charId) || activeLeftChar;
-      const skillObj = tag === 'ULTİ' ? charObj.ulti : (tag === 'S1' ? charObj.passives[0] : charObj.passives[1]);
-      if (!appState.gameStarted) {
-        showSubtitleAndSpeak(charObj.name, `${skillObj.name}: ${skillObj.desc}`, 'click', null, null, false);
-        return;
-      }
-      grantXpToPlayer(currentUserId, 10, false);
-      saveState();
-      showSubtitleAndSpeak(charObj.name, `${skillObj.name} tarot efekti tetiklendi.`, 'magic', charObj, skillObj, tag === 'ULTİ');
+      showSubtitleAndSpeak(charObj.name, `${passive.name}: ${passive.desc}`, 'magic');
     }
 
     function onArenaSkillOrVoice(side) {
       const charObj = side === 'left' ? activeLeftChar : activeRightChar;
-      showSubtitleAndSpeak(charObj.name, `"${charObj.quote}"`, 'magic', appState.gameStarted ? charObj : null, { name: charObj.badge, icon: charObj.emoji }, false);
+      if (appState.gameStarted) {
+        setCoreSymbolicCard(charObj.badge, charObj.name.toUpperCase(), charObj.emoji, charObj.color, false);
+      }
+      showSubtitleAndSpeak(charObj.name, `"${charObj.quote}"`, 'magic');
     }
 
     function onCollectiveAction() {
       if (!appState.gameStarted) {
-        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Oylama ve hamleler oyun başladığında aktif olur.', 'click', null, null, false);
+        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Oylama ve hamleler oyun başladığında aktif olur.', 'click');
         return;
       }
       const target = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
       appState.activeMechStage = '🗳️ Toplu Hamle';
       appState.lastActionSummary = `Toplu Hamle: ${target.name} • Taraf Dengesi İşlendi`;
+      setCoreSymbolicCard('TOPLU HAMLE KARTI', `${target.group.toUpperCase()} KUŞAĞI`, '🗳️', target.color, false);
       grantXpToPlayer(currentUserId, 25, true);
       saveState();
-      showSubtitleAndSpeak('OYLAMA / HAMLE', `Toplu strateji hamlesi kaydedildi (${target.group} kuşağı).`, 'magic', target, { name: 'Toplu Hamle', icon: '🗳️' }, false);
+      showSubtitleAndSpeak('OYLAMA / HAMLE', `Toplu strateji hamlesi kaydedildi (${target.group} kuşağı).`, 'magic');
     }
 
     function cycleSideHero(side) {
@@ -1838,7 +1899,8 @@
         const idx = pool.findIndex(c => c.id === activeRightChar.id);
         activeRightChar = pool[(idx + 1) % pool.length];
       }
-      renderCharacterPanels();
+      renderLeftHeroAndSockets();
+      renderRightPanelSummary();
       playGameTone('click');
     }
 
@@ -1974,15 +2036,15 @@
       appState.dawnCount = 1;
       appState.isNight = appState.startPhase === 'night';
       appState.skyEvent = appState.isNight ? 'blue_moon' : 'dawn';
-      appState.activeMechStage = '🃏 Tarot Sahne Aktif';
+      appState.activeMechStage = '🃏 Çekirdek Kart Aktif';
 
       const me = appState.lobbyMembers.find(m => m.id === currentUserId);
       if (me) {
         const myChar = CHARACTERS.find(c => c.id === me.charId) || CHARACTERS[0];
-        if (myChar.group === 'Gündüz') activeLeftChar = myChar;
-        else activeRightChar = myChar;
+        activeLeftChar = myChar;
         appState.profile.preferredSide = me.secretSide;
-        appState.lastActionSummary = `Oyun Başladı • Tarafın: ${me.secretSide} (Anonim) • 2. Şafak Ulti Kilitli`;
+        appState.lastActionSummary = `Oyun Başladı • Kahramanın: ${myChar.name} • 2. Şafak Ulti Kilitli`;
+        setCoreSymbolicCard(myChar.badge, myChar.name.toUpperCase(), myChar.emoji, myChar.color, true);
       }
 
       try {
@@ -2008,7 +2070,7 @@
 
       saveState();
       closeModal('lobby-modal');
-      showSubtitleAndSpeak('MINI LEGENDS', 'Herkes hazır verdi, oyun başladı! Tarot sahnesi ve sağ alt soketler aktif.', 'ulti', activeRightChar, activeRightChar.ulti, true);
+      showSubtitleAndSpeak('MINI LEGENDS', 'Oyun başladı! Sol dikeyde kahraman kartınız, sağında logosal soketler ve merkezde süreç kartları aktif.', 'ulti');
     }
 
     function renderLobbyModalContent() {
@@ -2058,8 +2120,9 @@
       const ultiNote = isUltiUnlocked() ? '2. ŞAFAK GEÇİLDİ: TÜM ULTİLER AÇIK!' : `Şafak ${appState.dawnCount}/2`;
       appState.activeMechStage = `${appState.isNight ? '🌙 Gece' : '☀️ Şafak ' + appState.dawnCount}`;
       appState.lastActionSummary = `Tur ${appState.turn} • ${ultiNote}`;
+      setCoreSymbolicCard(appState.isNight ? 'GECE KARTI' : `ŞAFAK ${appState.dawnCount} KARTI`, `TUR ${appState.turn}`, appState.isNight ? '🌙' : '☀️', appState.isNight ? '#c084fc' : '#f5c451', false);
       saveState();
-      showSubtitleAndSpeak('OTONOM DÖNGÜ', `${appState.isNight ? 'Gece fazı' : 'Şafak ' + appState.dawnCount} başladı. ${ultiNote}`, 'magic', activeRightChar, null, false);
+      showSubtitleAndSpeak('OTONOM DÖNGÜ', `${appState.isNight ? 'Gece fazı' : 'Şafak ' + appState.dawnCount} başladı. ${ultiNote}`, 'magic');
     }
 
     setInterval(() => {
@@ -2081,26 +2144,23 @@
     function renderAllRolesGrid() {
       const unlocked = isUltiUnlocked();
       document.getElementById('all-roles-grid').innerHTML = CHARACTERS.map(c => `
-        <div class="tarot-card" style="border-color:${c.color}66;" onclick="onArenaSkillOrVoice('${c.group === 'Gündüz' ? 'left' : 'right'}')">
-          <div class="tarot-card-top">
-            ${renderCartoonSVG(c, 34)}
-            <div>
-              <h4>${c.name}</h4>
-              <div style="font-size:8.5px; color:#94a3b8;">${c.group} • ${c.badge}</div>
-            </div>
+        <div class="catalog-card" style="border-color:${c.color}70;" onclick="onArenaSkillOrVoice('${c.group === 'Gündüz' ? 'left' : 'right'}')">
+          <div class="catalog-art-stage">
+            ${renderCartoonArtSVG(c, 52, 52)}
           </div>
-          <div class="quote">"${c.quote}"</div>
-          <div class="tarot-skill-pill ulti-row">
-            <span>${c.ulti.icon}</span>
-            <span>ULTİ [${unlocked ? 'AÇIK' : '2. ŞAFAK'}]: ${c.ulti.name}</span>
+          <h4>${c.name} <span style="font-size:8.5px; color:#94a3b8;">(${c.group} • ${c.badge})</span></h4>
+          <div class="catalog-meme-quote">"${c.quote}"</div>
+          <div class="shaped-power-row ulti-power">
+            <span class="shape-badge">${c.ulti.shape}</span>
+            <span>${c.ulti.icon} ULTİ [${unlocked ? 'AÇIK' : '2. ŞAFAK'}]: ${c.ulti.name}</span>
           </div>
-          <div class="tarot-skill-pill">
-            <span>${c.passives[0].icon}</span>
-            <span>Genel 1: ${c.passives[0].name}</span>
+          <div class="shaped-power-row">
+            <span class="shape-badge">${c.passives[0].shape}</span>
+            <span>${c.passives[0].icon} Genel 1: ${c.passives[0].name}</span>
           </div>
-          <div class="tarot-skill-pill">
-            <span>${c.passives[1].icon}</span>
-            <span>Genel 2: ${c.passives[1].name}</span>
+          <div class="shaped-power-row">
+            <span class="shape-badge">${c.passives[1].shape}</span>
+            <span>${c.passives[1].icon} Genel 2: ${c.passives[1].name}</span>
           </div>
         </div>
       `).join('');
@@ -2114,7 +2174,7 @@
     function handleYtAccess() {
       playGameTone('click');
       if (!isAuthorizedYt()) {
-        showSubtitleAndSpeak('YETKİ GEREKLİ', 'Yönet YT ekranına yalnızca yetkili kurucu hesabı girebilir.', 'click', null, null, false);
+        showSubtitleAndSpeak('YETKİ GEREKLİ', 'Yönet YT ekranına yalnızca yetkili kurucu hesabı girebilir.', 'click');
         return;
       }
       window.location.href = './yt_panel.html';
@@ -2159,7 +2219,7 @@
       const modeNames = {
         anon_equal: 'Senaryo: Anonim Eşit Taraf',
         sky_eclipse: 'Senaryo: Kozmik Tutulma & Ulti',
-        siege_tactic: 'Senaryo: Tarot Kuşatması'
+        siege_tactic: 'Senaryo: Çekirdek Kart Kuşatması'
       };
       document.getElementById('mode-scenario-label').textContent = modeNames[appState.mode] || modeNames.anon_equal;
       document.getElementById('live-turn-telemetry').textContent = appState.lastActionSummary || 'Level 1 • Hazır';
@@ -2193,8 +2253,8 @@
       }).join('');
 
       applySkyTheme();
-      renderCharacterPanels();
-      renderMobaSocketDock();
+      renderLeftHeroAndSockets();
+      renderRightPanelSummary();
     }
 
     function openModal(id) {
@@ -2215,11 +2275,11 @@
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
       playGameTone('click');
-      resizeTarotCanvas();
+      resizeCoreCanvas();
     }
 
-    resizeTarotCanvas();
-    requestAnimationFrame(loopTarot);
+    resizeCoreCanvas();
+    requestAnimationFrame(loopCore);
     updateAllUI();
     syncWithBackend(false);
   </script>
