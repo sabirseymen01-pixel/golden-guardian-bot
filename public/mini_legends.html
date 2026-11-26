@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>MINI LEGENDS — Strateji & Rol Yapma</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
@@ -29,13 +29,13 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
-    body {
+    html, body {
       background:
         radial-gradient(circle at 50% 45%, rgba(26, 46, 84, 0.55) 0%, rgba(6, 9, 17, 0.98) 75%),
         linear-gradient(180deg, #090e1a 0%, #050810 100%);
       color: var(--text-main);
       width: 100vw;
-      height: 100vh;
+      height: 100dvh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -67,6 +67,7 @@
       background: linear-gradient(180deg, rgba(5, 9, 18, 0.96) 0%, rgba(5, 9, 18, 0.55) 100%);
       border-bottom: 1px solid rgba(245, 196, 81, 0.18);
       z-index: 20;
+      flex-shrink: 0;
     }
 
     .player-card {
@@ -191,6 +192,7 @@
       padding: 6px 14px;
       position: relative;
       overflow: hidden;
+      min-height: 0;
     }
 
     .char-panel {
@@ -432,6 +434,7 @@
       border-top: 1px solid rgba(245, 196, 81, 0.2);
       z-index: 20;
       padding: 0 10px;
+      flex-shrink: 0;
     }
     .nav-tab {
       display: flex;
@@ -555,7 +558,7 @@
     th { color: var(--gold); }
   </style>
 </head>
-<body>
+<body onclick="forceFullScreenMode()">
 
   <div id="rotate-warning">
     <div style="font-size: 42px; margin-bottom: 12px;">📱🔄</div>
@@ -948,10 +951,29 @@
     ];
 
     const STORAGE_KEY = 'mini_legends_state_v2';
+    const DEFAULT_FOUNDER_ID = '8245373459';
     const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-    if (tg) {
-      tg.ready();
-      tg.expand();
+
+    function forceFullScreenMode() {
+      try {
+        if (tg) {
+          tg.ready();
+          tg.expand();
+          if (typeof tg.requestFullscreen === 'function') {
+            tg.requestFullscreen();
+          }
+        }
+      } catch (e) {}
+      if (document.documentElement.requestFullscreen && window.innerWidth > window.innerHeight && !document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    }
+
+    forceFullScreenMode();
+    if (tg && typeof tg.onEvent === 'function') {
+      tg.onEvent('viewportChanged', () => {
+        try { tg.expand(); } catch (e) {}
+      });
     }
 
     const tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : {
@@ -966,7 +988,7 @@
 
     function loadState() {
       const fallback = {
-        founderId: '',
+        founderId: DEFAULT_FOUNDER_ID,
         authorizedYts: [],
         profile: {
           displayName: autoTgName,
@@ -1155,12 +1177,14 @@
     }
 
     function isAuthorizedYt() {
-      return !appState.founderId || appState.founderId === currentUserId || appState.authorizedYts.some(y => y.id === currentUserId);
+      const fId = String(appState.founderId || DEFAULT_FOUNDER_ID);
+      return fId === currentUserId || (appState.authorizedYts || []).some(y => String(y.id) === currentUserId);
     }
 
     function handleYtAccess() {
+      forceFullScreenMode();
       playGameTone('click');
-      if (appState.founderId && !isAuthorizedYt()) {
+      if (!isAuthorizedYt()) {
         showSubtitleAndSpeak('YETKİ GEREKLİ', 'Yönet YT ekranına yalnızca Founder ID onayı alan yetkililer girebilir.', 'alert');
         return;
       }
@@ -1235,6 +1259,8 @@
       if (e.key === STORAGE_KEY) syncFromYtPanel();
     });
 
+    setInterval(syncFromYtPanel, 1500);
+
     function updateHudUI() {
       document.getElementById('hud-name').textContent = appState.profile.displayName;
       document.getElementById('hud-avatar').textContent = appState.profile.displayName.charAt(0).toUpperCase();
@@ -1250,7 +1276,7 @@
       renderTimerOnly();
 
       const ytBtn = document.getElementById('yt-port-btn');
-      ytBtn.classList.toggle('yt-locked', Boolean(appState.founderId && !isAuthorizedYt()));
+      ytBtn.classList.toggle('yt-locked', !isAuthorizedYt());
 
       document.getElementById('tg-detected-info').textContent = `${autoTgName} (Telegram ID: ${currentUserId})`;
       document.getElementById('input-display-name').value = appState.profile.displayName;
@@ -1274,6 +1300,7 @@
     }
 
     function openModal(id) {
+      forceFullScreenMode();
       playGameTone('click');
       if (id === 'roles-modal') renderAllRolesGrid();
       if (id === 'scoreboard-modal') updateHudUI();
@@ -1285,6 +1312,7 @@
     }
 
     function switchTab(el) {
+      forceFullScreenMode();
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
       playGameTone('click');
