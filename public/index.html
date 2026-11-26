@@ -135,6 +135,7 @@
         .app-icon-card { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; width: 100%; transition: transform 0.12s ease; }
         .app-icon-card:active { transform: scale(0.92); }
         .app-icon-box {
+            position: relative;
             width: 56px;
             height: 56px;
             background: var(--glass-icon);
@@ -146,6 +147,24 @@
             font-size: 22px;
         }
         .app-icon-box.gv-studio-icon { background: linear-gradient(145deg, #69091c, #29030a); border-color: #ffd166; }
+        .app-icon-box.ml-yt-icon {
+            background: linear-gradient(145deg, #1b1038, #0b0718);
+            border-color: #c084fc;
+            box-shadow: 0 0 12px rgba(192, 132, 252, 0.28);
+        }
+        .ml-yt-mini-badge {
+            position: absolute;
+            bottom: -4px;
+            right: -4px;
+            background: linear-gradient(90deg, #9333ea, #c084fc);
+            color: #fff;
+            font-size: 7.5px;
+            font-weight: 900;
+            padding: 1px 4px;
+            border-radius: 5px;
+            border: 1px solid #f8ecbe;
+            letter-spacing: 0.4px;
+        }
 
         .empty-plus-card { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; pointer-events: none; }
         .empty-plus-box {
@@ -600,8 +619,11 @@
         const tg = window.Telegram.WebApp;
         try { tg.ready(); tg.expand(); } catch(e) {}
 
+        const FOUNDER_TG_ID = "8245373459";
+        const ML_STORAGE_KEY = "mini_legends_state_v2";
+
         let user = tg.initDataUnsafe?.user || { id: 8245373459, first_name: "Breskavica", username: "breskavica" };
-        let isFounder = String(user.id) === "8245373459";
+        let isFounder = String(user.id) === FOUNDER_TG_ID;
         let canGvStudio = isFounder;
         let studioDataCache = null;
         let globalGroupsCache = [];
@@ -610,6 +632,46 @@
         let currentStaffPage = 0;
         let activeDetailGroupId = 0;
         let activeDetailGroupTitle = "";
+
+        /* Mini Legends Founder ID'yi yerel depoyla otomatik eşitle */
+        function syncMiniLegendsFounder() {
+            try {
+                const raw = localStorage.getItem(ML_STORAGE_KEY);
+                const state = raw ? JSON.parse(raw) : {
+                    founderId: FOUNDER_TG_ID,
+                    authorizedYts: [],
+                    isNight: true,
+                    timeLeft: 165,
+                    turn: 14,
+                    votingOpen: true,
+                    gameEnded: false,
+                    pendingBroadcast: null,
+                    participants: [],
+                    logs: ['[STAFF] Mini Legends YT köprüsü kuruldu.']
+                };
+                if (!state.founderId) {
+                    state.founderId = FOUNDER_TG_ID;
+                }
+                localStorage.setItem(ML_STORAGE_KEY, JSON.stringify(state));
+                return state;
+            } catch (e) {
+                return { founderId: FOUNDER_TG_ID, authorizedYts: [] };
+            }
+        }
+        syncMiniLegendsFounder();
+
+        function openMiniLegendsYt() {
+            const mlState = syncMiniLegendsFounder();
+            const uid = String(user.id);
+            const allowed = uid === String(mlState.founderId || FOUNDER_TG_ID) ||
+                (mlState.authorizedYts || []).some(y => String(y.id) === uid);
+
+            if (!allowed) {
+                alert("⛔ Mini Legends YT paneline giriş yetkiniz yok! Kurucu (Founder ID: " + FOUNDER_TG_ID + ") onayı gereklidir.");
+                return;
+            }
+            window.location.href = './yt_panel.html';
+        }
 
         let staffSoundOn = true;
         let sAudioCtx = null;
@@ -638,12 +700,21 @@
             if (staffSoundOn) playStaffSfx('tap');
         }
 
+        const ML_YT_SVG = `
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L4 5V11C4 16.55 7.41 21.74 12 23C16.59 21.74 20 16.55 20 11V5L12 2Z" stroke="#c084fc" stroke-width="2" fill="rgba(192,132,252,0.22)"/>
+                <path d="M14.5 7.5L9.5 16.5M9.5 7.5L14.5 16.5" stroke="#f8ecbe" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <span class="ml-yt-mini-badge">YT</span>
+        `;
+
         const STAFF_APPS = [
-            { id: 'gv', icon: '👑', label: 'GOLDENVISION', special: true, action: () => openGvStudio() },
+            { id: 'gv', icon: '👑', label: 'GOLDENVISION', boxClass: 'gv-studio-icon', action: () => openGvStudio() },
             { id: 'staff', icon: '⚜️', label: 'Staff & Yetki', action: () => openPort('staffModal') },
             { id: 'groups', icon: '🛡️', label: 'Gruplar', action: () => openPort('groupsModal') },
             { id: 'logs', icon: '📜', label: 'Loglar', action: () => openPort('logsModal') },
-            { id: 'sync', icon: '🔄', label: 'Yenile', action: () => { loadAllGroups(); showToast("🔄 Güncellendi"); } }
+            { id: 'sync', icon: '🔄', label: 'Yenile', action: () => { loadAllGroups(); showToast("🔄 Güncellendi"); } },
+            { id: 'ml_yt', icon: ML_YT_SVG, label: 'Mini Legends YT', boxClass: 'ml-yt-icon', action: () => openMiniLegendsYt() }
         ];
 
         function buildStaffPages() {
@@ -657,7 +728,7 @@
                 const slice = STAFF_APPS.slice(p * perPage, (p + 1) * perPage);
                 let cellsHtml = slice.map((app, idx) => `
                     <div class="app-icon-card" onclick="runStaffApp(${p * perPage + idx})">
-                        <div class="app-icon-box ${app.special ? 'gv-studio-icon' : ''}">${app.icon}</div>
+                        <div class="app-icon-box ${app.boxClass || ''}">${app.icon}</div>
                         <div class="app-label">${app.label}</div>
                     </div>
                 `).join('');
@@ -755,7 +826,7 @@
                     body: JSON.stringify({ user_id: user.id })
                 });
                 const data = await res.json();
-                isFounder = String(user.id) === "8245373459" || Boolean(data.is_founder);
+                isFounder = String(user.id) === FOUNDER_TG_ID || Boolean(data.is_founder);
                 canGvStudio = isFounder || Boolean(data.can_gv_studio);
                 document.getElementById('userRole').innerText = (user.first_name || 'Admin') + (isFounder ? " Kraljica 👑" : " 🛡️");
                 await loadAllGroups();
