@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MINI LEGENDS — Strateji & Rol Yapma</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-dark: #060911;
+      --panel-bg: rgba(11, 18, 33, 0.9);
+      --gold: #f5c451;
+      --gold-dim: #9c7a2c;
+      --blue-glow: #38bdf8;
+      --green-glow: #34d399;
+      --red-glow: #f87171;
+      --purple-glow: #c084fc;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-gold: rgba(245, 196, 81, 0.38);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 50% 45%, rgba(26, 46, 84, 0.55) 0%, rgba(6, 9, 17, 0.98) 75%),
+        linear-gradient(180deg, #090e1a 0%, #050810 100%);
+      color: var(--text-main);
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #rotate-warning {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #050811;
+      z-index: 9999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+    }
+    @media (orientation: portrait) and (max-width: 768px) {
+      #rotate-warning { display: flex; }
+    }
+
+    /* ÜST HUD */
+    .top-hud {
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 16px;
+      background: linear-gradient(180deg, rgba(5, 9, 18, 0.96) 0%, rgba(5, 9, 18, 0.55) 100%);
+      border-bottom: 1px solid rgba(245, 196, 81, 0.18);
+      z-index: 20;
+    }
+
+    .player-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-gold);
+      border-radius: 30px;
+      padding: 4px 14px 4px 5px;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .player-card:hover { border-color: var(--gold); }
+    .player-card:active { transform: scale(0.97); }
+    .avatar-ring {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: var(--gold);
+      font-size: 16px;
+      box-shadow: 0 0 12px rgba(245, 196, 81, 0.25);
+    }
+    .player-info h4 { font-size: 13px; color: #fff; line-height: 1.2; }
+    .player-info span { font-size: 10px; color: var(--gold); font-weight: 600; }
+
+    .resources {
+      display: flex;
+      gap: 8px;
+      margin-left: 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .res-badge {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(15, 23, 42, 0.85);
+      padding: 4px 9px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .cycle-hud {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-gold);
+      padding: 4px 18px;
+      border-radius: 20px;
+      box-shadow: 0 0 22px rgba(0, 0, 0, 0.65);
+    }
+    .cycle-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    .cycle-icon.active-sun { background: rgba(245, 196, 81, 0.25); box-shadow: 0 0 12px var(--gold); }
+    .cycle-icon.active-moon { background: rgba(56, 189, 248, 0.25); box-shadow: 0 0 12px var(--blue-glow); }
+    .cycle-text { text-align: center; }
+    .cycle-text .phase { font-size: 11px; font-weight: 800; letter-spacing: 0.8px; color: var(--gold); }
+    .cycle-text .timer { font-size: 13px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+
+    .brand-ports {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-title { text-align: right; }
+    .brand-title h2 { font-size: 14px; letter-spacing: 1.5px; color: var(--gold); font-weight: 900; }
+    .brand-title span { font-size: 10px; color: var(--text-muted); font-weight: 700; }
+
+    .port-btn {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #13203b, #09101f);
+      border: 1.5px solid var(--gold);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s;
+    }
+    .port-btn:hover { transform: translateY(-2px); box-shadow: 0 0 14px rgba(245, 196, 81, 0.4); }
+    .port-btn.yt-port { border-color: var(--purple-glow); }
+    .port-btn.yt-locked { opacity: 0.5; border-color: #475569; }
+    .yt-badge {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      background: linear-gradient(90deg, #9333ea, #c084fc);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 900;
+      padding: 1px 5px;
+      border-radius: 6px;
+      border: 1px solid #fff;
+    }
+
+    /* ANA ARENA */
+    .main-arena {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 260px 1fr 260px;
+      gap: 10px;
+      padding: 6px 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .char-panel {
+      background: linear-gradient(180deg, rgba(14, 22, 40, 0.93) 0%, rgba(8, 13, 24, 0.97) 100%);
+      border: 1px solid var(--border-gold);
+      border-radius: 14px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      z-index: 10;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.65);
+    }
+    .char-portrait-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px;
+      margin-top: 6px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, rgba(245, 196, 81, 0.14), rgba(56, 189, 248, 0.06));
+      border: 1px solid rgba(245, 196, 81, 0.25);
+    }
+    .char-portrait-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      background: rgba(6, 10, 20, 0.85);
+      border: 1px solid var(--gold);
+      flex-shrink: 0;
+    }
+    .char-quote-preview {
+      font-size: 10px;
+      line-height: 1.3;
+      color: #cbd5e1;
+      font-style: italic;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .char-header {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 6px;
+    }
+    .char-role-tag {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+    .char-name-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2px;
+      gap: 4px;
+    }
+    .char-name-row h3 { font-size: 14px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .status-pill {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-weight: 800;
+      background: rgba(52, 211, 153, 0.18);
+      color: var(--green-glow);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      flex-shrink: 0;
+    }
+    .status-pill.night-tag {
+      background: rgba(192, 132, 252, 0.18);
+      color: var(--purple-glow);
+      border-color: rgba(192, 132, 252, 0.4);
+    }
+
+    .skill-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin: 6px 0;
+    }
+    .skill-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 5px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .skill-item:hover {
+      border-color: var(--gold);
+      background: rgba(245, 196, 81, 0.12);
+    }
+    .skill-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      background: rgba(245, 196, 81, 0.15);
+      border: 1px solid var(--gold-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .skill-meta { flex: 1; min-width: 0; }
+    .skill-meta h5 { font-size: 11px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .skill-meta p { font-size: 9px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .char-select-bar {
+      display: flex;
+      gap: 5px;
+    }
+    .mini-btn {
+      flex: 1;
+      padding: 5px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 6px;
+      border: 1px solid var(--border-gold);
+      background: rgba(245, 196, 81, 0.12);
+      color: var(--gold);
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .mini-btn:hover { background: var(--gold); color: #070b14; }
+
+    /* MERKEZ ALTIGEN HARİTA */
+    .realm-map {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 50%, rgba(245, 196, 81, 0.08) 0%, transparent 65%);
+    }
+    .hex-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .hex-row {
+      display: flex;
+      gap: 10px;
+    }
+    .hex-node {
+      width: 76px;
+      height: 66px;
+      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+      background: rgba(15, 25, 45, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.2s, filter 0.2s;
+    }
+    .hex-node:hover { transform: scale(1.08); filter: brightness(1.25); }
+    .hex-node.blue { box-shadow: inset 0 0 16px rgba(56, 189, 248, 0.7); background: linear-gradient(135deg, #0d3254, #08182b); }
+    .hex-node.green { box-shadow: inset 0 0 16px rgba(52, 211, 153, 0.7); background: linear-gradient(135deg, #0c3d2f, #071f18); }
+    .hex-node.red { box-shadow: inset 0 0 16px rgba(248, 113, 113, 0.7); background: linear-gradient(135deg, #4a131b, #24090d); }
+    .hex-node.citadel {
+      width: 90px;
+      height: 78px;
+      box-shadow: inset 0 0 24px rgba(245, 196, 81, 0.9);
+      background: linear-gradient(135deg, #47330b, #1c1404);
+    }
+    .hex-emoji { font-size: 18px; }
+    .hex-label { font-size: 9px; font-weight: 800; color: #fff; margin-top: 2px; }
+
+    .realm-watermark {
+      margin-top: 6px;
+      font-size: 12px;
+      letter-spacing: 4px;
+      color: rgba(245, 196, 81, 0.6);
+      font-weight: 800;
+    }
+
+    /* SESLİ & ALTYAZILI ANLATIM BANDI */
+    .subtitle-banner {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 72%;
+      max-width: 680px;
+      background: rgba(5, 9, 18, 0.95);
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 30;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.85);
+    }
+    .voice-wave {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    .voice-wave span {
+      width: 3px;
+      height: 100%;
+      background: var(--gold);
+      border-radius: 2px;
+      animation: wave 0.85s infinite ease-in-out;
+    }
+    .voice-wave span:nth-child(2) { animation-delay: 0.2s; }
+    .voice-wave span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes wave {
+      0%, 100% { height: 4px; }
+      50% { height: 16px; }
+    }
+    .subtitle-text { font-size: 12px; color: #f8fafc; line-height: 1.35; }
+    .subtitle-speaker { color: var(--gold); font-weight: 800; margin-right: 6px; }
+
+    /* ALT NAVİGASYON BAR */
+    .bottom-hud {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: rgba(5, 9, 18, 0.97);
+      border-top: 1px solid rgba(245, 196, 81, 0.2);
+      z-index: 20;
+      padding: 0 10px;
+    }
+    .nav-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 13px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .nav-tab.active, .nav-tab:hover {
+      background: rgba(245, 196, 81, 0.15);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* MODALLAR */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 15, 0.86);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      background: #0c1426;
+      border: 1.5px solid var(--gold);
+      border-radius: 16px;
+      width: 92%;
+      max-width: 800px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
+    }
+    .modal-header {
+      padding: 12px 18px;
+      background: rgba(245, 196, 81, 0.12);
+      border-bottom: 1px solid var(--border-gold);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 { font-size: 15px; color: var(--gold); }
+    .close-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .modal-body {
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+      gap: 10px;
+    }
+    .role-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .role-card:hover { border-color: var(--gold); background: rgba(245, 196, 81, 0.09); }
+    .role-card h4 { color: var(--gold); font-size: 13px; margin-bottom: 4px; }
+    .role-card .quote { font-style: italic; color: #cbd5e1; font-size: 11px; margin-bottom: 6px; }
+    .role-card .ability { font-size: 11px; color: var(--blue-glow); }
+
+    input, select {
+      background: #070b14;
+      border: 1px solid var(--border-gold);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      width: 100%;
+    }
+    .action-btn {
+      background: linear-gradient(90deg, #d97706, #f59e0b);
+      color: #070b14;
+      font-weight: 800;
+      border: none;
+      padding: 9px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      align-self: flex-start;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    th { color: var(--gold); }
+  </style>
+</head>
+<body>
+
+  <div id="rotate-warning">
+    <div style="font-size: 42px; margin-bottom: 12px;">📱🔄</div>
+    <h2 style="color: var(--gold); margin-bottom: 8px;">Yatay Ekran Modu Gerekli</h2>
+    <p style="color: var(--text-muted); font-size: 14px;">Mini Legends taktik arenası tam ekran yatay görünüm için tasarlanmıştır. Lütfen cihazınızı yan çevirin.</p>
+  </div>
+
+  <!-- ÜST HUD -->
+  <header class="top-hud">
+    <div style="display:flex; align-items:center;">
+      <div class="player-card" onclick="openModal('profile-modal')" title="Profil & Ses Ayarları">
+        <div class="avatar-ring" id="hud-avatar">S</div>
+        <div class="player-info">
+          <h4 id="hud-name">Seymen Sabir</h4>
+          <span id="hud-rank">Lvl 16 • Rank: Elmas</span>
+        </div>
+      </div>
+      <div class="resources">
+        <div class="res-badge">🪙 <span id="res-gold">1450</span></div>
+        <div class="res-badge">💧 <span id="res-mana">780</span></div>
+        <div class="res-badge">💎 <span id="res-gem">4</span></div>
+      </div>
+    </div>
+
+    <div class="cycle-hud">
+      <div class="cycle-icon" id="sun-icon">☀️</div>
+      <div class="cycle-text">
+        <div class="phase" id="phase-label">FAZ: GECE</div>
+        <div class="timer" id="phase-timer">02:45</div>
+      </div>
+      <div class="cycle-icon active-moon" id="moon-icon">🌙</div>
+    </div>
+
+    <div class="brand-ports">
+      <div class="brand-title">
+        <h2>MINI LEGENDS</h2>
+        <span id="turn-counter">TUR 14 • OTONOM AKIŞ</span>
+      </div>
+
+      <div class="port-btn" onclick="openModal('roles-modal')" title="Mini Legends Üye Portu & 15 Karakter">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L4 5V11C4 16.55 7.41 21.74 12 23C16.59 21.74 20 16.55 20 11V5L12 2Z" stroke="#f5c451" stroke-width="2" fill="rgba(245,196,81,0.16)"/>
+          <path d="M14.5 7.5L9.5 16.5M9.5 7.5L14.5 16.5" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="port-btn yt-port" id="yt-port-btn" onclick="handleYtAccess()" title="Yönet YT Kontrol Paneli">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L4 5V11C4 16.55 7.41 21.74 12 23C16.59 21.74 20 16.55 20 11V5L12 2Z" stroke="#c084fc" stroke-width="2" fill="rgba(192,132,252,0.18)"/>
+          <circle cx="12" cy="11" r="3" fill="#f5c451"/>
+        </svg>
+        <span class="yt-badge">YT</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ANA ARENA -->
+  <main class="main-arena">
+    <section class="char-panel" id="left-char-panel">
+      <div>
+        <div class="char-header">
+          <div class="char-role-tag" id="left-tag">GÜNDÜZ KUŞAĞI • KAHRAMAN</div>
+          <div class="char-name-row">
+            <h3 id="left-name">🛡️ Muhafız Galadriel</h3>
+            <span class="status-pill" id="left-status">SAVUNMADA</span>
+          </div>
+        </div>
+
+        <div class="char-portrait-banner">
+          <div class="char-portrait-avatar" id="left-avatar">🛡️</div>
+          <div class="char-quote-preview" id="left-quote">"Işığım sönmeden bu kalenin tek bir taşına bile dokunamazsınız!"</div>
+        </div>
+      </div>
+
+      <div class="skill-list" id="left-skills"></div>
+
+      <div class="char-select-bar">
+        <button class="mini-btn" onclick="speakCharacter(activeLeftChar)">🔊 Sesli Giriş</button>
+        <button class="mini-btn" onclick="openModal('roles-modal')">🔄 Karakter</button>
+      </div>
+    </section>
+
+    <section class="realm-map">
+      <div class="hex-grid">
+        <div class="hex-row">
+          <div class="hex-node blue" onclick="triggerHexAction('Kuzey Gözcüsü (Okçu 4)')">
+            <span class="hex-emoji">🏹</span>
+            <span class="hex-label">Okçu 4</span>
+          </div>
+          <div class="hex-node green" onclick="triggerHexAction('Doğu Sığınağı')">
+            <span class="hex-emoji">🌿</span>
+            <span class="hex-label">Sığınak</span>
+          </div>
+        </div>
+
+        <div class="hex-row">
+          <div class="hex-node blue" onclick="triggerHexAction('Mavi Burç')">
+            <span class="hex-emoji">🛡️</span>
+            <span class="hex-label">Mavi Burç</span>
+          </div>
+          <div class="hex-node citadel" onclick="triggerHexAction('Merkez Altın Kale')">
+            <span class="hex-emoji">🏰</span>
+            <span class="hex-label">ALTIN KALE</span>
+          </div>
+          <div class="hex-node red" onclick="triggerHexAction('Kızıl Karakol')">
+            <span class="hex-emoji">⚔️</span>
+            <span class="hex-label">Kızıl Cephe</span>
+          </div>
+        </div>
+
+        <div class="hex-row">
+          <div class="hex-node blue" onclick="triggerHexAction('Büyü Pınarı')">
+            <span class="hex-emoji">🔮</span>
+            <span class="hex-label">Arkane</span>
+          </div>
+          <div class="hex-node green" onclick="triggerHexAction('Strateji Otağı')">
+            <span class="hex-emoji">📜</span>
+            <span class="hex-label">Strateji</span>
+          </div>
+        </div>
+      </div>
+      <div class="realm-watermark">THE REALM</div>
+
+      <div class="subtitle-banner" id="subtitle-banner">
+        <div class="voice-wave"><span></span><span></span><span></span></div>
+        <div class="subtitle-text">
+          <span class="subtitle-speaker" id="sub-speaker">SİSTEM:</span>
+          <span id="sub-content">Mini Legends arenasına hoş geldiniz. Bir karakter seçin, yetenek kullanın veya haritadan hamle yapın.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="char-panel" id="right-char-panel">
+      <div>
+        <div class="char-header">
+          <div class="char-role-tag" id="right-tag" style="color: var(--purple-glow);">GECE OYUNU • KAHRAMAN</div>
+          <div class="char-name-row">
+            <h3 id="right-name">👹 Alkarısı</h3>
+            <span class="status-pill night-tag" id="right-status">PUSUDA</span>
+          </div>
+        </div>
+
+        <div class="char-portrait-banner">
+          <div class="char-portrait-avatar" id="right-avatar">👹</div>
+          <div class="char-quote-preview" id="right-quote">"Gecenin en derin gölgesinden geldim; nefesinizi kesmeye hazırım!"</div>
+        </div>
+      </div>
+
+      <div class="skill-list" id="right-skills"></div>
+
+      <div class="char-select-bar">
+        <button class="mini-btn" onclick="speakCharacter(activeRightChar)">🔊 Sesli Giriş</button>
+        <button class="mini-btn" onclick="openModal('roles-modal')">🔄 Karakter</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ALT NAVİGASYON BAR -->
+  <footer class="bottom-hud">
+    <button class="nav-tab active" onclick="switchTab(this)">🗺️ HARİTA</button>
+    <button class="nav-tab" onclick="openModal('roles-modal')">🎭 15 KAHRAMAN</button>
+    <button class="nav-tab" onclick="openModal('guide-modal')">📖 OYUN KILAVUZU</button>
+    <button class="nav-tab" onclick="performAutonomousVote()">🗳️ OYLAMA / HAMLE</button>
+    <button class="nav-tab" onclick="openModal('scoreboard-modal')">🏆 SONUÇ LİSTESİ</button>
+    <button class="nav-tab" onclick="openModal('profile-modal')">👤 PROFİL & SES</button>
+  </footer>
+
+  <!-- 15 KARAKTER MODALI -->
+  <div class="modal-backdrop" id="roles-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🎭 Mini Legends — 15 Özel Karakter & Sesli Giriş Replikleri</h3>
+        <button class="close-btn" onclick="closeModal('roles-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); font-size: 12px;">Bir karaktere tıkladığınızda özel giriş repliği sesli ve altyazılı okunur ve karakter ilgili kuşağa atanır.</p>
+        <div class="grid-cards" id="all-roles-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OYUN KILAVUZU MODALI -->
+  <div class="modal-backdrop" id="guide-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>📖 Mini Legends — Oyun Kılavuzu & Otonom Akış</h3>
+        <button class="close-btn" onclick="closeModal('guide-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h4 style="color: var(--gold);">1. Yönetici Olmadan Otonom Oyun Akışı</h4>
+        <p>Oyun tıpkı klasik Kurt-Köylü dinamiklerinde olduğu gibi otomatik yönetilir. Moderatör çevrimiçi olmasa bile geri sayım sayacı Gece ve Gündüz fazlarını sırayla ilerletir.</p>
+        <h4 style="color: var(--blue-glow);">2. Gündüz Kuşağı & Strateji Evresi</h4>
+        <p><strong>Muhafız Galadriel</strong>, <strong>Stratejist Helen</strong>, <strong>Şifacı Estes</strong>, <strong>Işık Muhafızı</strong>, <strong>Zaman Büken</strong> ve <strong>Ruhlar Rehberi</strong> gündüz savunma, oylama ve taktik dengeyi kurar.</p>
+        <h4 style="color: var(--purple-glow);">3. Gece Oyunu & Mitolojik Güçler</h4>
+        <p><strong>Alkarısı</strong>, <strong>Büyücü Eudora</strong>, <strong>Tanrıça Sabrina</strong>, <strong>Gölge Avcısı</strong>, <strong>İnfazcı</strong>, <strong>Kıyamet Süvarisi</strong>, <strong>Casus</strong>, <strong>Sabotajcı</strong> ve <strong>Kan Emici</strong> gece aksiyonlarını yönetir.</p>
+        <h4 style="color: var(--green-glow);">4. Oyun Sonu Telegram Listesi</h4>
+        <p>Oyun sona erdiğinde katılan tüm üyelerin Telegram adları/kullanıcı adları, rolleri ve durumları oyun sonu listesinde görünür.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFİL MODALI -->
+  <div class="modal-backdrop" id="profile-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>👤 Kalıcı Oyuncu Profili & Ses Ayarları</h3>
+        <button class="close-btn" onclick="closeModal('profile-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid var(--blue-glow); padding: 10px; border-radius: 8px;">
+          <strong>Telegram Kimliği:</strong> <span id="tg-detected-info">Algılanıyor...</span>
+        </div>
+        <label>Görünecek Oyuncu Adı (Kalıcı Kaydedilir):</label>
+        <input type="text" id="input-display-name" placeholder="Örn: Seymen Sabir" />
+        <label>Ünvan / Favori Taraf:</label>
+        <select id="input-faction">
+          <option value="Rank: Elmas • Gündüz Muhafızı">Rank: Elmas • Gündüz Muhafızı</option>
+          <option value="Rank: Elmas • Gece Mitolojisi">Rank: Elmas • Gece Mitolojisi</option>
+          <option value="Rank: Elmas • Arkane Stratejist">Rank: Elmas • Arkane Stratejist</option>
+        </select>
+        <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+          <input type="checkbox" id="toggle-sound" checked style="width:18px; height:18px;" />
+          <label for="toggle-sound">Oyun Ses Efektleri & Karakter Seslendirmesi (TTS) Aktif</label>
+        </div>
+        <button class="action-btn" onclick="saveProfile()">💾 Profili Kalıcı Olarak Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OYUN SONU LİSTESİ MODALI -->
+  <div class="modal-backdrop" id="scoreboard-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>🏆 Oyun Sonu Rol & Telegram Katılımcı Listesi</h3>
+        <button class="close-btn" onclick="closeModal('scoreboard-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <table>
+          <thead>
+            <tr>
+              <th>Telegram Kullanıcısı</th>
+              <th>Atanan Karakter</th>
+              <th>Kuşak</th>
+              <th>Durum</th>
+            </tr>
+          </thead>
+          <tbody id="scoreboard-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CHARACTERS = [
+      {
+        id: 'galadriel', name: 'Muhafız Galadriel', group: 'Gündüz', emoji: '🛡️',
+        quote: 'Işığım sönmeden bu kalenin tek bir taşına bile dokunamazsınız!',
+        skills: [
+          { name: 'Kutsal Kalkan', desc: 'Bir müttefiki gece saldırılarından korur.' },
+          { name: 'Adalet Mührü', desc: 'Gündüz oylamasında +1 savunma gücü verir.' },
+          { name: 'İlahi Siper (Ulti)', desc: 'Tüm takıma 1 turluk koruma sağlar.' }
+        ]
+      },
+      {
+        id: 'eudora', name: 'Büyücü Eudora', group: 'Gece', emoji: '⚡',
+        quote: 'Gökyüzünün gazabı ve kadim yıldırım parmaklarımın ucunda!',
+        skills: [
+          { name: 'Arkane Patlaması', desc: 'Hedefin büyü enerjisini tüketir.' },
+          { name: 'Yıldırım Zinciri', desc: 'İki şüpheli arasında enerji bağı kurar.' },
+          { name: 'Fırtına Çağı (Ulti)', desc: 'Karanlık güçlerin yeteneklerini kilitler.' }
+        ]
+      },
+      {
+        id: 'alkarisi', name: 'Alkarısı', group: 'Gece', emoji: '👹',
+        quote: 'Gecenin en derin gölgesinden geldim; nefesinizi kesmeye hazırım!',
+        skills: [
+          { name: 'Gece Karabasanı', desc: 'Hedefin gece görüşünü ve eylemini engeller.' },
+          { name: 'Kızıl Fısıltı', desc: 'Sahte ipuçları yayarak gündüzü karıştırır.' },
+          { name: 'Kabus Çöküşü (Ulti)', desc: 'Arenada kabus atmosferi başlatır.' }
+        ]
+      },
+      {
+        id: 'helen', name: 'Stratejist Helen', group: 'Gündüz', emoji: '👑',
+        quote: 'Akıl ve zarafet kılıçtan keskindir; bu masanın kaderini ben çizerim.',
+        skills: [
+          { name: 'Stratejik Deha', desc: 'Gündüz oylamasında oy ağırlığını artırır.' },
+          { name: 'Diplomatik Hamle', desc: 'Bir oyuncunun infazını askıya alır.' },
+          { name: 'Altın Konsey (Ulti)', desc: 'Bir oyuncunun tarafını analiz eder.' }
+        ]
+      },
+      {
+        id: 'estes', name: 'Şifacı Estes', group: 'Gündüz', emoji: '🌿',
+        quote: 'Ay ışığının şefkati en derin yaraları bile yeniden hayata döndürür.',
+        skills: [
+          { name: 'Işık Şifası', desc: 'Saldırıya uğrayan oyuncuyu iyileştirir.' },
+          { name: 'Kutsal Bağ', desc: 'İki oyuncunun dayanıklılığını dengeler.' },
+          { name: 'Yaşam Pınarı (Ulti)', desc: 'Düşen bir müttefike can verir.' }
+        ]
+      },
+      {
+        id: 'sabrina', name: 'Tanrıça Sabrina', group: 'Gece', emoji: '⏳',
+        quote: 'Zaman benim emrimde akar; geçmişi siler, geleceği yeniden yazarım.',
+        skills: [
+          { name: 'Zamanı Bükme', desc: 'Faz süresini 30 saniye değiştirir.' },
+          { name: 'Kader Döngüsü', desc: 'Son hamlenin etkisini tersine çevirir.' },
+          { name: 'Sonsuz Tutulma (Ulti)', desc: 'Gece etkisini uzatır.' }
+        ]
+      },
+      {
+        id: 'shadow_hunter', name: 'Gölge Avcısı', group: 'Gece', emoji: '🏹',
+        quote: 'Karanlıkta saklanan hiçbir av oklarımdan kaçamaz.',
+        skills: [
+          { name: 'Gölge Oku', desc: 'Gece seçilen hedefi nişan alır.' },
+          { name: 'İz Sürücü', desc: 'Hedefin gece hareketini izler.' },
+          { name: 'Gümüş Yağmuru (Ulti)', desc: 'Savunma kalkanlarını deler.' }
+        ]
+      },
+      {
+        id: 'executioner', name: 'İnfazcı', group: 'Gece', emoji: '🪓',
+        quote: 'Hüküm verildiğinde baltam asla tereddüt etmez.',
+        skills: [
+          { name: 'Kesin Hüküm', desc: 'Hedefi gece saf dışı bırakır.' },
+          { name: 'Korku Aurası', desc: 'Çevredeki oyuncuların oylarını baskılar.' },
+          { name: 'Son Darbe (Ulti)', desc: 'Zayıflamış hedefi doğrudan eler.' }
+        ]
+      },
+      {
+        id: 'doomsday', name: 'Kıyamet Süvarisi', group: 'Gece', emoji: '🐎',
+        quote: 'Nallarımın sesi duyulduğunda tüm dengeler yerle bir olur!',
+        skills: [
+          { name: 'Kaos Dalgası', desc: 'Turdaki dengeleri altüst eder.' },
+          { name: 'Alev İzi', desc: 'Seçilen bölgeyi ateşe verir.' },
+          { name: 'Mahşer Çağrısı (Ulti)', desc: 'Pasif etkileri geçici kapatır.' }
+        ]
+      },
+      {
+        id: 'spy', name: 'Casus', group: 'Gece', emoji: '🕵️',
+        quote: 'Duvarların bile kulağı vardır, ama benim gözüm her sırrı görür.',
+        skills: [
+          { name: 'Bilgi Sızdırma', desc: 'Hedefin rol ipucunu toplar.' },
+          { name: 'Kimlik Gizleme', desc: 'İncelemelerde kimliğini gizler.' },
+          { name: 'Büyük İfşa (Ulti)', desc: 'Gizli bir rolü ortaya çıkarır.' }
+        ]
+      },
+      {
+        id: 'saboteur', name: 'Sabotajcı', group: 'Gece', emoji: '💣',
+        quote: 'En kusursuz planlar bile tek bir kıvılcımla küle döner.',
+        skills: [
+          { name: 'Mekanizma Kilidi', desc: 'Hedefin yeteneğini 1 tur kilitler.' },
+          { name: 'Tuzak Kurma', desc: 'Saldıran hedefe tuzak kurar.' },
+          { name: 'Tam Çöküş (Ulti)', desc: 'Oylama dengesini bozar.' }
+        ]
+      },
+      {
+        id: 'light_warden', name: 'Işık Muhafızı', group: 'Gündüz', emoji: '☀️',
+        quote: 'Şafak söktüğünde hiçbir gölge ayakta kalamaz!',
+        skills: [
+          { name: 'Şafak Kalkanı', desc: 'Gündüz oylamasına karşı korur.' },
+          { name: 'Hakikat Işığı', desc: 'Şüpheli hamleyi aydınlatır.' },
+          { name: 'Güneş Patlaması (Ulti)', desc: 'Gece etkisini gündüz ışığıyla bozar.' }
+        ]
+      },
+      {
+        id: 'vampire', name: 'Kan Emici', group: 'Gece', emoji: '🧛',
+        quote: 'Sizin yaşam enerjiniz benim ölümsüzlüğümün yakıtıdır.',
+        skills: [
+          { name: 'Yaşam Çekimi', desc: 'Hedeften enerji çeker.' },
+          { name: 'Gece Pelerini', desc: 'Gece saldırılarından sıyrılır.' },
+          { name: 'Kızıl Dolunay (Ulti)', desc: 'İki hedeften güç sömürür.' }
+        ]
+      },
+      {
+        id: 'time_bender', name: 'Zaman Büken', group: 'Gündüz', emoji: '🌀',
+        quote: 'Saatler benim için işlemez; anı durdurur, hamleyi değiştiririm.',
+        skills: [
+          { name: 'Akış Kontrolü', desc: 'Tartışma süresini düzenler.' },
+          { name: 'Yankı Hamlesi', desc: 'Önceki turun hamlesini tekrarlar.' },
+          { name: 'Kronos Mührü (Ulti)', desc: 'Turdaki hamleleri dondurur.' }
+        ]
+      },
+      {
+        id: 'spirit_guide', name: 'Ruhlar Rehberi', group: 'Gündüz', emoji: '👻',
+        quote: 'Ölüler sessiz değildir; fısıltıları bize gerçeği gösterir.',
+        skills: [
+          { name: 'Ruh İletişimi', desc: 'Elenen oyunculardan ipucu alır.' },
+          { name: 'Ruhani Kalkan', desc: 'Ruhsal koruma sağlar.' },
+          { name: 'Diriliş Ayini (Ulti)', desc: 'Son eylemi yeniden canlandırır.' }
+        ]
+      }
+    ];
+
+    const STORAGE_KEY = 'mini_legends_state_v2';
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    const tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : {
+      id: '748291054',
+      first_name: 'Seymen',
+      last_name: 'Sabir',
+      username: 'seymensabir'
+    };
+
+    const currentUserId = String(tgUser.id);
+    const autoTgName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || tgUser.username || `ID:${currentUserId}`;
+
+    function loadState() {
+      const fallback = {
+        founderId: '',
+        authorizedYts: [],
+        profile: {
+          displayName: autoTgName,
+          faction: 'Rank: Elmas • Gündüz Muhafızı',
+          soundEnabled: true
+        },
+        gold: 1450,
+        mana: 780,
+        gem: 4,
+        isNight: true,
+        timeLeft: 165,
+        turn: 14,
+        votingOpen: true,
+        gameEnded: false,
+        pendingBroadcast: null,
+        lastBroadcastId: 0,
+        logs: ['[SİSTEM] Mini Legends başlatıldı.'],
+        participants: []
+      };
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return parsed ? { ...fallback, ...parsed, profile: { ...fallback.profile, ...(parsed.profile || {}) } } : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    let appState = loadState();
+
+    if (!appState.participants.some(p => p.id === currentUserId)) {
+      appState.participants.push({
+        id: currentUserId,
+        tgLabel: tgUser.username ? `@${tgUser.username} (${autoTgName})` : `${autoTgName} [ID:${currentUserId}]`,
+        roleName: 'Muhafız Galadriel',
+        group: 'Gündüz',
+        alive: true
+      });
+    }
+
+    let activeLeftChar = CHARACTERS[0];
+    let activeRightChar = CHARACTERS[2];
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      updateHudUI();
+    }
+
+    function addLog(msg) {
+      const time = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      appState.logs.unshift(`[${time}] ${msg}`);
+      if (appState.logs.length > 50) appState.logs.pop();
+      saveState();
+    }
+
+    function playGameTone(type = 'click') {
+      if (!appState.profile.soundEnabled) return;
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'magic') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.25);
+        } else if (type === 'alert') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(520, ctx.currentTime + 0.3);
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(580, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.12);
+        }
+
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e) {}
+    }
+
+    function showSubtitleAndSpeak(speaker, text, tone = 'magic') {
+      document.getElementById('sub-speaker').textContent = `${speaker}:`;
+      document.getElementById('sub-content').textContent = text;
+      playGameTone(tone);
+
+      if (appState.profile.soundEnabled && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(`${speaker}. ${text}`);
+        utter.lang = 'tr-TR';
+        utter.rate = 1.03;
+        window.speechSynthesis.speak(utter);
+      }
+    }
+
+    function renderCharacterPanels() {
+      document.getElementById('left-tag').textContent = `${activeLeftChar.group.toUpperCase()} KUŞAĞI • KAHRAMAN`;
+      document.getElementById('left-name').textContent = `${activeLeftChar.emoji} ${activeLeftChar.name}`;
+      document.getElementById('left-avatar').textContent = activeLeftChar.emoji;
+      document.getElementById('left-quote').textContent = `"${activeLeftChar.quote}"`;
+      document.getElementById('left-skills').innerHTML = activeLeftChar.skills.map(s => `
+        <div class="skill-item" onclick="useSkill('${activeLeftChar.name}', '${s.name}', '${s.desc}')">
+          <div class="skill-icon">✨</div>
+          <div class="skill-meta">
+            <h5>${s.name}</h5>
+            <p>${s.desc}</p>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('right-tag').textContent = `${activeRightChar.group.toUpperCase()} OYUNU • KAHRAMAN`;
+      document.getElementById('right-name').textContent = `${activeRightChar.emoji} ${activeRightChar.name}`;
+      document.getElementById('right-avatar').textContent = activeRightChar.emoji;
+      document.getElementById('right-quote').textContent = `"${activeRightChar.quote}"`;
+      document.getElementById('right-skills').innerHTML = activeRightChar.skills.map(s => `
+        <div class="skill-item" onclick="useSkill('${activeRightChar.name}', '${s.name}', '${s.desc}')">
+          <div class="skill-icon">🔮</div>
+          <div class="skill-meta">
+            <h5>${s.name}</h5>
+            <p>${s.desc}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function speakCharacter(charObj) {
+      showSubtitleAndSpeak(charObj.name, `"${charObj.quote}"`, 'magic');
+    }
+
+    function useSkill(charName, skillName, desc) {
+      if (appState.mana >= 20) appState.mana -= 20;
+      showSubtitleAndSpeak(charName, `${skillName} etkinleştirildi. ${desc}`, 'alert');
+      addLog(`${appState.profile.displayName} (${charName}) -> ${skillName} kullandı.`);
+    }
+
+    function triggerHexAction(zoneName) {
+      appState.gold += 15;
+      showSubtitleAndSpeak('THE REALM', `${zoneName} bölgesinde hamle yapıldı (+15 Altın).`, 'click');
+      addLog(`${appState.profile.displayName}, ${zoneName} bölgesine yerleşti.`);
+    }
+
+    function performAutonomousVote() {
+      if (!appState.votingOpen) {
+        showSubtitleAndSpeak('OYLAMA KAPALI', 'Yönetici oylamayı şu an kapalı tutuyor. Faz akışını takip edin.', 'alert');
+        return;
+      }
+      const target = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+      showSubtitleAndSpeak('OTONOM OYLAMA', `${appState.profile.displayName}, ${target.name} için stratejik oyunu kaydetti.`, 'click');
+      addLog(`${appState.profile.displayName}, ${target.name} için oy verdi.`);
+    }
+
+    function renderAllRolesGrid() {
+      document.getElementById('all-roles-grid').innerHTML = CHARACTERS.map(c => `
+        <div class="role-card" onclick="selectCharacter('${c.id}')">
+          <h4>${c.emoji} ${c.name} <span style="font-size:10px; color:#94a3b8;">(${c.group})</span></h4>
+          <div class="quote">"${c.quote}"</div>
+          <div class="ability">⚡ ${c.skills[0].name}: ${c.skills[0].desc}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectCharacter(charId) {
+      const chosen = CHARACTERS.find(c => c.id === charId);
+      if (!chosen) return;
+
+      if (chosen.group === 'Gündüz') {
+        activeLeftChar = chosen;
+      } else {
+        activeRightChar = chosen;
+      }
+
+      const me = appState.participants.find(p => p.id === currentUserId);
+      if (me) {
+        me.roleName = chosen.name;
+        me.group = chosen.group;
+      }
+
+      renderCharacterPanels();
+      saveState();
+      closeModal('roles-modal');
+      speakCharacter(chosen);
+      addLog(`${appState.profile.displayName} karakterini ${chosen.name} olarak seçti.`);
+    }
+
+    function isAuthorizedYt() {
+      return !appState.founderId || appState.founderId === currentUserId || appState.authorizedYts.some(y => y.id === currentUserId);
+    }
+
+    function handleYtAccess() {
+      playGameTone('click');
+      if (appState.founderId && !isAuthorizedYt()) {
+        showSubtitleAndSpeak('YETKİ GEREKLİ', 'Yönet YT ekranına yalnızca Founder ID onayı alan yetkililer girebilir.', 'alert');
+        return;
+      }
+      window.location.href = './yt_panel.html';
+    }
+
+    function toggleDayNight() {
+      appState.isNight = !appState.isNight;
+      appState.timeLeft = 165;
+      if (!appState.isNight) appState.turn += 1;
+
+      const phaseText = appState.isNight ? 'GECE OYUNU BAŞLADI' : 'GÜNDÜZ KUŞAĞI BAŞLADI';
+      showSubtitleAndSpeak('OTONOM DÖNGÜ', `${phaseText}. Tur ${appState.turn} devam ediyor.`, 'magic');
+      addLog(`Otonom faz geçişi: ${phaseText} (Tur ${appState.turn})`);
+      saveState();
+    }
+
+    setInterval(() => {
+      if (appState.timeLeft > 0) {
+        appState.timeLeft -= 1;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } else {
+        toggleDayNight();
+      }
+      renderTimerOnly();
+    }, 1000);
+
+    function renderTimerOnly() {
+      const mins = String(Math.floor(appState.timeLeft / 60)).padStart(2, '0');
+      const secs = String(appState.timeLeft % 60).padStart(2, '0');
+      document.getElementById('phase-timer').textContent = `${mins}:${secs}`;
+    }
+
+    function saveProfile() {
+      const nameVal = document.getElementById('input-display-name').value.trim();
+      const factionVal = document.getElementById('input-faction').value;
+      const soundVal = document.getElementById('toggle-sound').checked;
+
+      if (nameVal) appState.profile.displayName = nameVal;
+      appState.profile.faction = factionVal;
+      appState.profile.soundEnabled = soundVal;
+
+      saveState();
+      closeModal('profile-modal');
+      showSubtitleAndSpeak('PROFİL KAYDEDİLDİ', `${appState.profile.displayName} profil bilgileri kalıcı olarak güncellendi.`, 'click');
+    }
+
+    function syncFromYtPanel() {
+      const latest = loadState();
+      const phaseChanged = latest.isNight !== appState.isNight || latest.turn !== appState.turn;
+      appState = { ...appState, ...latest, profile: { ...appState.profile, ...(latest.profile || {}) } };
+
+      if (appState.pendingBroadcast && appState.pendingBroadcast.id !== appState.lastBroadcastId) {
+        appState.lastBroadcastId = appState.pendingBroadcast.id;
+        showSubtitleAndSpeak(appState.pendingBroadcast.speaker, appState.pendingBroadcast.text, 'alert');
+        appState.pendingBroadcast = null;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } else if (phaseChanged) {
+        showSubtitleAndSpeak('YÖNET YT FAZ GÜNCELLEMESİ', `Faz ${appState.isNight ? 'GECE' : 'GÜNDÜZ'} olarak güncellendi (Tur ${appState.turn}).`, 'magic');
+      }
+
+      if (appState.gameEnded) {
+        appState.gameEnded = false;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        openModal('scoreboard-modal');
+      }
+
+      updateHudUI();
+    }
+
+    window.addEventListener('storage', (e) => {
+      if (e.key === STORAGE_KEY) syncFromYtPanel();
+    });
+
+    function updateHudUI() {
+      document.getElementById('hud-name').textContent = appState.profile.displayName;
+      document.getElementById('hud-avatar').textContent = appState.profile.displayName.charAt(0).toUpperCase();
+      document.getElementById('hud-rank').textContent = `Lvl 16 • ${appState.profile.faction}`;
+      document.getElementById('res-gold').textContent = appState.gold;
+      document.getElementById('res-mana').textContent = appState.mana;
+      document.getElementById('res-gem').textContent = appState.gem;
+      document.getElementById('turn-counter').textContent = `TUR ${appState.turn} • ${appState.votingOpen ? 'OYLAMA AÇIK' : 'OYLAMA KAPALI'}`;
+
+      document.getElementById('phase-label').textContent = appState.isNight ? 'FAZ: GECE' : 'FAZ: GÜNDÜZ';
+      document.getElementById('moon-icon').classList.toggle('active-moon', appState.isNight);
+      document.getElementById('sun-icon').classList.toggle('active-sun', !appState.isNight);
+      renderTimerOnly();
+
+      const ytBtn = document.getElementById('yt-port-btn');
+      ytBtn.classList.toggle('yt-locked', Boolean(appState.founderId && !isAuthorizedYt()));
+
+      document.getElementById('tg-detected-info').textContent = `${autoTgName} (Telegram ID: ${currentUserId})`;
+      document.getElementById('input-display-name').value = appState.profile.displayName;
+      document.getElementById('input-faction').value = appState.profile.faction;
+      document.getElementById('toggle-sound').checked = appState.profile.soundEnabled;
+
+      const demoOthers = [
+        { tgLabel: '@arena_uzmani (Kaan)', roleName: 'Büyücü Eudora', group: 'Gece', alive: true },
+        { tgLabel: '@mitoloji_avcisi (Selin)', roleName: 'Stratejist Helen', group: 'Gündüz', alive: true },
+        { tgLabel: '@gece_yolcusu (Mert)', roleName: 'Alkarısı', group: 'Gece', alive: false }
+      ];
+      const fullList = [...(appState.participants || []), ...demoOthers];
+      document.getElementById('scoreboard-tbody').innerHTML = fullList.map(p => `
+        <tr>
+          <td><strong>${p.tgLabel}</strong></td>
+          <td style="color:var(--gold);">${p.roleName}</td>
+          <td>${p.group}</td>
+          <td>${p.alive ? '<span style="color:var(--green-glow);">● Hayatta</span>' : '<span style="color:var(--red-glow);">✕ Elendi</span>'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function openModal(id) {
+      playGameTone('click');
+      if (id === 'roles-modal') renderAllRolesGrid();
+      if (id === 'scoreboard-modal') updateHudUI();
+      document.getElementById(id).classList.add('open');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function switchTab(el) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      playGameTone('click');
+    }
+
+    renderCharacterPanels();
+    updateHudUI();
+  </script>
+</body>
+</html>
