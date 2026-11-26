@@ -23,8 +23,9 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --safe-left: env(safe-area-inset-left, 0px);
       --safe-right: env(safe-area-inset-right, 0px);
-      --tg-top-pad: 8px;
-      --tg-right-pad: 38px;
+      --tg-top-pad: 22px;
+      --tg-right-pad: 46px;
+      --tg-bottom-pad: 12px;
     }
 
     * {
@@ -92,12 +93,12 @@
 
     /* ÜST HUD */
     .top-hud {
-      min-height: 44px;
+      min-height: 46px;
       height: auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: calc(var(--safe-top) + var(--tg-top-pad)) calc(var(--safe-right) + var(--tg-right-pad)) 4px calc(var(--safe-left) + 12px);
+      padding: calc(var(--safe-top) + var(--tg-top-pad)) calc(var(--safe-right) + var(--tg-right-pad)) 4px calc(var(--safe-left) + 16px);
       background: linear-gradient(180deg, rgba(5, 9, 18, 0.96) 0%, rgba(5, 9, 18, 0.72) 100%);
       border-bottom: 1px solid rgba(245, 196, 81, 0.18);
       z-index: 20;
@@ -116,7 +117,7 @@
       cursor: pointer;
       transition: transform 0.15s, border-color 0.15s;
       flex-shrink: 0;
-      max-width: 176px;
+      max-width: 170px;
     }
     .player-card:hover { border-color: var(--gold); }
     .player-card:active { transform: scale(0.97); }
@@ -189,7 +190,7 @@
       gap: 5px;
       flex-shrink: 0;
     }
-    .brand-title { text-align: right; max-width: 118px; }
+    .brand-title { text-align: right; max-width: 110px; }
     .brand-title h2 { font-size: 10.5px; letter-spacing: 0.6px; color: var(--gold); font-weight: 900; line-height: 1.05; white-space: nowrap; }
     .brand-title span { font-size: 7.5px; color: var(--text-muted); font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -208,6 +209,22 @@
       flex-shrink: 0;
     }
     .port-btn:hover { transform: translateY(-1px); box-shadow: 0 0 12px rgba(245, 196, 81, 0.4); }
+    .port-btn.lobby-port {
+      border-color: var(--green-glow);
+      box-shadow: 0 0 10px rgba(52, 211, 153, 0.25);
+    }
+    .lobby-badge {
+      position: absolute;
+      bottom: -3px;
+      right: -3px;
+      background: linear-gradient(90deg, #059669, #34d399);
+      color: #041019;
+      font-size: 7px;
+      font-weight: 900;
+      padding: 0 3px;
+      border-radius: 4px;
+      border: 1px solid #fff;
+    }
     .port-btn.yt-port { border-color: var(--purple-glow); }
     .port-btn.yt-locked { opacity: 0.5; border-color: #475569; }
     .yt-badge {
@@ -227,9 +244,9 @@
     .main-arena {
       flex: 1;
       display: grid;
-      grid-template-columns: minmax(154px, 184px) 1fr minmax(154px, 184px);
+      grid-template-columns: minmax(154px, 182px) 1fr minmax(154px, 182px);
       gap: 7px;
-      padding: 3px calc(var(--safe-right) + var(--tg-right-pad)) 3px calc(var(--safe-left) + 12px);
+      padding: 4px calc(var(--safe-right) + var(--tg-right-pad)) 4px calc(var(--safe-left) + 14px);
       position: relative;
       overflow: hidden;
       min-height: 0;
@@ -321,8 +338,7 @@
       overflow: hidden;
     }
 
-    /* LoL TARZI 3 SOKET: EN ÜSTTE ULTI (2. ŞAFAKTAN SONRA), ALTTA 2 GENEL ÖZELLİK */
-    .socket-rack {
+    .skill-list {
       display: flex;
       flex-direction: column;
       gap: 3px;
@@ -330,32 +346,22 @@
       overflow-y: auto;
       min-height: 0;
     }
-    .socket-slot {
+    .skill-item {
       display: flex;
       align-items: center;
       gap: 5px;
       background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       padding: 3px 5px;
       border-radius: 7px;
       cursor: pointer;
       transition: 0.15s;
     }
-    .socket-slot:hover {
+    .skill-item:hover {
       border-color: var(--gold);
       background: rgba(245, 196, 81, 0.12);
     }
-    .socket-slot.ulti-slot {
-      border: 1.2px solid rgba(245, 196, 81, 0.65);
-      background: linear-gradient(90deg, rgba(245, 196, 81, 0.16), rgba(192, 132, 252, 0.1));
-    }
-    .socket-slot.ulti-locked {
-      opacity: 0.52;
-      border-style: dashed;
-      border-color: rgba(148, 163, 184, 0.45);
-      background: rgba(15, 23, 42, 0.55);
-    }
-    .socket-gem {
+    .skill-gem-mini {
       width: 20px;
       height: 20px;
       border-radius: 50%;
@@ -369,36 +375,9 @@
       color: var(--gold);
       flex-shrink: 0;
     }
-    .ulti-slot .socket-gem {
-      border-color: #f97316;
-      box-shadow: 0 0 8px rgba(245, 196, 81, 0.35);
-    }
-    .socket-meta { flex: 1; min-width: 0; }
-    .socket-meta h5 {
-      font-size: 9px;
-      color: #fff;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 4px;
-    }
-    .socket-tag {
-      font-size: 6.5px;
-      padding: 0.5px 4px;
-      border-radius: 4px;
-      font-weight: 800;
-      background: rgba(56, 189, 248, 0.18);
-      color: var(--blue-glow);
-      flex-shrink: 0;
-    }
-    .ulti-slot .socket-tag {
-      background: rgba(245, 196, 81, 0.25);
-      color: var(--gold);
-    }
-    .socket-meta p { font-size: 7.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .skill-meta { flex: 1; min-width: 0; }
+    .skill-meta h5 { font-size: 9px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .skill-meta p { font-size: 7.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .char-select-bar {
       display: flex;
@@ -420,7 +399,7 @@
     }
     .mini-btn:hover { background: var(--gold); color: #070b14; }
 
-    /* MERKEZ 3D ADA & GÖKSEL/TAKTİK SAHNE */
+    /* MERKEZ 3D ADA & GÖKSEL SAHNE */
     .realm-map {
       position: relative;
       display: flex;
@@ -436,9 +415,9 @@
     .island-3d-stage {
       position: relative;
       width: 100%;
-      max-width: 450px;
+      max-width: 440px;
       height: 100%;
-      max-height: 224px;
+      max-height: 220px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -462,16 +441,13 @@
 
     .floating-3d-island {
       position: relative;
-      width: 274px;
-      height: 128px;
+      width: 268px;
+      height: 124px;
       margin-top: 6px;
       transform: rotateX(24deg) rotateZ(-1.5deg);
       transform-style: preserve-3d;
       transition: transform 0.35s ease, filter 0.35s ease;
       cursor: pointer;
-    }
-    .floating-3d-island:hover {
-      transform: rotateX(20deg) rotateZ(0deg) translateY(-2px);
     }
     .floating-3d-island.fx-cast {
       animation: islandShock 0.72s ease-out;
@@ -487,7 +463,7 @@
       left: 26px;
       right: 26px;
       bottom: 2px;
-      height: 44px;
+      height: 42px;
       clip-path: polygon(10% 0%, 90% 0%, 72% 72%, 50% 100%, 28% 72%);
       background: linear-gradient(180deg, #1e293b 0%, #0f172a 55%, #060a14 100%);
       opacity: 0.92;
@@ -496,8 +472,8 @@
       position: absolute;
       left: 10px;
       right: 10px;
-      bottom: 18px;
-      height: 36px;
+      bottom: 16px;
+      height: 34px;
       border-radius: 50%;
       border: 1.5px solid rgba(56, 189, 248, 0.35);
       background: radial-gradient(circle, rgba(14, 165, 233, 0.14) 0%, transparent 72%);
@@ -505,7 +481,7 @@
     .island-top-deck {
       position: relative;
       width: 100%;
-      height: 92px;
+      height: 88px;
       border-radius: 48%;
       background:
         radial-gradient(circle at 50% 45%, rgba(245, 196, 81, 0.22), rgba(15, 36, 56, 0.95) 68%, rgba(8, 20, 36, 0.98) 100%);
@@ -589,85 +565,66 @@
       text-overflow: ellipsis;
     }
 
-    /* ARAYÜZ İÇİ LOBİ KUTUSU (MERKEZDE ÇALIŞIR, EKRANI KİLİTLEMEZ) */
-    .arena-lobby-box {
-      position: absolute;
-      inset: 4px 6px 26px 6px;
-      background: rgba(8, 14, 28, 0.96);
-      border: 1.5px solid var(--gold);
-      border-radius: 12px;
-      padding: 7px 9px;
+    /* MOBA TARZI SAĞ ALT KÖŞE YUVARLAK SOKET PORTLARI (OYUN BAŞLAYINCA GÖRÜNÜR) */
+    .moba-socket-dock {
       display: none;
+      position: fixed;
+      right: calc(var(--safe-right) + var(--tg-right-pad) + 6px);
+      bottom: calc(var(--safe-bottom) + var(--tg-bottom-pad) + 36px);
       flex-direction: column;
-      justify-content: space-between;
-      gap: 4px;
-      z-index: 25;
-      overflow-y: auto;
-    }
-    .arena-lobby-box.open { display: flex; }
-
-    .lobby-head-row {
-      display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 6px;
-      border-bottom: 1px solid rgba(245, 196, 81, 0.22);
-      padding-bottom: 4px;
+      z-index: 45;
     }
-    .brand-lockup {
+    .moba-socket-dock.active {
       display: flex;
-      align-items: center;
-      gap: 8px;
     }
-    .logo-stack {
+    .moba-port-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 25%, rgba(56, 189, 248, 0.28), rgba(9, 15, 30, 0.96) 72%);
+      border: 2px solid var(--blue-glow);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.75), inset 0 0 10px rgba(56, 189, 248, 0.25);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 1.5px;
-      flex-shrink: 0;
-    }
-    .golden-gay-emblem {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      border: 1.5px solid var(--gold);
-      background: radial-gradient(circle at 30% 30%, rgba(245, 196, 81, 0.35), rgba(15, 23, 42, 0.95));
-      display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
+      transition: transform 0.16s, box-shadow 0.16s, border-color 0.16s;
+      position: relative;
     }
-    .powered-sub {
-      font-size: 7px;
-      font-weight: 800;
-      color: var(--gold);
+    .moba-port-btn:hover {
+      transform: scale(1.08);
+      border-color: var(--gold);
+      box-shadow: 0 0 16px rgba(245, 196, 81, 0.45);
+    }
+    .moba-port-btn:active {
+      transform: scale(0.95);
+    }
+    .moba-port-btn.ulti-port {
+      width: 46px;
+      height: 46px;
+      border: 2.5px solid var(--gold);
+      background: radial-gradient(circle at 30% 25%, rgba(245, 196, 81, 0.35), rgba(24, 15, 38, 0.96) 72%);
+      box-shadow: 0 0 16px rgba(245, 196, 81, 0.35);
+    }
+    .moba-port-btn.ulti-locked {
+      opacity: 0.48;
+      border-style: dashed;
+      border-color: #94a3b8;
+      box-shadow: none;
+    }
+    .moba-port-icon {
+      font-size: 14px;
       line-height: 1;
-      white-space: nowrap;
     }
-
-    .lobby-controls-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      align-items: center;
-    }
-    .lobby-players-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
-    .lobby-player-chip {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2.5px 6px;
-      border-radius: 7px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      font-size: 9px;
-    }
-    .lobby-player-chip.ready {
-      border-color: var(--green-glow);
-      background: rgba(52, 211, 153, 0.14);
+    .moba-port-key {
+      font-size: 7.5px;
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: 0.3px;
+      margin-top: 1px;
     }
 
     /* SESLİ & ALTYAZILI ANLATIM BANDI */
@@ -720,7 +677,7 @@
       background: rgba(5, 9, 18, 0.97);
       border-top: 1px solid rgba(245, 196, 81, 0.2);
       z-index: 20;
-      padding: 3px calc(var(--safe-right) + var(--tg-right-pad)) calc(var(--safe-bottom) + 3px) calc(var(--safe-left) + 12px);
+      padding: 3px calc(var(--safe-right) + var(--tg-right-pad)) calc(var(--safe-bottom) + var(--tg-bottom-pad)) calc(var(--safe-left) + 12px);
       flex-shrink: 0;
       overflow-x: auto;
     }
@@ -746,7 +703,7 @@
       color: var(--gold);
     }
 
-    /* MODALLAR */
+    /* MODALLAR (LOBİ MODALI DAHİL SİMGEYE TIKLAYINCA AÇILIR) */
     .modal-backdrop {
       display: none;
       position: fixed;
@@ -756,7 +713,7 @@
       z-index: 100;
       align-items: center;
       justify-content: center;
-      padding: max(50px, calc(var(--safe-top) + var(--tg-top-pad) + 40px)) calc(var(--safe-right) + var(--tg-right-pad) + 6px) max(12px, calc(var(--safe-bottom) + 10px)) calc(var(--safe-left) + 14px);
+      padding: max(54px, calc(var(--safe-top) + var(--tg-top-pad) + 36px)) calc(var(--safe-right) + var(--tg-right-pad) + 6px) max(14px, calc(var(--safe-bottom) + var(--tg-bottom-pad))) calc(var(--safe-left) + 16px);
     }
     .modal-backdrop.open { display: flex; }
     .modal-box {
@@ -765,7 +722,7 @@
       border-radius: 14px;
       width: 96%;
       max-width: 820px;
-      max-height: calc(100dvh - 66px);
+      max-height: calc(100dvh - 82px);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -802,6 +759,62 @@
       font-size: 11.5px;
     }
 
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5px;
+      flex-shrink: 0;
+    }
+    .golden-gay-emblem {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      border: 1.5px solid var(--gold);
+      background: radial-gradient(circle at 30% 30%, rgba(245, 196, 81, 0.35), rgba(15, 23, 42, 0.95));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .powered-sub {
+      font-size: 7px;
+      font-weight: 800;
+      color: var(--gold);
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .lobby-controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .lobby-players-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .lobby-player-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 10.5px;
+    }
+    .lobby-player-chip.ready {
+      border-color: var(--green-glow);
+      background: rgba(52, 211, 153, 0.14);
+    }
+
     .grid-cards {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
@@ -812,6 +825,7 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 10px;
       padding: 8px;
+      cursor: pointer;
     }
     .role-card h4 { color: var(--gold); font-size: 11.5px; margin-bottom: 2px; }
     .role-card .quote { font-style: italic; color: #cbd5e1; font-size: 10px; margin-bottom: 4px; }
@@ -821,19 +835,19 @@
       background: #070b14;
       border: 1px solid var(--border-gold);
       color: #fff;
-      padding: 5px 8px;
-      border-radius: 7px;
-      font-size: 10px;
+      padding: 6px 9px;
+      border-radius: 8px;
+      font-size: 11px;
     }
     .action-btn {
       background: linear-gradient(90deg, #d97706, #f59e0b);
       color: #070b14;
       font-weight: 800;
       border: none;
-      padding: 5px 10px;
-      border-radius: 7px;
+      padding: 6px 11px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 9.5px;
+      font-size: 10.5px;
       white-space: nowrap;
     }
     .secondary-btn {
@@ -841,10 +855,10 @@
       color: var(--blue-glow);
       font-weight: 700;
       border: 1px solid rgba(56, 189, 248, 0.45);
-      padding: 5px 8px;
-      border-radius: 7px;
+      padding: 6px 10px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 9.5px;
+      font-size: 10.5px;
       white-space: nowrap;
     }
     table {
@@ -875,7 +889,7 @@
         <div class="avatar-ring" id="hud-avatar">B</div>
         <div class="player-info">
           <h4 id="hud-name">BRESKAVICA</h4>
-          <span id="hud-rank">Taraf: Gündüz</span>
+          <span id="hud-rank">Lvl 1 • Gündüz</span>
         </div>
       </div>
       <div class="resources">
@@ -897,10 +911,20 @@
     <div class="brand-ports">
       <div class="brand-title">
         <h2>MINI LEGENDS</h2>
-        <span id="turn-counter">Powered by BRESKAVICA</span>
+        <span id="turn-counter">BRESKAVICA • TUR 1</span>
       </div>
 
-      <div class="port-btn" onclick="openModal('roles-modal')" title="15 Kahraman & Soket Arşivi">
+      <!-- LOBİ SİMGESİ: Tıklandığında Lobby açılır -->
+      <div class="port-btn lobby-port" onclick="openLobbyModal()" title="Lobby Penceresini Aç">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M16 11C17.66 11 19 9.66 19 8C19 6.34 17.66 5 16 5" stroke="#34d399" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M9 11C11.21 11 13 9.21 13 7C13 4.79 11.21 3 9 3C6.79 3 5 4.79 5 7C5 9.21 6.79 11 9 11Z" stroke="#f5c451" stroke-width="1.8"/>
+          <path d="M3 19C3 16.24 5.69 14 9 14C12.31 14 15 16.24 15 19" stroke="#f5c451" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <span class="lobby-badge">LOBBY</span>
+      </div>
+
+      <div class="port-btn" onclick="openModal('roles-modal')" title="15 Kahraman Arşivi">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
           <path d="M12 2L4 5V11C4 16.55 7.41 21.74 12 23C16.59 21.74 20 16.55 20 11V5L12 2Z" stroke="#f5c451" stroke-width="2" fill="rgba(245,196,81,0.16)"/>
           <path d="M14.5 7.5L9.5 16.5M9.5 7.5L14.5 16.5" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
@@ -919,11 +943,11 @@
 
   <!-- ANA ARENA -->
   <main class="main-arena">
-    <!-- SOL KAHRAMAN: 3 SOKET (EN ÜSTTE ULTI, ALTTA 2 GENEL ÖZELLİK) -->
+    <!-- SOL KAHRAMAN PANELİ -->
     <section class="char-panel" id="left-char-panel">
       <div>
         <div class="char-header">
-          <div class="char-role-tag" id="left-tag">GÜNDÜZ KUŞAĞI • 3 SOKET</div>
+          <div class="char-role-tag" id="left-tag">GÜNDÜZ KUŞAĞI • KAHRAMAN</div>
           <div class="char-name-row">
             <h3 id="left-name">🛡️ Muhafız Galadriel</h3>
             <span class="status-pill" id="left-status">SAVUNMADA</span>
@@ -935,38 +959,38 @@
         </div>
       </div>
 
-      <div class="socket-rack" id="left-sockets"></div>
+      <div class="skill-list" id="left-skills"></div>
 
       <div class="char-select-bar">
-        <button class="mini-btn" onclick="speakCharacter(activeLeftChar)">🔊 Replik</button>
-        <button class="mini-btn" onclick="cycleSideHero('Gündüz')">🔀 Değiştir</button>
+        <button class="mini-btn" onclick="onArenaSkillOrVoice('left')">🔊 Sesli Giriş</button>
+        <button class="mini-btn" onclick="cycleSideHero('Gündüz')">🔄 Karakter</button>
       </div>
     </section>
 
-    <!-- MERKEZ 3D ADA & ARAYÜZ İÇİ LOBİ -->
+    <!-- MERKEZ 3D ADA SAHNESİ -->
     <section class="realm-map">
       <div class="island-3d-stage" id="island-3d-stage">
         <div class="island-sky-bar">
           <span id="sky-event-label" style="color:var(--blue-glow); font-weight:800;">🌙 Mavi Dolunay</span>
           <span id="mode-scenario-label" style="color:var(--gold); font-weight:700;">Senaryo: Anonim Eşit Taraf</span>
-          <button class="mini-btn" style="flex:none; padding:1.5px 6px;" onclick="cycleSkyEvent()">🌌 Gökyüzü</button>
+          <button class="mini-btn" style="flex:none; padding:1.5px 6px;" onclick="onSkyEventClick()">🌌 Gökyüzü</button>
         </div>
 
-        <div class="floating-3d-island" id="floating-3d-island" onclick="triggerIslandPulse('3D Ada Çekirdeği', 'Ada enerjisi ve göksel rezonans tetiklendi')">
+        <div class="floating-3d-island" id="floating-3d-island" onclick="onIslandSpotClick('3D Ada Çekirdeği', 'Ada enerjisi ve göksel rezonans')">
           <div class="fx-pulse-ring"></div>
-          <div class="celestial-fx-badge" id="celestial-fx-badge">⚙️ Mekan • 🌙 Dolunay</div>
+          <div class="celestial-fx-badge" id="celestial-fx-badge">🏝️ 3D Ada • Lvl 1</div>
           <div class="island-under-rock"></div>
           <div class="island-sea-ring"></div>
           <div class="island-top-deck">
-            <div class="island-spot" onclick="event.stopPropagation(); triggerIslandPulse('Mavi Burç', 'Ay Işığı & Savunma Mühürü')">
+            <div class="island-spot" onclick="event.stopPropagation(); onIslandSpotClick('Mavi Burç', 'Ay Işığı & Savunma Mühürü')">
               <span class="sp-icon">🛡️</span>
               <span class="sp-lbl">Mavi Burç</span>
             </div>
-            <div class="island-spot citadel-3d" onclick="event.stopPropagation(); triggerIslandPulse('3D Altın Kale', 'Merkez Ada & Strateji Odağı')">
+            <div class="island-spot citadel-3d" onclick="event.stopPropagation(); onIslandSpotClick('3D Altın Kale', 'Merkez Ada & Strateji Odağı')">
               <span class="sp-icon" id="island-center-hero">🏰</span>
               <span class="sp-lbl" id="island-center-label">3D ADA</span>
             </div>
-            <div class="island-spot" onclick="event.stopPropagation(); triggerIslandPulse('Kızıl Cephe', 'Gece Baskın & Toplu Hamle')">
+            <div class="island-spot" onclick="event.stopPropagation(); onIslandSpotClick('Kızıl Cephe', 'Gece Baskın & Toplu Hamle')">
               <span class="sp-icon">⚔️</span>
               <span class="sp-lbl">Kızıl Cephe</span>
             </div>
@@ -974,30 +998,91 @@
         </div>
 
         <div class="live-turn-telemetry" id="live-turn-telemetry">
-          Sıra #1 • Roller Otomatik Dağıtılır • 2. Şafak Ulti Kilitli
+          Level 1 • Lobby simgesinden katılabilir ve herkes hazır olduğunda başlatabilirsiniz.
         </div>
       </div>
 
-      <!-- ARAYÜZ İÇİ LOBİ (HERKES HAZIR VERDİĞİNDE START BELİRİR) -->
-      <div class="arena-lobby-box open" id="arena-lobby-box">
-        <div class="lobby-head-row">
-          <div class="brand-lockup">
-            <div class="logo-stack">
-              <div class="golden-gay-emblem" title="Golden Gay">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <polygon points="12,2 15,9 22,9 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9 9,9" fill="#f5c451" stroke="#fff" stroke-width="1.2"/>
-                </svg>
-              </div>
-              <span class="powered-sub">Powered by</span>
-            </div>
-            <div>
-              <div style="font-size:10.5px; font-weight:900; color:var(--gold);">MINI LEGENDS LOBİ</div>
-              <div style="font-size:8px; color:#cbd5e1; font-weight:700;">BRESKAVICA • Oto Adaletli Rol Dağıtımı</div>
-            </div>
-          </div>
-          <span id="lobby-ready-summary" style="font-size:9px; font-weight:800; color:var(--blue-glow);">Hazır: 0/0</span>
+      <div class="subtitle-banner" id="subtitle-banner">
+        <div class="voice-wave"><span></span><span></span><span></span></div>
+        <div class="subtitle-text">
+          <span class="subtitle-speaker" id="sub-speaker">MINI LEGENDS:</span>
+          <span id="sub-content">Arayüz hazır. Lobby penceresini açmak için üstteki Lobby simgesine tıklayın.</span>
         </div>
+      </div>
+    </section>
 
+    <!-- SAĞ KAHRAMAN PANELİ -->
+    <section class="char-panel" id="right-char-panel">
+      <div>
+        <div class="char-header">
+          <div class="char-role-tag" id="right-tag" style="color: var(--purple-glow);">GECE OYUNU • KAHRAMAN</div>
+          <div class="char-name-row">
+            <h3 id="right-name">⏳ Tanrıça Sabrina</h3>
+            <span class="status-pill night-tag" id="right-status">PUSUDA</span>
+          </div>
+        </div>
+        <div class="char-portrait-banner">
+          <div class="char-portrait-avatar" id="right-avatar">⏳</div>
+          <div class="char-quote-preview" id="right-quote">"Zaman benim emrimde akar; geçmişi siler, geleceği yeniden yazarım!"</div>
+        </div>
+      </div>
+
+      <div class="skill-list" id="right-skills"></div>
+
+      <div class="char-select-bar">
+        <button class="mini-btn" onclick="onArenaSkillOrVoice('right')">🔊 Sesli Giriş</button>
+        <button class="mini-btn" onclick="cycleSideHero('Gece')">🔄 Karakter</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- MOBA TARZI SAĞ ALT KÖŞE YUVARLAK SOKET PORTLARI (OYUN BAŞLAYINCA GÖRÜNÜR) -->
+  <div class="moba-socket-dock" id="moba-socket-dock">
+    <button type="button" class="moba-port-btn ulti-port" id="moba-ulti-btn" onclick="triggerMobaSocket('ulti')" title="Ulti Portu (2. Şafak Sonrası)">
+      <span class="moba-port-icon" id="moba-ulti-icon">⚡</span>
+      <span class="moba-port-key">ULTI</span>
+    </button>
+    <button type="button" class="moba-port-btn" onclick="triggerMobaSocket('p1')" title="Genel Özellik Portu 1">
+      <span class="moba-port-icon" id="moba-p1-icon">🛡️</span>
+      <span class="moba-port-key">S1</span>
+    </button>
+    <button type="button" class="moba-port-btn" onclick="triggerMobaSocket('p2')" title="Genel Özellik Portu 2">
+      <span class="moba-port-icon" id="moba-p2-icon">✨</span>
+      <span class="moba-port-key">S2</span>
+    </button>
+  </div>
+
+  <!-- ALT NAVİGASYON BAR -->
+  <footer class="bottom-hud">
+    <button class="nav-tab active" onclick="switchTab(this)">🏝️ 3D ADA</button>
+    <button class="nav-tab" onclick="openModal('roles-modal')">🎭 15 KAHRAMAN</button>
+    <button class="nav-tab" onclick="onCollectiveAction()">🗳️ OYLAMA / HAMLE</button>
+    <button class="nav-tab" onclick="openModal('guide-modal')">📖 OYUN KILAVUZU</button>
+    <button class="nav-tab" onclick="openModal('scoreboard-modal')">🏆 SONUÇ &amp; LEVEL</button>
+    <button class="nav-tab" onclick="openModal('profile-modal')">👤 PROFİL &amp; SES</button>
+  </footer>
+
+  <!-- LOBBY PENCERESİ (Yalnızca Lobby simgesine tıklandığında açılır) -->
+  <div class="modal-backdrop" id="lobby-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="brand-lockup">
+          <div class="logo-stack">
+            <div class="golden-gay-emblem" title="Golden Gay">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <polygon points="12,2 15,9 22,9 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9 9,9" fill="#f5c451" stroke="#fff" stroke-width="1.2"/>
+              </svg>
+            </div>
+            <span class="powered-sub">Powered by</span>
+          </div>
+          <div>
+            <h3 style="font-size:12.5px; color:var(--gold);">MINI LEGENDS — LOBBY</h3>
+            <span style="font-size:8.5px; color:#cbd5e1;">BRESKAVICA • Herkes Level 1 Başlar</span>
+          </div>
+        </div>
+        <button class="close-btn" onclick="closeModal('lobby-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
         <div class="lobby-controls-row">
           <select id="lobby-mode-select" style="width:auto;" onchange="onLobbyConfigChange()">
             <option value="anon_equal">Mod: Anonim Eşit Taraf</option>
@@ -1008,81 +1093,48 @@
             <option value="night">Başlangıç: Gece</option>
             <option value="day">Başlangıç: Şafak</option>
           </select>
-          <input type="text" id="lobby-join-input" placeholder="Giren oyuncu adı" style="width:110px;" />
-          <button class="secondary-btn" onclick="joinLobbyPlayer()">+ Gir</button>
+          <button class="secondary-btn" onclick="joinCurrentUserToLobby()">+ Lobby'ye Katıl</button>
           <button class="secondary-btn" id="lobby-self-ready-btn" onclick="toggleSelfReady()">✅ Hazır Ver</button>
           <button class="action-btn" id="lobby-start-btn" style="display:none;" onclick="startMatchFromLobby()">▶ START</button>
         </div>
 
+        <div id="lobby-ready-summary" style="font-size:10.5px; color:var(--blue-glow); font-weight:800;">Lobby'de Katılımcı: 0 • Hazır: 0/0</div>
+
+        <div style="font-size:10px; font-weight:800; color:var(--gold);">LOBBY KATILIMCILARI (LOBBY'YE KATILANLAR):</div>
         <div class="lobby-players-grid" id="lobby-players-grid"></div>
       </div>
+    </div>
+  </div>
 
-      <div class="subtitle-banner" id="subtitle-banner">
-        <div class="voice-wave"><span></span><span></span><span></span></div>
-        <div class="subtitle-text">
-          <span class="subtitle-speaker" id="sub-speaker">MINI LEGENDS:</span>
-          <span id="sub-content">Lobi ayarlarını yapın; herkes hazır verdiğinde START ile 3D ada oyunu başlar.</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- SAĞ KAHRAMAN: 3 SOKET (EN ÜSTTE ULTI, ALTTA 2 GENEL ÖZELLİK) -->
-    <section class="char-panel" id="right-char-panel">
-      <div>
-        <div class="char-header">
-          <div class="char-role-tag" id="right-tag" style="color: var(--purple-glow);">GECE OYUNU • 3 SOKET</div>
-          <div class="char-name-row">
-            <h3 id="right-name">👹 Alkarısı</h3>
-            <span class="status-pill night-tag" id="right-status">PUSUDA</span>
-          </div>
-        </div>
-        <div class="char-portrait-banner">
-          <div class="char-portrait-avatar" id="right-avatar">👹</div>
-          <div class="char-quote-preview" id="right-quote">"Gecenin en derin gölgesinden geldim; nefesinizi kesmeye hazırım!"</div>
-        </div>
-      </div>
-
-      <div class="socket-rack" id="right-sockets"></div>
-
-      <div class="char-select-bar">
-        <button class="mini-btn" onclick="speakCharacter(activeRightChar)">🔊 Replik</button>
-        <button class="mini-btn" onclick="cycleSideHero('Gece')">🔀 Değiştir</button>
-      </div>
-    </section>
-  </main>
-
-  <!-- ALT NAVİGASYON BAR -->
-  <footer class="bottom-hud">
-    <button class="nav-tab active" onclick="switchTab(this)">🏝️ 3D ADA</button>
-    <button class="nav-tab" onclick="openModal('roles-modal')">🎭 15 KAHRAMAN</button>
-    <button class="nav-tab" onclick="performCollectiveMove()">🗳️ TOPLU HAMLE</button>
-    <button class="nav-tab" onclick="openModal('guide-modal')">📖 KILAVUZ &amp; KOMBOLAR</button>
-    <button class="nav-tab" onclick="openModal('scoreboard-modal')">🏆 SONUÇ LİSTESİ</button>
-    <button class="nav-tab" onclick="openModal('profile-modal')">👤 PROFİL &amp; SES</button>
-  </footer>
-
-  <!-- 15 KARAKTER & SOKET MODALI -->
+  <!-- 15 KARAKTER MODALI -->
   <div class="modal-backdrop" id="roles-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>🎭 15 Kahraman • 3 Soket (Üst Ulti 2. Şafak Sonrası + 2 Genel Özellik)</h3>
+        <h3>🎭 Mini Legends — 15 Kahraman &amp; Soket Bilgisi</h3>
         <button class="close-btn" onclick="closeModal('roles-modal')">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="color:var(--text-muted); font-size:11px;">Roller oyun başladığında sistem tarafından rastgele ve eşit taraflı dağıtılır; buradan kahraman soketlerini ve replikleri inceleyebilirsin.</p>
+        <p style="color:var(--text-muted); font-size:11px;">Kahramanlar oyun başladığında sistem tarafından rastgele ve eşit taraflı dağıtılır. Ulti soketi 2. Şafak sonrası açılır.</p>
         <div class="grid-cards" id="all-roles-grid"></div>
       </div>
     </div>
   </div>
 
-  <!-- KILAVUZ, STRATEJİ & KOMBİNASYON MODALI -->
+  <!-- OYUN KILAVUZU MODALI -->
   <div class="modal-backdrop" id="guide-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>📖 Oyun Kuralları, Stratejiler &amp; Kahraman Kombinasyonları</h3>
+        <h3>📖 Oyun Kılavuzu • Level &amp; Sanal Bulut Sistemi</h3>
         <button class="close-btn" onclick="closeModal('guide-modal')">&times;</button>
       </div>
-      <div class="modal-body" id="guide-dynamic-body"></div>
+      <div class="modal-body">
+        <h4 style="color:var(--gold);">1. Level 1 Başlangıç ve Sanal Bulut Kaydı</h4>
+        <p>Her oyuncu <strong>Level 1</strong> olarak başlar. Oyun oynandıkça, Gündüz veya Gece tarafı kazanımlarına ve sıralama/hamle başarılarına göre XP ve seviye yükselir; ilerleme sanal bulut deposuna otomatik kaydedilir.</p>
+        <h4 style="color:var(--blue-glow);">2. Lobby ve Otomatik Rol Dağıtımı</h4>
+        <p>Lobby penceresi üstteki <strong>Lobby</strong> simgesine basıldığında açılır. Lobby'ye katılan herkes listede görünür; herkes <strong>Hazır</strong> verdiğinde <strong>START</strong> butonu görünür ve roller rastgele, eşit taraflı ve anonim olarak atanır.</p>
+        <h4 style="color:var(--purple-glow);">3. Sağ Alt Köşe Yuvarlak Soket Portları &amp; Tanrıça Sabrina</h4>
+        <p>Oyun başladığında sağ alt köşede <strong>ULTI</strong> (2. Şafak sonrası aktif) ve <strong>S1 / S2</strong> genel özellik yuvarlak portları görünür. <strong>Tanrıça Sabrina</strong> ultisine basıldığında <em>Mavi Dolunay</em>, <em>Ay Tutulması</em> veya <em>Güneş Tutulması</em> rastgele tetiklenir.</p>
+      </div>
     </div>
   </div>
 
@@ -1090,16 +1142,16 @@
   <div class="modal-backdrop" id="profile-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>👤 Oyuncu Profili &amp; Ses Ayarları</h3>
+        <h3>👤 Kalıcı Oyuncu Profili &amp; Sanal Bulut Level</h3>
         <button class="close-btn" onclick="closeModal('profile-modal')">&times;</button>
       </div>
       <div class="modal-body">
         <div style="background:rgba(56,189,248,0.1); border:1px solid var(--blue-glow); padding:8px; border-radius:8px;">
-          <strong>Oyuncu:</strong> <span id="tg-detected-info">Algılanıyor...</span>
+          <strong>Oyuncu:</strong> <span id="tg-detected-info">Algılanıyor...</span> • <strong id="profile-level-badge">Level 1 (0/100 XP)</strong>
         </div>
         <label>Görünecek Oyuncu Adı:</label>
         <input type="text" id="input-display-name" />
-        <label>Bilinen Kendi Tarafın:</label>
+        <label>Bilinen Taraf:</label>
         <select id="input-faction">
           <option value="Gündüz">Gündüz Tarafı</option>
           <option value="Gece">Gece Tarafı</option>
@@ -1108,25 +1160,25 @@
           <input type="checkbox" id="toggle-sound" checked style="width:16px; height:16px;" />
           <label for="toggle-sound">Ses Efektleri &amp; Türkçe Sesli Okuma (TTS) Aktif</label>
         </div>
-        <button class="action-btn" onclick="saveProfile()">💾 Kaydet</button>
+        <button class="action-btn" onclick="saveProfile()">💾 Sanal Buluta Kaydet</button>
       </div>
     </div>
   </div>
 
-  <!-- SONUÇ LİSTESİ MODALI -->
+  <!-- SONUÇ & LEVEL LİSTESİ MODALI -->
   <div class="modal-backdrop" id="scoreboard-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>🏆 Oyun Sonu Rol &amp; Katılımcı Listesi</h3>
+        <h3>🏆 Sıralama, Level &amp; Taraf Sonuçları</h3>
         <button class="close-btn" onclick="closeModal('scoreboard-modal')">&times;</button>
       </div>
       <div class="modal-body">
         <table>
           <thead>
             <tr>
-              <th>Katılımcı</th>
+              <th>Oyuncu</th>
+              <th>Level &amp; XP</th>
               <th>Taraf &amp; Rol</th>
-              <th>Hazır</th>
               <th>Durum</th>
             </tr>
           </thead>
@@ -1141,141 +1193,142 @@
       {
         id: 'galadriel', name: 'Muhafız Galadriel', group: 'Gündüz', emoji: '🛡️',
         quote: 'Işığım sönmeden bu kalenin tek bir taşına bile dokunamazsınız!',
-        ulti: { name: 'Şafak Siperi (Ulti)', desc: '2. Şafak sonrası: Gündüz tarafının oylama ve gece savunma gücünü mühürler.', effectType: 'dawn_aegis' },
+        ulti: { name: 'Şafak Siperi (Ulti)', icon: '🛡️', desc: '2. Şafak sonrası: Gündüz tarafının savunma ve oylama gücünü mühürler.', effectType: 'dawn_aegis' },
         passives: [
-          { name: 'Kutsal Kalkan', desc: 'Seçilen müttefiki gece ilk darbeden korur.' },
-          { name: 'Adalet Mührü', desc: 'Gündüz oylamasında taraf dengesini güçlendirir.' }
+          { name: 'Kutsal Kalkan', icon: '🔰', desc: 'Seçilen müttefiki gece ilk darbeden korur.' },
+          { name: 'Adalet Mührü', icon: '⚖️', desc: 'Gündüz oylamasında taraf dengesini güçlendirir.' }
         ]
       },
       {
         id: 'eudora', name: 'Büyücü Eudora', group: 'Gece', emoji: '⚡',
         quote: 'Gökyüzünün gazabı ve kadim yıldırım parmaklarımın ucunda!',
-        ulti: { name: 'Fırtına Kırılımı (Ulti)', desc: '2. Şafak sonrası: Rakip tarafın yetenek zincirini bozar ve faz temposunu hızlandırır.', effectType: 'storm_shift' },
+        ulti: { name: 'Fırtına Kırılımı (Ulti)', icon: '⛈️', desc: '2. Şafak sonrası: Karşı tarafın yetenek zincirini bozar.', effectType: 'storm_shift' },
         passives: [
-          { name: 'Arkane Patlaması', desc: 'Hedefin büyü enerjisini tüketir.' },
-          { name: 'Yıldırım Zinciri', desc: 'İki bölge arasında enerji akışı kurar.' }
+          { name: 'Arkane Patlaması', icon: '🔮', desc: 'Hedefin büyü enerjisini tüketir.' },
+          { name: 'Yıldırım Zinciri', icon: '⚡', desc: 'İki bölge arasında enerji akışı kurar.' }
         ]
       },
       {
         id: 'alkarisi', name: 'Alkarısı', group: 'Gece', emoji: '👹',
         quote: 'Gecenin en derin gölgesinden geldim; nefesinizi kesmeye hazırım!',
-        ulti: { name: 'Kabus Çöküşü (Ulti)', desc: '2. Şafak sonrası: Gece baskı etkisini artırır ve gündüz stratejisini sarsar.', effectType: 'nightmare_tide' },
+        ulti: { name: 'Kabus Çöküşü (Ulti)', icon: '🌑', desc: '2. Şafak sonrası: Gece baskısını artırır ve gündüz stratejisini sarsar.', effectType: 'nightmare_tide' },
         passives: [
-          { name: 'Gece Karabasanı', desc: 'Hedefin gece görüşünü ve hamlesini aksatır.' },
-          { name: 'Kızıl Fısıltı', desc: 'Gündüz tartışmasında şaşırtıcı ipucu bırakır.' }
+          { name: 'Gece Karabasanı', icon: '👁️', desc: 'Hedefin gece görüşünü ve hamlesini aksatır.' },
+          { name: 'Kızıl Fısıltı', icon: '🩸', desc: 'Gündüz tartışmasında şaşırtıcı ipucu bırakır.' }
         ]
       },
       {
         id: 'helen', name: 'Stratejist Helen', group: 'Gündüz', emoji: '👑',
         quote: 'Akıl ve zarafet kılıçtan keskindir; bu masanın kaderini ben çizerim.',
-        ulti: { name: 'Altın Konsey (Ulti)', desc: '2. Şafak sonrası: Toplu hareketlerde oylama çarpanını yükseltir.', effectType: 'council_boost' },
+        ulti: { name: 'Altın Konsey (Ulti)', icon: '👑', desc: '2. Şafak sonrası: Toplu hareketlerde oylama etkisini artırır.', effectType: 'council_boost' },
         passives: [
-          { name: 'Stratejik Deha', desc: 'Toplu oylama ve hamle koordinasyonu sağlar.' },
-          { name: 'Diplomatik Hamle', desc: 'Bir oyuncunun elenme baskısını askıya alır.' }
+          { name: 'Stratejik Deha', icon: '📜', desc: 'Toplu oylama ve hamle koordinasyonu sağlar.' },
+          { name: 'Diplomatik Hamle', icon: '🕊️', desc: 'Bir oyuncunun elenme baskısını askıya alır.' }
         ]
       },
       {
         id: 'estes', name: 'Şifacı Estes', group: 'Gündüz', emoji: '🌿',
         quote: 'Ay ışığının şefkati en derin yaraları bile yeniden hayata döndürür.',
-        ulti: { name: 'Yaşam Pınarı (Ulti)', desc: '2. Şafak sonrası: Düşen/zayıflayan müttefiki yeniden savaşa dahil eder.', effectType: 'spring_revive' },
+        ulti: { name: 'Yaşam Pınarı (Ulti)', icon: '✨', desc: '2. Şafak sonrası: Zayıflayan müttefiki yeniden güçlendirir.', effectType: 'spring_revive' },
         passives: [
-          { name: 'Işık Şifası', desc: 'Saldırıya uğrayan hedefi iyileştirir.' },
-          { name: 'Kutsal Bağ', desc: 'İki oyuncunun dayanıklılığını dengeler.' }
+          { name: 'Işık Şifası', icon: '🌿', desc: 'Saldırıya uğrayan hedefi iyileştirir.' },
+          { name: 'Kutsal Bağ', icon: '💠', desc: 'İki oyuncunun dayanıklılığını dengeler.' }
         ]
       },
       {
         id: 'sabrina', name: 'Tanrıça Sabrina', group: 'Gece', emoji: '⏳',
-        quote: 'Zaman benim emrimde akar; geçmişi siler, geleceği yeniden yazarım.',
-        ulti: { name: 'Bilinmeyen Kozmik Tutulma (Ulti)', desc: '2. Şafak sonrası: Mavi Dolunay, Ay Tutulması veya Güneş Tutulmasından rastgele birini tetikler; sonuç basıldığında açığa çıkar!', effectType: 'sabrina_cosmic' },
+        quote: 'Zaman benim emrimde akar; geçmişi siler, geleceği yeniden yazarım!',
+        ulti: { name: 'Bilinmeyen Kozmik Tutulma (Ulti)', icon: '🌌', desc: '2. Şafak sonrası: Mavi Dolunay, Ay Tutulması veya Güneş Tutulmasından rastgele birini tetikler.', effectType: 'sabrina_cosmic' },
         passives: [
-          { name: 'Zamanı Bükme', desc: 'Faz süresini ve tur akışını kaydırır.' },
-          { name: 'Kader Döngüsü', desc: 'Son hamlenin etkisini ters yönde çevirir.' }
+          { name: 'Zamanı Bükme', icon: '⏳', desc: 'Faz süresini ve tur akışını kaydırır.' },
+          { name: 'Kader Döngüsü', icon: '🌀', desc: 'Son hamlenin etkisini ters yönde çevirir.' }
         ]
       },
       {
         id: 'shadow_hunter', name: 'Gölge Avcısı', group: 'Gece', emoji: '🏹',
         quote: 'Karanlıkta saklanan hiçbir av oklarımdan kaçamaz.',
-        ulti: { name: 'Gümüş Yağmuru (Ulti)', desc: '2. Şafak sonrası: Savunma kalkanlarını delip gece hedefini kilitler.', effectType: 'silver_volley' },
+        ulti: { name: 'Gümüş Yağmuru (Ulti)', icon: '🏹', desc: '2. Şafak sonrası: Savunma kalkanlarını delip gece hedefini kilitler.', effectType: 'silver_volley' },
         passives: [
-          { name: 'Gölge Oku', desc: 'Gece seçilen hedefi nişan alır.' },
-          { name: 'İz Sürücü', desc: 'Hedefin gece rotasını takip eder.' }
+          { name: 'Gölge Oku', icon: '🎯', desc: 'Gece seçilen hedefi nişan alır.' },
+          { name: 'İz Sürücü', icon: '👣', desc: 'Hedefin gece rotasını takip eder.' }
         ]
       },
       {
         id: 'executioner', name: 'İnfazcı', group: 'Gece', emoji: '🪓',
         quote: 'Hüküm verildiğinde baltam asla tereddüt etmez.',
-        ulti: { name: 'Son Hüküm (Ulti)', desc: '2. Şafak sonrası: Zayıflamış hedefi oy dengesiyle saf dışı bırakır.', effectType: 'final_judgment' },
+        ulti: { name: 'Son Hüküm (Ulti)', icon: '🪓', desc: '2. Şafak sonrası: Zayıflamış hedefi oy dengesiyle saf dışı bırakır.', effectType: 'final_judgment' },
         passives: [
-          { name: 'Kesin Hüküm', desc: 'Gece hedef belirleme gücünü artırır.' },
-          { name: 'Korku Aurası', desc: 'Çevredeki kararsız oyları baskılar.' }
+          { name: 'Kesin Hüküm', icon: '⚔️', desc: 'Gece hedef belirleme gücünü artırır.' },
+          { name: 'Korku Aurası', icon: '🔥', desc: 'Çevredeki kararsız oyları baskılar.' }
         ]
       },
       {
         id: 'doomsday', name: 'Kıyamet Süvarisi', group: 'Gece', emoji: '🐎',
         quote: 'Nallarımın sesi duyulduğunda tüm dengeler yerle bir olur!',
-        ulti: { name: 'Mahşer Fırtınası (Ulti)', desc: '2. Şafak sonrası: Turdaki tüm pasif dengeleri sıfırlayıp yeniden kurar.', effectType: 'apocalypse_reset' },
+        ulti: { name: 'Mahşer Fırtınası (Ulti)', icon: '🐎', desc: '2. Şafak sonrası: Turdaki pasif dengeleri sıfırlayıp yeniden kurar.', effectType: 'apocalypse_reset' },
         passives: [
-          { name: 'Kaos Dalgası', desc: 'Turdaki dengeleri sarsar.' },
-          { name: 'Alev İzi', desc: 'Seçilen bölgeyi ateşe verir.' }
+          { name: 'Kaos Dalgası', icon: '🌪️', desc: 'Turdaki dengeleri sarsar.' },
+          { name: 'Alev İzi', icon: '🌋', desc: 'Seçilen bölgeyi ateşe verir.' }
         ]
       },
       {
         id: 'spy', name: 'Casus', group: 'Gece', emoji: '🕵️',
         quote: 'Duvarların bile kulağı vardır, ama benim gözüm her sırrı görür.',
-        ulti: { name: 'Büyük İfşa (Ulti)', desc: '2. Şafak sonrası: Gizli hamle kalıbını ortaya çıkarıp stratejiyi değiştirir.', effectType: 'grand_reveal' },
+        ulti: { name: 'Büyük İfşa (Ulti)', icon: '🕵️', desc: '2. Şafak sonrası: Gizli hamle kalıbını ortaya çıkarır.', effectType: 'grand_reveal' },
         passives: [
-          { name: 'Bilgi Sızdırma', desc: 'Hedefin rol ipucunu toplar.' },
-          { name: 'Kimlik Gizleme', desc: 'İncelemelerde kimliğini gizler.' }
+          { name: 'Bilgi Sızdırma', icon: '🔍', desc: 'Hedefin rol ipucunu toplar.' },
+          { name: 'Kimlik Gizleme', icon: '🎭', desc: 'İncelemelerde kimliğini gizler.' }
         ]
       },
       {
         id: 'saboteur', name: 'Sabotajcı', group: 'Gece', emoji: '💣',
         quote: 'En kusursuz planlar bile tek bir kıvılcımla küle döner.',
-        ulti: { name: 'Tam Çöküş (Ulti)', desc: '2. Şafak sonrası: Karşı tarafın oylama/yetenek akışını 1 faz kilitler.', effectType: 'sabotage_lock' },
+        ulti: { name: 'Tam Çöküş (Ulti)', icon: '💣', desc: '2. Şafak sonrası: Karşı tarafın oylama/yetenek akışını 1 faz kilitler.', effectType: 'sabotage_lock' },
         passives: [
-          { name: 'Mekanizma Kilidi', desc: 'Hedefin yeteneğini 1 tur aksatır.' },
-          { name: 'Tuzak Kurma', desc: 'Saldıran hedefe tuzak kurar.' }
+          { name: 'Mekanizma Kilidi', icon: '⚙️', desc: 'Hedefin yeteneğini 1 tur aksatır.' },
+          { name: 'Tuzak Kurma', icon: '🪤', desc: 'Saldıran hedefe tuzak kurar.' }
         ]
       },
       {
         id: 'light_warden', name: 'Işık Muhafızı', group: 'Gündüz', emoji: '☀️',
         quote: 'Şafak söktüğünde hiçbir gölge ayakta kalamaz!',
-        ulti: { name: 'Güneş Patlaması (Ulti)', desc: '2. Şafak sonrası: Gece etkisini dağıtıp gündüz üstünlüğü kurar.', effectType: 'solar_flare' },
+        ulti: { name: 'Güneş Patlaması (Ulti)', icon: '☀️', desc: '2. Şafak sonrası: Gece etkisini dağıtıp gündüz üstünlüğü kurar.', effectType: 'solar_flare' },
         passives: [
-          { name: 'Şafak Kalkanı', desc: 'Gündüz oylamasına karşı korur.' },
-          { name: 'Hakikat Işığı', desc: 'Şüpheli hamleyi aydınlatır.' }
+          { name: 'Şafak Kalkanı', icon: '🌞', desc: 'Gündüz oylamasına karşı korur.' },
+          { name: 'Hakikat Işığı', icon: '🔦', desc: 'Şüpheli hamleyi aydınlatır.' }
         ]
       },
       {
         id: 'vampire', name: 'Kan Emici', group: 'Gece', emoji: '🧛',
         quote: 'Sizin yaşam enerjiniz benim ölümsüzlüğümün yakıtıdır.',
-        ulti: { name: 'Kızıl Dolunay (Ulti)', desc: '2. Şafak sonrası: İki hedeften enerji çekip gece takımını güçlendirir.', effectType: 'crimson_moon' },
+        ulti: { name: 'Kızıl Dolunay (Ulti)', icon: '🌕', desc: '2. Şafak sonrası: İki hedeften enerji çekip gece takımını güçlendirir.', effectType: 'crimson_moon' },
         passives: [
-          { name: 'Yaşam Çekimi', desc: 'Hedeften enerji çeker.' },
-          { name: 'Gece Pelerini', desc: 'Gece saldırılarından sıyrılır.' }
+          { name: 'Yaşam Çekimi', icon: '🧛', desc: 'Hedeften enerji çeker.' },
+          { name: 'Gece Pelerini', icon: '🦇', desc: 'Gece saldırılarından sıyrılır.' }
         ]
       },
       {
         id: 'time_bender', name: 'Zaman Büken', group: 'Gündüz', emoji: '🌀',
         quote: 'Saatler benim için işlemez; anı durdurur, hamleyi değiştiririm.',
-        ulti: { name: 'Kronos Mührü (Ulti)', desc: '2. Şafak sonrası: Turdaki hamle zamanlamasını dondurup lehine çevirir.', effectType: 'chronos_seal' },
+        ulti: { name: 'Kronos Mührü (Ulti)', icon: '🌀', desc: '2. Şafak sonrası: Turdaki hamle zamanlamasını dondurur.', effectType: 'chronos_seal' },
         passives: [
-          { name: 'Akış Kontrolü', desc: 'Tartışma süresini düzenler.' },
-          { name: 'Yankı Hamlesi', desc: 'Önceki turun hamlesini tekrarlar.' }
+          { name: 'Akış Kontrolü', icon: '⏱️', desc: 'Tartışma süresini düzenler.' },
+          { name: 'Yankı Hamlesi', icon: '🔁', desc: 'Önceki turun hamlesini tekrarlar.' }
         ]
       },
       {
         id: 'spirit_guide', name: 'Ruhlar Rehberi', group: 'Gündüz', emoji: '👻',
         quote: 'Ölüler sessiz değildir; fısıltıları bize gerçeği gösterir.',
-        ulti: { name: 'Diriliş Ayini (Ulti)', desc: '2. Şafak sonrası: Düşen bir stratejiyi/müttefiki geri çağırır.', effectType: 'spirit_resurrect' },
+        ulti: { name: 'Diriliş Ayini (Ulti)', icon: '👻', desc: '2. Şafak sonrası: Düşen bir stratejiyi/müttefiki geri çağırır.', effectType: 'spirit_resurrect' },
         passives: [
-          { name: 'Ruh İletişimi', desc: 'Elenen oyunculardan ipucu alır.' },
-          { name: 'Ruhani Kalkan', desc: 'Ruhsal koruma sağlar.' }
+          { name: 'Ruh İletişimi', icon: '🕯️', desc: 'Elenen oyunculardan ipucu alır.' },
+          { name: 'Ruhani Kalkan', icon: '🔮', desc: 'Ruhsal koruma sağlar.' }
         ]
       }
     ];
 
-    const STORAGE_KEY = 'mini_legends_state_v4';
+    const STATE_KEY = 'mini_legends_state_v5';
+    const CLOUD_KEY = 'mini_legends_cloud_v1';
     const FOUNDER_ID = '8245373459';
     const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
@@ -1293,8 +1346,13 @@
           (tg.contentSafeAreaInset && tg.contentSafeAreaInset.right) || 0,
           (tg.safeAreaInset && tg.safeAreaInset.right) || 0
         );
-        document.documentElement.style.setProperty('--tg-top-pad', `${Math.max(8, topInset + 4)}px`);
-        document.documentElement.style.setProperty('--tg-right-pad', `${Math.max(38, rightInset + 22)}px`);
+        const bottomInset = Math.max(
+          (tg.contentSafeAreaInset && tg.contentSafeAreaInset.bottom) || 0,
+          (tg.safeAreaInset && tg.safeAreaInset.bottom) || 0
+        );
+        document.documentElement.style.setProperty('--tg-top-pad', `${Math.max(22, topInset + 14)}px`);
+        document.documentElement.style.setProperty('--tg-right-pad', `${Math.max(46, rightInset + 32)}px`);
+        document.documentElement.style.setProperty('--tg-bottom-pad', `${Math.max(12, bottomInset + 6)}px`);
       } catch (e) {}
     }
     applyTelegramInsets();
@@ -1318,27 +1376,56 @@
       return copy;
     }
 
-    function computeHeroCombos(pool) {
-      const combos = [];
-      for (let i = 0; i < pool.length; i++) {
-        for (let j = i + 1; j < pool.length; j++) {
-          const a = pool[i];
-          const b = pool[j];
-          const synergy = a.group === b.group ? 'Eş Taraf Sinerjisi' : 'Çapraz Faz Denge Kombosu';
-          combos.push({
-            pair: `${a.emoji} ${a.name} + ${b.emoji} ${b.name}`,
-            synergy,
-            ultiPair: `${a.ulti.name.split(' (')[0]} × ${b.ulti.name.split(' (')[0]}`
-          });
-        }
+    // Sanal bulut level & oyuncu kayıt deposu (herkes Level 1 başlar)
+    function loadCloudProfiles() {
+      const defaults = {
+        [FOUNDER_ID]: { id: FOUNDER_ID, name: 'BRESKAVICA', handle: '@breskavica', level: 1, xp: 0, wins: 0 },
+        '1002': { id: '1002', name: 'Kaan', handle: '@arena_uzmani', level: 1, xp: 0, wins: 0 },
+        '1003': { id: '1003', name: 'Selin', handle: '@mitoloji_avcisi', level: 1, xp: 0, wins: 0 },
+        '1004': { id: '1004', name: 'Mert', handle: '@gece_yolcusu', level: 1, xp: 0, wins: 0 }
+      };
+      try {
+        const saved = JSON.parse(localStorage.getItem(CLOUD_KEY));
+        return saved ? { ...defaults, ...saved } : defaults;
+      } catch (e) {
+        return defaults;
       }
-      return combos;
     }
-    const ALL_COMBOS = computeHeroCombos(CHARACTERS);
 
-    // Sistem otomatik ve eşit taraflı rol dağıtımı (kimse rol seçmez)
-    function autoAssignFairRoles(players) {
-      const active = players.filter(p => p.status !== 'left');
+    let cloudProfiles = loadCloudProfiles();
+    if (!cloudProfiles[currentUserId]) {
+      cloudProfiles[currentUserId] = {
+        id: currentUserId,
+        name: currentUserId === FOUNDER_ID ? 'BRESKAVICA' : autoTgName,
+        handle: tgUser.username ? `@${tgUser.username}` : '@oyuncu',
+        level: 1,
+        xp: 0,
+        wins: 0
+      };
+    }
+
+    function saveCloudProfiles() {
+      localStorage.setItem(CLOUD_KEY, JSON.stringify(cloudProfiles));
+    }
+
+    function grantXpToPlayer(userId, amount, wonMatch = false) {
+      if (!cloudProfiles[userId]) {
+        cloudProfiles[userId] = { id: userId, name: 'Oyuncu', handle: '@oyuncu', level: 1, xp: 0, wins: 0 };
+      }
+      const p = cloudProfiles[userId];
+      p.level = Math.max(1, Number(p.level || 1));
+      p.xp = Number(p.xp || 0) + amount;
+      if (wonMatch) p.wins = Number(p.wins || 0) + 1;
+      while (p.xp >= p.level * 100) {
+        p.xp -= p.level * 100;
+        p.level += 1;
+      }
+      saveCloudProfiles();
+    }
+
+    // Lobby'ye katılanlara rastgele, adaletli ve eşit taraflı rol dağıtımı
+    function autoAssignFairRoles(lobbyPlayers) {
+      const active = lobbyPlayers.filter(p => p.status !== 'left');
       const shuffledPlayers = shuffleList(active);
       const dayPool = shuffleList(CHARACTERS.filter(c => c.group === 'Gündüz'));
       const nightPool = shuffleList(CHARACTERS.filter(c => c.group === 'Gece'));
@@ -1376,12 +1463,11 @@
       const fallback = {
         founderId: FOUNDER_ID,
         authorizedYts: [],
-        lobbyOpen: true,
-        gameStarted: false,
+        gameStarted: false, // Oyun başladıktan sonra soket/efekt aksiyonları aktif olur
         mode: 'anon_equal',
         startPhase: 'night',
         profile: {
-          displayName: currentUserId === FOUNDER_ID ? 'BRESKAVICA' : autoTgName,
+          displayName: cloudProfiles[currentUserId].name || autoTgName,
           preferredSide: 'Gündüz',
           soundEnabled: true
         },
@@ -1393,18 +1479,12 @@
         skyEvent: 'blue_moon',
         timeLeft: 165,
         turn: 1,
-        votingOpen: true,
-        activeMechStage: '⚙️ Mekan • 🌙 Mavi Dolunay',
-        lastActionSummary: 'Lobi Aktif • Herkes Hazır Verince START Belirir • 2. Şafak Ulti Kilitli',
-        participants: [
-          { id: FOUNDER_ID, name: 'BRESKAVICA', handle: '@breskavica', ready: true, status: 'joined', secretSide: 'Gündüz', secretRole: 'Muhafız Galadriel', charId: 'galadriel', alive: true },
-          { id: '1002', name: 'Kaan', handle: '@arena_uzmani', ready: true, status: 'joined', secretSide: 'Gece', secretRole: 'Alkarısı', charId: 'alkarisi', alive: true },
-          { id: '1003', name: 'Selin', handle: '@mitoloji_avcisi', ready: true, status: 'joined', secretSide: 'Gündüz', secretRole: 'Stratejist Helen', charId: 'helen', alive: true },
-          { id: '1004', name: 'Mert', handle: '@gece_yolcusu', ready: false, status: 'joined', secretSide: 'Gece', secretRole: 'Tanrıça Sabrina', charId: 'sabrina', alive: true }
-        ]
+        activeMechStage: '🏝️ 3D Ada • Lvl 1',
+        lastActionSummary: 'Level 1 • Lobby simgesinden katılabilir ve herkes hazır olduğunda başlatabilirsiniz.',
+        lobbyMembers: [] // Lobby'ye tıklayıp katılanlar burada görünür
       };
       try {
-        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        const parsed = JSON.parse(localStorage.getItem(STATE_KEY));
         return parsed ? { ...fallback, ...parsed, profile: { ...fallback.profile, ...(parsed.profile || {}) } } : fallback;
       } catch (e) {
         return fallback;
@@ -1420,7 +1500,7 @@
     }
 
     function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      localStorage.setItem(STATE_KEY, JSON.stringify(appState));
       updateAllUI();
     }
 
@@ -1452,14 +1532,16 @@
       } catch (e) {}
     }
 
-    function showSubtitleAndSpeak(speaker, text, tone = 'magic') {
+    function showSubtitleAndSpeak(speaker, text, tone = 'magic', triggerIslandFx = false) {
       document.getElementById('sub-speaker').textContent = `${speaker}:`;
       document.getElementById('sub-content').textContent = text;
-      const island = document.getElementById('floating-3d-island');
-      if (island) {
-        island.classList.remove('fx-cast');
-        void island.offsetWidth;
-        island.classList.add('fx-cast');
+      if (triggerIslandFx && appState.gameStarted) {
+        const island = document.getElementById('floating-3d-island');
+        if (island) {
+          island.classList.remove('fx-cast');
+          void island.offsetWidth;
+          island.classList.add('fx-cast');
+        }
       }
       playGameTone(tone);
       if (appState.profile.soundEnabled && 'speechSynthesis' in window) {
@@ -1487,52 +1569,173 @@
       document.getElementById('sky-event-label').textContent = label;
     }
 
-    function cycleSkyEvent() {
+    function onSkyEventClick() {
+      if (!appState.gameStarted) {
+        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Göksel ve soket efektleri oyun başladığında aktif olur.', 'click', false);
+        return;
+      }
       const order = ['blue_moon', 'dawn', 'lunar_eclipse', 'dusk', 'solar_eclipse'];
       const next = order[(order.indexOf(appState.skyEvent || 'blue_moon') + 1) % order.length];
       appState.skyEvent = next;
-      appState.activeMechStage = `🌌 Gökyüzü • ${next.replace('_', ' ')}`;
+      appState.activeMechStage = `🌌 ${next.replace('_', ' ')}`;
       appState.lastActionSummary = `3D Ada atmosferi değişti • Sıra #${appState.turn}`;
+      grantXpToPlayer(currentUserId, 15, false);
       saveState();
-      showSubtitleAndSpeak('3D ADA GÖKYÜZÜ', `Göksel evre ${next.replace('_', ' ')} olarak güncellendi.`, 'magic');
+      showSubtitleAndSpeak('3D ADA GÖKYÜZÜ', `Göksel evre ${next.replace('_', ' ')} olarak güncellendi.`, 'magic', true);
     }
 
-    function renderSocketsForCharacter(charObj, containerId) {
-      const unlocked = isUltiUnlocked();
-      const ultiBadge = unlocked ? '2. ŞAFAK AÇIK' : `2. ŞAFAK (${appState.dawnCount || 1}/2)`;
-      const ultiHtml = `
-        <div class="socket-slot ulti-slot ${unlocked ? '' : 'ulti-locked'}" onclick="triggerSocket('${charObj.id}', 'ulti')">
-          <div class="socket-gem">U</div>
-          <div class="socket-meta">
-            <h5><span>${charObj.ulti.name}</span><span class="socket-tag">${ultiBadge}</span></h5>
-            <p>${charObj.ulti.desc}</p>
-          </div>
-        </div>
-      `;
-      const passivesHtml = charObj.passives.map((p, i) => `
-        <div class="socket-slot" onclick="triggerSocket('${charObj.id}', 'passive_${i}')">
-          <div class="socket-gem">S${i + 1}</div>
-          <div class="socket-meta">
-            <h5><span>${p.name}</span><span class="socket-tag">GENEL ÖZELLİK</span></h5>
-            <p>${p.desc}</p>
+    function renderPanelSkillPreview(charObj, containerId) {
+      const rows = [
+        { tag: 'ULTİ', name: charObj.ulti.name, desc: '2. Şafak sonrası aktif' },
+        { tag: 'S1', name: charObj.passives[0].name, desc: charObj.passives[0].desc },
+        { tag: 'S2', name: charObj.passives[1].name, desc: charObj.passives[1].desc }
+      ];
+      document.getElementById(containerId).innerHTML = rows.map(r => `
+        <div class="skill-item" onclick="onPanelRowClick('${charObj.id}', '${r.name}')">
+          <div class="skill-gem-mini">${r.tag}</div>
+          <div class="skill-meta">
+            <h5>${r.name}</h5>
+            <p>${r.desc}</p>
           </div>
         </div>
       `).join('');
-      document.getElementById(containerId).innerHTML = ultiHtml + passivesHtml;
     }
 
     function renderCharacterPanels() {
-      document.getElementById('left-tag').textContent = `${activeLeftChar.group.toUpperCase()} • 3 SOKET`;
+      document.getElementById('left-tag').textContent = `${activeLeftChar.group.toUpperCase()} KUŞAĞI • KAHRAMAN`;
       document.getElementById('left-name').textContent = `${activeLeftChar.emoji} ${activeLeftChar.name}`;
       document.getElementById('left-avatar').textContent = activeLeftChar.emoji;
       document.getElementById('left-quote').textContent = `"${activeLeftChar.quote}"`;
-      renderSocketsForCharacter(activeLeftChar, 'left-sockets');
+      renderPanelSkillPreview(activeLeftChar, 'left-skills');
 
-      document.getElementById('right-tag').textContent = `${activeRightChar.group.toUpperCase()} • 3 SOKET`;
+      document.getElementById('right-tag').textContent = `${activeRightChar.group.toUpperCase()} OYUNU • KAHRAMAN`;
       document.getElementById('right-name').textContent = `${activeRightChar.emoji} ${activeRightChar.name}`;
       document.getElementById('right-avatar').textContent = activeRightChar.emoji;
       document.getElementById('right-quote').textContent = `"${activeRightChar.quote}"`;
-      renderSocketsForCharacter(activeRightChar, 'right-sockets');
+      renderPanelSkillPreview(activeRightChar, 'right-skills');
+    }
+
+    function renderMobaSocketDock() {
+      const dock = document.getElementById('moba-socket-dock');
+      if (!appState.gameStarted) {
+        dock.classList.remove('active');
+        return;
+      }
+      dock.classList.add('active');
+      const meMember = appState.lobbyMembers.find(m => m.id === currentUserId);
+      const currentHero = CHARACTERS.find(c => c.id === (meMember && meMember.charId)) || activeRightChar;
+
+      const unlocked = isUltiUnlocked();
+      const ultiBtn = document.getElementById('moba-ulti-btn');
+      ultiBtn.classList.toggle('ulti-locked', !unlocked);
+      document.getElementById('moba-ulti-icon').textContent = currentHero.ulti.icon || '⚡';
+      document.getElementById('moba-p1-icon').textContent = currentHero.passives[0].icon || '🛡️';
+      document.getElementById('moba-p2-icon').textContent = currentHero.passives[1].icon || '✨';
+    }
+
+    // Sağ alt köşedeki MOBA yuvarlak soket portları (Yalnızca oyun başlayınca çalışır)
+    function triggerMobaSocket(portKey) {
+      if (!appState.gameStarted) {
+        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Soket portları oyun başladığında aktif olur.', 'click', false);
+        return;
+      }
+      const meMember = appState.lobbyMembers.find(m => m.id === currentUserId);
+      const charObj = CHARACTERS.find(c => c.id === (meMember && meMember.charId)) || activeRightChar;
+      if (appState.mana >= 15) appState.mana -= 15;
+
+      document.getElementById('island-center-hero').textContent = charObj.emoji;
+      document.getElementById('island-center-label').textContent = charObj.name.split(' ').pop().toUpperCase();
+
+      if (portKey === 'ulti') {
+        if (!isUltiUnlocked()) {
+          showSubtitleAndSpeak(charObj.name, `Ulti portu 2. Şafaktan sonra açılır (Şu an Şafak ${appState.dawnCount || 1}/2).`, 'click', true);
+          return;
+        }
+
+        if (charObj.id === 'sabrina' || charObj.ulti.effectType === 'sabrina_cosmic') {
+          const cosmicPool = ['blue_moon', 'lunar_eclipse', 'solar_eclipse'];
+          const picked = cosmicPool[Math.floor(Math.random() * cosmicPool.length)];
+          appState.skyEvent = picked;
+          const names = {
+            blue_moon: '🌙 Mavi Dolunay',
+            lunar_eclipse: '🌘 Ay Tutulması',
+            solar_eclipse: '☀️ Güneş Tutulması'
+          };
+          appState.activeMechStage = `⚡ ${names[picked]}`;
+          appState.lastActionSummary = `Tanrıça Sabrina Kozmik Ulti -> ${names[picked]} tetiklendi!`;
+          grantXpToPlayer(currentUserId, 40, true);
+          saveState();
+          showSubtitleAndSpeak(charObj.name, `Bilinmeyen kozmik ulti tetiklendi: ${names[picked]} arenaya yansıdı!`, 'ulti', true);
+          return;
+        }
+
+        if (charObj.ulti.effectType === 'solar_flare' || charObj.ulti.effectType === 'dawn_aegis') {
+          appState.isNight = false;
+          appState.skyEvent = 'dawn';
+        } else if (charObj.ulti.effectType === 'nightmare_tide' || charObj.ulti.effectType === 'crimson_moon') {
+          appState.isNight = true;
+          appState.skyEvent = 'blue_moon';
+        }
+
+        appState.gold += 35;
+        appState.activeMechStage = `⚡ ${charObj.ulti.name.split(' (')[0]}`;
+        appState.lastActionSummary = `${charObj.name} Ultisi aktif (+35 Altın)`;
+        grantXpToPlayer(currentUserId, 35, true);
+        saveState();
+        showSubtitleAndSpeak(charObj.name, `${charObj.ulti.name} tetiklendi! ${charObj.ulti.desc}`, 'ulti', true);
+        return;
+      }
+
+      const pIndex = portKey === 'p1' ? 0 : 1;
+      const passive = charObj.passives[pIndex];
+      appState.gold += 10;
+      appState.activeMechStage = `💎 ${passive.name}`;
+      appState.lastActionSummary = `${charObj.name} • ${passive.name}`;
+      grantXpToPlayer(currentUserId, 20, false);
+      saveState();
+      showSubtitleAndSpeak(charObj.name, `${passive.name}: ${passive.desc}`, 'magic', true);
+    }
+
+    function onPanelRowClick(charId, title) {
+      if (!appState.gameStarted) {
+        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Yetenek ve sahne efektleri oyun başladığında tetiklenir.', 'click', false);
+        return;
+      }
+      const charObj = CHARACTERS.find(c => c.id === charId) || activeLeftChar;
+      grantXpToPlayer(currentUserId, 10, false);
+      saveState();
+      showSubtitleAndSpeak(charObj.name, `${title} seçildi.`, 'magic', true);
+    }
+
+    function onArenaSkillOrVoice(side) {
+      const charObj = side === 'left' ? activeLeftChar : activeRightChar;
+      showSubtitleAndSpeak(charObj.name, `"${charObj.quote}"`, 'magic', appState.gameStarted);
+    }
+
+    function onIslandSpotClick(spotName, note) {
+      if (!appState.gameStarted) {
+        showSubtitleAndSpeak('3D ADA', `${spotName} — Oyun başladığında bölge hamleleri ve efektleri aktif olur.`, 'click', false);
+        return;
+      }
+      appState.gold += 15;
+      appState.activeMechStage = `🏝️ ${spotName}`;
+      appState.lastActionSummary = `Bölge: ${spotName} • ${note}`;
+      grantXpToPlayer(currentUserId, 20, false);
+      saveState();
+      showSubtitleAndSpeak(spotName, `${note}.`, 'click', true);
+    }
+
+    function onCollectiveAction() {
+      if (!appState.gameStarted) {
+        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Oylama ve hamleler oyun başladığında aktif olur.', 'click', false);
+        return;
+      }
+      const target = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+      appState.activeMechStage = '🗳️ Toplu Hamle';
+      appState.lastActionSummary = `Toplu Hamle: ${target.name} • Taraf Dengesi İşlendi`;
+      grantXpToPlayer(currentUserId, 25, true);
+      saveState();
+      showSubtitleAndSpeak('OYLAMA / HAMLE', `Toplu strateji hamlesi kaydedildi (${target.group} kuşağı).`, 'magic', true);
     }
 
     function cycleSideHero(side) {
@@ -1548,83 +1751,78 @@
       playGameTone('click');
     }
 
-    function triggerSocket(charId, slotType) {
-      const charObj = CHARACTERS.find(c => c.id === charId) || activeLeftChar;
-      if (appState.mana >= 15) appState.mana -= 15;
+    // Lobby penceresi işlemleri
+    function openLobbyModal() {
+      playGameTone('click');
+      renderLobbyModalContent();
+      document.getElementById('lobby-modal').classList.add('open');
+    }
 
-      document.getElementById('island-center-hero').textContent = charObj.emoji;
-      document.getElementById('island-center-label').textContent = charObj.name.split(' ').pop().toUpperCase();
-
-      if (slotType === 'ulti') {
-        if (!isUltiUnlocked()) {
-          showSubtitleAndSpeak(charObj.name, `Ulti soketi kilitli! 2. Şafak geçildikten sonra kullanılabilir (Şu an Şafak ${appState.dawnCount || 1}).`, 'click');
-          return;
-        }
-
-        if (charObj.id === 'sabrina' || charObj.ulti.effectType === 'sabrina_cosmic') {
-          const cosmicPool = ['blue_moon', 'lunar_eclipse', 'solar_eclipse'];
-          const picked = cosmicPool[Math.floor(Math.random() * cosmicPool.length)];
-          appState.skyEvent = picked;
-          const labels = {
-            blue_moon: '🌙 Mavi Dolunay',
-            lunar_eclipse: '🌘 Ay Tutulması',
-            solar_eclipse: '☀️ Güneş Tutulması'
-          };
-          appState.activeMechStage = `⚡ ${labels[picked]}`;
-          appState.lastActionSummary = `Tanrıça Sabrina Kozmik Ulti -> ${labels[picked]} tetiklendi!`;
-          saveState();
-          showSubtitleAndSpeak(charObj.name, `Bilinmeyen kozmik mühür açıldı: ${labels[picked]} 3D adada yankılandı!`, 'ulti');
-          return;
-        }
-
-        if (charObj.ulti.effectType === 'solar_flare' || charObj.ulti.effectType === 'dawn_aegis') {
-          appState.isNight = false;
-          appState.skyEvent = 'dawn';
-        } else if (charObj.ulti.effectType === 'nightmare_tide' || charObj.ulti.effectType === 'crimson_moon') {
-          appState.isNight = true;
-          appState.skyEvent = 'blue_moon';
-        } else if (charObj.ulti.effectType === 'chronos_seal') {
-          appState.timeLeft = Math.min(240, appState.timeLeft + 45);
-        }
-
-        appState.gold += 35;
-        appState.activeMechStage = `⚡ ${charObj.emoji} ${charObj.ulti.name.split(' (')[0]}`;
-        appState.lastActionSummary = `${charObj.name} Ultisi 3D ada dengesini değiştirdi (+35 Altın)`;
-        saveState();
-        showSubtitleAndSpeak(charObj.name, `${charObj.ulti.name} tetiklendi! ${charObj.ulti.desc}`, 'ulti');
-        return;
+    function joinCurrentUserToLobby() {
+      const prof = cloudProfiles[currentUserId] || {
+        id: currentUserId,
+        name: appState.profile.displayName || autoTgName,
+        handle: tgUser.username ? `@${tgUser.username}` : '@oyuncu',
+        level: 1,
+        xp: 0,
+        wins: 0
+      };
+      const existing = appState.lobbyMembers.find(m => m.id === currentUserId);
+      if (!existing) {
+        appState.lobbyMembers.push({
+          id: currentUserId,
+          name: appState.profile.displayName || prof.name,
+          handle: prof.handle || '@oyuncu',
+          ready: false,
+          status: 'joined',
+          secretSide: appState.profile.preferredSide || 'Gündüz',
+          secretRole: 'Muhafız Galadriel',
+          charId: 'galadriel',
+          alive: true
+        });
+      } else {
+        existing.status = 'joined';
+        existing.name = appState.profile.displayName || existing.name;
       }
-
-      const idx = Number(slotType.split('_')[1] || 0);
-      const passive = charObj.passives[idx] || charObj.passives[0];
-      appState.gold += 10;
-      appState.activeMechStage = `💎 ${charObj.emoji} ${passive.name}`;
-      appState.lastActionSummary = `3D Ada Soket: ${charObj.name} • ${passive.name}`;
       saveState();
-      showSubtitleAndSpeak(charObj.name, `${passive.name} 3D adada yansıtıldı: ${passive.desc}`, 'magic');
+      renderLobbyModalContent();
     }
 
-    function triggerIslandPulse(spotName, note) {
-      appState.gold += 15;
-      appState.activeMechStage = `🏝️ ${spotName}`;
-      appState.lastActionSummary = `3D Ada Bölgesi: ${spotName} • ${note}`;
+    function toggleLobbyMemberReady(id) {
+      const m = appState.lobbyMembers.find(x => x.id === id);
+      if (!m || m.status === 'left') return;
+      m.ready = !m.ready;
       saveState();
-      showSubtitleAndSpeak(spotName, `${note}. 3D ada üzerinde etki dalgası oluştu.`, 'click');
+      renderLobbyModalContent();
     }
 
-    function performCollectiveMove() {
-      const combo = ALL_COMBOS[Math.floor(Math.random() * ALL_COMBOS.length)];
-      appState.activeMechStage = `🗳️ Toplu Hamle`;
-      appState.lastActionSummary = `Strateji: ${combo.pair} (${combo.synergy})`;
+    function toggleLobbyMemberLeave(id) {
+      const m = appState.lobbyMembers.find(x => x.id === id);
+      if (!m) return;
+      if (m.status === 'left') {
+        m.status = 'joined';
+        m.ready = false;
+      } else {
+        m.status = 'left';
+        m.ready = false;
+      }
       saveState();
-      showSubtitleAndSpeak('TOPLU HAMLE', `${combo.pair} stratejisi 3D adada uygulandı — ${combo.synergy}.`, 'magic');
+      renderLobbyModalContent();
     }
 
-    function speakCharacter(charObj) {
-      showSubtitleAndSpeak(charObj.name, `"${charObj.quote}"`, 'magic');
+    function toggleSelfReady() {
+      let me = appState.lobbyMembers.find(m => m.id === currentUserId);
+      if (!me) {
+        joinCurrentUserToLobby();
+        me = appState.lobbyMembers.find(m => m.id === currentUserId);
+      }
+      if (!me) return;
+      me.status = 'joined';
+      me.ready = !me.ready;
+      saveState();
+      renderLobbyModalContent();
     }
 
-    // Lobi işlemleri
     function onLobbyConfigChange() {
       appState.mode = document.getElementById('lobby-mode-select').value;
       appState.startPhase = document.getElementById('lobby-phase-select').value;
@@ -1633,65 +1831,12 @@
       saveState();
     }
 
-    function joinLobbyPlayer() {
-      const inp = document.getElementById('lobby-join-input');
-      const val = inp.value.trim();
-      if (!val) return;
-      const handle = val.startsWith('@') ? val : `@${val.toLowerCase().replace(/\s+/g, '_')}`;
-      const name = val.startsWith('@') ? val.slice(1) : val;
-      appState.participants.push({
-        id: String(Date.now()),
-        name,
-        handle,
-        ready: false,
-        status: 'joined',
-        secretSide: 'Gündüz',
-        secretRole: 'Muhafız Galadriel',
-        charId: 'galadriel',
-        alive: true
-      });
-      inp.value = '';
-      saveState();
-    }
-
-    function toggleLobbyPlayerReady(id) {
-      const p = appState.participants.find(item => item.id === id);
-      if (!p || p.status === 'left') return;
-      p.ready = !p.ready;
-      saveState();
-    }
-
-    function toggleLobbyPlayerLeave(id) {
-      const p = appState.participants.find(item => item.id === id);
-      if (!p) return;
-      if (p.status === 'left') {
-        p.status = 'joined';
-        p.ready = false;
-      } else {
-        p.status = 'left';
-        p.ready = false;
-      }
-      saveState();
-    }
-
-    function toggleSelfReady() {
-      let me = appState.participants.find(p => p.id === currentUserId);
-      if (!me) {
-        me = { id: currentUserId, name: appState.profile.displayName, handle: '@oyuncu', ready: false, status: 'joined', secretSide: 'Gündüz', secretRole: 'Muhafız Galadriel', charId: 'galadriel', alive: true };
-        appState.participants.push(me);
-      }
-      me.status = 'joined';
-      me.ready = !me.ready;
-      saveState();
-    }
-
     function startMatchFromLobby() {
-      const active = appState.participants.filter(p => p.status !== 'left');
-      const allReady = active.length > 0 && active.every(p => p.ready);
+      const active = appState.lobbyMembers.filter(m => m.status !== 'left');
+      const allReady = active.length > 0 && active.every(m => m.ready);
       if (!allReady) return;
 
-      autoAssignFairRoles(appState.participants);
-      appState.lobbyOpen = false;
+      autoAssignFairRoles(appState.lobbyMembers);
       appState.gameStarted = true;
       appState.turn = 1;
       appState.dawnCount = 1;
@@ -1699,43 +1844,49 @@
       appState.skyEvent = appState.isNight ? 'blue_moon' : 'dawn';
       appState.activeMechStage = '🏝️ 3D Ada Aktif';
 
-      const me = appState.participants.find(p => p.id === currentUserId) || active[0];
+      const me = appState.lobbyMembers.find(m => m.id === currentUserId);
       if (me) {
         const myChar = CHARACTERS.find(c => c.id === me.charId) || CHARACTERS[0];
         if (myChar.group === 'Gündüz') activeLeftChar = myChar;
         else activeRightChar = myChar;
         appState.profile.preferredSide = me.secretSide;
-        appState.lastActionSummary = `3D Ada Başladı • Tarafın: ${me.secretSide} (Anonim) • 2. Şafak Ulti Kilitli`;
+        appState.lastActionSummary = `Oyun Başladı • Tarafın: ${me.secretSide} (Anonim) • 2. Şafak Ulti Kilitli`;
       }
+
       saveState();
-      showSubtitleAndSpeak('MINI LEGENDS', 'Herkes hazır verdi, 3D ada oyunu başladı! Roller adaletli ve anonim dağıtıldı.', 'ulti');
+      closeModal('lobby-modal');
+      showSubtitleAndSpeak('MINI LEGENDS', 'Herkes hazır verdi, oyun başladı! Roller adaletli ve anonim dağıtıldı.', 'ulti', true);
     }
 
-    function renderLobby() {
-      const box = document.getElementById('arena-lobby-box');
-      if (!appState.lobbyOpen || appState.gameStarted) {
-        box.classList.remove('open');
-        return;
-      }
-      box.classList.add('open');
+    function renderLobbyModalContent() {
       document.getElementById('lobby-mode-select').value = appState.mode || 'anon_equal';
       document.getElementById('lobby-phase-select').value = appState.startPhase || 'night';
 
-      const active = appState.participants.filter(p => p.status !== 'left');
-      const readyCount = active.filter(p => p.ready).length;
+      const active = appState.lobbyMembers.filter(m => m.status !== 'left');
+      const readyCount = active.filter(m => m.ready).length;
       const allReady = active.length > 0 && readyCount === active.length;
 
-      document.getElementById('lobby-ready-summary').textContent = `Giren: ${active.length} • Hazır: ${readyCount}/${active.length}`;
+      document.getElementById('lobby-ready-summary').textContent = `Lobby'de Katılımcı: ${active.length} • Hazır: ${readyCount}/${active.length}`;
       document.getElementById('lobby-start-btn').style.display = allReady ? 'inline-flex' : 'none';
 
-      document.getElementById('lobby-players-grid').innerHTML = appState.participants.map(p => {
-        const left = p.status === 'left';
+      const me = appState.lobbyMembers.find(m => m.id === currentUserId && m.status !== 'left');
+      document.getElementById('lobby-self-ready-btn').textContent = (me && me.ready) ? '✅ Hazırım (İptal)' : '✅ Hazır Ver';
+
+      if (appState.lobbyMembers.length === 0) {
+        document.getElementById('lobby-players-grid').innerHTML = '<div style="color:var(--text-muted); font-size:10.5px;">Lobby henüz boş. Katılmak için "+ Lobby\'ye Katıl" butonuna basın.</div>';
+        return;
+      }
+
+      document.getElementById('lobby-players-grid').innerHTML = appState.lobbyMembers.map(m => {
+        const left = m.status === 'left';
+        const prof = cloudProfiles[m.id] || { level: 1 };
         return `
-          <div class="lobby-player-chip ${p.ready && !left ? 'ready' : ''}">
-            <span>${left ? '🚪 Çıktı' : (p.ready ? '✅ Hazır' : '⏳ Bekliyor')}</span>
-            <strong>${p.name}</strong>
-            ${!left ? `<button class="mini-btn" style="flex:none; padding:1px 5px;" onclick="toggleLobbyPlayerReady('${p.id}')">Hazır</button>` : ''}
-            <button class="mini-btn" style="flex:none; padding:1px 5px;" onclick="toggleLobbyPlayerLeave('${p.id}')">${left ? 'Al' : 'Çıkar'}</button>
+          <div class="lobby-player-chip ${m.ready && !left ? 'ready' : ''}">
+            <span>${left ? '🚪 Çıktı' : (m.ready ? '✅ Hazır' : '⏳ Bekliyor')}</span>
+            <strong>${m.name}</strong>
+            <span style="color:var(--gold);">Lvl ${prof.level || 1}</span>
+            ${!left ? `<button class="mini-btn" style="flex:none; padding:1px 6px;" onclick="toggleLobbyMemberReady('${m.id}')">Hazır</button>` : ''}
+            <button class="mini-btn" style="flex:none; padding:1px 6px;" onclick="toggleLobbyMemberLeave('${m.id}')">${left ? 'Katıl' : 'Çıkar'}</button>
           </div>
         `;
       }).join('');
@@ -1755,14 +1906,14 @@
       appState.activeMechStage = `${appState.isNight ? '🌙 Gece' : '☀️ Şafak ' + appState.dawnCount}`;
       appState.lastActionSummary = `Tur ${appState.turn} • ${ultiNote}`;
       saveState();
-      showSubtitleAndSpeak('OTONOM DÖNGÜ', `${appState.isNight ? 'Gece fazı' : 'Şafak ' + appState.dawnCount} başladı. ${ultiNote}`, 'magic');
+      showSubtitleAndSpeak('OTONOM DÖNGÜ', `${appState.isNight ? 'Gece fazı' : 'Şafak ' + appState.dawnCount} başladı. ${ultiNote}`, 'magic', true);
     }
 
     setInterval(() => {
       if (appState.gameStarted) {
         if (appState.timeLeft > 0) {
           appState.timeLeft -= 1;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+          localStorage.setItem(STATE_KEY, JSON.stringify(appState));
         } else {
           advancePhase();
         }
@@ -1775,27 +1926,13 @@
     function renderAllRolesGrid() {
       const unlocked = isUltiUnlocked();
       document.getElementById('all-roles-grid').innerHTML = CHARACTERS.map(c => `
-        <div class="role-card" onclick="speakCharacter(CHARACTERS.find(x=>x.id==='${c.id}'))">
+        <div class="role-card" onclick="onArenaSkillOrVoice('${c.group === 'Gündüz' ? 'left' : 'right'}')">
           <h4>${c.emoji} ${c.name} <span style="font-size:9px; color:#94a3b8;">(${c.group})</span></h4>
           <div class="quote">"${c.quote}"</div>
           <div class="ability">⚡ Ulti [${unlocked ? 'AÇIK' : '2. ŞAFAK'}]: ${c.ulti.name}</div>
           <div style="font-size:9.5px; color:#cbd5e1; margin-top:2px;">💎 ${c.passives[0].name} • ${c.passives[1].name}</div>
         </div>
       `).join('');
-    }
-
-    function renderGuideAndCombos() {
-      const listHtml = ALL_COMBOS.slice(0, 12).map(c =>
-        `<li><strong>${c.pair}</strong> — <em>${c.synergy}</em> (${c.ultiPair})</li>`
-      ).join('');
-      document.getElementById('guide-dynamic-body').innerHTML = `
-        <h4 style="color:var(--gold);">1. 3D Ada, Soketler &amp; 2. Şafak Ulti</h4>
-        <p>Oyun başladığında merkez alan 3D adaya dönüşür. Her kahramanda en üstte <strong>1 Ulti</strong> soketi ve altında <strong>2 genel özellik</strong> soketi vardır; ultiler <strong>2. Şafak</strong> sonrası kullanılır. <strong>Tanrıça Sabrina</strong> ultisine basıldığında <em>Mavi Dolunay</em>, <em>Ay Tutulması</em> veya <em>Güneş Tutulması</em> rastgele tetiklenir.</p>
-        <h4 style="color:var(--blue-glow);">2. Otomatik Adaletli Rol Dağıtımı</h4>
-        <p>Oyuncular rol seçmez; <strong>START</strong> ile sistem katılımcı sayısına göre Gündüz ve Gece taraflarını eşit/adaletli dağıtır. Herkes kendi tarafını bilir, diğer roller anonim kalır.</p>
-        <h4 style="color:var(--purple-glow);">3. Kahraman Kombinasyonları (${ALL_COMBOS.length} İkili Kombo)</h4>
-        <ul style="padding-left:16px; display:flex; flex-direction:column; gap:3px; font-size:10.5px;">${listHtml}</ul>
-      `;
     }
 
     function isAuthorizedYt() {
@@ -1806,7 +1943,7 @@
     function handleYtAccess() {
       playGameTone('click');
       if (!isAuthorizedYt()) {
-        showSubtitleAndSpeak('YETKİ GEREKLİ', 'Yönet YT ekranına yalnızca yetkili kurucu hesabı girebilir.', 'click');
+        showSubtitleAndSpeak('YETKİ GEREKLİ', 'Yönet YT ekranına yalnızca yetkili kurucu hesabı girebilir.', 'click', false);
         return;
       }
       window.location.href = './yt_panel.html';
@@ -1816,19 +1953,25 @@
       const n = document.getElementById('input-display-name').value.trim();
       const side = document.getElementById('input-faction').value;
       const snd = document.getElementById('toggle-sound').checked;
-      if (n) appState.profile.displayName = n;
+      if (n) {
+        appState.profile.displayName = n;
+        if (cloudProfiles[currentUserId]) cloudProfiles[currentUserId].name = n;
+      }
       appState.profile.preferredSide = side;
       appState.profile.soundEnabled = snd;
+      saveCloudProfiles();
       saveState();
       closeModal('profile-modal');
     }
 
     function updateAllUI() {
-      const me = appState.participants.find(p => p.id === currentUserId);
-      const mySide = (me && me.secretSide) || appState.profile.preferredSide || 'Gündüz';
+      const myCloud = cloudProfiles[currentUserId] || { level: 1, xp: 0 };
+      const meLobby = appState.lobbyMembers.find(m => m.id === currentUserId);
+      const mySide = (meLobby && meLobby.secretSide) || appState.profile.preferredSide || 'Gündüz';
+
       document.getElementById('hud-name').textContent = appState.profile.displayName;
       document.getElementById('hud-avatar').textContent = appState.profile.displayName.charAt(0).toUpperCase();
-      document.getElementById('hud-rank').textContent = `Taraf: ${mySide}`;
+      document.getElementById('hud-rank').textContent = `Lvl ${myCloud.level || 1} • ${mySide}`;
 
       document.getElementById('res-gold').textContent = appState.gold;
       document.getElementById('res-mana').textContent = appState.mana;
@@ -1845,38 +1988,47 @@
         siege_tactic: 'Senaryo: 3D Ada Kuşatması'
       };
       document.getElementById('mode-scenario-label').textContent = modeNames[appState.mode] || modeNames.anon_equal;
-      document.getElementById('celestial-fx-badge').textContent = appState.activeMechStage || '⚙️ Mekan • 🌙 Dolunay';
-      document.getElementById('live-turn-telemetry').textContent = appState.lastActionSummary || 'Sıra #1 • Toplu Hareket';
+      document.getElementById('celestial-fx-badge').textContent = appState.activeMechStage || '🏝️ 3D Ada • Lvl 1';
+      document.getElementById('live-turn-telemetry').textContent = appState.lastActionSummary || 'Level 1 • Hazır';
 
       const mins = String(Math.floor(appState.timeLeft / 60)).padStart(2, '0');
       const secs = String(appState.timeLeft % 60).padStart(2, '0');
       document.getElementById('phase-timer').textContent = `${mins}:${secs}`;
 
       document.getElementById('yt-port-btn').classList.toggle('yt-locked', !isAuthorizedYt());
-      document.getElementById('tg-detected-info').textContent = autoTgName;
+      document.getElementById('tg-detected-info').textContent = appState.profile.displayName;
+      document.getElementById('profile-level-badge').textContent = `Level ${myCloud.level || 1} (${myCloud.xp || 0}/${(myCloud.level || 1) * 100} XP)`;
       document.getElementById('input-display-name').value = appState.profile.displayName;
       document.getElementById('input-faction').value = mySide;
       document.getElementById('toggle-sound').checked = appState.profile.soundEnabled;
 
-      document.getElementById('scoreboard-tbody').innerHTML = appState.participants.map(p => `
-        <tr>
-          <td><strong>${p.name}</strong> <span style="color:#94a3b8;">${p.handle}</span></td>
-          <td style="color:var(--gold);">${p.secretSide} • ${p.secretRole}</td>
-          <td>${p.ready ? '✅ Hazır' : '⏳ Hayır'}</td>
-          <td>${p.status === 'left' ? '<span style="color:var(--red-glow);">Çıktı</span>' : '<span style="color:var(--green-glow);">Aktif</span>'}</td>
-        </tr>
-      `).join('');
+      const sortedPlayers = Object.values(cloudProfiles).sort((a, b) => (b.level - a.level) || (b.xp - a.xp));
+      document.getElementById('scoreboard-tbody').innerHTML = sortedPlayers.map(p => {
+        const lm = appState.lobbyMembers.find(x => x.id === p.id);
+        const sideRole = appState.gameStarted && lm ? `${lm.secretSide} • ${lm.secretRole}` : 'Anonim / Sıralama';
+        const statusText = lm && lm.status === 'left'
+          ? '<span style="color:var(--red-glow);">Çıktı</span>'
+          : '<span style="color:var(--green-glow);">Aktif</span>';
+        return `
+          <tr>
+            <td><strong>${p.name}</strong> <span style="color:#94a3b8;">${p.handle}</span></td>
+            <td style="color:var(--gold);">Lvl ${p.level || 1} (${p.xp || 0} XP)</td>
+            <td>${sideRole}</td>
+            <td>${statusText}</td>
+          </tr>
+        `;
+      }).join('');
 
       applySkyTheme();
       renderCharacterPanels();
-      renderLobby();
+      renderMobaSocketDock();
     }
 
     function openModal(id) {
       applyTelegramInsets();
       playGameTone('click');
+      if (id === 'lobby-modal') renderLobbyModalContent();
       if (id === 'roles-modal') renderAllRolesGrid();
-      if (id === 'guide-modal') renderGuideAndCombos();
       if (id === 'scoreboard-modal') updateAllUI();
       document.getElementById(id).classList.add('open');
     }
