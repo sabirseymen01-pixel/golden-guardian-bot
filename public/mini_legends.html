@@ -24,7 +24,7 @@
       --safe-left: env(safe-area-inset-left, 0px);
       --safe-right: env(safe-area-inset-right, 0px);
       --tg-top-pad: 8px;
-      --tg-right-pad: 36px;
+      --tg-right-pad: 38px;
     }
 
     * {
@@ -50,28 +50,28 @@
 
     body.sky-dawn {
       background:
-        radial-gradient(circle at 50% 35%, rgba(251, 146, 60, 0.26) 0%, rgba(245, 196, 81, 0.1) 35%, rgba(6, 9, 17, 0.98) 80%),
-        linear-gradient(180deg, #161829 0%, #050810 100%);
+        radial-gradient(circle at 50% 35%, rgba(251, 146, 60, 0.28) 0%, rgba(245, 196, 81, 0.12) 38%, rgba(6, 9, 17, 0.98) 82%),
+        linear-gradient(180deg, #1b1726 0%, #050810 100%);
     }
     body.sky-dusk {
       background:
-        radial-gradient(circle at 50% 35%, rgba(225, 29, 72, 0.25) 0%, rgba(147, 51, 234, 0.14) 40%, rgba(6, 9, 17, 0.98) 82%),
-        linear-gradient(180deg, #170d24 0%, #050810 100%);
+        radial-gradient(circle at 50% 35%, rgba(225, 29, 72, 0.26) 0%, rgba(147, 51, 234, 0.16) 42%, rgba(6, 9, 17, 0.98) 84%),
+        linear-gradient(180deg, #190d24 0%, #050810 100%);
     }
     body.sky-blue-moon {
       background:
-        radial-gradient(circle at 50% 40%, rgba(37, 99, 235, 0.34) 0%, rgba(56, 189, 248, 0.14) 42%, rgba(5, 9, 18, 0.99) 82%),
-        linear-gradient(180deg, #07132b 0%, #040711 100%);
+        radial-gradient(circle at 50% 40%, rgba(37, 99, 235, 0.36) 0%, rgba(56, 189, 248, 0.16) 44%, rgba(5, 9, 18, 0.99) 84%),
+        linear-gradient(180deg, #07142e 0%, #040711 100%);
     }
     body.sky-lunar-eclipse {
       background:
-        radial-gradient(circle at 50% 40%, rgba(185, 28, 28, 0.3) 0%, rgba(88, 28, 135, 0.18) 45%, rgba(5, 7, 15, 0.99) 84%),
-        linear-gradient(180deg, #16091c 0%, #04060e 100%);
+        radial-gradient(circle at 50% 40%, rgba(185, 28, 28, 0.34) 0%, rgba(88, 28, 135, 0.2) 46%, rgba(5, 7, 15, 0.99) 85%),
+        linear-gradient(180deg, #18091e 0%, #04060e 100%);
     }
     body.sky-solar-eclipse {
       background:
-        radial-gradient(circle at 50% 40%, rgba(245, 196, 81, 0.24) 0%, rgba(15, 23, 42, 0.65) 42%, rgba(4, 6, 12, 0.99) 82%),
-        linear-gradient(180deg, #090c16 0%, #03050a 100%);
+        radial-gradient(circle at 50% 40%, rgba(245, 196, 81, 0.26) 0%, rgba(15, 23, 42, 0.72) 44%, rgba(4, 6, 12, 0.99) 84%),
+        linear-gradient(180deg, #090d18 0%, #03050a 100%);
     }
 
     #rotate-warning {
@@ -189,7 +189,7 @@
       gap: 5px;
       flex-shrink: 0;
     }
-    .brand-title { text-align: right; max-width: 112px; }
+    .brand-title { text-align: right; max-width: 118px; }
     .brand-title h2 { font-size: 10.5px; letter-spacing: 0.6px; color: var(--gold); font-weight: 900; line-height: 1.05; white-space: nowrap; }
     .brand-title span { font-size: 7.5px; color: var(--text-muted); font-weight: 700; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -227,7 +227,7 @@
     .main-arena {
       flex: 1;
       display: grid;
-      grid-template-columns: minmax(156px, 186px) 1fr minmax(156px, 186px);
+      grid-template-columns: minmax(154px, 184px) 1fr minmax(154px, 184px);
       gap: 7px;
       padding: 3px calc(var(--safe-right) + var(--tg-right-pad)) 3px calc(var(--safe-left) + 12px);
       position: relative;
@@ -420,7 +420,7 @@
     }
     .mini-btn:hover { background: var(--gold); color: #070b14; }
 
-    /* MERKEZ GÖKSEL & TAKTİK SİMGE */
+    /* MERKEZ 3D ADA & GÖKSEL/TAKTİK SAHNE */
     .realm-map {
       position: relative;
       display: flex;
@@ -429,104 +429,245 @@
       justify-content: center;
       min-width: 0;
       min-height: 0;
-      padding-bottom: 22px;
+      padding-bottom: 24px;
+      perspective: 780px;
     }
 
-    .celestial-core-stage {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-    }
-
-    .center-celestial-orb {
-      width: 92px;
-      height: 92px;
-      border-radius: 50%;
+    .island-3d-stage {
       position: relative;
+      width: 100%;
+      max-width: 450px;
+      height: 100%;
+      max-height: 224px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      background: radial-gradient(circle at 35% 30%, rgba(56, 189, 248, 0.28), rgba(11, 18, 33, 0.96) 72%);
-      border: 2px solid var(--gold);
-      box-shadow: 0 0 22px rgba(245, 196, 81, 0.28), inset 0 0 18px rgba(56, 189, 248, 0.25);
-      transition: transform 0.25s, box-shadow 0.25s;
-      flex-shrink: 0;
-    }
-    .center-celestial-orb:hover { transform: scale(1.04); }
-    .center-celestial-orb.fx-pulse {
-      animation: orbPulse 0.65s ease-out;
-    }
-    @keyframes orbPulse {
-      0% { transform: scale(1); box-shadow: 0 0 22px rgba(245, 196, 81, 0.35); }
-      50% { transform: scale(1.12); box-shadow: 0 0 36px rgba(56, 189, 248, 0.85); }
-      100% { transform: scale(1); box-shadow: 0 0 22px rgba(245, 196, 81, 0.28); }
-    }
-    .orb-sky-svg {
-      width: 44px;
-      height: 44px;
-      overflow: visible;
-    }
-    .orb-mini-stage {
-      font-size: 7.5px;
-      font-weight: 900;
-      color: #fff;
-      background: rgba(5, 9, 18, 0.85);
-      border: 1px solid rgba(245, 196, 81, 0.45);
-      border-radius: 8px;
-      padding: 1px 5px;
-      margin-top: 1px;
-      max-width: 86px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      transform-style: preserve-3d;
     }
 
-    .hex-grid {
+    .island-sky-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      width: 100%;
+      padding: 2px 8px;
+      border-radius: 9px;
+      background: rgba(7, 12, 24, 0.84);
+      border: 1px solid rgba(245, 196, 81, 0.28);
+      font-size: 8px;
+      z-index: 6;
+    }
+
+    .floating-3d-island {
+      position: relative;
+      width: 274px;
+      height: 128px;
+      margin-top: 6px;
+      transform: rotateX(24deg) rotateZ(-1.5deg);
+      transform-style: preserve-3d;
+      transition: transform 0.35s ease, filter 0.35s ease;
+      cursor: pointer;
+    }
+    .floating-3d-island:hover {
+      transform: rotateX(20deg) rotateZ(0deg) translateY(-2px);
+    }
+    .floating-3d-island.fx-cast {
+      animation: islandShock 0.72s ease-out;
+    }
+    @keyframes islandShock {
+      0% { transform: rotateX(24deg) scale(1); filter: drop-shadow(0 0 12px rgba(245, 196, 81, 0.4)); }
+      45% { transform: rotateX(18deg) scale(1.06); filter: drop-shadow(0 0 28px rgba(56, 189, 248, 0.95)); }
+      100% { transform: rotateX(24deg) scale(1); filter: drop-shadow(0 0 12px rgba(245, 196, 81, 0.4)); }
+    }
+
+    .island-under-rock {
+      position: absolute;
+      left: 26px;
+      right: 26px;
+      bottom: 2px;
+      height: 44px;
+      clip-path: polygon(10% 0%, 90% 0%, 72% 72%, 50% 100%, 28% 72%);
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 55%, #060a14 100%);
+      opacity: 0.92;
+    }
+    .island-sea-ring {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 18px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(56, 189, 248, 0.35);
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.14) 0%, transparent 72%);
+    }
+    .island-top-deck {
+      position: relative;
+      width: 100%;
+      height: 92px;
+      border-radius: 48%;
+      background:
+        radial-gradient(circle at 50% 45%, rgba(245, 196, 81, 0.22), rgba(15, 36, 56, 0.95) 68%, rgba(8, 20, 36, 0.98) 100%);
+      border: 2px solid var(--gold);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.75), inset 0 0 22px rgba(56, 189, 248, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 14px;
+    }
+
+    .island-spot {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2px;
+      padding: 3px 6px;
+      border-radius: 8px;
+      background: rgba(6, 10, 20, 0.74);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 8px;
+      font-weight: 800;
+      color: #f8fafc;
+      transition: transform 0.2s, border-color 0.2s;
     }
-    .hex-row {
+    .island-spot:hover {
+      transform: translateY(-2px);
+      border-color: var(--gold);
+    }
+    .island-spot.citadel-3d {
+      border-color: var(--gold);
+      background: rgba(42, 30, 8, 0.85);
+      transform: translateY(-4px);
+    }
+    .island-spot .sp-icon { font-size: 14px; }
+    .island-spot .sp-lbl { font-size: 7px; color: var(--gold); white-space: nowrap; }
+
+    .celestial-fx-badge {
+      position: absolute;
+      top: -10px;
+      right: 10px;
       display: flex;
-      gap: 5px;
       align-items: center;
+      gap: 4px;
+      background: rgba(6, 10, 20, 0.92);
+      border: 1px solid var(--blue-glow);
+      border-radius: 12px;
+      padding: 2px 7px;
+      font-size: 8px;
+      font-weight: 800;
+      color: var(--blue-glow);
+      z-index: 8;
     }
-    .hex-node {
-      width: 54px;
-      height: 46px;
-      clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-      background: rgba(15, 25, 45, 0.92);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.2s, filter 0.2s;
+    .fx-pulse-ring {
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      opacity: 0;
+      pointer-events: none;
     }
-    .hex-node:hover { transform: scale(1.08); filter: brightness(1.25); }
-    .hex-node.blue { box-shadow: inset 0 0 12px rgba(56, 189, 248, 0.7); background: linear-gradient(135deg, #0d3254, #08182b); }
-    .hex-node.green { box-shadow: inset 0 0 12px rgba(52, 211, 153, 0.7); background: linear-gradient(135deg, #0c3d2f, #071f18); }
-    .hex-node.red { box-shadow: inset 0 0 12px rgba(248, 113, 113, 0.7); background: linear-gradient(135deg, #4a131b, #24090d); }
-    .hex-emoji { font-size: 12px; }
-    .hex-label { font-size: 7px; font-weight: 800; color: #fff; margin-top: 1px; }
+    .floating-3d-island.fx-cast .fx-pulse-ring {
+      animation: ringExpand 0.72s ease-out;
+    }
+    @keyframes ringExpand {
+      0% { opacity: 0.95; transform: scale(0.92); }
+      100% { opacity: 0; transform: scale(1.24); }
+    }
 
     .live-turn-telemetry {
-      margin-top: 3px;
+      margin-top: 4px;
       font-size: 8px;
       color: #e2e8f0;
-      background: rgba(7, 12, 24, 0.85);
-      border: 1px solid rgba(245, 196, 81, 0.28);
+      background: rgba(7, 12, 24, 0.88);
+      border: 1px solid rgba(245, 196, 81, 0.3);
       border-radius: 8px;
       padding: 2px 8px;
       max-width: 96%;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    /* ARAYÜZ İÇİ LOBİ KUTUSU (MERKEZDE ÇALIŞIR, EKRANI KİLİTLEMEZ) */
+    .arena-lobby-box {
+      position: absolute;
+      inset: 4px 6px 26px 6px;
+      background: rgba(8, 14, 28, 0.96);
+      border: 1.5px solid var(--gold);
+      border-radius: 12px;
+      padding: 7px 9px;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 4px;
+      z-index: 25;
+      overflow-y: auto;
+    }
+    .arena-lobby-box.open { display: flex; }
+
+    .lobby-head-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      border-bottom: 1px solid rgba(245, 196, 81, 0.22);
+      padding-bottom: 4px;
+    }
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5px;
+      flex-shrink: 0;
+    }
+    .golden-gay-emblem {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1.5px solid var(--gold);
+      background: radial-gradient(circle at 30% 30%, rgba(245, 196, 81, 0.35), rgba(15, 23, 42, 0.95));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .powered-sub {
+      font-size: 7px;
+      font-weight: 800;
+      color: var(--gold);
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .lobby-controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+    }
+    .lobby-players-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .lobby-player-chip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2.5px 6px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      font-size: 9px;
+    }
+    .lobby-player-chip.ready {
+      border-color: var(--green-glow);
+      background: rgba(52, 211, 153, 0.14);
     }
 
     /* SESLİ & ALTYAZILI ANLATIM BANDI */
@@ -605,105 +746,6 @@
       color: var(--gold);
     }
 
-    /* TEK SEFERLİK BAŞLANGIÇ LOBİSİ KATMANI */
-    .lobby-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(3, 6, 14, 0.94);
-      backdrop-filter: blur(8px);
-      z-index: 90;
-      align-items: center;
-      justify-content: center;
-      padding: max(48px, calc(var(--safe-top) + var(--tg-top-pad) + 38px)) calc(var(--safe-right) + var(--tg-right-pad) + 6px) max(12px, calc(var(--safe-bottom) + 10px)) calc(var(--safe-left) + 14px);
-    }
-    .lobby-overlay.open { display: flex; }
-    .lobby-card {
-      width: 96%;
-      max-width: 780px;
-      max-height: calc(100dvh - 64px);
-      background: linear-gradient(180deg, rgba(13, 22, 42, 0.98), rgba(7, 11, 22, 0.99));
-      border: 1.5px solid var(--gold);
-      border-radius: 14px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .lobby-top {
-      padding: 8px 14px;
-      background: rgba(245, 196, 81, 0.12);
-      border-bottom: 1px solid var(--border-gold);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-    .brand-lockup {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-    }
-    .logo-stack {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      flex-shrink: 0;
-    }
-    .golden-gay-emblem {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      border: 1.5px solid var(--gold);
-      background: radial-gradient(circle at 30% 30%, rgba(245, 196, 81, 0.35), rgba(15, 23, 42, 0.95));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 12px rgba(245, 196, 81, 0.25);
-    }
-    .powered-sub {
-      font-size: 7.5px;
-      font-weight: 800;
-      letter-spacing: 0.4px;
-      color: var(--gold);
-      line-height: 1;
-      white-space: nowrap;
-    }
-    .lobby-body {
-      padding: 10px 14px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      font-size: 11.5px;
-    }
-    .lobby-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
-    }
-    .lobby-pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .player-chip {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 9px;
-      padding: 4px 8px;
-      font-size: 10.5px;
-    }
-    .player-chip.ready {
-      border-color: var(--green-glow);
-      background: rgba(52, 211, 153, 0.12);
-    }
-
     /* MODALLAR */
     .modal-backdrop {
       display: none;
@@ -770,10 +812,7 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 10px;
       padding: 8px;
-      cursor: pointer;
-      transition: 0.15s;
     }
-    .role-card:hover { border-color: var(--gold); background: rgba(245, 196, 81, 0.09); }
     .role-card h4 { color: var(--gold); font-size: 11.5px; margin-bottom: 2px; }
     .role-card .quote { font-style: italic; color: #cbd5e1; font-size: 10px; margin-bottom: 4px; }
     .role-card .ability { font-size: 9.5px; color: var(--blue-glow); }
@@ -782,19 +821,19 @@
       background: #070b14;
       border: 1px solid var(--border-gold);
       color: #fff;
-      padding: 6px 9px;
-      border-radius: 8px;
-      font-size: 11px;
+      padding: 5px 8px;
+      border-radius: 7px;
+      font-size: 10px;
     }
     .action-btn {
       background: linear-gradient(90deg, #d97706, #f59e0b);
       color: #070b14;
       font-weight: 800;
       border: none;
-      padding: 6px 11px;
-      border-radius: 8px;
+      padding: 5px 10px;
+      border-radius: 7px;
       cursor: pointer;
-      font-size: 10.5px;
+      font-size: 9.5px;
       white-space: nowrap;
     }
     .secondary-btn {
@@ -802,10 +841,10 @@
       color: var(--blue-glow);
       font-weight: 700;
       border: 1px solid rgba(56, 189, 248, 0.45);
-      padding: 6px 10px;
-      border-radius: 8px;
+      padding: 5px 8px;
+      border-radius: 7px;
       cursor: pointer;
-      font-size: 10.5px;
+      font-size: 9.5px;
       white-space: nowrap;
     }
     table {
@@ -884,10 +923,10 @@
     <section class="char-panel" id="left-char-panel">
       <div>
         <div class="char-header">
-          <div class="char-role-tag" id="left-tag">GÜNDÜZ KUŞAĞI • SOKET SETİ</div>
+          <div class="char-role-tag" id="left-tag">GÜNDÜZ KUŞAĞI • 3 SOKET</div>
           <div class="char-name-row">
             <h3 id="left-name">🛡️ Muhafız Galadriel</h3>
-            <span class="status-pill" id="left-status">AKTİF</span>
+            <span class="status-pill" id="left-status">SAVUNMADA</span>
           </div>
         </div>
         <div class="char-portrait-banner">
@@ -900,75 +939,89 @@
 
       <div class="char-select-bar">
         <button class="mini-btn" onclick="speakCharacter(activeLeftChar)">🔊 Replik</button>
-        <button class="mini-btn" onclick="openModal('roles-modal')">🔄 Seç</button>
+        <button class="mini-btn" onclick="cycleSideHero('Gündüz')">🔀 Değiştir</button>
       </div>
     </section>
 
-    <!-- MERKEZ GÖKSEL & TAKTİK SİMGE -->
+    <!-- MERKEZ 3D ADA & ARAYÜZ İÇİ LOBİ -->
     <section class="realm-map">
-      <div class="celestial-core-stage">
-        <div class="hex-grid">
-          <div class="hex-row">
-            <div class="hex-node blue" onclick="triggerHexAction('Kuzey Gözcüsü', 'Gündüz Gözlem & Savunma Hattı')">
-              <span class="hex-emoji">🏹</span>
-              <span class="hex-label">Gözcü</span>
+      <div class="island-3d-stage" id="island-3d-stage">
+        <div class="island-sky-bar">
+          <span id="sky-event-label" style="color:var(--blue-glow); font-weight:800;">🌙 Mavi Dolunay</span>
+          <span id="mode-scenario-label" style="color:var(--gold); font-weight:700;">Senaryo: Anonim Eşit Taraf</span>
+          <button class="mini-btn" style="flex:none; padding:1.5px 6px;" onclick="cycleSkyEvent()">🌌 Gökyüzü</button>
+        </div>
+
+        <div class="floating-3d-island" id="floating-3d-island" onclick="triggerIslandPulse('3D Ada Çekirdeği', 'Ada enerjisi ve göksel rezonans tetiklendi')">
+          <div class="fx-pulse-ring"></div>
+          <div class="celestial-fx-badge" id="celestial-fx-badge">⚙️ Mekan • 🌙 Dolunay</div>
+          <div class="island-under-rock"></div>
+          <div class="island-sea-ring"></div>
+          <div class="island-top-deck">
+            <div class="island-spot" onclick="event.stopPropagation(); triggerIslandPulse('Mavi Burç', 'Ay Işığı & Savunma Mühürü')">
+              <span class="sp-icon">🛡️</span>
+              <span class="sp-lbl">Mavi Burç</span>
             </div>
-            <div class="hex-node green" onclick="triggerHexAction('Şafak Sığınağı', 'Yenilenme & Taraf Denge Bölgesi')">
-              <span class="hex-emoji">🌿</span>
-              <span class="hex-label">Sığınak</span>
+            <div class="island-spot citadel-3d" onclick="event.stopPropagation(); triggerIslandPulse('3D Altın Kale', 'Merkez Ada & Strateji Odağı')">
+              <span class="sp-icon" id="island-center-hero">🏰</span>
+              <span class="sp-lbl" id="island-center-label">3D ADA</span>
             </div>
-          </div>
-          <div class="hex-row">
-            <div class="hex-node blue" onclick="triggerHexAction('Mavi Burç', 'Ay Işığı & Kalkan Odağı')">
-              <span class="hex-emoji">🛡️</span>
-              <span class="hex-label">Mavi Burç</span>
-            </div>
-            <div class="hex-node red" onclick="triggerHexAction('Kızıl Cephe', 'Gece Baskın & Baskı Bölgesi')">
-              <span class="hex-emoji">⚔️</span>
-              <span class="hex-label">Kızıl Cephe</span>
+            <div class="island-spot" onclick="event.stopPropagation(); triggerIslandPulse('Kızıl Cephe', 'Gece Baskın & Toplu Hamle')">
+              <span class="sp-icon">⚔️</span>
+              <span class="sp-lbl">Kızıl Cephe</span>
             </div>
           </div>
         </div>
 
-        <!-- ORTADAKİ BÜYÜK GÖKSEL & MEKAN/KAHRAMAN SİMGESİ -->
-        <div class="center-celestial-orb" id="center-celestial-orb" onclick="cycleSkyAndDemoAction()" title="Göksel Evre & Anlık Aksiyon Çekirdeği">
-          <svg class="orb-sky-svg" id="orb-sky-svg" viewBox="0 0 64 64"></svg>
-          <div class="orb-mini-stage" id="orb-mini-stage">⚙️ Mekan • 🌙 Dolunay</div>
-        </div>
-
-        <div class="hex-grid">
-          <div class="hex-row">
-            <div class="hex-node blue" onclick="triggerHexAction('Arkane Pınarı', 'Mana & Strateji Akışı')">
-              <span class="hex-emoji">🔮</span>
-              <span class="hex-label">Arkane</span>
-            </div>
-            <div class="hex-node green" onclick="triggerHexAction('Konsey Otağı', 'Toplu Hareket & Oylama')">
-              <span class="hex-emoji">📜</span>
-              <span class="hex-label">Konsey</span>
-            </div>
-          </div>
-          <div class="hex-row">
-            <div class="hex-node red" onclick="triggerHexAction('Gölge Geçidi', 'Gece Gizli Hamle Hattı')">
-              <span class="hex-emoji">🌑</span>
-              <span class="hex-label">Gölge</span>
-            </div>
-            <div class="hex-node green" onclick="triggerHexAction('Altın Sınır', 'Şafak & Denge Kalesi')">
-              <span class="hex-emoji">🏰</span>
-              <span class="hex-label">Altın Sınır</span>
-            </div>
-          </div>
+        <div class="live-turn-telemetry" id="live-turn-telemetry">
+          Sıra #1 • Roller Otomatik Dağıtılır • 2. Şafak Ulti Kilitli
         </div>
       </div>
 
-      <div class="live-turn-telemetry" id="live-turn-telemetry">
-        SIRA: #1 • Strateji: Eşit Taraflı Toplu Hareket • 2. Şafak Ulti: Kilitli
+      <!-- ARAYÜZ İÇİ LOBİ (HERKES HAZIR VERDİĞİNDE START BELİRİR) -->
+      <div class="arena-lobby-box open" id="arena-lobby-box">
+        <div class="lobby-head-row">
+          <div class="brand-lockup">
+            <div class="logo-stack">
+              <div class="golden-gay-emblem" title="Golden Gay">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <polygon points="12,2 15,9 22,9 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9 9,9" fill="#f5c451" stroke="#fff" stroke-width="1.2"/>
+                </svg>
+              </div>
+              <span class="powered-sub">Powered by</span>
+            </div>
+            <div>
+              <div style="font-size:10.5px; font-weight:900; color:var(--gold);">MINI LEGENDS LOBİ</div>
+              <div style="font-size:8px; color:#cbd5e1; font-weight:700;">BRESKAVICA • Oto Adaletli Rol Dağıtımı</div>
+            </div>
+          </div>
+          <span id="lobby-ready-summary" style="font-size:9px; font-weight:800; color:var(--blue-glow);">Hazır: 0/0</span>
+        </div>
+
+        <div class="lobby-controls-row">
+          <select id="lobby-mode-select" style="width:auto;" onchange="onLobbyConfigChange()">
+            <option value="anon_equal">Mod: Anonim Eşit Taraf</option>
+            <option value="sky_eclipse">Mod: Kozmik Tutulma &amp; Ulti</option>
+            <option value="siege_tactic">Mod: 3D Ada Kuşatması</option>
+          </select>
+          <select id="lobby-phase-select" style="width:auto;" onchange="onLobbyConfigChange()">
+            <option value="night">Başlangıç: Gece</option>
+            <option value="day">Başlangıç: Şafak</option>
+          </select>
+          <input type="text" id="lobby-join-input" placeholder="Giren oyuncu adı" style="width:110px;" />
+          <button class="secondary-btn" onclick="joinLobbyPlayer()">+ Gir</button>
+          <button class="secondary-btn" id="lobby-self-ready-btn" onclick="toggleSelfReady()">✅ Hazır Ver</button>
+          <button class="action-btn" id="lobby-start-btn" style="display:none;" onclick="startMatchFromLobby()">▶ START</button>
+        </div>
+
+        <div class="lobby-players-grid" id="lobby-players-grid"></div>
       </div>
 
       <div class="subtitle-banner" id="subtitle-banner">
         <div class="voice-wave"><span></span><span></span><span></span></div>
         <div class="subtitle-text">
           <span class="subtitle-speaker" id="sub-speaker">MINI LEGENDS:</span>
-          <span id="sub-content">Başlangıç akışı hazır. Roller anonim dağıtılır, 2. Şafak sonrası tüm ultiler açılır.</span>
+          <span id="sub-content">Lobi ayarlarını yapın; herkes hazır verdiğinde START ile 3D ada oyunu başlar.</span>
         </div>
       </div>
     </section>
@@ -977,7 +1030,7 @@
     <section class="char-panel" id="right-char-panel">
       <div>
         <div class="char-header">
-          <div class="char-role-tag" id="right-tag" style="color: var(--purple-glow);">GECE OYUNU • SOKET SETİ</div>
+          <div class="char-role-tag" id="right-tag" style="color: var(--purple-glow);">GECE OYUNU • 3 SOKET</div>
           <div class="char-name-row">
             <h3 id="right-name">👹 Alkarısı</h3>
             <span class="status-pill night-tag" id="right-status">PUSUDA</span>
@@ -993,62 +1046,20 @@
 
       <div class="char-select-bar">
         <button class="mini-btn" onclick="speakCharacter(activeRightChar)">🔊 Replik</button>
-        <button class="mini-btn" onclick="openModal('roles-modal')">🔄 Seç</button>
+        <button class="mini-btn" onclick="cycleSideHero('Gece')">🔀 Değiştir</button>
       </div>
     </section>
   </main>
 
   <!-- ALT NAVİGASYON BAR -->
   <footer class="bottom-hud">
-    <button class="nav-tab active" onclick="switchTab(this)">🌌 GÖKSEL ARENA</button>
+    <button class="nav-tab active" onclick="switchTab(this)">🏝️ 3D ADA</button>
     <button class="nav-tab" onclick="openModal('roles-modal')">🎭 15 KAHRAMAN</button>
-    <button class="nav-tab" onclick="performAutonomousVote()">🗳️ TOPLU HAMLE</button>
-    <button class="nav-tab" onclick="openModal('guide-modal')">📖 KILAVUZ & KOMBOLAR</button>
+    <button class="nav-tab" onclick="performCollectiveMove()">🗳️ TOPLU HAMLE</button>
+    <button class="nav-tab" onclick="openModal('guide-modal')">📖 KILAVUZ &amp; KOMBOLAR</button>
     <button class="nav-tab" onclick="openModal('scoreboard-modal')">🏆 SONUÇ LİSTESİ</button>
-    <button class="nav-tab" onclick="openModal('profile-modal')">👤 PROFİL & SES</button>
+    <button class="nav-tab" onclick="openModal('profile-modal')">👤 PROFİL &amp; SES</button>
   </footer>
-
-  <!-- TEK SEFERLİK BAŞLANGIÇ LOBİ EKRANI -->
-  <div class="lobby-overlay" id="lobby-overlay">
-    <div class="lobby-card">
-      <div class="lobby-top">
-        <div class="brand-lockup">
-          <div class="logo-stack">
-            <div class="golden-gay-emblem" title="Golden Gay">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <polygon points="12,2 15,9 22,9 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9 9,9" fill="#f5c451" stroke="#fff" stroke-width="1.2"/>
-              </svg>
-            </div>
-            <span class="powered-sub">Powered by</span>
-          </div>
-          <div>
-            <div style="font-size:12px; font-weight:900; color:var(--gold); letter-spacing:0.8px;">MINI LEGENDS</div>
-            <div style="font-size:9px; color:#cbd5e1; font-weight:700;">BRESKAVICA</div>
-          </div>
-        </div>
-        <button class="action-btn" onclick="startMatchFromLobby()">🚀 BAŞLA</button>
-      </div>
-
-      <div class="lobby-body">
-        <div class="lobby-controls">
-          <select id="lobby-mode-select" style="width:auto; min-width:175px;" onchange="updateLobbyMode(this.value)">
-            <option value="anon_equal">Mod: Anonim Kurt-Köylü (Eşit Taraflar)</option>
-            <option value="sky_eclipse">Mod: Kozmik Evre & Ulti Taktik</option>
-            <option value="clan_siege">Mod: Kale & Soket Kuşatması</option>
-          </select>
-          <input type="text" id="lobby-add-name" placeholder="Katılımcı adı veya @kullanıcı" style="width:170px;" />
-          <button class="secondary-btn" onclick="addLobbyParticipant()">+ Katılımcı Ekle</button>
-          <button class="secondary-btn" onclick="toggleSelfReady()">✅ Hazır Ver / İptal</button>
-          <button class="action-btn" onclick="startMatchFromLobby()">⚔️ Oyunu Başlat</button>
-        </div>
-
-        <div id="lobby-balance-info" style="font-size:10.5px; color:var(--blue-glow); font-weight:700;"></div>
-
-        <div style="font-size:10px; font-weight:800; color:var(--gold);">KATILIMCI LİSTESİ (KATILANLAR / ÇIKANLAR / HAZIR DURUMU):</div>
-        <div class="lobby-pill-row" id="lobby-participants-list"></div>
-      </div>
-    </div>
-  </div>
 
   <!-- 15 KARAKTER & SOKET MODALI -->
   <div class="modal-backdrop" id="roles-modal">
@@ -1058,7 +1069,7 @@
         <button class="close-btn" onclick="closeModal('roles-modal')">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="color:var(--text-muted); font-size:11px;">Karakter seçildiğinde kendi tarafın (`Gündüz` / `Gece`) gizli/anonim rol kimliğine işlenir ve soketleri anında güncellenir.</p>
+        <p style="color:var(--text-muted); font-size:11px;">Roller oyun başladığında sistem tarafından rastgele ve eşit taraflı dağıtılır; buradan kahraman soketlerini ve replikleri inceleyebilirsin.</p>
         <div class="grid-cards" id="all-roles-grid"></div>
       </div>
     </div>
@@ -1068,7 +1079,7 @@
   <div class="modal-backdrop" id="guide-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>📖 Oyun Kuralları, Stratejiler & Kahraman Kombinasyonları</h3>
+        <h3>📖 Oyun Kuralları, Stratejiler &amp; Kahraman Kombinasyonları</h3>
         <button class="close-btn" onclick="closeModal('guide-modal')">&times;</button>
       </div>
       <div class="modal-body" id="guide-dynamic-body"></div>
@@ -1079,7 +1090,7 @@
   <div class="modal-backdrop" id="profile-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>👤 Oyuncu Profili & Ses Ayarları</h3>
+        <h3>👤 Oyuncu Profili &amp; Ses Ayarları</h3>
         <button class="close-btn" onclick="closeModal('profile-modal')">&times;</button>
       </div>
       <div class="modal-body">
@@ -1088,14 +1099,14 @@
         </div>
         <label>Görünecek Oyuncu Adı:</label>
         <input type="text" id="input-display-name" />
-        <label>Anonim Rol Tercihi (Sadece Sana Görünür):</label>
+        <label>Bilinen Kendi Tarafın:</label>
         <select id="input-faction">
-          <option value="Gündüz Tarafı">Gündüz Tarafı</option>
-          <option value="Gece Tarafı">Gece Tarafı</option>
+          <option value="Gündüz">Gündüz Tarafı</option>
+          <option value="Gece">Gece Tarafı</option>
         </select>
         <div style="display:flex; align-items:center; gap:8px;">
           <input type="checkbox" id="toggle-sound" checked style="width:16px; height:16px;" />
-          <label for="toggle-sound">Ses Efektleri & Türkçe Sesli Okuma (TTS) Aktif</label>
+          <label for="toggle-sound">Ses Efektleri &amp; Türkçe Sesli Okuma (TTS) Aktif</label>
         </div>
         <button class="action-btn" onclick="saveProfile()">💾 Kaydet</button>
       </div>
@@ -1106,7 +1117,7 @@
   <div class="modal-backdrop" id="scoreboard-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>🏆 Oyun Sonu Rol & Katılımcı Listesi</h3>
+        <h3>🏆 Oyun Sonu Rol &amp; Katılımcı Listesi</h3>
         <button class="close-btn" onclick="closeModal('scoreboard-modal')">&times;</button>
       </div>
       <div class="modal-body">
@@ -1114,7 +1125,7 @@
           <thead>
             <tr>
               <th>Katılımcı</th>
-              <th>Anonim Rol & Taraf</th>
+              <th>Taraf &amp; Rol</th>
               <th>Hazır</th>
               <th>Durum</th>
             </tr>
@@ -1264,7 +1275,7 @@
       }
     ];
 
-    const STORAGE_KEY = 'mini_legends_state_v3';
+    const STORAGE_KEY = 'mini_legends_state_v4';
     const FOUNDER_ID = '8245373459';
     const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 
@@ -1283,7 +1294,7 @@
           (tg.safeAreaInset && tg.safeAreaInset.right) || 0
         );
         document.documentElement.style.setProperty('--tg-top-pad', `${Math.max(8, topInset + 4)}px`);
-        document.documentElement.style.setProperty('--tg-right-pad', `${Math.max(36, rightInset + 22)}px`);
+        document.documentElement.style.setProperty('--tg-right-pad', `${Math.max(38, rightInset + 22)}px`);
       } catch (e) {}
     }
     applyTelegramInsets();
@@ -1297,6 +1308,15 @@
 
     const currentUserId = String(tgUser.id);
     const autoTgName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || tgUser.username || 'Oyuncu';
+
+    function shuffleList(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
 
     function computeHeroCombos(pool) {
       const combos = [];
@@ -1316,36 +1336,34 @@
     }
     const ALL_COMBOS = computeHeroCombos(CHARACTERS);
 
-    function assignBalancedAnonymousRoles(players) {
+    // Sistem otomatik ve eşit taraflı rol dağıtımı (kimse rol seçmez)
+    function autoAssignFairRoles(players) {
       const active = players.filter(p => p.status !== 'left');
-      const shuffled = [...active].sort(() => Math.random() - 0.5);
-      const dayRoles = CHARACTERS.filter(c => c.group === 'Gündüz');
-      const nightRoles = CHARACTERS.filter(c => c.group === 'Gece');
+      const shuffledPlayers = shuffleList(active);
+      const dayPool = shuffleList(CHARACTERS.filter(c => c.group === 'Gündüz'));
+      const nightPool = shuffleList(CHARACTERS.filter(c => c.group === 'Gece'));
 
-      const targetDay = Math.floor(shuffled.length / 2);
-      const targetNight = Math.ceil(shuffled.length / 2);
-      let dCount = 0;
-      let nCount = 0;
+      const total = shuffledPlayers.length;
+      const targetDay = Math.floor(total / 2);
+      const targetNight = Math.ceil(total / 2);
+      const sideSlots = shuffleList([
+        ...Array(targetDay).fill('Gündüz'),
+        ...Array(targetNight).fill('Gece')
+      ]);
 
-      shuffled.forEach((p, idx) => {
-        let side = 'Gündüz';
-        if (dCount < targetDay && nCount < targetNight) {
-          side = idx % 2 === 0 ? 'Gündüz' : 'Gece';
-        } else if (dCount < targetDay) {
-          side = 'Gündüz';
-        } else {
-          side = 'Gece';
-        }
-
+      let dIdx = 0;
+      let nIdx = 0;
+      shuffledPlayers.forEach((p, idx) => {
+        const side = sideSlots[idx] || (idx % 2 === 0 ? 'Gündüz' : 'Gece');
         if (side === 'Gündüz') {
-          const role = dayRoles[dCount % dayRoles.length];
-          dCount++;
+          const role = dayPool[dIdx % dayPool.length];
+          dIdx++;
           p.secretSide = 'Gündüz';
           p.secretRole = role.name;
           p.charId = role.id;
         } else {
-          const role = nightRoles[nCount % nightRoles.length];
-          nCount++;
+          const role = nightPool[nIdx % nightPool.length];
+          nIdx++;
           p.secretSide = 'Gece';
           p.secretRole = role.name;
           p.charId = role.id;
@@ -1358,9 +1376,10 @@
       const fallback = {
         founderId: FOUNDER_ID,
         authorizedYts: [],
-        lobbyShownOnce: false,
+        lobbyOpen: true,
         gameStarted: false,
         mode: 'anon_equal',
+        startPhase: 'night',
         profile: {
           displayName: currentUserId === FOUNDER_ID ? 'BRESKAVICA' : autoTgName,
           preferredSide: 'Gündüz',
@@ -1375,17 +1394,13 @@
         timeLeft: 165,
         turn: 1,
         votingOpen: true,
-        gameEnded: false,
-        pendingBroadcast: null,
-        lastBroadcastId: 0,
         activeMechStage: '⚙️ Mekan • 🌙 Mavi Dolunay',
-        lastActionSummary: 'Sıra #1 • Eşit Taraflı Toplu Hareket • 2. Şafak Ulti: Kilitli',
-        logs: [],
+        lastActionSummary: 'Lobi Aktif • Herkes Hazır Verince START Belirir • 2. Şafak Ulti Kilitli',
         participants: [
           { id: FOUNDER_ID, name: 'BRESKAVICA', handle: '@breskavica', ready: true, status: 'joined', secretSide: 'Gündüz', secretRole: 'Muhafız Galadriel', charId: 'galadriel', alive: true },
           { id: '1002', name: 'Kaan', handle: '@arena_uzmani', ready: true, status: 'joined', secretSide: 'Gece', secretRole: 'Alkarısı', charId: 'alkarisi', alive: true },
           { id: '1003', name: 'Selin', handle: '@mitoloji_avcisi', ready: true, status: 'joined', secretSide: 'Gündüz', secretRole: 'Stratejist Helen', charId: 'helen', alive: true },
-          { id: '1004', name: 'Mert', handle: '@gece_yolcusu', ready: false, status: 'joined', secretSide: 'Gece', secretRole: 'Büyücü Eudora', charId: 'eudora', alive: true }
+          { id: '1004', name: 'Mert', handle: '@gece_yolcusu', ready: false, status: 'joined', secretSide: 'Gece', secretRole: 'Tanrıça Sabrina', charId: 'sabrina', alive: true }
         ]
       };
       try {
@@ -1398,7 +1413,7 @@
 
     let appState = loadState();
     let activeLeftChar = CHARACTERS.find(c => c.id === 'galadriel');
-    let activeRightChar = CHARACTERS.find(c => c.id === 'alkarisi');
+    let activeRightChar = CHARACTERS.find(c => c.id === 'sabrina');
 
     function isUltiUnlocked() {
       return Number(appState.dawnCount || 1) >= 2;
@@ -1440,11 +1455,11 @@
     function showSubtitleAndSpeak(speaker, text, tone = 'magic') {
       document.getElementById('sub-speaker').textContent = `${speaker}:`;
       document.getElementById('sub-content').textContent = text;
-      const orb = document.getElementById('center-celestial-orb');
-      if (orb) {
-        orb.classList.remove('fx-pulse');
-        void orb.offsetWidth;
-        orb.classList.add('fx-pulse');
+      const island = document.getElementById('floating-3d-island');
+      if (island) {
+        island.classList.remove('fx-cast');
+        void island.offsetWidth;
+        island.classList.add('fx-cast');
       }
       playGameTone(tone);
       if (appState.profile.soundEnabled && 'speechSynthesis' in window) {
@@ -1456,74 +1471,35 @@
       }
     }
 
-    function renderSkySvg() {
-      const svg = document.getElementById('orb-sky-svg');
+    function applySkyTheme() {
       const body = document.body;
       body.classList.remove('sky-dawn', 'sky-dusk', 'sky-blue-moon', 'sky-lunar-eclipse', 'sky-solar-eclipse');
-
-      const ev = appState.skyEvent || (appState.isNight ? 'blue_moon' : 'dawn');
-      if (ev === 'dawn') {
-        body.classList.add('sky-dawn');
-        svg.innerHTML = `
-          <line x1="8" y1="46" x2="56" y2="46" stroke="#f5c451" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M18 46 A14 14 0 0 1 46 46" fill="#fb923c" stroke="#f5c451" stroke-width="2"/>
-          <line x1="32" y1="14" x2="32" y2="24" stroke="#fde047" stroke-width="2"/>
-          <line x1="15" y1="24" x2="22" y2="30" stroke="#fde047" stroke-width="2"/>
-          <line x1="49" y1="24" x2="42" y2="30" stroke="#fde047" stroke-width="2"/>
-        `;
-      } else if (ev === 'dusk') {
-        body.classList.add('sky-dusk');
-        svg.innerHTML = `
-          <line x1="8" y1="44" x2="56" y2="44" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round"/>
-          <circle cx="32" cy="36" r="13" fill="#e11d48" stroke="#c084fc" stroke-width="2"/>
-          <path d="M12 52 Q32 45 52 52" fill="none" stroke="#c084fc" stroke-width="2"/>
-        `;
-      } else if (ev === 'lunar_eclipse') {
-        body.classList.add('sky-lunar-eclipse');
-        svg.innerHTML = `
-          <circle cx="32" cy="32" r="16" fill="#991b1b" stroke="#f87171" stroke-width="2"/>
-          <circle cx="38" cy="28" r="14" fill="#1e1b4b" opacity="0.72"/>
-          <circle cx="15" cy="16" r="1.6" fill="#fff"/>
-          <circle cx="50" cy="48" r="1.6" fill="#fff"/>
-        `;
-      } else if (ev === 'solar_eclipse') {
-        body.classList.add('sky-solar-eclipse');
-        svg.innerHTML = `
-          <circle cx="32" cy="32" r="16" fill="none" stroke="#f5c451" stroke-width="3.5" stroke-dasharray="4 3"/>
-          <circle cx="32" cy="32" r="12" fill="#060911" stroke="#fbbf24" stroke-width="1.5"/>
-        `;
-      } else {
-        body.classList.add('sky-blue-moon');
-        svg.innerHTML = `
-          <circle cx="32" cy="32" r="16" fill="#2563eb" stroke="#38bdf8" stroke-width="2.2"/>
-          <circle cx="26" cy="27" r="3.5" fill="#1d4ed8" opacity="0.7"/>
-          <circle cx="38" cy="37" r="4.5" fill="#1d4ed8" opacity="0.7"/>
-          <circle cx="37" cy="24" r="2.2" fill="#7dd3fc" opacity="0.6"/>
-        `;
-      }
+      const ev = appState.skyEvent || 'blue_moon';
+      const map = {
+        dawn: ['sky-dawn', '🌅 Gün Doğumu'],
+        dusk: ['sky-dusk', '🌇 Gün Batımı'],
+        blue_moon: ['sky-blue-moon', '🌙 Mavi Dolunay'],
+        lunar_eclipse: ['sky-lunar-eclipse', '🌘 Ay Tutulması'],
+        solar_eclipse: ['sky-solar-eclipse', '☀️ Güneş Tutulması']
+      };
+      const [cls, label] = map[ev] || map.blue_moon;
+      body.classList.add(cls);
+      document.getElementById('sky-event-label').textContent = label;
     }
 
-    function cycleSkyAndDemoAction() {
-      const sequence = ['blue_moon', 'dawn', 'lunar_eclipse', 'dusk', 'solar_eclipse'];
-      const idx = sequence.indexOf(appState.skyEvent || 'blue_moon');
-      const next = sequence[(idx + 1) % sequence.length];
+    function cycleSkyEvent() {
+      const order = ['blue_moon', 'dawn', 'lunar_eclipse', 'dusk', 'solar_eclipse'];
+      const next = order[(order.indexOf(appState.skyEvent || 'blue_moon') + 1) % order.length];
       appState.skyEvent = next;
-      const labels = {
-        blue_moon: '⚙️ Mekan • 🌙 Mavi Dolunay',
-        dawn: '⚙️ Mekan • 🌅 Gün Doğumu',
-        lunar_eclipse: '⚙️ Mekan • 🌘 Ay Tutulması',
-        dusk: '⚙️ Mekan • 🌇 Gün Batımı',
-        solar_eclipse: '⚙️ Mekan • ☀️ Güneş Tutulması'
-      };
-      appState.activeMechStage = labels[next];
-      appState.lastActionSummary = `Göksel Evre: ${labels[next]} • Sıra #${appState.turn}`;
+      appState.activeMechStage = `🌌 Gökyüzü • ${next.replace('_', ' ')}`;
+      appState.lastActionSummary = `3D Ada atmosferi değişti • Sıra #${appState.turn}`;
       saveState();
-      showSubtitleAndSpeak('GÖKSEL ÇEKİRDEK', `${labels[next]} görseli arenaya yansıtıldı.`, 'magic');
+      showSubtitleAndSpeak('3D ADA GÖKYÜZÜ', `Göksel evre ${next.replace('_', ' ')} olarak güncellendi.`, 'magic');
     }
 
     function renderSocketsForCharacter(charObj, containerId) {
       const unlocked = isUltiUnlocked();
-      const ultiBadge = unlocked ? '2. ŞAFAK AÇIK' : `2. ŞAFAK BEKLENİYOR (${appState.dawnCount || 1}/2)`;
+      const ultiBadge = unlocked ? '2. ŞAFAK AÇIK' : `2. ŞAFAK (${appState.dawnCount || 1}/2)`;
       const ultiHtml = `
         <div class="socket-slot ulti-slot ${unlocked ? '' : 'ulti-locked'}" onclick="triggerSocket('${charObj.id}', 'ulti')">
           <div class="socket-gem">U</div>
@@ -1542,7 +1518,6 @@
           </div>
         </div>
       `).join('');
-
       document.getElementById(containerId).innerHTML = ultiHtml + passivesHtml;
     }
 
@@ -1560,9 +1535,25 @@
       renderSocketsForCharacter(activeRightChar, 'right-sockets');
     }
 
+    function cycleSideHero(side) {
+      const pool = CHARACTERS.filter(c => c.group === side);
+      if (side === 'Gündüz') {
+        const idx = pool.findIndex(c => c.id === activeLeftChar.id);
+        activeLeftChar = pool[(idx + 1) % pool.length];
+      } else {
+        const idx = pool.findIndex(c => c.id === activeRightChar.id);
+        activeRightChar = pool[(idx + 1) % pool.length];
+      }
+      renderCharacterPanels();
+      playGameTone('click');
+    }
+
     function triggerSocket(charId, slotType) {
       const charObj = CHARACTERS.find(c => c.id === charId) || activeLeftChar;
       if (appState.mana >= 15) appState.mana -= 15;
+
+      document.getElementById('island-center-hero').textContent = charObj.emoji;
+      document.getElementById('island-center-label').textContent = charObj.name.split(' ').pop().toUpperCase();
 
       if (slotType === 'ulti') {
         if (!isUltiUnlocked()) {
@@ -1571,18 +1562,18 @@
         }
 
         if (charObj.id === 'sabrina' || charObj.ulti.effectType === 'sabrina_cosmic') {
-          const pool = ['blue_moon', 'lunar_eclipse', 'solar_eclipse'];
-          const picked = pool[Math.floor(Math.random() * pool.length)];
+          const cosmicPool = ['blue_moon', 'lunar_eclipse', 'solar_eclipse'];
+          const picked = cosmicPool[Math.floor(Math.random() * cosmicPool.length)];
           appState.skyEvent = picked;
-          const names = {
+          const labels = {
             blue_moon: '🌙 Mavi Dolunay',
             lunar_eclipse: '🌘 Ay Tutulması',
             solar_eclipse: '☀️ Güneş Tutulması'
           };
-          appState.activeMechStage = `⚙️ Mekan • ${names[picked]}`;
-          appState.lastActionSummary = `Tanrıça Sabrina Kozmik Ulti -> ${names[picked]} tetiklendi!`;
+          appState.activeMechStage = `⚡ ${labels[picked]}`;
+          appState.lastActionSummary = `Tanrıça Sabrina Kozmik Ulti -> ${labels[picked]} tetiklendi!`;
           saveState();
-          showSubtitleAndSpeak(charObj.name, `Bilinmeyen kozmik mühür açıldı: ${names[picked]} arenayı değiştirdi!`, 'ulti');
+          showSubtitleAndSpeak(charObj.name, `Bilinmeyen kozmik mühür açıldı: ${labels[picked]} 3D adada yankılandı!`, 'ulti');
           return;
         }
 
@@ -1597,8 +1588,8 @@
         }
 
         appState.gold += 35;
-        appState.activeMechStage = `⚡ Ulti • ${charObj.emoji} ${charObj.ulti.name.split(' (')[0]}`;
-        appState.lastActionSummary = `${charObj.name} Ultisi dengeleri değiştirdi (+35 Altın)`;
+        appState.activeMechStage = `⚡ ${charObj.emoji} ${charObj.ulti.name.split(' (')[0]}`;
+        appState.lastActionSummary = `${charObj.name} Ultisi 3D ada dengesini değiştirdi (+35 Altın)`;
         saveState();
         showSubtitleAndSpeak(charObj.name, `${charObj.ulti.name} tetiklendi! ${charObj.ulti.desc}`, 'ulti');
         return;
@@ -1607,169 +1598,144 @@
       const idx = Number(slotType.split('_')[1] || 0);
       const passive = charObj.passives[idx] || charObj.passives[0];
       appState.gold += 10;
-      appState.activeMechStage = `💎 Soket S${idx + 1} • ${charObj.emoji}`;
-      appState.lastActionSummary = `${charObj.name} [${passive.name}] aktif • ${passive.desc}`;
+      appState.activeMechStage = `💎 ${charObj.emoji} ${passive.name}`;
+      appState.lastActionSummary = `3D Ada Soket: ${charObj.name} • ${passive.name}`;
       saveState();
-      showSubtitleAndSpeak(charObj.name, `${passive.name}: ${passive.desc}`, 'magic');
+      showSubtitleAndSpeak(charObj.name, `${passive.name} 3D adada yansıtıldı: ${passive.desc}`, 'magic');
     }
 
-    function triggerHexAction(zoneName, tacticalNote) {
+    function triggerIslandPulse(spotName, note) {
       appState.gold += 15;
-      appState.activeMechStage = `🗺️ ${zoneName} • ${appState.isNight ? '🌙' : '☀️'}`;
-      appState.lastActionSummary = `Bölge: ${zoneName} (${tacticalNote}) • +15 Altın`;
+      appState.activeMechStage = `🏝️ ${spotName}`;
+      appState.lastActionSummary = `3D Ada Bölgesi: ${spotName} • ${note}`;
       saveState();
-      showSubtitleAndSpeak(zoneName, `${tacticalNote}. Takım stratejisi merkez çekirdeğe yansıtıldı.`, 'click');
+      showSubtitleAndSpeak(spotName, `${note}. 3D ada üzerinde etki dalgası oluştu.`, 'click');
     }
 
-    function performAutonomousVote() {
-      if (!appState.votingOpen) {
-        showSubtitleAndSpeak('OYLAMA KAPALI', 'Toplu hamle şu an kapalı.', 'click');
-        return;
-      }
+    function performCollectiveMove() {
       const combo = ALL_COMBOS[Math.floor(Math.random() * ALL_COMBOS.length)];
-      appState.activeMechStage = `🗳️ Toplu Kombo • ${combo.synergy.split(' ')[0]}`;
-      appState.lastActionSummary = `Toplu Strateji: ${combo.pair} (${combo.synergy})`;
+      appState.activeMechStage = `🗳️ Toplu Hamle`;
+      appState.lastActionSummary = `Strateji: ${combo.pair} (${combo.synergy})`;
       saveState();
-      showSubtitleAndSpeak('TOPLU STRATEJİ', `${combo.pair} uyumu tetiklendi — ${combo.synergy}.`, 'magic');
+      showSubtitleAndSpeak('TOPLU HAMLE', `${combo.pair} stratejisi 3D adada uygulandı — ${combo.synergy}.`, 'magic');
     }
 
     function speakCharacter(charObj) {
       showSubtitleAndSpeak(charObj.name, `"${charObj.quote}"`, 'magic');
     }
 
-    function renderAllRolesGrid() {
-      const unlocked = isUltiUnlocked();
-      document.getElementById('all-roles-grid').innerHTML = CHARACTERS.map(c => `
-        <div class="role-card" onclick="selectCharacter('${c.id}')">
-          <h4>${c.emoji} ${c.name} <span style="font-size:9px; color:#94a3b8;">(${c.group})</span></h4>
-          <div class="quote">"${c.quote}"</div>
-          <div class="ability">⚡ Ulti [${unlocked ? 'AÇIK' : '2. ŞAFAK'}]: ${c.ulti.name}</div>
-          <div style="font-size:9.5px; color:#cbd5e1; margin-top:2px;">💎 ${c.passives[0].name} • ${c.passives[1].name}</div>
-        </div>
-      `).join('');
-    }
-
-    function selectCharacter(charId) {
-      const chosen = CHARACTERS.find(c => c.id === charId);
-      if (!chosen) return;
-      if (chosen.group === 'Gündüz') activeLeftChar = chosen;
-      else activeRightChar = chosen;
-
-      const me = appState.participants.find(p => p.id === currentUserId);
-      if (me) {
-        me.charId = chosen.id;
-        me.secretRole = chosen.name;
-        me.secretSide = chosen.group;
-      }
-      appState.profile.preferredSide = chosen.group;
-      appState.activeMechStage = `🎭 ${chosen.emoji} ${chosen.name}`;
-      appState.lastActionSummary = `Anonim Kimliğin: ${chosen.group} Tarafı (${chosen.name})`;
+    // Lobi işlemleri
+    function onLobbyConfigChange() {
+      appState.mode = document.getElementById('lobby-mode-select').value;
+      appState.startPhase = document.getElementById('lobby-phase-select').value;
+      appState.isNight = appState.startPhase === 'night';
+      appState.skyEvent = appState.isNight ? 'blue_moon' : 'dawn';
       saveState();
-      closeModal('roles-modal');
-      speakCharacter(chosen);
     }
 
-    function addLobbyParticipant() {
-      const inp = document.getElementById('lobby-add-name');
+    function joinLobbyPlayer() {
+      const inp = document.getElementById('lobby-join-input');
       const val = inp.value.trim();
       if (!val) return;
-      const cleanHandle = val.startsWith('@') ? val : `@${val.toLowerCase().replace(/\s+/g, '_')}`;
-      const cleanName = val.startsWith('@') ? val.slice(1) : val;
+      const handle = val.startsWith('@') ? val : `@${val.toLowerCase().replace(/\s+/g, '_')}`;
+      const name = val.startsWith('@') ? val.slice(1) : val;
       appState.participants.push({
         id: String(Date.now()),
-        name: cleanName,
-        handle: cleanHandle,
-        ready: true,
+        name,
+        handle,
+        ready: false,
         status: 'joined',
         secretSide: 'Gündüz',
         secretRole: 'Muhafız Galadriel',
         charId: 'galadriel',
         alive: true
       });
-      assignBalancedAnonymousRoles(appState.participants);
       inp.value = '';
       saveState();
     }
 
-    function toggleParticipantStatus(id) {
+    function toggleLobbyPlayerReady(id) {
+      const p = appState.participants.find(item => item.id === id);
+      if (!p || p.status === 'left') return;
+      p.ready = !p.ready;
+      saveState();
+    }
+
+    function toggleLobbyPlayerLeave(id) {
       const p = appState.participants.find(item => item.id === id);
       if (!p) return;
       if (p.status === 'left') {
         p.status = 'joined';
-        p.ready = true;
+        p.ready = false;
       } else {
         p.status = 'left';
         p.ready = false;
       }
-      assignBalancedAnonymousRoles(appState.participants);
       saveState();
     }
 
     function toggleSelfReady() {
       let me = appState.participants.find(p => p.id === currentUserId);
       if (!me) {
-        me = { id: currentUserId, name: appState.profile.displayName, handle: '@oyuncu', ready: true, status: 'joined', secretSide: 'Gündüz', secretRole: 'Muhafız Galadriel', charId: 'galadriel', alive: true };
+        me = { id: currentUserId, name: appState.profile.displayName, handle: '@oyuncu', ready: false, status: 'joined', secretSide: 'Gündüz', secretRole: 'Muhafız Galadriel', charId: 'galadriel', alive: true };
         appState.participants.push(me);
       }
       me.status = 'joined';
       me.ready = !me.ready;
-      assignBalancedAnonymousRoles(appState.participants);
-      saveState();
-    }
-
-    function updateLobbyMode(modeVal) {
-      appState.mode = modeVal;
-      assignBalancedAnonymousRoles(appState.participants);
       saveState();
     }
 
     function startMatchFromLobby() {
-      assignBalancedAnonymousRoles(appState.participants);
-      appState.lobbyShownOnce = true;
+      const active = appState.participants.filter(p => p.status !== 'left');
+      const allReady = active.length > 0 && active.every(p => p.ready);
+      if (!allReady) return;
+
+      autoAssignFairRoles(appState.participants);
+      appState.lobbyOpen = false;
       appState.gameStarted = true;
       appState.turn = 1;
       appState.dawnCount = 1;
-      appState.isNight = true;
-      appState.skyEvent = 'blue_moon';
-      appState.activeMechStage = '⚙️ Mekan • 🌙 Mavi Dolunay';
-      const me = appState.participants.find(p => p.id === currentUserId);
+      appState.isNight = appState.startPhase === 'night';
+      appState.skyEvent = appState.isNight ? 'blue_moon' : 'dawn';
+      appState.activeMechStage = '🏝️ 3D Ada Aktif';
+
+      const me = appState.participants.find(p => p.id === currentUserId) || active[0];
       if (me) {
         const myChar = CHARACTERS.find(c => c.id === me.charId) || CHARACTERS[0];
-        activeLeftChar = myChar.group === 'Gündüz' ? myChar : activeLeftChar;
-        activeRightChar = myChar.group === 'Gece' ? myChar : activeRightChar;
+        if (myChar.group === 'Gündüz') activeLeftChar = myChar;
+        else activeRightChar = myChar;
         appState.profile.preferredSide = me.secretSide;
-        appState.lastActionSummary = `Oyun Başladı • Tarafın: ${me.secretSide} (Anonim) • 2. Şafak Ulti: Kilitli`;
+        appState.lastActionSummary = `3D Ada Başladı • Tarafın: ${me.secretSide} (Anonim) • 2. Şafak Ulti Kilitli`;
       }
       saveState();
-      document.getElementById('lobby-overlay').classList.remove('open');
-      showSubtitleAndSpeak('MINI LEGENDS', 'Oyun başladı! Roller anonim ve eşit taraflı dağıtıldı. 2. Şafaktan sonra ultiler açılır.', 'ulti');
+      showSubtitleAndSpeak('MINI LEGENDS', 'Herkes hazır verdi, 3D ada oyunu başladı! Roller adaletli ve anonim dağıtıldı.', 'ulti');
     }
 
     function renderLobby() {
-      const overlay = document.getElementById('lobby-overlay');
-      if (appState.lobbyShownOnce || appState.gameStarted) {
-        overlay.classList.remove('open');
+      const box = document.getElementById('arena-lobby-box');
+      if (!appState.lobbyOpen || appState.gameStarted) {
+        box.classList.remove('open');
         return;
       }
-      overlay.classList.add('open');
+      box.classList.add('open');
       document.getElementById('lobby-mode-select').value = appState.mode || 'anon_equal';
+      document.getElementById('lobby-phase-select').value = appState.startPhase || 'night';
 
-      const activeList = appState.participants.filter(p => p.status !== 'left');
-      const dayTotal = activeList.filter(p => p.secretSide === 'Gündüz').length;
-      const nightTotal = activeList.filter(p => p.secretSide === 'Gece').length;
-      const readyTotal = activeList.filter(p => p.ready).length;
+      const active = appState.participants.filter(p => p.status !== 'left');
+      const readyCount = active.filter(p => p.ready).length;
+      const allReady = active.length > 0 && readyCount === active.length;
 
-      document.getElementById('lobby-balance-info').textContent =
-        `Aktif Katılımcı: ${activeList.length} • Hazır: ${readyTotal}/${activeList.length} • Eşit Rol Dağılımı: Gündüz ${dayTotal} / Gece ${nightTotal} (Anonim)`;
+      document.getElementById('lobby-ready-summary').textContent = `Giren: ${active.length} • Hazır: ${readyCount}/${active.length}`;
+      document.getElementById('lobby-start-btn').style.display = allReady ? 'inline-flex' : 'none';
 
-      document.getElementById('lobby-participants-list').innerHTML = appState.participants.map(p => {
-        const isLeft = p.status === 'left';
+      document.getElementById('lobby-players-grid').innerHTML = appState.participants.map(p => {
+        const left = p.status === 'left';
         return `
-          <div class="player-chip ${p.ready && !isLeft ? 'ready' : ''}">
-            <span>${isLeft ? '🚪 Çıktı' : (p.ready ? '✅ Hazır' : '⏳ Bekliyor')}</span>
+          <div class="lobby-player-chip ${p.ready && !left ? 'ready' : ''}">
+            <span>${left ? '🚪 Çıktı' : (p.ready ? '✅ Hazır' : '⏳ Bekliyor')}</span>
             <strong>${p.name}</strong>
-            <span style="color:#94a3b8;">${p.handle}</span>
-            <button class="mini-btn" style="padding:2px 6px;" onclick="toggleParticipantStatus('${p.id}')">${isLeft ? 'Katıl' : 'Çıkar'}</button>
+            ${!left ? `<button class="mini-btn" style="flex:none; padding:1px 5px;" onclick="toggleLobbyPlayerReady('${p.id}')">Hazır</button>` : ''}
+            <button class="mini-btn" style="flex:none; padding:1px 5px;" onclick="toggleLobbyPlayerLeave('${p.id}')">${left ? 'Al' : 'Çıkar'}</button>
           </div>
         `;
       }).join('');
@@ -1789,7 +1755,7 @@
       appState.activeMechStage = `${appState.isNight ? '🌙 Gece' : '☀️ Şafak ' + appState.dawnCount}`;
       appState.lastActionSummary = `Tur ${appState.turn} • ${ultiNote}`;
       saveState();
-      showSubtitleAndSpeak('OTONOM AKIŞ', `${appState.isNight ? 'Gece fazı' : 'Şafak ' + appState.dawnCount + ' fazı'} başladı. ${ultiNote}`, 'magic');
+      showSubtitleAndSpeak('OTONOM DÖNGÜ', `${appState.isNight ? 'Gece fazı' : 'Şafak ' + appState.dawnCount} başladı. ${ultiNote}`, 'magic');
     }
 
     setInterval(() => {
@@ -1806,17 +1772,29 @@
       document.getElementById('phase-timer').textContent = `${mins}:${secs}`;
     }, 1000);
 
+    function renderAllRolesGrid() {
+      const unlocked = isUltiUnlocked();
+      document.getElementById('all-roles-grid').innerHTML = CHARACTERS.map(c => `
+        <div class="role-card" onclick="speakCharacter(CHARACTERS.find(x=>x.id==='${c.id}'))">
+          <h4>${c.emoji} ${c.name} <span style="font-size:9px; color:#94a3b8;">(${c.group})</span></h4>
+          <div class="quote">"${c.quote}"</div>
+          <div class="ability">⚡ Ulti [${unlocked ? 'AÇIK' : '2. ŞAFAK'}]: ${c.ulti.name}</div>
+          <div style="font-size:9.5px; color:#cbd5e1; margin-top:2px;">💎 ${c.passives[0].name} • ${c.passives[1].name}</div>
+        </div>
+      `).join('');
+    }
+
     function renderGuideAndCombos() {
-      const sampleCombos = ALL_COMBOS.slice(0, 12).map(c =>
+      const listHtml = ALL_COMBOS.slice(0, 12).map(c =>
         `<li><strong>${c.pair}</strong> — <em>${c.synergy}</em> (${c.ultiPair})</li>`
       ).join('');
       document.getElementById('guide-dynamic-body').innerHTML = `
-        <h4 style="color:var(--gold);">1. Soket, 2. Şafak Ulti & Tanrıça Sabrina Kozmik Kuralı</h4>
-        <p>Her kahramanın en üstte <strong>1 Ulti</strong> soketi ve altında <strong>2 Genel Özellik</strong> soketi bulunur. Ultiler <strong>2. Şafak</strong> geçildikten sonra kullanılır. <strong>Tanrıça Sabrina</strong> ultiye bastığında <em>Mavi Dolunay</em>, <em>Ay Tutulması</em> veya <em>Güneş Tutulması</em> rastgele belirlenir; kendisi de hangi evrenin geleceğini önceden bilmez.</p>
-        <h4 style="color:var(--blue-glow);">2. Anonim Roller & Eşit Taraf Dengesi</h4>
-        <p>Roller anonim dağıtılır; her oyuncu kendi tarafını bilir. Katılımcı sayısına göre Gündüz ve Gece tarafları eşit/dengeli kurulur; tek başına güç yerine strateji ve toplu hareket belirleyicidir.</p>
-        <h4 style="color:var(--purple-glow);">3. Kahraman Kombinasyon Matrisi (${ALL_COMBOS.length} İkili Kombo Hesaplandı)</h4>
-        <ul style="padding-left:16px; display:flex; flex-direction:column; gap:3px; font-size:10.5px;">${sampleCombos}</ul>
+        <h4 style="color:var(--gold);">1. 3D Ada, Soketler &amp; 2. Şafak Ulti</h4>
+        <p>Oyun başladığında merkez alan 3D adaya dönüşür. Her kahramanda en üstte <strong>1 Ulti</strong> soketi ve altında <strong>2 genel özellik</strong> soketi vardır; ultiler <strong>2. Şafak</strong> sonrası kullanılır. <strong>Tanrıça Sabrina</strong> ultisine basıldığında <em>Mavi Dolunay</em>, <em>Ay Tutulması</em> veya <em>Güneş Tutulması</em> rastgele tetiklenir.</p>
+        <h4 style="color:var(--blue-glow);">2. Otomatik Adaletli Rol Dağıtımı</h4>
+        <p>Oyuncular rol seçmez; <strong>START</strong> ile sistem katılımcı sayısına göre Gündüz ve Gece taraflarını eşit/adaletli dağıtır. Herkes kendi tarafını bilir, diğer roller anonim kalır.</p>
+        <h4 style="color:var(--purple-glow);">3. Kahraman Kombinasyonları (${ALL_COMBOS.length} İkili Kombo)</h4>
+        <ul style="padding-left:16px; display:flex; flex-direction:column; gap:3px; font-size:10.5px;">${listHtml}</ul>
       `;
     }
 
@@ -1828,7 +1806,7 @@
     function handleYtAccess() {
       playGameTone('click');
       if (!isAuthorizedYt()) {
-        showSubtitleAndSpeak('YETKİ GEREKLİ', 'Yönet YT paneline yalnızca yetkili kurucu hesabı girebilir.', 'click');
+        showSubtitleAndSpeak('YETKİ GEREKLİ', 'Yönet YT ekranına yalnızca yetkili kurucu hesabı girebilir.', 'click');
         return;
       }
       window.location.href = './yt_panel.html';
@@ -1856,13 +1834,18 @@
       document.getElementById('res-mana').textContent = appState.mana;
       document.getElementById('res-gem').textContent = appState.gem;
 
-      const ultiStatusText = isUltiUnlocked() ? 'ULTİ AÇIK' : `ŞAFAK ${appState.dawnCount || 1}/2`;
-      document.getElementById('phase-label').textContent = `${appState.isNight ? 'GECE' : 'GÜNDÜZ'} • ${ultiStatusText}`;
+      const ultiTag = isUltiUnlocked() ? 'ULTİ AÇIK' : `ŞAFAK ${appState.dawnCount || 1}/2`;
+      document.getElementById('phase-label').textContent = `${appState.isNight ? 'GECE' : 'GÜNDÜZ'} • ${ultiTag}`;
       document.getElementById('moon-icon').classList.toggle('active-moon', appState.isNight);
       document.getElementById('sun-icon').classList.toggle('active-sun', !appState.isNight);
-      document.getElementById('turn-counter').textContent = `TUR ${appState.turn}`;
 
-      document.getElementById('orb-mini-stage').textContent = appState.activeMechStage || '⚙️ Mekan • 🌙 Dolunay';
+      const modeNames = {
+        anon_equal: 'Senaryo: Anonim Eşit Taraf',
+        sky_eclipse: 'Senaryo: Kozmik Tutulma & Ulti',
+        siege_tactic: 'Senaryo: 3D Ada Kuşatması'
+      };
+      document.getElementById('mode-scenario-label').textContent = modeNames[appState.mode] || modeNames.anon_equal;
+      document.getElementById('celestial-fx-badge').textContent = appState.activeMechStage || '⚙️ Mekan • 🌙 Dolunay';
       document.getElementById('live-turn-telemetry').textContent = appState.lastActionSummary || 'Sıra #1 • Toplu Hareket';
 
       const mins = String(Math.floor(appState.timeLeft / 60)).padStart(2, '0');
@@ -1884,7 +1867,7 @@
         </tr>
       `).join('');
 
-      renderSkySvg();
+      applySkyTheme();
       renderCharacterPanels();
       renderLobby();
     }
