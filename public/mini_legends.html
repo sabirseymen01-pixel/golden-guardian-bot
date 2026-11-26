@@ -304,6 +304,10 @@
       padding: 4px;
       gap: 3px;
       overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .vertical-cartoon-card.match-active {
+      box-shadow: 0 0 16px rgba(245, 196, 81, 0.28);
     }
 
     .char-quote-preview {
@@ -338,7 +342,7 @@
     }
     .mini-btn:hover { background: var(--gold); color: #070b14; }
 
-    /* SOL KAHRAMANIN SAĞINDAKİ LOGOSAL SİMGE SOKET ŞERİDİ (OYUN BAŞLAYINCA AKTİF) */
+    /* SOL KAHRAMANIN SAĞINDAKİ LOGOSAL SİMGE SOKET ŞERİDİ */
     .side-logo-sockets {
       display: flex;
       flex-direction: column;
@@ -443,7 +447,7 @@
       z-index: 6;
     }
 
-    /* SAĞ PANEL (KARŞI KUŞAK / SÜREÇ KART ÖZETİ) */
+    /* SAĞ PANEL */
     .char-panel {
       background: linear-gradient(180deg, rgba(16, 26, 48, 0.97) 0%, rgba(7, 11, 20, 0.99) 100%);
       border: 1.5px solid var(--border-gold);
@@ -872,7 +876,7 @@
           <div class="char-role-tag" id="left-tag">GÜNDÜZ • ŞAFAK SİPERİ</div>
           <div class="char-name-row">
             <h3 id="left-name">Muhafız Galadriel</h3>
-            <span class="status-pill" id="left-status">AKTİF KART</span>
+            <span class="status-pill" id="left-status">BEKLEME</span>
           </div>
         </div>
 
@@ -1490,12 +1494,10 @@
       };
       const sc = skyCards[ev] || skyCards.blue_moon;
 
-      // Arka yan renkli süreç kartları (sol ve sağ çekirdek kartlar)
       const sideW = Math.min(w * 0.22, 86);
       const sideH = Math.min(h * 0.42, 116);
       const floatY = Math.sin(nowSec * 2) * 2.5;
 
-      // Sol süreç kartı: Faz & Şafak
       const lx = cx - sideW * 1.48;
       const ly = cy - sideH * 0.5 + floatY;
       ctxCore.save();
@@ -1516,7 +1518,6 @@
       ctxCore.fillText(`ŞAFAK ${appState.dawnCount || 1}/2`, lx + sideW * 0.5, ly + 74);
       ctxCore.restore();
 
-      // Sağ süreç kartı: Gökyüzü Evresi
       const rx = cx + sideW * 0.48;
       const ry = cy - sideH * 0.5 - floatY;
       ctxCore.save();
@@ -1537,7 +1538,6 @@
       ctxCore.fillText(`TUR ${appState.turn || 1}`, rx + sideW * 0.5, ry + 74);
       ctxCore.restore();
 
-      // Merkez ana çekirdek kart (Yetenek / Süreç simgesel kartı)
       const mainW = Math.min(w * 0.36, 146);
       const mainH = Math.min(h * 0.54, 152);
       const mx = cx - mainW * 0.5;
@@ -1768,10 +1768,13 @@
         ? (CHARACTERS.find(c => c.id === meMember.charId) || activeLeftChar)
         : activeLeftChar;
 
+      const cardEl = document.getElementById('left-vertical-cartoon');
+      cardEl.classList.toggle('match-active', Boolean(appState.gameStarted));
+
       document.getElementById('left-tag').textContent = `${hero.group.toUpperCase()} • ${hero.badge}`;
       document.getElementById('left-name').textContent = hero.name;
       document.getElementById('left-status').textContent = appState.gameStarted ? 'SAHADA' : 'BEKLEME';
-      document.getElementById('left-vertical-cartoon').innerHTML = renderCartoonArtSVG(hero, 66, 66);
+      cardEl.innerHTML = renderCartoonArtSVG(hero, appState.gameStarted ? 56 : 68, appState.gameStarted ? 56 : 68);
       document.getElementById('left-quote').textContent = `"${hero.quote}"`;
 
       const socketBox = document.getElementById('side-logo-sockets');
