@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>MINI LEGENDS — Powered by BRESKAVICA</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
     :root {
       --bg-dark: #060911;
@@ -373,7 +372,7 @@
     }
     .mini-btn:hover { background: var(--gold); color: #070b14; }
 
-    /* MERKEZ WEBGL / THREE.JS 3D ADA SAHNESİ */
+    /* MERKEZ PROFESYONEL 2D KATMANLI ADA SAHNESİ (ÜSTÜNDE AY / GÜNEŞ) */
     .realm-map {
       position: relative;
       display: flex;
@@ -384,21 +383,19 @@
       min-height: 0;
       padding-bottom: 24px;
       border-radius: 12px;
-      border: 1px solid rgba(56, 189, 248, 0.24);
-      background: rgba(4, 8, 18, 0.72);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      background: radial-gradient(circle at 50% 24%, rgba(30, 64, 125, 0.35) 0%, rgba(5, 10, 22, 0.95) 82%);
       overflow: hidden;
     }
 
-    #three-island-canvas {
+    #canvas2d-island {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       display: block;
       z-index: 1;
-      cursor: grab;
     }
-    #three-island-canvas:active { cursor: grabbing; }
 
     .island-sky-bar {
       position: relative;
@@ -410,7 +407,7 @@
       margin-top: 5px;
       padding: 2.5px 8px;
       border-radius: 9px;
-      background: rgba(7, 12, 24, 0.82);
+      background: rgba(7, 12, 24, 0.84);
       border: 1px solid rgba(245, 196, 81, 0.28);
       font-size: 8px;
       z-index: 6;
@@ -422,7 +419,7 @@
       margin-bottom: 4px;
       font-size: 8px;
       color: #f1f5f9;
-      background: rgba(7, 12, 24, 0.85);
+      background: rgba(7, 12, 24, 0.86);
       border: 1px solid rgba(245, 196, 81, 0.3);
       border-radius: 8px;
       padding: 2px 8px;
@@ -798,9 +795,9 @@
       </div>
     </section>
 
-    <!-- MERKEZ THREE.JS 3D ADA SAHNESİ (ÜSTÜNDE AY / GÜNEŞ KÜRESİ) -->
+    <!-- MERKEZ PROFESYONEL 2D ADA SAHNESİ (ÜSTÜNDE AY / GÜNEŞ KÜRESİ) -->
     <section class="realm-map" id="realm-map">
-      <canvas id="three-island-canvas"></canvas>
+      <canvas id="canvas2d-island"></canvas>
 
       <div class="island-sky-bar">
         <span id="sky-event-label" style="color:var(--blue-glow); font-weight:800;">🌙 Mavi Dolunay</span>
@@ -809,7 +806,7 @@
       </div>
 
       <div class="live-turn-telemetry" id="live-turn-telemetry">
-        Level 1 • 3D Ada üstünde Ay/Güneş sahnesi hazır. Lobby simgesinden katılıp başlatabilirsiniz.
+        Level 1 • 2D Ada üstünde Ay/Güneş sahnesi hazır. Lobby simgesinden katılıp başlatabilirsiniz.
       </div>
 
       <div class="subtitle-banner" id="subtitle-banner">
@@ -864,7 +861,7 @@
 
   <!-- ALT NAVİGASYON BAR -->
   <footer class="bottom-hud">
-    <button class="nav-tab active" onclick="switchTab(this)">🏝️ 3D ADA</button>
+    <button class="nav-tab active" onclick="switchTab(this)">🏝️ 2D ADA</button>
     <button class="nav-tab" onclick="openModal('roles-modal')">🎭 15 KAHRAMAN</button>
     <button class="nav-tab" onclick="onCollectiveAction()">🗳️ OYLAMA / HAMLE</button>
     <button class="nav-tab" onclick="openModal('guide-modal')">📖 OYUN KILAVUZU</button>
@@ -897,7 +894,7 @@
           <select id="lobby-mode-select" style="width:auto;" onchange="onLobbyConfigChange()">
             <option value="anon_equal">Mod: Anonim Eşit Taraf</option>
             <option value="sky_eclipse">Mod: Kozmik Tutulma &amp; Ulti</option>
-            <option value="siege_tactic">Mod: 3D Ada Kuşatması</option>
+            <option value="siege_tactic">Mod: 2D Ada Kuşatması</option>
           </select>
           <select id="lobby-phase-select" style="width:auto;" onchange="onLobbyConfigChange()">
             <option value="night">Başlangıç: Gece</option>
@@ -934,16 +931,16 @@
   <div class="modal-backdrop" id="guide-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>📖 Oyun Kılavuzu • 3D Ada, Level &amp; MongoDB</h3>
+        <h3>📖 Oyun Kılavuzu • 2D Ada, Level &amp; MongoDB</h3>
         <button class="close-btn" onclick="closeModal('guide-modal')">&times;</button>
       </div>
       <div class="modal-body">
-        <h4 style="color:var(--gold);">1. 3D Ada ve Üstündeki Ay / Güneş</h4>
-        <p>Merkezde WebGL / Three.js ile oluşturulmuş üç boyutlu ada ve hemen üzerinde süzülen 3D Ay/Güneş/Tutulma küresi yer alır. Sahneyi sürükleyerek açısını döndürebilirsiniz.</p>
+        <h4 style="color:var(--gold);">1. Yüksek Çözünürlüklü 2D Ada ve Üstünde Ay / Güneş</h4>
+        <p>Merkezde ekran DPI ölçeklemeli pikselsiz 2D sahne çizilir. Tam üstte Ay / Güneş / Mavi Dolunay / Ay Tutulması / Güneş Tutulması küresi yer alır ve ada üzerine ışık huzmesi düşürür.</p>
         <h4 style="color:var(--blue-glow);">2. Level 1 Başlangıç ve MongoDB Kaydı</h4>
         <p>Her oyuncu <strong>Level 1</strong> olarak başlar. Oyun oynandıkça ve taraf kazanımlarına göre XP ve seviye yükselir; kayıtlar sunucudaki MongoDB veritabanına (<code>/api/lobby</code> ve <code>/api/progress</code>) işlenir.</p>
         <h4 style="color:var(--purple-glow);">3. Sağ Alt Köşe Yuvarlak Soket Portları &amp; 15 Karakter Efekti</h4>
-        <p>Oyun başladığında sağ alt köşede <strong>ULTI</strong> (2. Şafak sonrası aktif) ve <strong>S1 / S2</strong> yuvarlak soketleri belirir; her karakter kendi yeteneğine göre 3D adada özel ışık, kalkan, yıldırım, gölge, alev veya tutulma efekti üretir.</p>
+        <p>Oyun başladığında sağ alt köşede <strong>ULTI</strong> (2. Şafak sonrası aktif) ve <strong>S1 / S2</strong> yuvarlak soketleri belirir; her karakter kendi yeteneğine göre 2D adada özel kalkan, şok dalgası, yıldırım, gölge, alev veya tutulma efekti üretir.</p>
       </div>
     </div>
   </div>
@@ -1001,7 +998,7 @@
   <script>
     const CHARACTERS = [
       {
-        id: 'galadriel', name: 'Muhafız Galadriel', group: 'Gündüz', emoji: '🛡️', color: 0xf5c451,
+        id: 'galadriel', name: 'Muhafız Galadriel', group: 'Gündüz', emoji: '🛡️', color: '#f5c451',
         quote: 'Işığım sönmeden bu kalenin tek bir taşına bile dokunamazsınız!',
         ulti: { name: 'Şafak Siperi (Ulti)', icon: '🛡️', desc: '2. Şafak sonrası: Gündüz tarafının savunma ve oylama gücünü mühürler.', effectType: 'dawn_aegis' },
         passives: [
@@ -1010,7 +1007,7 @@
         ]
       },
       {
-        id: 'eudora', name: 'Büyücü Eudora', group: 'Gece', emoji: '⚡', color: 0x38bdf8,
+        id: 'eudora', name: 'Büyücü Eudora', group: 'Gece', emoji: '⚡', color: '#38bdf8',
         quote: 'Gökyüzünün gazabı ve kadim yıldırım parmaklarımın ucunda!',
         ulti: { name: 'Fırtına Kırılımı (Ulti)', icon: '⛈️', desc: '2. Şafak sonrası: Karşı tarafın yetenek zincirini bozar.', effectType: 'storm_shift' },
         passives: [
@@ -1019,7 +1016,7 @@
         ]
       },
       {
-        id: 'alkarisi', name: 'Alkarısı', group: 'Gece', emoji: '👹', color: 0xf43f5e,
+        id: 'alkarisi', name: 'Alkarısı', group: 'Gece', emoji: '👹', color: '#fb7185',
         quote: 'Gecenin en derin gölgesinden geldim; nefesinizi kesmeye hazırım!',
         ulti: { name: 'Kabus Çöküşü (Ulti)', icon: '🌑', desc: '2. Şafak sonrası: Gece baskısını artırır ve gündüz stratejisini sarsar.', effectType: 'nightmare_tide' },
         passives: [
@@ -1028,7 +1025,7 @@
         ]
       },
       {
-        id: 'helen', name: 'Stratejist Helen', group: 'Gündüz', emoji: '👑', color: 0xfbbf24,
+        id: 'helen', name: 'Stratejist Helen', group: 'Gündüz', emoji: '👑', color: '#fbbf24',
         quote: 'Akıl ve zarafet kılıçtan keskindir; bu masanın kaderini ben çizerim.',
         ulti: { name: 'Altın Konsey (Ulti)', icon: '👑', desc: '2. Şafak sonrası: Toplu hareketlerde oylama etkisini artırır.', effectType: 'council_boost' },
         passives: [
@@ -1037,7 +1034,7 @@
         ]
       },
       {
-        id: 'estes', name: 'Şifacı Estes', group: 'Gündüz', emoji: '🌿', color: 0x34d399,
+        id: 'estes', name: 'Şifacı Estes', group: 'Gündüz', emoji: '🌿', color: '#34d399',
         quote: 'Ay ışığının şefkati en derin yaraları bile yeniden hayata döndürür.',
         ulti: { name: 'Yaşam Pınarı (Ulti)', icon: '✨', desc: '2. Şafak sonrası: Zayıflayan müttefiki yeniden güçlendirir.', effectType: 'spring_revive' },
         passives: [
@@ -1046,7 +1043,7 @@
         ]
       },
       {
-        id: 'sabrina', name: 'Tanrıça Sabrina', group: 'Gece', emoji: '⏳', color: 0xc084fc,
+        id: 'sabrina', name: 'Tanrıça Sabrina', group: 'Gece', emoji: '⏳', color: '#c084fc',
         quote: 'Zaman benim emrimde akar; geçmişi siler, geleceği yeniden yazarım!',
         ulti: { name: 'Bilinmeyen Kozmik Tutulma (Ulti)', icon: '🌌', desc: '2. Şafak sonrası: Mavi Dolunay, Ay Tutulması veya Güneş Tutulmasından rastgele birini tetikler.', effectType: 'sabrina_cosmic' },
         passives: [
@@ -1055,7 +1052,7 @@
         ]
       },
       {
-        id: 'shadow_hunter', name: 'Gölge Avcısı', group: 'Gece', emoji: '🏹', color: 0x94a3b8,
+        id: 'shadow_hunter', name: 'Gölge Avcısı', group: 'Gece', emoji: '🏹', color: '#94a3b8',
         quote: 'Karanlıkta saklanan hiçbir av oklarımdan kaçamaz.',
         ulti: { name: 'Gümüş Yağmuru (Ulti)', icon: '🏹', desc: '2. Şafak sonrası: Savunma kalkanlarını delip gece hedefini kilitler.', effectType: 'silver_volley' },
         passives: [
@@ -1064,7 +1061,7 @@
         ]
       },
       {
-        id: 'executioner', name: 'İnfazcı', group: 'Gece', emoji: '🪓', color: 0xef4444,
+        id: 'executioner', name: 'İnfazcı', group: 'Gece', emoji: '🪓', color: '#f87171',
         quote: 'Hüküm verildiğinde baltam asla tereddüt etmez.',
         ulti: { name: 'Son Hüküm (Ulti)', icon: '🪓', desc: '2. Şafak sonrası: Zayıflamış hedefi oy dengesiyle saf dışı bırakır.', effectType: 'final_judgment' },
         passives: [
@@ -1073,7 +1070,7 @@
         ]
       },
       {
-        id: 'doomsday', name: 'Kıyamet Süvarisi', group: 'Gece', emoji: '🐎', color: 0xf97316,
+        id: 'doomsday', name: 'Kıyamet Süvarisi', group: 'Gece', emoji: '🐎', color: '#fb923c',
         quote: 'Nallarımın sesi duyulduğunda tüm dengeler yerle bir olur!',
         ulti: { name: 'Mahşer Fırtınası (Ulti)', icon: '🐎', desc: '2. Şafak sonrası: Turdaki pasif dengeleri sıfırlayıp yeniden kurar.', effectType: 'apocalypse_reset' },
         passives: [
@@ -1082,7 +1079,7 @@
         ]
       },
       {
-        id: 'spy', name: 'Casus', group: 'Gece', emoji: '🕵️', color: 0x60a5fa,
+        id: 'spy', name: 'Casus', group: 'Gece', emoji: '🕵️', color: '#60a5fa',
         quote: 'Duvarların bile kulağı vardır, ama benim gözüm her sırrı görür.',
         ulti: { name: 'Büyük İfşa (Ulti)', icon: '🕵️', desc: '2. Şafak sonrası: Gizli hamle kalıbını ortaya çıkarır.', effectType: 'grand_reveal' },
         passives: [
@@ -1091,7 +1088,7 @@
         ]
       },
       {
-        id: 'saboteur', name: 'Sabotajcı', group: 'Gece', emoji: '💣', color: 0xfacc15,
+        id: 'saboteur', name: 'Sabotajcı', group: 'Gece', emoji: '💣', color: '#facc15',
         quote: 'En kusursuz planlar bile tek bir kıvılcımla küle döner.',
         ulti: { name: 'Tam Çöküş (Ulti)', icon: '💣', desc: '2. Şafak sonrası: Karşı tarafın oylama/yetenek akışını 1 faz kilitler.', effectType: 'sabotage_lock' },
         passives: [
@@ -1100,7 +1097,7 @@
         ]
       },
       {
-        id: 'light_warden', name: 'Işık Muhafızı', group: 'Gündüz', emoji: '☀️', color: 0xfde047,
+        id: 'light_warden', name: 'Işık Muhafızı', group: 'Gündüz', emoji: '☀️', color: '#fde047',
         quote: 'Şafak söktüğünde hiçbir gölge ayakta kalamaz!',
         ulti: { name: 'Güneş Patlaması (Ulti)', icon: '☀️', desc: '2. Şafak sonrası: Gece etkisini dağıtıp gündüz üstünlüğü kurar.', effectType: 'solar_flare' },
         passives: [
@@ -1109,7 +1106,7 @@
         ]
       },
       {
-        id: 'vampire', name: 'Kan Emici', group: 'Gece', emoji: '🧛', color: 0xe11d48,
+        id: 'vampire', name: 'Kan Emici', group: 'Gece', emoji: '🧛', color: '#f43f5e',
         quote: 'Sizin yaşam enerjiniz benim ölümsüzlüğümün yakıtıdır.',
         ulti: { name: 'Kızıl Dolunay (Ulti)', icon: '🌕', desc: '2. Şafak sonrası: İki hedeften enerji çekip gece takımını güçlendirir.', effectType: 'crimson_moon' },
         passives: [
@@ -1118,7 +1115,7 @@
         ]
       },
       {
-        id: 'time_bender', name: 'Zaman Büken', group: 'Gündüz', emoji: '🌀', color: 0x2dd4bf,
+        id: 'time_bender', name: 'Zaman Büken', group: 'Gündüz', emoji: '🌀', color: '#2dd4bf',
         quote: 'Saatler benim için işlemez; anı durdurur, hamleyi değiştiririm.',
         ulti: { name: 'Kronos Mührü (Ulti)', icon: '🌀', desc: '2. Şafak sonrası: Turdaki hamle zamanlamasını dondurur.', effectType: 'chronos_seal' },
         passives: [
@@ -1127,7 +1124,7 @@
         ]
       },
       {
-        id: 'spirit_guide', name: 'Ruhlar Rehberi', group: 'Gündüz', emoji: '👻', color: 0xa78bfa,
+        id: 'spirit_guide', name: 'Ruhlar Rehberi', group: 'Gündüz', emoji: '👻', color: '#a78bfa',
         quote: 'Ölüler sessiz değildir; fısıltıları bize gerçeği gösterir.',
         ulti: { name: 'Diriliş Ayini (Ulti)', icon: '👻', desc: '2. Şafak sonrası: Düşen bir stratejiyi/müttefiki geri çağırır.', effectType: 'spirit_resurrect' },
         passives: [
@@ -1280,16 +1277,30 @@
         skyEvent: 'blue_moon',
         turn: 1,
         timeLeft: 165,
-        activeMechStage: '🏝️ 3D Ada • Lvl 1',
-        lastActionSummary: 'Level 1 • 3D Ada üstünde Ay/Güneş sahnesi hazır. Lobby simgesinden katılıp başlatabilirsiniz.',
+        gold: 1450,
+        mana: 780,
+        gem: 4,
+        activeMechStage: '🏝️ 2D Ada • Lvl 1',
+        lastActionSummary: 'Level 1 • 2D Ada üstünde Ay/Güneş sahnesi hazır. Lobby simgesinden katılıp başlatabilirsiniz.',
         lobbyMembers: []
       };
       try {
         const parsed = JSON.parse(localStorage.getItem(STATE_KEY));
-        return parsed ? { ...fallback, ...parsed, profile: { displayName: cloudProfiles[currentUserId].name || autoTgName, preferredSide: 'Gündüz', soundEnabled: true, ...(parsed.profile || {}) } } : {
-          ...fallback,
-          profile: { displayName: cloudProfiles[currentUserId].name || autoTgName, preferredSide: 'Gündüz', soundEnabled: true }
-        };
+        return parsed
+          ? {
+              ...fallback,
+              ...parsed,
+              profile: {
+                displayName: cloudProfiles[currentUserId].name || autoTgName,
+                preferredSide: 'Gündüz',
+                soundEnabled: true,
+                ...(parsed.profile || {})
+              }
+            }
+          : {
+              ...fallback,
+              profile: { displayName: cloudProfiles[currentUserId].name || autoTgName, preferredSide: 'Gündüz', soundEnabled: true }
+            };
       } catch (e) {
         return {
           ...fallback,
@@ -1302,291 +1313,234 @@
     let activeLeftChar = CHARACTERS.find(c => c.id === 'galadriel');
     let activeRightChar = CHARACTERS.find(c => c.id === 'sabrina');
 
-    // --- GERÇEK THREE.JS 3D ADA + ÜSTÜNDE AY/GÜNEŞ KÜRESİ + 15 KARAKTER EFEKTLERİ ---
-    let threeScene = null, threeCamera = null, threeRenderer = null, islandGroup = null;
-    let celestialMesh = null, celestialHalo = null, celestialBeam = null, shieldDome = null, shockRing = null, particlePoints = null, particleVel = null;
-    let effectTimer = 0, currentEffectColor = 0x38bdf8;
-    let isDragging = false, prevPointer = { x: 0, y: 0 }, targetRotY = 0.25, targetRotX = 0.34;
+    // --- YÜKSEK ÇÖZÜNÜRLÜKLÜ (DPR) 2D KATMANLI ADA SAHNESİ + ÜSTTE AY/GÜNEŞ ---
+    const canvas2d = document.getElementById('canvas2d-island');
+    const ctx2d = canvas2d ? canvas2d.getContext('2d') : null;
+    let effectPulse = 0;
+    let effectColor = '#38bdf8';
+    let effectLabel = '';
+    const sparks = Array.from({ length: 28 }, (_, i) => ({
+      angle: (i / 28) * Math.PI * 2,
+      radius: 28 + (i % 5) * 16,
+      speed: 0.008 + (i % 4) * 0.003,
+      size: 1.6 + (i % 3) * 0.9
+    }));
 
-    function initThreeIsland() {
-      const canvas = document.getElementById('three-island-canvas');
+    function resizeCanvas2D() {
       const container = document.getElementById('realm-map');
-      if (!canvas || !container || typeof THREE === 'undefined') return;
-
-      try {
-        threeRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-        threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-        threeScene = new THREE.Scene();
-
-        threeCamera = new THREE.PerspectiveCamera(42, Math.max(1, container.clientWidth) / Math.max(1, container.clientHeight), 0.1, 100);
-        threeCamera.position.set(0, 4.2, 8.2);
-        threeCamera.lookAt(0, 0.8, 0);
-
-        const ambient = new THREE.AmbientLight(0x93c5fd, 0.85);
-        threeScene.add(ambient);
-
-        const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.45);
-        dirLight.position.set(0, 9, 3);
-        threeScene.add(dirLight);
-
-        // Ada grubu
-        islandGroup = new THREE.Group();
-        islandGroup.position.set(0, -0.35, 0);
-
-        // Alt kayalık koni
-        const rockGeo = new THREE.ConeGeometry(2.35, 2.2, 7);
-        const rockMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9, flatShading: true });
-        const rockMesh = new THREE.Mesh(rockGeo, rockMat);
-        rockMesh.rotation.x = Math.PI;
-        rockMesh.position.y = -1.1;
-        islandGroup.add(rockMesh);
-
-        // Üst yeşil/altın ada zemin diski
-        const topGeo = new THREE.CylinderGeometry(2.35, 2.25, 0.32, 24);
-        const topMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.75 });
-        const topMesh = new THREE.Mesh(topGeo, topMat);
-        topMesh.position.y = 0.08;
-        islandGroup.add(topMesh);
-
-        // Altın halka kenar
-        const rimGeo = new THREE.TorusGeometry(2.34, 0.04, 12, 40);
-        const rimMat = new THREE.MeshBasicMaterial({ color: 0xf5c451 });
-        const rimMesh = new THREE.Mesh(rimGeo, rimMat);
-        rimMesh.rotation.x = Math.PI / 2;
-        rimMesh.position.y = 0.24;
-        islandGroup.add(rimMesh);
-
-        // Merkez kristal / kule yapısı
-        const towerGeo = new THREE.OctahedronGeometry(0.55, 0);
-        const towerMat = new THREE.MeshStandardMaterial({ color: 0xf5c451, emissive: 0x78350f, roughness: 0.25, metalness: 0.6 });
-        const towerMesh = new THREE.Mesh(towerGeo, towerMat);
-        towerMesh.position.set(0, 0.85, 0);
-        towerMesh.name = 'centerCrystal';
-        islandGroup.add(towerMesh);
-
-        // 3 çevre burç/dikili taş
-        const spotAngles = [0, (Math.PI * 2) / 3, (Math.PI * 4) / 3];
-        spotAngles.forEach((ang, idx) => {
-          const pillarGeo = new THREE.BoxGeometry(0.26, 0.55, 0.26);
-          const pillarMat = new THREE.MeshStandardMaterial({
-            color: idx === 0 ? 0x38bdf8 : (idx === 1 ? 0xf5c451 : 0xf43f5e),
-            emissive: 0x0f172a
-          });
-          const p = new THREE.Mesh(pillarGeo, pillarMat);
-          p.position.set(Math.cos(ang) * 1.45, 0.45, Math.sin(ang) * 1.45);
-          islandGroup.add(p);
-        });
-
-        // Kalkan kubbesi (Savunma / Şifa / Mührü efektleri için)
-        const domeGeo = new THREE.SphereGeometry(2.45, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-        const domeMat = new THREE.MeshBasicMaterial({ color: 0xf5c451, transparent: true, opacity: 0.0, wireframe: false, side: THREE.DoubleSide });
-        shieldDome = new THREE.Mesh(domeGeo, domeMat);
-        shieldDome.position.y = 0.15;
-        islandGroup.add(shieldDome);
-
-        // Şok dalgası halkası
-        const ringGeo = new THREE.RingGeometry(0.6, 0.85, 32);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.0, side: THREE.DoubleSide });
-        shockRing = new THREE.Mesh(ringGeo, ringMat);
-        shockRing.rotation.x = -Math.PI / 2;
-        shockRing.position.y = 0.35;
-        islandGroup.add(shockRing);
-
-        threeScene.add(islandGroup);
-
-        // 3D ADANIN ÜSTÜNDEKİ AY / GÜNEŞ KÜRESİ
-        const celGeo = new THREE.SphereGeometry(0.72, 32, 32);
-        const celMat = new THREE.MeshStandardMaterial({
-          color: 0x38bdf8,
-          emissive: 0x1d4ed8,
-          emissiveIntensity: 1.1,
-          roughness: 0.3
-        });
-        celestialMesh = new THREE.Mesh(celGeo, celMat);
-        celestialMesh.position.set(0, 3.15, -0.35);
-        threeScene.add(celestialMesh);
-
-        // Üstteki Ay/Güneş ışık halesi
-        const haloGeo = new THREE.RingGeometry(0.84, 1.18, 36);
-        const haloMat = new THREE.MeshBasicMaterial({ color: 0x7dd3fc, transparent: true, opacity: 0.55, side: THREE.DoubleSide });
-        celestialHalo = new THREE.Mesh(haloGeo, haloMat);
-        celestialHalo.position.set(0, 3.15, -0.36);
-        threeScene.add(celestialHalo);
-
-        // Adanın üzerine inen göksel ışık sütunu
-        const beamGeo = new THREE.CylinderGeometry(0.28, 1.35, 3.1, 24, 1, true);
-        const beamMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.14, side: THREE.DoubleSide });
-        celestialBeam = new THREE.Mesh(beamGeo, beamMat);
-        celestialBeam.position.set(0, 1.55, -0.2);
-        threeScene.add(celestialBeam);
-
-        // 3D Parçacıklar (15 karakter yetenek efektleri)
-        const pCount = 90;
-        const pPos = new Float32Array(pCount * 3);
-        particleVel = new Float32Array(pCount * 3);
-        for (let i = 0; i < pCount; i++) {
-          pPos[i * 3] = (Math.random() - 0.5) * 3.2;
-          pPos[i * 3 + 1] = 0.4 + Math.random() * 2.6;
-          pPos[i * 3 + 2] = (Math.random() - 0.5) * 3.2;
-          particleVel[i * 3] = (Math.random() - 0.5) * 0.04;
-          particleVel[i * 3 + 1] = 0.01 + Math.random() * 0.03;
-          particleVel[i * 3 + 2] = (Math.random() - 0.5) * 0.04;
-        }
-        const pGeo = new THREE.BufferGeometry();
-        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-        const pMat = new THREE.PointsMaterial({ color: 0xf5c451, size: 0.11, transparent: true, opacity: 0.85 });
-        particlePoints = new THREE.Points(pGeo, pMat);
-        threeScene.add(particlePoints);
-
-        resizeThree();
-        window.addEventListener('resize', resizeThree);
-
-        canvas.addEventListener('pointerdown', (e) => {
-          isDragging = true;
-          prevPointer = { x: e.clientX, y: e.clientY };
-        });
-        window.addEventListener('pointerup', () => { isDragging = false; });
-        window.addEventListener('pointermove', (e) => {
-          if (!isDragging) return;
-          const dx = e.clientX - prevPointer.x;
-          const dy = e.clientY - prevPointer.y;
-          prevPointer = { x: e.clientX, y: e.clientY };
-          targetRotY += dx * 0.012;
-          targetRotX = Math.max(0.12, Math.min(0.75, targetRotX + dy * 0.008));
-        });
-
-        syncThreeCelestialSky();
-        animateThree();
-      } catch (e) {
-        // WebGL desteklenmiyorsa sessizce geçer
-      }
+      if (!canvas2d || !ctx2d || !container) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+      const rect = container.getBoundingClientRect();
+      const w = Math.max(1, Math.floor(rect.width));
+      const h = Math.max(1, Math.floor(rect.height));
+      canvas2d.width = Math.floor(w * dpr);
+      canvas2d.height = Math.floor(h * dpr);
+      ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
+    window.addEventListener('resize', resizeCanvas2D);
 
-    function resizeThree() {
-      const container = document.getElementById('realm-map');
-      if (!threeRenderer || !threeCamera || !container) return;
-      const w = Math.max(1, container.clientWidth);
-      const h = Math.max(1, container.clientHeight);
-      threeCamera.aspect = w / h;
-      threeCamera.updateProjectionMatrix();
-      threeRenderer.setSize(w, h, false);
-    }
-
-    function syncThreeCelestialSky() {
-      if (!celestialMesh || !celestialHalo || !celestialBeam) return;
-      const ev = appState.skyEvent || 'blue_moon';
-      const configs = {
-        blue_moon: { body: 0x38bdf8, emissive: 0x1d4ed8, halo: 0x7dd3fc, beamOp: 0.16, scale: 1.0 },
-        lunar_eclipse: { body: 0x7f1d1d, emissive: 0xdc2626, halo: 0xf87171, beamOp: 0.18, scale: 1.05 },
-        solar_eclipse: { body: 0x090d16, emissive: 0x111827, halo: 0xf5c451, beamOp: 0.12, scale: 1.08 },
-        dawn: { body: 0xfb923c, emissive: 0xf59e0b, halo: 0xfde047, beamOp: 0.18, scale: 1.02 },
-        dusk: { body: 0xe11d48, emissive: 0x9333ea, halo: 0xf472b6, beamOp: 0.16, scale: 1.0 }
-      };
-      const cfg = configs[ev] || configs.blue_moon;
-      celestialMesh.material.color.setHex(cfg.body);
-      celestialMesh.material.emissive.setHex(cfg.emissive);
-      celestialHalo.material.color.setHex(cfg.halo);
-      celestialBeam.material.color.setHex(cfg.halo);
-      celestialBeam.material.opacity = cfg.beamOp;
-      celestialMesh.scale.setScalar(cfg.scale);
-    }
-
-    function triggerCharacter3DEffect(charObj, isUlti = false) {
-      syncThreeCelestialSky();
+    function trigger2DCharacterEffect(charObj, isUlti = false) {
       if (!charObj) return;
-      currentEffectColor = charObj.color || 0xf5c451;
-      effectTimer = isUlti ? 1.8 : 1.1;
-
-      if (particlePoints) {
-        particlePoints.material.color.setHex(currentEffectColor);
-        const posAttr = particlePoints.geometry.getAttribute('position');
-        for (let i = 0; i < posAttr.count; i++) {
-          const ang = (i / posAttr.count) * Math.PI * 2;
-          const r = 0.4 + Math.random() * 1.6;
-          posAttr.setXYZ(i, Math.cos(ang) * r, 0.5 + Math.random() * 1.8, Math.sin(ang) * r);
-        }
-        posAttr.needsUpdate = true;
-      }
-
-      if (shieldDome) {
-        shieldDome.material.color.setHex(currentEffectColor);
-        shieldDome.material.opacity = isUlti ? 0.28 : 0.15;
-      }
-      if (shockRing) {
-        shockRing.material.color.setHex(currentEffectColor);
-        shockRing.material.opacity = 0.9;
-        shockRing.scale.setScalar(0.6);
-      }
-      if (celestialBeam) {
-        celestialBeam.material.color.setHex(currentEffectColor);
-        celestialBeam.material.opacity = isUlti ? 0.36 : 0.24;
-      }
+      effectColor = charObj.color || '#f5c451';
+      effectPulse = isUlti ? 1.0 : 0.65;
+      effectLabel = isUlti ? `${charObj.emoji} ${charObj.ulti.name}` : `${charObj.emoji} ${charObj.name}`;
     }
 
-    function animateThree() {
-      requestAnimationFrame(animateThree);
-      if (!threeRenderer || !threeScene || !threeCamera) return;
+    function draw2DIslandScene(nowSec) {
+      if (!canvas2d || !ctx2d) return;
+      const container = document.getElementById('realm-map');
+      if (!container) return;
+      const rect = container.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      if (w < 10 || h < 10) return;
 
-      const t = performance.now() * 0.001;
-      if (islandGroup) {
-        islandGroup.rotation.y += (targetRotY - islandGroup.rotation.y) * 0.08 + 0.0022;
-        islandGroup.rotation.x += (targetRotX - islandGroup.rotation.x) * 0.08;
-        islandGroup.position.y = -0.35 + Math.sin(t * 1.6) * 0.08;
+      ctx2d.clearRect(0, 0, w, h);
 
-        const crystal = islandGroup.getObjectByName('centerCrystal');
-        if (crystal) {
-          crystal.rotation.y = t * 1.4;
-          crystal.position.y = 0.85 + Math.sin(t * 2.4) * 0.08;
+      const cx = w * 0.5;
+      const sunX = cx;
+      const sunY = Math.max(54, h * 0.24) + Math.sin(nowSec * 1.8) * 3.5;
+      const sunR = Math.min(w, h) * 0.072;
+      const islandY = h * 0.63 + Math.sin(nowSec * 1.4) * 2.5;
+      const rx = Math.min(w * 0.34, 155);
+      const ry = rx * 0.34;
+
+      // Gökyüzü göksel temaları (Mavi Dolunay, Ay Tutulması, Güneş Tutulması, Gün Doğumu/Batımı)
+      const ev = appState.skyEvent || 'blue_moon';
+      const skyThemeMap = {
+        blue_moon: { core: '#e0f2fe', mid: '#38bdf8', glow: 'rgba(56, 189, 248, 0.28)', beamTop: 'rgba(125, 211, 252, 0.24)', beamBot: 'rgba(56, 189, 248, 0.0)', eclipse: false },
+        lunar_eclipse: { core: '#fecaca', mid: '#ef4444', glow: 'rgba(239, 68, 68, 0.30)', beamTop: 'rgba(248, 113, 113, 0.24)', beamBot: 'rgba(127, 29, 29, 0.0)', eclipse: 'lunar' },
+        solar_eclipse: { core: '#090d16', mid: '#f59e0b', glow: 'rgba(245, 196, 81, 0.34)', beamTop: 'rgba(251, 191, 36, 0.22)', beamBot: 'rgba(245, 158, 11, 0.0)', eclipse: 'solar' },
+        dawn: { core: '#fef08a', mid: '#fb923c', glow: 'rgba(251, 146, 60, 0.32)', beamTop: 'rgba(253, 224, 71, 0.26)', beamBot: 'rgba(251, 146, 60, 0.0)', eclipse: false },
+        dusk: { core: '#fbcfe8', mid: '#c084fc', glow: 'rgba(192, 132, 252, 0.30)', beamTop: 'rgba(244, 114, 182, 0.24)', beamBot: 'rgba(147, 51, 234, 0.0)', eclipse: false }
+      };
+      const stTheme = skyThemeMap[ev] || skyThemeMap.blue_moon;
+
+      // 1. Üstteki Ay/Güneş'ten adaya inen ışık huzmesi
+      ctx2d.save();
+      const beamGrad = ctx2d.createLinearGradient(sunX, sunY, cx, islandY);
+      beamGrad.addColorStop(0, stTheme.beamTop);
+      beamGrad.addColorStop(1, stTheme.beamBot);
+      ctx2d.fillStyle = beamGrad;
+      ctx2d.beginPath();
+      ctx2d.moveTo(sunX - sunR * 0.6, sunY + sunR * 0.4);
+      ctx2d.lineTo(sunX + sunR * 0.6, sunY + sunR * 0.4);
+      ctx2d.lineTo(cx + rx * 0.92, islandY);
+      ctx2d.lineTo(cx - rx * 0.92, islandY);
+      ctx2d.closePath();
+      ctx2d.fill();
+      ctx2d.restore();
+
+      // 2. 3D Adanın tam üstündeki Ay / Güneş küresi ve halesi
+      ctx2d.save();
+      const haloGrad = ctx2d.createRadialGradient(sunX, sunY, sunR * 0.4, sunX, sunY, sunR * 2.5);
+      haloGrad.addColorStop(0, stTheme.glow);
+      haloGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx2d.fillStyle = haloGrad;
+      ctx2d.beginPath();
+      ctx2d.arc(sunX, sunY, sunR * 2.5, 0, Math.PI * 2);
+      ctx2d.fill();
+
+      const bodyGrad = ctx2d.createRadialGradient(sunX - sunR * 0.25, sunY - sunR * 0.25, sunR * 0.1, sunX, sunY, sunR);
+      bodyGrad.addColorStop(0, stTheme.core);
+      bodyGrad.addColorStop(1, stTheme.mid);
+      ctx2d.fillStyle = bodyGrad;
+      ctx2d.beginPath();
+      ctx2d.arc(sunX, sunY, sunR, 0, Math.PI * 2);
+      ctx2d.fill();
+      ctx2d.lineWidth = 1.5;
+      ctx2d.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx2d.stroke();
+
+      if (stTheme.eclipse === 'solar') {
+        ctx2d.fillStyle = '#070b14';
+        ctx2d.beginPath();
+        ctx2d.arc(sunX + Math.sin(nowSec) * 2, sunY, sunR * 0.78, 0, Math.PI * 2);
+        ctx2d.fill();
+      } else if (stTheme.eclipse === 'lunar') {
+        ctx2d.fillStyle = 'rgba(24, 9, 14, 0.45)';
+        ctx2d.beginPath();
+        ctx2d.arc(sunX - sunR * 0.22, sunY - sunR * 0.12, sunR * 0.72, 0, Math.PI * 2);
+        ctx2d.fill();
+      }
+      ctx2d.restore();
+
+      // 3. Deniz dalga halkaları
+      for (let i = 1; i <= 3; i++) {
+        const waveProg = ((nowSec * 0.28 + i * 0.33) % 1);
+        const wrx = rx * (0.95 + waveProg * 0.38);
+        const wry = ry * (0.95 + waveProg * 0.38);
+        ctx2d.save();
+        ctx2d.strokeStyle = `rgba(56, 189, 248, ${(1 - waveProg) * 0.28})`;
+        ctx2d.lineWidth = 1.3;
+        ctx2d.beginPath();
+        ctx2d.ellipse(cx, islandY + 6, wrx, wry, 0, 0, Math.PI * 2);
+        ctx2d.stroke();
+        ctx2d.restore();
+      }
+
+      // 4. Katmanlı kayalık ada gövdesi
+      ctx2d.save();
+      const rockGrad = ctx2d.createLinearGradient(cx, islandY, cx, islandY + ry * 2.1);
+      rockGrad.addColorStop(0, '#334155');
+      rockGrad.addColorStop(0.55, '#1e293b');
+      rockGrad.addColorStop(1, '#090e1a');
+      ctx2d.fillStyle = rockGrad;
+      ctx2d.beginPath();
+      ctx2d.moveTo(cx - rx * 0.96, islandY);
+      ctx2d.lineTo(cx - rx * 0.52, islandY + ry * 1.45);
+      ctx2d.lineTo(cx, islandY + ry * 2.05);
+      ctx2d.lineTo(cx + rx * 0.54, islandY + ry * 1.42);
+      ctx2d.lineTo(cx + rx * 0.96, islandY);
+      ctx2d.closePath();
+      ctx2d.fill();
+      ctx2d.lineWidth = 1.4;
+      ctx2d.strokeStyle = 'rgba(245, 196, 81, 0.35)';
+      ctx2d.stroke();
+      ctx2d.restore();
+
+      // 5. Yeşil & altın arazi yüzeyi
+      ctx2d.save();
+      const landGrad = ctx2d.createRadialGradient(cx, islandY - 4, rx * 0.1, cx, islandY, rx);
+      landGrad.addColorStop(0, '#22c55e');
+      landGrad.addColorStop(0.62, '#15803d');
+      landGrad.addColorStop(1, '#0f3d2e');
+      ctx2d.fillStyle = landGrad;
+      ctx2d.beginPath();
+      ctx2d.ellipse(cx, islandY, rx, ry, 0, 0, Math.PI * 2);
+      ctx2d.fill();
+      ctx2d.lineWidth = 2;
+      ctx2d.strokeStyle = 'rgba(245, 196, 81, 0.72)';
+      ctx2d.stroke();
+      ctx2d.restore();
+
+      // 6. Adadaki kuleler, ağaçlar ve merkez kristal
+      const towers = [
+        { dx: -rx * 0.44, dy: -ry * 0.15, h: 20, color: '#38bdf8' },
+        { dx: rx * 0.44, dy: -ry * 0.15, h: 20, color: '#f43f5e' },
+        { dx: 0, dy: -ry * 0.36, h: 28, color: '#f5c451' }
+      ];
+      towers.forEach(t => {
+        const tx = cx + t.dx;
+        const ty = islandY + t.dy;
+        ctx2d.save();
+        ctx2d.fillStyle = '#1e293b';
+        ctx2d.fillRect(tx - 5, ty - t.h * 0.65, 10, t.h * 0.65);
+        ctx2d.fillStyle = t.color;
+        ctx2d.beginPath();
+        ctx2d.moveTo(tx - 8, ty - t.h * 0.65);
+        ctx2d.lineTo(tx, ty - t.h - 6);
+        ctx2d.lineTo(tx + 8, ty - t.h * 0.65);
+        ctx2d.closePath();
+        ctx2d.fill();
+        ctx2d.restore();
+      });
+
+      // 7. Karakter yetenek / soket 2D efekti
+      if (effectPulse > 0.02) {
+        ctx2d.save();
+        const ringR = rx * (0.45 + (1 - effectPulse) * 0.75);
+        ctx2d.strokeStyle = effectColor;
+        ctx2d.globalAlpha = effectPulse * 0.85;
+        ctx2d.lineWidth = 2.6;
+        ctx2d.beginPath();
+        ctx2d.ellipse(cx, islandY, ringR, ringR * 0.36, 0, 0, Math.PI * 2);
+        ctx2d.stroke();
+
+        ctx2d.fillStyle = effectColor;
+        ctx2d.globalAlpha = effectPulse * 0.18;
+        ctx2d.beginPath();
+        ctx2d.ellipse(cx, islandY, ringR, ringR * 0.36, 0, 0, Math.PI * 2);
+        ctx2d.fill();
+
+        if (effectLabel) {
+          ctx2d.globalAlpha = Math.min(1, effectPulse * 1.2);
+          ctx2d.font = '800 10px "Segoe UI", sans-serif';
+          ctx2d.textAlign = 'center';
+          ctx2d.fillStyle = '#fff';
+          ctx2d.fillText(effectLabel, cx, islandY - ry - 14);
         }
+        ctx2d.restore();
+        effectPulse = Math.max(0, effectPulse - 0.022);
       }
 
-      // Üstteki Ay/Güneş küresi 3D adanın tam üzerinde süzülür
-      if (celestialMesh) {
-        celestialMesh.position.y = 3.15 + Math.sin(t * 1.5) * 0.14;
-        celestialMesh.rotation.y = t * 0.45;
-      }
-      if (celestialHalo) {
-        celestialHalo.position.y = celestialMesh ? celestialMesh.position.y : 3.15;
-        celestialHalo.lookAt(threeCamera.position);
-        celestialHalo.rotation.z = t * 0.35;
-      }
-      if (celestialBeam) {
-        celestialBeam.rotation.y = -t * 0.3;
-      }
+      // 8. Işık/enerji parçacıkları
+      ctx2d.save();
+      sparks.forEach(sp => {
+        sp.angle += sp.speed;
+        const px = cx + Math.cos(sp.angle) * (rx * 0.72);
+        const py = islandY - 8 + Math.sin(sp.angle * 1.4) * (ry * 0.65) - ((nowSec * 14 + sp.radius) % 24);
+        ctx2d.fillStyle = effectPulse > 0.1 ? effectColor : 'rgba(245, 196, 81, 0.75)';
+        ctx2d.beginPath();
+        ctx2d.arc(px, py, sp.size, 0, Math.PI * 2);
+        ctx2d.fill();
+      });
+      ctx2d.restore();
+    }
 
-      if (effectTimer > 0) {
-        effectTimer = Math.max(0, effectTimer - 0.018);
-        if (shockRing) {
-          const s = 0.7 + (1.8 - effectTimer) * 1.9;
-          shockRing.scale.setScalar(s);
-          shockRing.material.opacity = Math.min(0.95, effectTimer * 0.65);
-        }
-        if (shieldDome) {
-          shieldDome.material.opacity = Math.max(0, effectTimer * 0.16);
-        }
-      } else {
-        if (shieldDome) shieldDome.material.opacity = 0;
-        if (shockRing) shockRing.material.opacity = 0;
-        syncThreeCelestialSky();
-      }
-
-      if (particlePoints) {
-        const posAttr = particlePoints.geometry.getAttribute('position');
-        for (let i = 0; i < posAttr.count; i++) {
-          let x = posAttr.getX(i) + particleVel[i * 3];
-          let y = posAttr.getY(i) + particleVel[i * 3 + 1];
-          let z = posAttr.getZ(i) + particleVel[i * 3 + 2];
-          if (y > 3.2) {
-            y = 0.4;
-            x = (Math.random() - 0.5) * 2.8;
-            z = (Math.random() - 0.5) * 2.8;
-          }
-          posAttr.setXYZ(i, x, y, z);
-        }
-        posAttr.needsUpdate = true;
-      }
-
-      threeRenderer.render(threeScene, threeCamera);
+    function loop2D(ts) {
+      draw2DIslandScene((ts || 0) * 0.001);
+      requestAnimationFrame(loop2D);
     }
 
     // --- SUNUCU / MONGODB SENKRONİZASYONU ---
@@ -1718,7 +1672,7 @@
       document.getElementById('sub-speaker').textContent = `${speaker}:`;
       document.getElementById('sub-content').textContent = text;
       if (appState.gameStarted && charObj) {
-        triggerCharacter3DEffect(charObj, isUlti);
+        trigger2DCharacterEffect(charObj, isUlti);
       }
       playGameTone(tone);
       if (appState.profile.soundEnabled && 'speechSynthesis' in window) {
@@ -1740,7 +1694,6 @@
         solar_eclipse: '☀️ Güneş Tutulması'
       };
       document.getElementById('sky-event-label').textContent = labels[ev] || labels.blue_moon;
-      syncThreeCelestialSky();
     }
 
     function onSkyEventClick() {
@@ -1752,10 +1705,10 @@
       const next = order[(order.indexOf(appState.skyEvent || 'blue_moon') + 1) % order.length];
       appState.skyEvent = next;
       appState.activeMechStage = `🌌 ${next.replace('_', ' ')}`;
-      appState.lastActionSummary = `3D Ada üstündeki gök küresi değişti • Sıra #${appState.turn}`;
+      appState.lastActionSummary = `2D Ada üstündeki gök küresi değişti • Sıra #${appState.turn}`;
       grantXpToPlayer(currentUserId, 15, false);
       saveState();
-      showSubtitleAndSpeak('3D ADA GÖKYÜZÜ', `Adanın üstündeki göksel küre ${next.replace('_', ' ')} evresine geçti.`, 'magic', activeRightChar, false);
+      showSubtitleAndSpeak('2D ADA GÖKYÜZÜ', `Adanın üstündeki göksel küre ${next.replace('_', ' ')} evresine geçti.`, 'magic', activeRightChar, false);
     }
 
     function renderPanelSkillPreview(charObj, containerId) {
@@ -1832,10 +1785,10 @@
             solar_eclipse: '☀️ Güneş Tutulması'
           };
           appState.activeMechStage = `⚡ ${names[picked]}`;
-          appState.lastActionSummary = `Tanrıça Sabrina Kozmik Ulti -> ${names[picked]} 3D adanın üstünde tetiklendi!`;
+          appState.lastActionSummary = `Tanrıça Sabrina Kozmik Ulti -> ${names[picked]} 2D adanın üstünde tetiklendi!`;
           grantXpToPlayer(currentUserId, 40, true);
           saveState();
-          showSubtitleAndSpeak(charObj.name, `Bilinmeyen kozmik ulti tetiklendi: ${names[picked]} 3D adanın üstünde belirdi!`, 'ulti', charObj, true);
+          showSubtitleAndSpeak(charObj.name, `Bilinmeyen kozmik ulti tetiklendi: ${names[picked]} 2D adanın üstünde belirdi!`, 'ulti', charObj, true);
           return;
         }
 
@@ -2040,7 +1993,7 @@
       appState.dawnCount = 1;
       appState.isNight = appState.startPhase === 'night';
       appState.skyEvent = appState.isNight ? 'blue_moon' : 'dawn';
-      appState.activeMechStage = '🏝️ 3D Ada Aktif';
+      appState.activeMechStage = '🏝️ 2D Ada Aktif';
 
       const me = appState.lobbyMembers.find(m => m.id === currentUserId);
       if (me) {
@@ -2074,7 +2027,7 @@
 
       saveState();
       closeModal('lobby-modal');
-      showSubtitleAndSpeak('MINI LEGENDS', 'Herkes hazır verdi, oyun başladı! 3D adanın üstündeki sahne ve sağ alt soketler aktif.', 'ulti', activeRightChar, true);
+      showSubtitleAndSpeak('MINI LEGENDS', 'Herkes hazır verdi, oyun başladı! 2D adanın üstündeki sahne ve sağ alt soketler aktif.', 'ulti', activeRightChar, true);
     }
 
     function renderLobbyModalContent() {
@@ -2209,7 +2162,7 @@
       const modeNames = {
         anon_equal: 'Senaryo: Anonim Eşit Taraf',
         sky_eclipse: 'Senaryo: Kozmik Tutulma & Ulti',
-        siege_tactic: 'Senaryo: 3D Ada Kuşatması'
+        siege_tactic: 'Senaryo: 2D Ada Kuşatması'
       };
       document.getElementById('mode-scenario-label').textContent = modeNames[appState.mode] || modeNames.anon_equal;
       document.getElementById('live-turn-telemetry').textContent = appState.lastActionSummary || 'Level 1 • Hazır';
@@ -2265,10 +2218,11 @@
       document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active');
       playGameTone('click');
-      resizeThree();
+      resizeCanvas2D();
     }
 
-    initThreeIsland();
+    resizeCanvas2D();
+    requestAnimationFrame(loop2D);
     updateAllUI();
     syncWithBackend(false);
   </script>
