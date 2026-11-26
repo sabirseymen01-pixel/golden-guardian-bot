@@ -176,6 +176,11 @@
             border: 2px solid #ffd166;
             box-shadow: 0 10px 26px rgba(181, 18, 47, 0.55), 0 0 18px rgba(255, 209, 102, 0.45);
         }
+        .member-app-icon.ml-special {
+            background: linear-gradient(145deg, #132242 0%, #091124 75%, #050914 100%);
+            border: 2px solid #f5c451;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.7), 0 0 16px rgba(56, 189, 248, 0.32);
+        }
 
         .empty-plus-card { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 100%; pointer-events: none; }
         .empty-plus-box {
@@ -916,6 +921,15 @@
         let allMemberApps = [];
         let festivalAutoShown = false;
 
+        const MINI_LEGENDS_ICON_HTML = `
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L4 5V11C4 16.55 7.41 21.74 12 23C16.59 21.74 20 16.55 20 11V5L12 2Z" stroke="#f5c451" stroke-width="2" fill="rgba(245,196,81,0.18)"/>
+                <path d="M14.5 7.5L9.5 16.5M9.5 7.5L14.5 16.5" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
+                <circle cx="7.2" cy="6.2" r="1.4" fill="#f5c451"/>
+                <path d="M17.4 5.2A1.5 1.5 0 1 0 17.4 7.6A1.2 1.2 0 1 1 17.4 5.2Z" fill="#ffd166"/>
+            </svg>
+        `;
+
         function renderMemberPages() {
             const perPage = 9;
             const totalPages = Math.max(1, Math.ceil(allMemberApps.length / perPage));
@@ -925,15 +939,18 @@
             let pagesHtml = '';
             for (let p = 0; p < totalPages; p++) {
                 const slice = allMemberApps.slice(p * perPage, (p + 1) * perPage);
-                let cellsHtml = slice.map((app, idx) => `
-                    <div class="member-app-card" onclick="triggerMemberApp(${p * perPage + idx})">
-                        <div class="member-app-icon ${app.special ? 'gv-special' : ''}">
-                            ${app.badge ? `<span class="app-live-badge">${escapeHtml(app.badge)}</span>` : ''}
-                            <span>${escapeHtml(app.icon || '✨')}</span>
+                let cellsHtml = slice.map((app, idx) => {
+                    const iconContent = app.iconHtml || `<span>${escapeHtml(app.icon || '✨')}</span>`;
+                    return `
+                        <div class="member-app-card" onclick="triggerMemberApp(${p * perPage + idx})">
+                            <div class="member-app-icon ${app.specialClass || ''}">
+                                ${app.badge ? `<span class="app-live-badge">${escapeHtml(app.badge)}</span>` : ''}
+                                ${iconContent}
+                            </div>
+                            <div class="member-app-title">${escapeHtml(app.title)}</div>
                         </div>
-                        <div class="member-app-title">${escapeHtml(app.title)}</div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
 
                 const remainder = perPage - slice.length;
                 for (let b = 0; b < remainder; b++) {
@@ -978,7 +995,8 @@
             const item = allMemberApps[index];
             if (!item) return;
             if (item.isGv) openGoldenVision();
-            else { playMlSfx('tap'); showGlitterToast(`${item.icon} ${item.title} Açıldı`); }
+            else if (item.href) { playMlSfx('enter'); window.location.href = item.href; }
+            else { playMlSfx('tap'); showGlitterToast(`${item.icon || '✨'} ${item.title} Açıldı`); }
         }
 
         const COUNTRY_FLAGS = {
@@ -1321,14 +1339,16 @@
 
         async function loadMemberEvents() {
             const baseApps = [
-                { title: 'GOLDENVISION', icon: '👑', badge: 'SARAY', special: true, isGv: true }
+                { title: 'GOLDENVISION', icon: '👑', badge: 'SARAY', specialClass: 'gv-special', isGv: true },
+                { title: 'Mini Legends', iconHtml: MINI_LEGENDS_ICON_HTML, badge: 'YENİ', specialClass: 'ml-special', href: './mini_legends.html' }
             ];
             try {
                 const res = await fetch('/api/events/list?only_active=true');
                 const extra = await res.json();
                 const merged = [...baseApps];
                 (extra || []).forEach(ev => {
-                    if (String(ev.title).toUpperCase() !== 'GOLDENVISION' && !merged.some(m => m.title === ev.title)) {
+                    const upper = String(ev.title || '').toUpperCase();
+                    if (upper !== 'GOLDENVISION' && upper !== 'MINI LEGENDS' && !merged.some(m => m.title === ev.title)) {
                         merged.push({ title: ev.title, icon: ev.icon || '✨', badge: ev.badge || 'YENİ' });
                     }
                 });
