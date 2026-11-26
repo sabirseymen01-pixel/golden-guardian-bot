@@ -1080,6 +1080,16 @@ async def handle_member_portal():
     return _serve_html("member.html")
 
 
+@app.api_route("/mini_legends.html", methods=["GET", "HEAD"], response_class=HTMLResponse)
+async def handle_mini_legends_html():
+    return _serve_html("mini_legends.html")
+
+
+@app.api_route("/yt_panel.html", methods=["GET", "HEAD"], response_class=HTMLResponse)
+async def handle_yt_panel_html():
+    return _serve_html("yt_panel.html")
+
+
 async def _delete_after_delay(context, chat_id, message_id, delay=5):
     await asyncio.sleep(delay)
     try:
