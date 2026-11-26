@@ -1,6 +1,5 @@
 import os
 import re
-import json
 import asyncio
 import logging
 import hashlib
@@ -40,7 +39,6 @@ logger = logging.getLogger(__name__)
 BOT_TOKEN = (os.environ.get("BOT_TOKEN") or (config and getattr(config, "BOT_TOKEN", None)) or "").strip()
 FOUNDER_ID = (os.environ.get("FOUNDER_ID") or (config and getattr(config, "FOUNDER_ID", None)) or "8245373459").strip()
 GV_AUDIO_DIR = os.environ.get("GV_AUDIO_DIR", os.path.join("public", "gv_audio"))
-MINI_LEGENDS_STATE_FILE = os.environ.get("MINI_LEGENDS_STATE_FILE", "mini_legends_server_state.json")
 
 scheduler = AsyncIOScheduler()
 tg_application = None
@@ -48,73 +46,6 @@ tg_application = None
 _group_meta_cache: dict[int, float] = {}
 _ml_state_lock = asyncio.Lock()
 GROUP_CACHE_TTL_SEC = 300.0
-
-DEFAULT_ML_STATE = {
-    "gameStarted": False,
-    "mode": "anon_equal",
-    "startPhase": "night",
-    "isNight": True,
-    "dawnCount": 1,
-    "skyEvent": "blue_moon",
-    "turn": 1,
-    "timeLeft": 165,
-    "activeMechStage": "🏝️ 3D Ada • Lvl 1",
-    "lastActionSummary": "Level 1 • Lobby simgesinden katılabilir ve herkes hazır olduğunda başlatabilirsiniz.",
-    "lobbyMembers": [],
-    "profiles": {}
-}
-
-
-def _load_ml_state() -> dict:
-    if os.path.exists(MINI_LEGENDS_STATE_FILE):
-        try:
-            with open(MINI_LEGENDS_STATE_FILE, "r", encoding="utf-8") as f:
-                raw = json.load(f)
-                if isinstance(raw, dict):
-                    merged = json.loads(json.dumps(DEFAULT_ML_STATE))
-                    for k, v in raw.items():
-                        merged[k] = v
-                    if not isinstance(merged.get("lobbyMembers"), list):
-                        merged["lobbyMembers"] = []
-                    if not isinstance(merged.get("profiles"), dict):
-                        merged["profiles"] = {}
-                    return merged
-        except Exception as e:
-            logger.error(f"Mini Legends state okuma hatası: {e}")
-    return json.loads(json.dumps(DEFAULT_ML_STATE))
-
-
-def _save_ml_state(state: dict) -> None:
-    try:
-        with open(MINI_LEGENDS_STATE_FILE, "w", encoding="utf-8") as f:
-            json.dump(state, f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        logger.error(f"Mini Legends state yazma hatası: {e}")
-
-
-def _ensure_ml_profile(state: dict, uid: str, name: str = "Oyuncu", handle: str = "@oyuncu") -> dict:
-    uid_str = str(uid).strip()
-    profiles = state.setdefault("profiles", {})
-    if uid_str not in profiles or not isinstance(profiles[uid_str], dict):
-        profiles[uid_str] = {
-            "id": uid_str,
-            "name": name or "Oyuncu",
-            "handle": handle or "@oyuncu",
-            "level": 1,
-            "xp": 0,
-            "wins": 0,
-        }
-    else:
-        p = profiles[uid_str]
-        p["id"] = uid_str
-        p["level"] = max(1, int(p.get("level", 1) or 1))
-        p["xp"] = max(0, int(p.get("xp", 0) or 0))
-        p["wins"] = max(0, int(p.get("wins", 0) or 0))
-        if name:
-            p["name"] = name
-        if handle:
-            p["handle"] = handle
-    return profiles[uid_str]
 
 
 def log_event(level: str, message: str):
@@ -186,8 +117,7 @@ async def lifespan(app: FastAPI):
     os.makedirs(GV_AUDIO_DIR, exist_ok=True)
     database.init_db()
     async with _ml_state_lock:
-        if not os.path.exists(MINI_LEGENDS_STATE_FILE):
-            _save_ml_state(_load_ml_state())
+        database.ensure_ml_initialized()
     if not scheduler.running:
         scheduler.start()
 
@@ -269,11 +199,11 @@ async def health_check():
     return HTMLResponse("GOLDEN_ENTERPRISE_FASTAPI_OK")
 
 
-# --- MINI LEGENDS ORTAK LOBİ & LEVEL/XP API ---
+# --- MINI LEGENDS ORTAK LOBİ & LEVEL/XP API (MONGODB BAĞLANTILI) ---
 @app.get("/api/lobby")
 async def api_ml_get_lobby():
     async with _ml_state_lock:
-        state = _load_ml_state()
+        state = database.get_ml_full_state()
     return JSONResponse(state)
 
 
@@ -289,27 +219,7 @@ async def api_ml_lobby_join(request: Request):
         preferred_side = str(data.get("preferred_side", "Gündüz")).strip() or "Gündüz"
 
         async with _ml_state_lock:
-            state = _load_ml_state()
-            prof = _ensure_ml_profile(state, uid, name, handle)
-            members = state.setdefault("lobbyMembers", [])
-            existing = next((m for m in members if str(m.get("id")) == uid), None)
-            if existing:
-                existing["status"] = "joined"
-                existing["name"] = prof["name"]
-                existing["handle"] = prof["handle"]
-            else:
-                members.append({
-                    "id": uid,
-                    "name": prof["name"],
-                    "handle": prof["handle"],
-                    "ready": False,
-                    "status": "joined",
-                    "secretSide": preferred_side,
-                    "secretRole": "Muhafız Galadriel",
-                    "charId": "galadriel",
-                    "alive": True,
-                })
-            _save_ml_state(state)
+            state = database.join_ml_lobby(uid, name, handle, preferred_side)
         return {"success": True, "state": state}
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -323,30 +233,15 @@ async def api_ml_lobby_ready(request: Request):
         if not target_id:
             return {"success": False, "error": "Kullanıcı kimliği eksik."}
         has_explicit_ready = "ready" in data and data.get("ready") is not None
-        explicit_ready = bool(data.get("ready"))
+        explicit_ready = bool(data.get("ready")) if has_explicit_ready else None
 
         async with _ml_state_lock:
-            state = _load_ml_state()
-            members = state.setdefault("lobbyMembers", [])
-            existing = next((m for m in members if str(m.get("id")) == target_id), None)
-            if not existing:
-                prof = _ensure_ml_profile(state, target_id, str(data.get("name", "Oyuncu")), str(data.get("handle", "@oyuncu")))
-                existing = {
-                    "id": target_id,
-                    "name": prof["name"],
-                    "handle": prof["handle"],
-                    "ready": explicit_ready if has_explicit_ready else True,
-                    "status": "joined",
-                    "secretSide": "Gündüz",
-                    "secretRole": "Muhafız Galadriel",
-                    "charId": "galadriel",
-                    "alive": True,
-                }
-                members.append(existing)
-            else:
-                existing["status"] = "joined"
-                existing["ready"] = explicit_ready if has_explicit_ready else (not bool(existing.get("ready")))
-            _save_ml_state(state)
+            state = database.set_ml_lobby_ready(
+                target_id,
+                ready=explicit_ready,
+                name=str(data.get("name", "")).strip(),
+                handle=str(data.get("handle", "")).strip(),
+            )
         return {"success": True, "state": state}
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -358,18 +253,26 @@ async def api_ml_lobby_start(request: Request):
         data = await request.json()
         actor_id = int(data.get("user_id", 0) or 0)
         async with _ml_state_lock:
-            state = _load_ml_state()
-            members = state.get("lobbyMembers", [])
+            current = database.get_ml_full_state()
+            members = data.get("lobbyMembers") if isinstance(data.get("lobbyMembers"), list) else current.get("lobbyMembers", [])
             active = [m for m in members if m.get("status") != "left"]
             if not active or not all(bool(m.get("ready")) for m in active):
                 return {"success": False, "error": "Tüm aktif katılımcılar Hazır vermeden oyun başlatılamaz."}
 
-            for key in ["gameStarted", "mode", "startPhase", "isNight", "dawnCount", "skyEvent", "turn", "timeLeft", "activeMechStage", "lastActionSummary"]:
-                if key in data:
-                    state[key] = data[key]
-            state["gameStarted"] = True
-            state["lobbyMembers"] = members
-            _save_ml_state(state)
+            sync_payload = {
+                "gameStarted": True,
+                "mode": data.get("mode", current.get("mode", "anon_equal")),
+                "startPhase": data.get("startPhase", current.get("startPhase", "night")),
+                "isNight": data.get("isNight", current.get("isNight", True)),
+                "dawnCount": data.get("dawnCount", current.get("dawnCount", 1)),
+                "skyEvent": data.get("skyEvent", current.get("skyEvent", "blue_moon")),
+                "turn": data.get("turn", current.get("turn", 1)),
+                "timeLeft": data.get("timeLeft", current.get("timeLeft", 165)),
+                "activeMechStage": data.get("activeMechStage", "🏝️ 3D Ada Aktif"),
+                "lastActionSummary": data.get("lastActionSummary", current.get("lastActionSummary", "")),
+                "lobbyMembers": members,
+            }
+            state = database.sync_ml_state(sync_payload)
 
         database.log_action(0, "ML_LOBBY_START", actor_id, "MiniLegends", f"Oyun başlatıldı ({len(active)} oyuncu).")
         return {"success": True, "state": state}
@@ -382,41 +285,7 @@ async def api_ml_lobby_sync(request: Request):
     try:
         data = await request.json()
         async with _ml_state_lock:
-            state = _load_ml_state()
-
-            for key in [
-                "gameStarted",
-                "mode",
-                "startPhase",
-                "isNight",
-                "dawnCount",
-                "skyEvent",
-                "turn",
-                "timeLeft",
-                "activeMechStage",
-                "lastActionSummary",
-            ]:
-                if key in data:
-                    state[key] = data[key]
-
-            if "lobbyMembers" in data and isinstance(data["lobbyMembers"], list):
-                state["lobbyMembers"] = data["lobbyMembers"]
-
-            if "playerProgress" in data and isinstance(data["playerProgress"], dict):
-                pp = data["playerProgress"]
-                uid = str(pp.get("id", "")).strip()
-                if uid:
-                    prof = _ensure_ml_profile(
-                        state,
-                        uid,
-                        str(pp.get("name", "")).strip(),
-                        str(pp.get("handle", "")).strip(),
-                    )
-                    prof["level"] = max(1, int(pp.get("level", prof["level"]) or 1))
-                    prof["xp"] = max(0, int(pp.get("xp", prof["xp"]) or 0))
-                    prof["wins"] = max(0, int(pp.get("wins", prof["wins"]) or 0))
-
-            _save_ml_state(state)
+            state = database.sync_ml_state(data)
         return JSONResponse({"success": True, "state": state})
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
@@ -433,23 +302,21 @@ async def api_ml_progress(request: Request):
         handle = str(data.get("handle", "")).strip()
         xp_gain = int(data.get("xp_gain", 0) or 0)
         won = bool(data.get("won", False))
+        lvl_val = int(data["level"]) if "level" in data and data["level"] is not None else None
+        xp_val = int(data["xp"]) if "xp" in data and data["xp"] is not None else None
 
         async with _ml_state_lock:
-            state = _load_ml_state()
-            prof = _ensure_ml_profile(state, uid, name, handle)
-            if "level" in data and data["level"] is not None:
-                prof["level"] = max(1, int(data["level"] or 1))
-            if "xp" in data and data["xp"] is not None:
-                prof["xp"] = max(0, int(data["xp"] or 0))
-            if xp_gain > 0:
-                prof["xp"] += xp_gain
-            if won:
-                prof["wins"] += 1
-            while prof["xp"] >= prof["level"] * 100:
-                prof["xp"] -= prof["level"] * 100
-                prof["level"] += 1
-            _save_ml_state(state)
-        return {"success": True, "profile": prof, "profiles": state["profiles"]}
+            prof = database.update_ml_progress(
+                user_id=uid,
+                name=name,
+                handle=handle,
+                xp_gain=xp_gain,
+                won=won,
+                level=lvl_val,
+                xp=xp_val,
+            )
+            all_profiles = database.get_all_ml_profiles()
+        return {"success": True, "profile": prof, "profiles": all_profiles}
     except Exception as e:
         return {"success": False, "error": str(e)}
 
