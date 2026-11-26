@@ -30,6 +30,271 @@ gv_bans_col = db["goldenvision_bans"]
 gv_hosts_col = db["goldenvision_hosts"]
 gv_audio_col = db["goldenvision_audio"]
 
+ml_state_col = db["mini_legends_state"]
+ml_profiles_col = db["mini_legends_profiles"]
+
+DEFAULT_ML_GAME_STATE = {
+    "gameStarted": False,
+    "mode": "anon_equal",
+    "startPhase": "night",
+    "isNight": True,
+    "dawnCount": 1,
+    "skyEvent": "blue_moon",
+    "turn": 1,
+    "timeLeft": 165,
+    "activeMechStage": "🏝️ 3D Ada • Lvl 1",
+    "lastActionSummary": "Level 1 • Lobby simgesinden katılabilir ve herkes hazır olduğunda başlatabilirsiniz.",
+    "lobbyMembers": [],
+}
+
+
+def ensure_ml_initialized():
+    try:
+        if not ml_state_col.find_one({"_id": "global_room"}):
+            ml_state_col.insert_one({
+                "_id": "global_room",
+                **DEFAULT_ML_GAME_STATE,
+                "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+            })
+    except Exception:
+        pass
+
+
+def ensure_ml_profile(user_id: str, name: str = "Oyuncu", handle: str = "@oyuncu") -> dict:
+    uid = str(user_id).strip()
+    clean_name = (name or "Oyuncu").strip() or "Oyuncu"
+    clean_handle = (handle or "@oyuncu").strip() or "@oyuncu"
+    try:
+        doc = ml_profiles_col.find_one({"user_id": uid}, {"_id": 0})
+        if not doc:
+            doc = {
+                "user_id": uid,
+                "name": clean_name,
+                "handle": clean_handle,
+                "level": 1,
+                "xp": 0,
+                "wins": 0,
+                "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+            }
+            ml_profiles_col.update_one({"user_id": uid}, {"$set": doc}, upsert=True)
+            return doc
+
+        updates = {"updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")}
+        if name and name.strip():
+            updates["name"] = clean_name
+            doc["name"] = clean_name
+        if handle and handle.strip():
+            updates["handle"] = clean_handle
+            doc["handle"] = clean_handle
+        doc["level"] = max(1, int(doc.get("level", 1) or 1))
+        doc["xp"] = max(0, int(doc.get("xp", 0) or 0))
+        doc["wins"] = max(0, int(doc.get("wins", 0) or 0))
+        ml_profiles_col.update_one({"user_id": uid}, {"$set": updates})
+        return doc
+    except Exception:
+        return {
+            "user_id": uid,
+            "name": clean_name,
+            "handle": clean_handle,
+            "level": 1,
+            "xp": 0,
+            "wins": 0,
+        }
+
+
+def get_all_ml_profiles() -> dict:
+    out = {}
+    try:
+        for row in ml_profiles_col.find({}, {"_id": 0}):
+            uid = str(row.get("user_id", "")).strip()
+            if uid:
+                out[uid] = {
+                    "id": uid,
+                    "user_id": uid,
+                    "name": row.get("name", "Oyuncu"),
+                    "handle": row.get("handle", "@oyuncu"),
+                    "level": max(1, int(row.get("level", 1) or 1)),
+                    "xp": max(0, int(row.get("xp", 0) or 0)),
+                    "wins": max(0, int(row.get("wins", 0) or 0)),
+                }
+    except Exception:
+        pass
+    return out
+
+
+def get_ml_full_state() -> dict:
+    ensure_ml_initialized()
+    st = {}
+    try:
+        doc = ml_state_col.find_one({"_id": "global_room"}, {"_id": 0}) or {}
+        st = {**DEFAULT_ML_GAME_STATE, **doc}
+    except Exception:
+        st = {**DEFAULT_ML_GAME_STATE}
+
+    if not isinstance(st.get("lobbyMembers"), list):
+        st["lobbyMembers"] = []
+
+    st["profiles"] = get_all_ml_profiles()
+    return st
+
+
+def join_ml_lobby(user_id: str, name: str = "Oyuncu", handle: str = "@oyuncu", preferred_side: str = "Gündüz") -> dict:
+    ensure_ml_initialized()
+    uid = str(user_id).strip()
+    prof = ensure_ml_profile(uid, name, handle)
+    st = get_ml_full_state()
+    members = st.get("lobbyMembers", [])
+    existing = next((m for m in members if str(m.get("id")) == uid), None)
+    if existing:
+        existing["status"] = "joined"
+        existing["name"] = prof["name"]
+        existing["handle"] = prof["handle"]
+    else:
+        members.append({
+            "id": uid,
+            "name": prof["name"],
+            "handle": prof["handle"],
+            "ready": False,
+            "status": "joined",
+            "secretSide": preferred_side or "Gündüz",
+            "secretRole": "Muhafız Galadriel",
+            "charId": "galadriel",
+            "alive": True,
+        })
+    try:
+        ml_state_col.update_one(
+            {"_id": "global_room"},
+            {"$set": {
+                "lobbyMembers": members,
+                "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+            }},
+            upsert=True,
+        )
+    except Exception:
+        pass
+    return get_ml_full_state()
+
+
+def set_ml_lobby_ready(target_user_id: str, ready: Optional[bool] = None, name: str = "", handle: str = "") -> dict:
+    ensure_ml_initialized()
+    uid = str(target_user_id).strip()
+    prof = ensure_ml_profile(uid, name or "Oyuncu", handle or "@oyuncu")
+    st = get_ml_full_state()
+    members = st.get("lobbyMembers", [])
+    existing = next((m for m in members if str(m.get("id")) == uid), None)
+    if not existing:
+        existing = {
+            "id": uid,
+            "name": prof["name"],
+            "handle": prof["handle"],
+            "ready": bool(ready) if ready is not None else True,
+            "status": "joined",
+            "secretSide": "Gündüz",
+            "secretRole": "Muhafız Galadriel",
+            "charId": "galadriel",
+            "alive": True,
+        }
+        members.append(existing)
+    else:
+        existing["status"] = "joined"
+        existing["ready"] = bool(ready) if ready is not None else (not bool(existing.get("ready")))
+    try:
+        ml_state_col.update_one(
+            {"_id": "global_room"},
+            {"$set": {
+                "lobbyMembers": members,
+                "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+            }},
+            upsert=True,
+        )
+    except Exception:
+        pass
+    return get_ml_full_state()
+
+
+def sync_ml_state(payload: dict) -> dict:
+    ensure_ml_initialized()
+    allowed_keys = [
+        "gameStarted",
+        "mode",
+        "startPhase",
+        "isNight",
+        "dawnCount",
+        "skyEvent",
+        "turn",
+        "timeLeft",
+        "activeMechStage",
+        "lastActionSummary",
+        "lobbyMembers",
+    ]
+    updates = {k: payload[k] for k in allowed_keys if k in payload}
+    if "lobbyMembers" in updates and not isinstance(updates["lobbyMembers"], list):
+        updates.pop("lobbyMembers")
+
+    updates["updated_at"] = datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+    try:
+        ml_state_col.update_one({"_id": "global_room"}, {"$set": updates}, upsert=True)
+    except Exception:
+        pass
+
+    pp = payload.get("playerProgress")
+    if isinstance(pp, dict):
+        uid = str(pp.get("id") or pp.get("user_id") or "").strip()
+        if uid:
+            prof = ensure_ml_profile(uid, str(pp.get("name", "")), str(pp.get("handle", "")))
+            new_lvl = max(1, int(pp.get("level", prof["level"]) or 1))
+            new_xp = max(0, int(pp.get("xp", prof["xp"]) or 0))
+            new_wins = max(0, int(pp.get("wins", prof["wins"]) or 0))
+            try:
+                ml_profiles_col.update_one(
+                    {"user_id": uid},
+                    {"$set": {
+                        "level": new_lvl,
+                        "xp": new_xp,
+                        "wins": new_wins,
+                        "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+                    }},
+                    upsert=True,
+                )
+            except Exception:
+                pass
+
+    return get_ml_full_state()
+
+
+def update_ml_progress(user_id: str, name: str = "", handle: str = "", xp_gain: int = 0, won: bool = False, level: Optional[int] = None, xp: Optional[int] = None) -> dict:
+    ensure_ml_initialized()
+    uid = str(user_id).strip()
+    prof = ensure_ml_profile(uid, name or "Oyuncu", handle or "@oyuncu")
+    cur_lvl = max(1, int(level if level is not None else prof.get("level", 1) or 1))
+    cur_xp = max(0, int(xp if xp is not None else prof.get("xp", 0) or 0))
+    cur_wins = max(0, int(prof.get("wins", 0) or 0))
+
+    if int(xp_gain or 0) > 0:
+        cur_xp += int(xp_gain)
+    if won:
+        cur_wins += 1
+
+    while cur_xp >= cur_lvl * 100:
+        cur_xp -= cur_lvl * 100
+        cur_lvl += 1
+
+    updated_doc = {
+        "user_id": uid,
+        "name": (name or prof.get("name") or "Oyuncu").strip(),
+        "handle": (handle or prof.get("handle") or "@oyuncu").strip(),
+        "level": cur_lvl,
+        "xp": cur_xp,
+        "wins": cur_wins,
+        "updated_at": datetime.datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+    }
+    try:
+        ml_profiles_col.update_one({"user_id": uid}, {"$set": updated_doc}, upsert=True)
+    except Exception:
+        pass
+    updated_doc["id"] = uid
+    return updated_doc
+
 
 def _default_25_weeks():
     week_types = {
@@ -835,6 +1100,8 @@ def init_db():
         gv_bans_col.create_index("user_id", unique=True)
         gv_hosts_col.create_index("user_id", unique=True)
         gv_audio_col.create_index([("season", 1), ("week", 1), ("entry_id", 1)])
+        ml_profiles_col.create_index("user_id", unique=True)
+        ensure_ml_initialized()
         ensure_season_initialized(get_active_season_number())
         seed_default_events()
     except Exception:
