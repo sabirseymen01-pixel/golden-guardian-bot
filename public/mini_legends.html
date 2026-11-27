@@ -349,21 +349,53 @@
     }
     .mini-btn:hover { background: var(--gold); color: #070b14; }
 
-    /* MERKEZ ÇEKİRDEK & RENKLİ SİMGELİ SÜREÇ / EFEKT KARTLARI SAHNESİ */
+    /* MERKEZ ÇEKİRDEK & YUMUŞAK GEÇİŞLİ SAHNE + RENKLİ SİMGELİ SÜREÇ KARTLARI */
     .realm-map {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
+      width: 100%;
+      height: 100%;
       min-width: 0;
       min-height: 0;
-      padding-bottom: 24px;
+      padding-bottom: 6px;
       border-radius: 14px;
       border: 1.5px solid rgba(245, 196, 81, 0.42);
       background: radial-gradient(circle at 50% 34%, rgba(30, 58, 120, 0.32) 0%, rgba(5, 9, 20, 0.97) 85%);
       box-shadow: inset 0 0 32px rgba(0, 0, 0, 0.72);
       overflow: hidden;
+    }
+
+    .scene-backdrop-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0;
+      transform: scale(1.015);
+      transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1), transform 1.4s ease;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .scene-backdrop-layer.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .scene-vignette-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(5, 9, 20, 0.04) 35%, rgba(4, 7, 15, 0.56) 100%);
+      pointer-events: none;
+      z-index: 1;
+      transition: opacity 0.6s ease;
+    }
+    .realm-map.lobby-mode .scene-vignette-overlay {
+      opacity: 0.12;
     }
 
     #hd-core-canvas {
@@ -372,7 +404,8 @@
       width: 100%;
       height: 100%;
       display: block;
-      z-index: 1;
+      z-index: 2;
+      pointer-events: none;
     }
 
     .island-sky-bar {
@@ -394,7 +427,7 @@
 
     .live-turn-telemetry {
       position: relative;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       font-size: 8px;
       color: #f8fafc;
       background: rgba(7, 12, 24, 0.88);
@@ -536,9 +569,9 @@
     /* SESLİ & ALTYAZILI ANLATIM BANDI */
     .subtitle-banner {
       position: relative;
-      width: 95%;
-      max-width: 600px;
-      background: rgba(5, 9, 18, 0.96);
+      width: 96%;
+      max-width: 620px;
+      background: rgba(5, 9, 18, 0.94);
       border: 1.2px solid var(--gold);
       border-radius: 9px;
       padding: 3px 9px;
@@ -616,7 +649,7 @@
       z-index: 100;
       align-items: center;
       justify-content: center;
-      padding: max(58px, calc(var(--safe-top) + var(--tg-top-pad) + 40px)) calc(var(--safe-right) + var(--tg-right-pad) + 8px) max(14px, calc(var(--safe-bottom) + var(--tg-bottom-pad))) calc(var(--safe-left) + 18px);
+      padding: max(46px, calc(var(--safe-top) + var(--tg-top-pad) + 18px)) calc(var(--safe-right) + var(--tg-right-pad) + 4px) max(10px, calc(var(--safe-bottom) + var(--tg-bottom-pad))) calc(var(--safe-left) + 10px);
     }
     .modal-backdrop.open { display: flex; }
     .modal-box {
@@ -625,10 +658,20 @@
       border-radius: 14px;
       width: 96%;
       max-width: 980px;
-      max-height: calc(100dvh - 88px);
+      max-height: calc(100dvh - 64px);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+    }
+    .modal-backdrop.catalog-fullscreen {
+      padding: max(42px, calc(var(--safe-top) + var(--tg-top-pad) + 10px)) calc(var(--safe-right) + var(--tg-right-pad) + 2px) max(8px, calc(var(--safe-bottom) + var(--tg-bottom-pad))) calc(var(--safe-left) + 8px);
+    }
+    .modal-backdrop.catalog-fullscreen .modal-box {
+      width: 100%;
+      max-width: 100%;
+      height: 100%;
+      max-height: 100%;
+      border-radius: 12px;
     }
     .modal-header {
       padding: 8px 14px;
@@ -660,6 +703,7 @@
       flex-direction: column;
       gap: 10px;
       font-size: 11.5px;
+      min-height: 0;
     }
 
     .brand-lockup { display: flex; align-items: center; gap: 8px; }
@@ -710,103 +754,120 @@
     /* BÜYÜYEN ODAK KARTI — GÖRSEL TAM GÖRÜNÜR, ALT KISMI KAPANMAZ */
     .catalog-spotlight {
       display: grid;
-      grid-template-columns: minmax(150px, 195px) 1fr;
-      gap: 12px;
-      padding: 10px;
-      border-radius: 16px;
+      grid-template-columns: minmax(118px, 148px) 1fr;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 14px;
       background: linear-gradient(135deg, rgba(245, 196, 81, 0.14), rgba(11, 18, 35, 0.98) 55%, rgba(28, 18, 46, 0.95));
-      border: 2px solid var(--gold);
-      box-shadow: 0 0 24px rgba(245, 196, 81, 0.28), inset 0 0 18px rgba(245, 196, 81, 0.1);
+      border: 1.5px solid var(--gold);
+      box-shadow: 0 0 20px rgba(245, 196, 81, 0.24), inset 0 0 14px rgba(245, 196, 81, 0.1);
       align-items: center;
       transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+      flex-shrink: 0;
     }
     .catalog-spotlight.zoom-pulse {
-      transform: scale(1.015);
-      box-shadow: 0 0 32px rgba(253, 230, 138, 0.45), inset 0 0 22px rgba(245, 196, 81, 0.18);
+      transform: scale(1.01);
+      box-shadow: 0 0 28px rgba(253, 230, 138, 0.4), inset 0 0 18px rgba(245, 196, 81, 0.16);
     }
     .spotlight-art-frame {
       width: 100%;
       aspect-ratio: 3 / 4;
-      max-height: 250px;
-      border-radius: 12px;
-      border: 2px solid var(--gold-bright);
+      max-height: 175px;
+      border-radius: 10px;
+      border: 1.5px solid var(--gold-bright);
       background: radial-gradient(circle at 50% 35%, rgba(245, 196, 81, 0.12), #060a14 88%);
-      padding: 4px;
+      padding: 3px;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.75);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.7);
     }
     .spotlight-art-frame img {
       width: 100%;
       height: 100%;
       object-fit: contain;
       object-position: center;
-      border-radius: 8px;
+      border-radius: 7px;
       display: block;
     }
     .spotlight-details {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4.5px;
       min-width: 0;
     }
     .spotlight-meme-box {
-      padding: 7px 10px;
-      border-radius: 10px;
+      padding: 5px 8px;
+      border-radius: 8px;
       background: rgba(245, 196, 81, 0.1);
-      border: 1px solid rgba(245, 196, 81, 0.5);
+      border: 1px solid rgba(245, 196, 81, 0.45);
       font-style: italic;
-      font-size: 11px;
-      line-height: 1.35;
+      font-size: 10px;
+      line-height: 1.28;
     }
     @media (max-width: 600px) {
       .catalog-spotlight {
-        grid-template-columns: 1fr;
+        grid-template-columns: 104px 1fr;
+        gap: 8px;
+        padding: 7px;
       }
       .spotlight-art-frame {
-        max-width: 165px;
-        margin: 0 auto;
+        max-height: 145px;
       }
     }
 
-    /* LEGENDS HERO KATALOĞU: GÖRSELLER TAM, SIKIŞMA YOK, ALTINDA GOLD ÖZELLİK/MİM YAZILARI */
+    /* LEGENDS HERO KATALOĞU: ORANTILI KARTLAR, YATAY KAYDIRMADA KESİLME YOK */
     .grid-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-      gap: 12px;
-      align-items: start;
+      grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+      gap: 9px;
+      align-items: stretch;
+      padding-bottom: 4px;
+    }
+    @media (max-width: 640px) {
+      .grid-cards {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+        gap: 8px;
+      }
+      .grid-cards .catalog-card {
+        flex: 0 0 168px;
+        scroll-snap-align: start;
+      }
     }
     .catalog-card {
       background: linear-gradient(180deg, rgba(20, 31, 56, 0.98) 0%, rgba(7, 11, 21, 0.99) 100%);
-      border: 1.5px solid rgba(245, 196, 81, 0.55);
-      border-radius: 14px;
-      padding: 8px;
+      border: 1.5px solid rgba(245, 196, 81, 0.52);
+      border-radius: 12px;
+      padding: 6.5px;
       cursor: pointer;
-      transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s, box-shadow 0.24s;
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s, box-shadow 0.22s;
       display: flex;
       flex-direction: column;
-      gap: 7px;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.65);
+      gap: 5px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.6);
+      min-width: 0;
     }
     .catalog-card:hover {
-      transform: translateY(-2px) scale(1.015);
+      transform: translateY(-2px);
       border-color: var(--gold-bright);
-      box-shadow: 0 0 18px rgba(245, 196, 81, 0.35);
+      box-shadow: 0 0 14px rgba(245, 196, 81, 0.3);
     }
     .catalog-card.selected-hero {
-      transform: scale(1.02);
       border: 2px solid var(--gold-bright);
-      box-shadow: 0 0 22px rgba(253, 230, 138, 0.45);
+      box-shadow: 0 0 18px rgba(253, 230, 138, 0.42);
     }
     .catalog-art-stage {
       width: 100%;
       aspect-ratio: 3 / 4;
-      border-radius: 10px;
-      border: 1.5px solid rgba(245, 196, 81, 0.48);
+      max-height: 158px;
+      border-radius: 9px;
+      border: 1.2px solid rgba(245, 196, 81, 0.45);
       background: radial-gradient(circle at 50% 35%, rgba(245, 196, 81, 0.12), #060a14 88%);
-      padding: 4px;
+      padding: 3px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -819,43 +880,64 @@
       height: 100%;
       object-fit: contain;
       object-position: center;
-      border-radius: 7px;
+      border-radius: 6px;
       display: block;
-      transition: transform 0.28s ease;
+      transition: transform 0.25s ease;
     }
     .catalog-card:hover .catalog-art-img,
     .catalog-card.selected-hero .catalog-art-img {
-      transform: scale(1.04);
+      transform: scale(1.03);
     }
     .catalog-card h4 {
-      font-size: 12px;
-      letter-spacing: 0.2px;
-      line-height: 1.25;
+      font-size: 10.5px;
+      letter-spacing: 0.15px;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .catalog-meme-quote {
       font-style: italic;
-      font-size: 10px;
-      line-height: 1.32;
-      background: rgba(245, 196, 81, 0.1);
-      border-left: 2.5px solid var(--gold);
-      padding: 5px 7px;
-      border-radius: 0 7px 7px 0;
+      font-size: 8.8px;
+      line-height: 1.24;
+      background: rgba(245, 196, 81, 0.09);
+      border-left: 2px solid var(--gold);
+      padding: 3.5px 6px;
+      border-radius: 0 6px 6px 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .shaped-power-row {
       display: flex;
       align-items: center;
-      gap: 7px;
-      font-size: 9.5px;
-      line-height: 1.28;
-      padding: 4.5px 6px;
-      border-radius: 8px;
+      gap: 5px;
+      font-size: 8.5px;
+      line-height: 1.2;
+      padding: 3px 5px;
+      border-radius: 7px;
       background: rgba(245, 196, 81, 0.06);
-      border: 1px solid rgba(245, 196, 81, 0.24);
+      border: 1px solid rgba(245, 196, 81, 0.22);
+      min-width: 0;
+    }
+    .shaped-power-row span:last-child {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .shaped-power-row .catalog-socket-art {
+      width: 22px;
+      height: 22px;
     }
     .shaped-power-row.ulti-power {
       background: linear-gradient(90deg, rgba(245, 196, 81, 0.18), rgba(192, 132, 252, 0.14));
-      border-color: rgba(253, 230, 138, 0.55);
+      border-color: rgba(253, 230, 138, 0.52);
       font-weight: 700;
+    }
+    .shaped-power-row.ulti-power .catalog-socket-art {
+      width: 25px;
+      height: 25px;
     }
 
     input, select {
@@ -981,18 +1063,21 @@
       </div>
     </section>
 
-    <!-- MERKEZ ÇEKİRDEK & RENKLİ SİMGELİ SÜREÇ / EFEKT KARTLARI SAHNESİ -->
-    <section class="realm-map" id="realm-map">
+    <!-- MERKEZ ÇEKİRDEK & YUMUŞAK GEÇİŞLİ SAHNE + RENKLİ SİMGELİ SÜREÇ KARTLARI -->
+    <section class="realm-map lobby-mode" id="realm-map">
+      <img id="scene-layer-a" class="scene-backdrop-layer active" src="/scenes/lobby_arena_scene.jpg" alt="Arena Sahnesi" />
+      <img id="scene-layer-b" class="scene-backdrop-layer" src="/scenes/lobby_arena_scene.jpg" alt="Arena Sahnesi Geçiş" />
+      <div class="scene-vignette-overlay"></div>
       <canvas id="hd-core-canvas"></canvas>
 
       <div class="island-sky-bar">
-        <span id="sky-event-label" style="color:var(--blue-glow); font-weight:800;">🌙 Mavi Dolunay</span>
+        <span id="sky-event-label" style="color:var(--blue-glow); font-weight:800;">🏛️ Lobi Arenası</span>
         <span id="mode-scenario-label" style="color:var(--gold); font-weight:700;">Senaryo: Anonim Eşit Taraf</span>
         <button class="mini-btn" style="flex:none; padding:1.5px 6px;" onclick="onSkyEventClick()">🃏 Süreç Kartı</button>
       </div>
 
       <div class="live-turn-telemetry" id="live-turn-telemetry">
-        Level 1 • Merkez çekirdek kart sahnesi hazır. Lobby simgesinden katılıp başlatabilirsiniz.
+        Level 1 • Lobi arenası hazır. Oyun başlayana kadar ana sahne korunur.
       </div>
 
       <div class="subtitle-banner" id="subtitle-banner">
@@ -1084,7 +1169,7 @@
   </div>
 
   <!-- LEGENDS HERO KATALOĞU MODALI -->
-  <div class="modal-backdrop" id="roles-modal">
+  <div class="modal-backdrop catalog-fullscreen" id="roles-modal">
     <div class="modal-box">
       <div class="modal-header">
         <h3 class="gold-foil-text">🎭 Legends Hero — Kahraman Kataloğu</h3>
@@ -1111,7 +1196,7 @@
         <h4 style="color:var(--gold);">1. Sağ Panel Yetenek Soketleri (En Üstte Büyük Ulti, Altta 2 Yetenek)</h4>
         <p>Oyun başladığında sağ paneldeki soketlerde <strong>en üstte büyük ULTI</strong> (2. Şafak sonrası aktif) ve <strong>altında 2 genel yetenek</strong> soketi yer alır.</p>
         <h4 style="color:var(--blue-glow);">2. Merkez Çekirdek Renkli Simgeli Kart Süreci</h4>
-        <p>Efekt yerine merkez çekirdekte gökyüzü evreleri ve tetiklenen yetenekler için <strong>renkli simgesel kart görselleri</strong> belirir ve oyun sürecini yansıtır.</p>
+        <p>Oyun başlamadan önce merkezde <strong>Lobi Arenası</strong> görünür; oyun başladığında faz ve gökyüzü olayına göre <strong>sahne ve renkli simgesel kartlar</strong> akıcı geçişle güncellenir.</p>
         <h4 style="color:var(--purple-glow);">3. Level 1 Başlangıç ve MongoDB Kaydı</h4>
         <p>Her oyuncu <strong>Level 1</strong> olarak başlar. Oyun hamleleri ve kazanımlarla XP ve seviye yükselir; tüm veriler <code>/api/lobby</code> ve <code>/api/progress</code> üzerinden MongoDB'de saklanır.</p>
       </div>
@@ -1318,77 +1403,48 @@
         : `<radialGradient id="bg_${uid}" cx="50%" cy="42%" r="58%"><stop offset="0%" stop-color="${accentColor}" stop-opacity="0.34"/><stop offset="72%" stop-color="#0c152b"/><stop offset="100%" stop-color="#050811"/></radialGradient>`;
 
       const customGlyphs = {
-        /* 01. MUHAFIZ GALADRIEL */
         galadriel_p1: `<path d="M32 16L45 22V34C45 42 39 47 32 50C25 47 19 42 19 34V22L32 16Z" fill="#f5c451" fill-opacity="0.26" stroke="#fde68a" stroke-width="2"/><path d="M12 26C16 25 19 28 19 32M52 26C48 25 45 28 45 32" stroke="#fff3b0" stroke-width="2" stroke-linecap="round"/><path d="M32 22V43M25 30H39" stroke="#fff3b0" stroke-width="1.8" stroke-linecap="round"/>`,
         galadriel_p2: `<path d="M32 16V48M22 48H42M18 24H46" stroke="#fde68a" stroke-width="2" stroke-linecap="round"/><path d="M18 24L13 34H23L18 24ZM46 24L41 34H51L46 24Z" fill="#f5c451" fill-opacity="0.32" stroke="#fff3b0" stroke-width="1.5"/>`,
         galadriel_ulti: `<circle cx="32" cy="34" r="10.5" fill="#f59e0b" fill-opacity="0.45" stroke="#fff3b0" stroke-width="2.2"/><path d="M14 39C19 22 45 22 50 39" fill="none" stroke="#fde68a" stroke-width="2.6" stroke-linecap="round"/><path d="M32 12V19M18 17L23 22M46 17L41 22" stroke="#fff3b0" stroke-width="2.2" stroke-linecap="round"/>`,
-
-        /* 02. STRATEJIST HELEN */
         helen_p1: `<path d="M24 46H40L37 29L42 23L35 24L32 15L29 24L22 23L27 29L24 46Z" fill="#fbbf24" fill-opacity="0.35" stroke="#fde68a" stroke-width="2" stroke-linejoin="round"/><circle cx="32" cy="14" r="2" fill="#fff3b0"/>`,
         helen_p2: `<rect x="19" y="18" width="26" height="28" rx="4" fill="#f5c451" fill-opacity="0.22" stroke="#fde68a" stroke-width="2"/><path d="M24 25H40M24 31H36" stroke="#fff3b0" stroke-width="1.8" stroke-linecap="round"/><circle cx="39" cy="39" r="5" fill="#d97706" stroke="#fff3b0" stroke-width="1.5"/>`,
         helen_ulti: `<path d="M17 25L23 16L32 22L41 16L47 25L44 32H20L17 25Z" fill="#fbbf24" fill-opacity="0.42" stroke="#fff3b0" stroke-width="2"/><path d="M32 32V48M23 41H41" stroke="#fde68a" stroke-width="2" stroke-linecap="round"/>`,
-
-        /* 03. ŞİFACI ESTES */
         estes_p1: `<path d="M32 15V48" stroke="#6ee7b7" stroke-width="2.2" stroke-linecap="round"/><path d="M32 38C22 38 17 30 19 22C25 22 31 28 32 38ZM32 34C42 34 47 26 45 18C39 18 33 24 32 34Z" fill="#34d399" fill-opacity="0.36" stroke="#a7f3d0" stroke-width="1.8"/>`,
         estes_p2: `<path d="M20 20L44 44M44 20L20 44" stroke="#6ee7b7" stroke-width="2" stroke-linecap="round"/><circle cx="32" cy="32" r="9.5" fill="none" stroke="#fde68a" stroke-width="1.8"/><circle cx="32" cy="32" r="3" fill="#fff3b0"/>`,
         estes_ulti: `<path d="M20 44H44L41 34H23L20 44Z" fill="#34d399" fill-opacity="0.32" stroke="#a7f3d0" stroke-width="2"/><path d="M32 34V19M32 19C27 15 22 17 21 22M32 19C37 15 42 17 43 22" stroke="#6ee7b7" stroke-width="2.2" stroke-linecap="round" fill="none"/>`,
-
-        /* 04. IŞIK MUHAFIZI */
         light_warden_p1: `<path d="M32 16L45 22V34C45 42 39 47 32 50C25 47 19 42 19 34V22L32 16Z" fill="#fde047" fill-opacity="0.28" stroke="#fef08a" stroke-width="2"/><circle cx="32" cy="33" r="6" fill="#facc15" stroke="#fff3b0" stroke-width="1.6"/>`,
         light_warden_p2: `<path d="M15 32C20 23 26 20 32 20C38 20 44 23 49 32C44 41 38 44 32 44C26 44 20 41 15 32Z" fill="#fef08a" fill-opacity="0.22" stroke="#fde68a" stroke-width="2"/><circle cx="32" cy="32" r="4.5" fill="#fde047"/><path d="M32 13V17M32 47V51" stroke="#fff3b0" stroke-width="1.8" stroke-linecap="round"/>`,
         light_warden_ulti: `<circle cx="32" cy="32" r="10.5" fill="#facc15" stroke="#fff3b0" stroke-width="2.2"/><path d="M32 12V18M32 46V52M12 32H18M46 32H52M18 18L22 22M42 42L46 46M46 18L42 22M22 42L18 46" stroke="#fde047" stroke-width="2.2" stroke-linecap="round"/>`,
-
-        /* 05. ZAMAN BÜKEN */
         time_bender_p1: `<path d="M22 17H42M22 47H42M24 17C24 26 32 29 32 32C32 35 24 38 24 47M40 17C40 26 32 29 32 32C32 35 40 38 40 47" fill="none" stroke="#5eead4" stroke-width="2" stroke-linecap="round"/>`,
         time_bender_p2: `<circle cx="27" cy="32" r="9" fill="none" stroke="#2dd4bf" stroke-width="2.4"/><circle cx="37" cy="32" r="9" fill="none" stroke="#fde68a" stroke-width="2.4"/>`,
         time_bender_ulti: `<circle cx="32" cy="32" r="15" fill="none" stroke="#5eead4" stroke-width="2"/><circle cx="32" cy="32" r="8" fill="none" stroke="#fde68a" stroke-width="1.8"/><path d="M32 21V32L40 36" stroke="#fff3b0" stroke-width="2.2" stroke-linecap="round"/>`,
-
-        /* 06. RUHLAR REHBERİ */
         spirit_guide_p1: `<path d="M22 44V29C22 22 26.5 18 32 18C37.5 18 42 22 42 29V44L37 40L32 44L27 40L22 44Z" fill="#c4b5fd" fill-opacity="0.32" stroke="#ddd6fe" stroke-width="2" stroke-linejoin="round"/><circle cx="28.5" cy="29" r="1.8" fill="#fff"/><circle cx="35.5" cy="29" r="1.8" fill="#fff"/>`,
         spirit_guide_p2: `<path d="M21 46V26C21 20 26 16 32 16C38 16 43 20 43 26V46H21Z" fill="#a78bfa" fill-opacity="0.25" stroke="#ddd6fe" stroke-width="2"/><path d="M32 21V41M26 28H38" stroke="#fde68a" stroke-width="1.8" stroke-linecap="round"/>`,
         spirit_guide_ulti: `<circle cx="32" cy="22" r="5" fill="#ddd6fe" stroke="#a78bfa" stroke-width="1.8"/><path d="M21 45C21 37 26 32 32 32C38 32 43 37 43 45" fill="none" stroke="#fde68a" stroke-width="2.2" stroke-linecap="round"/><circle cx="32" cy="32" r="16" fill="none" stroke="#c4b5fd" stroke-width="1.5" stroke-dasharray="4 3"/>`,
-
-        /* 07. TANRIÇA SABRINA */
         sabrina_p1: `<circle cx="32" cy="32" r="14" fill="#c084fc" fill-opacity="0.22" stroke="#e9d5ff" stroke-width="2"/><path d="M32 22V32L39 27" stroke="#fde68a" stroke-width="2.2" stroke-linecap="round"/><circle cx="32" cy="32" r="2.5" fill="#fff"/>`,
         sabrina_p2: `<circle cx="32" cy="32" r="14" fill="none" stroke="#c084fc" stroke-width="1.8"/><circle cx="32" cy="32" r="7" fill="none" stroke="#fde68a" stroke-width="1.6"/><path d="M32 16V48M16 32H48" stroke="#e9d5ff" stroke-width="1.2" opacity="0.8"/>`,
         sabrina_ulti: `<circle cx="32" cy="32" r="10.5" fill="#070510" stroke="#fde68a" stroke-width="3.2"/><circle cx="32" cy="32" r="15.5" fill="none" stroke="#c084fc" stroke-width="2.2" opacity="0.9"/>`,
-
-        /* 08. BÜYÜCÜ EUDORA */
         eudora_p1: `<path d="M32 15L36 27L48 32L36 37L32 49L28 37L16 32L28 27L32 15Z" fill="#38bdf8" fill-opacity="0.35" stroke="#bae6fd" stroke-width="2" stroke-linejoin="round"/>`,
         eudora_p2: `<path d="M35 15L22 33H32L29 49L42 31H32L35 15Z" fill="#7dd3fc" fill-opacity="0.4" stroke="#e0f2fe" stroke-width="2" stroke-linejoin="round"/>`,
         eudora_ulti: `<path d="M20 22C28 18 42 19 44 26C45 31 24 31 22 36C20 41 41 41 42 46" fill="none" stroke="#7dd3fc" stroke-width="2.4" stroke-linecap="round"/><path d="M16 28H48M20 38H44" stroke="#fde68a" stroke-width="1.5" stroke-linecap="round" opacity="0.85"/>`,
-
-        /* 09. ALKARISI */
         alkarisi_p1: `<path d="M15 32C20 24 26 21 32 21C38 21 44 24 49 32C44 40 38 43 32 43C26 43 20 40 15 32Z" fill="#fb7185" fill-opacity="0.25" stroke="#fda4af" stroke-width="2"/><circle cx="32" cy="32" r="5" fill="#f43f5e" stroke="#fff" stroke-width="1.4"/>`,
         alkarisi_p2: `<path d="M22 44C18 38 22 31 30 30C38 29 43 22 39 16" fill="none" stroke="#fda4af" stroke-width="2.4" stroke-linecap="round"/><path d="M26 46C24 40 30 35 37 33C43 31 46 26 44 21" fill="none" stroke="#fb7185" stroke-width="2" stroke-linecap="round"/>`,
         alkarisi_ulti: `<path d="M18 22L24 29L32 18L40 29L46 22L43 42H21L18 22Z" fill="#f43f5e" fill-opacity="0.38" stroke="#fda4af" stroke-width="2" stroke-linejoin="round"/><circle cx="27" cy="34" r="2" fill="#fff"/><circle cx="37" cy="34" r="2" fill="#fff"/>`,
-
-        /* 10. GÖLGE AVCISI */
         shadow_hunter_p1: `<path d="M18 46L45 19M45 19H33M45 19V31" stroke="#e2e8f0" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 42L17 41L23 47L22 42Z" fill="#94a3b8"/>`,
         shadow_hunter_p2: `<circle cx="32" cy="32" r="12" fill="none" stroke="#cbd5e1" stroke-width="2"/><path d="M32 16V23M32 41V48M16 32H23M41 32H48" stroke="#fde68a" stroke-width="2" stroke-linecap="round"/>`,
         shadow_hunter_ulti: `<path d="M17 20L35 38M27 17L45 35M17 31L33 47" stroke="#f1f5f9" stroke-width="2.4" stroke-linecap="round"/><path d="M35 38H28M35 38V31M45 35H38M45 35V28" stroke="#fde68a" stroke-width="2" stroke-linecap="round"/>`,
-
-        /* 11. İNFAZCI */
         executioner_p1: `<path d="M15 32C20 23 26 20 32 20C38 20 44 23 49 32C44 41 38 44 32 44C26 44 20 41 15 32Z" fill="#f87171" fill-opacity="0.28" stroke="#fca5a5" stroke-width="2"/><circle cx="32" cy="32" r="4.5" fill="#ef4444"/><path d="M32 23V41" stroke="#fde68a" stroke-width="1.6"/>`,
         executioner_p2: `<path d="M20 46L25 22L32 17L39 22L44 46H20Z" fill="#dc2626" fill-opacity="0.35" stroke="#fca5a5" stroke-width="2" stroke-linejoin="round"/>`,
         executioner_ulti: `<path d="M32 14V49M23 22H41M27 44H37" stroke="#fde68a" stroke-width="2.6" stroke-linecap="round"/><path d="M28 18L32 13L36 18" fill="#f87171" stroke="#fff3b0" stroke-width="1.6"/>`,
-
-        /* 12. KIYAMET SÜVARİSİ */
         doomsday_p1: `<path d="M18 39C20 27 29 22 32 15C36 23 45 27 46 39C46 44 40 48 32 48C24 48 18 44 18 39Z" fill="#fb923c" fill-opacity="0.4" stroke="#fed7aa" stroke-width="2"/>`,
         doomsday_p2: `<path d="M16 42C24 36 29 42 36 34C41 29 44 23 48 20" fill="none" stroke="#fb923c" stroke-width="2.6" stroke-linecap="round"/><circle cx="24" cy="24" r="2.2" fill="#fde68a"/><circle cx="38" cy="40" r="2.2" fill="#fed7aa"/>`,
         doomsday_ulti: `<path d="M18 42L25 28L35 24L44 18L42 28L47 34L36 35L31 44H18Z" fill="#f97316" fill-opacity="0.42" stroke="#fde68a" stroke-width="2.2" stroke-linejoin="round"/>`,
-
-        /* 13. CASUS */
         spy_p1: `<rect x="19" y="18" width="26" height="28" rx="3" fill="#60a5fa" fill-opacity="0.28" stroke="#bfdbfe" stroke-width="2"/><path d="M32 18V46M23 25H29M35 25H41M23 31H29M35 31H41" stroke="#fde68a" stroke-width="1.6" stroke-linecap="round"/>`,
         spy_p2: `<path d="M20 46C20 34 25 24 32 17C39 24 44 34 44 46H20Z" fill="#3b82f6" fill-opacity="0.32" stroke="#bfdbfe" stroke-width="2"/><circle cx="32" cy="31" r="4" fill="#0f172a" stroke="#fde68a" stroke-width="1.5"/>`,
         spy_ulti: `<path d="M14 32C20 22 26 19 32 19C38 19 44 22 50 32C44 42 38 45 32 45C26 45 20 42 14 32Z" fill="#60a5fa" fill-opacity="0.3" stroke="#fde68a" stroke-width="2.2"/><circle cx="32" cy="32" r="6" fill="#38bdf8" stroke="#fff" stroke-width="1.6"/>`,
-
-        /* 14. SABOTAJCI */
         saboteur_p1: `<circle cx="32" cy="32" r="11" fill="none" stroke="#facc15" stroke-width="2.4" stroke-dasharray="4 3"/><rect x="27" y="29" width="10" height="8" rx="2" fill="#f59e0b" stroke="#fff3b0" stroke-width="1.6"/><path d="M29 29V26C29 24 35 24 35 26V29" fill="none" stroke="#fff3b0" stroke-width="1.6"/>`,
         saboteur_p2: `<path d="M17 38L25 26L32 33L39 26L47 38" fill="none" stroke="#fde047" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 42H45" stroke="#f59e0b" stroke-width="2.2" stroke-linecap="round"/>`,
         saboteur_ulti: `<circle cx="32" cy="32" r="13" fill="#f59e0b" fill-opacity="0.3" stroke="#fde68a" stroke-width="2.2" stroke-dasharray="5 3"/><path d="M22 22L42 42M42 22L22 42" stroke="#fff3b0" stroke-width="2.4" stroke-linecap="round"/>`,
-
-        /* 15. KAN EMİCİ */
         vampire_p1: `<path d="M26 17H38M29 17V25L21 41C20 44 22 47 25 47H39C42 47 44 44 43 41L35 25V17" fill="#e11d48" fill-opacity="0.38" stroke="#fda4af" stroke-width="2" stroke-linejoin="round"/><path d="M23 38H41" stroke="#fb7185" stroke-width="2"/>`,
         vampire_p2: `<path d="M32 25C27 21 20 22 14 31C20 31 24 35 25 41C28 38 30 38 32 42C34 38 36 38 39 41C40 35 44 31 50 31C44 22 37 21 32 25Z" fill="#f43f5e" fill-opacity="0.36" stroke="#fda4af" stroke-width="2" stroke-linejoin="round"/>`,
         vampire_ulti: `<circle cx="32" cy="32" r="13" fill="#e11d48" fill-opacity="0.55" stroke="#fda4af" stroke-width="2.4"/><path d="M24 26C28 24 34 25 38 29M23 35C28 33 35 34 40 38" fill="none" stroke="#ffe4e6" stroke-width="1.6" stroke-linecap="round"/>`
@@ -1616,8 +1672,8 @@
         gold: 1450,
         mana: 780,
         gem: 4,
-        activeMechStage: '🃏 Çekirdek Kart • Lvl 1',
-        lastActionSummary: 'Level 1 • Merkez çekirdek kart sahnesi hazır. Lobby simgesinden katılıp başlatabilirsiniz.',
+        activeMechStage: '🏛️ Lobi Arenası',
+        lastActionSummary: 'Level 1 • Lobi arenası hazır. Oyun başlayana kadar ana sahne korunur.',
         lobbyMembers: []
       };
       try {
@@ -1648,6 +1704,70 @@
     let appState = loadState();
     let activeLeftChar = CHARACTERS.find(c => c.id === 'galadriel');
     let activeRightChar = CHARACTERS.find(c => c.id === 'sabrina');
+
+    // --- SAHNE GÖRSELLERİ & YUMUŞAK CROSSFADE GEÇİŞİ ---
+    const SCENE_MAP = {
+      lobby: '/scenes/lobby_arena_scene.jpg',
+      dawn: '/scenes/dawn_scene.jpg',
+      dusk: '/scenes/dusk_scene.jpg',
+      blue_moon: '/scenes/blue_moon_scene.jpg',
+      lunar_eclipse: '/scenes/lunar_eclipse_scene.jpg',
+      solar_eclipse: '/scenes/solar_eclipse_scene.jpg'
+    };
+
+    let currentSceneSrc = '';
+    let activeLayerIndex = 0;
+
+    function resolveTargetSceneKey() {
+      if (!appState.gameStarted) {
+        return 'lobby';
+      }
+      const totalDuration = 165;
+      const elapsed = Math.max(0, totalDuration - Number(appState.timeLeft || totalDuration));
+      if (!appState.isNight) {
+        return elapsed > totalDuration * 0.65 ? 'dusk' : 'dawn';
+      }
+      if (appState.skyEvent === 'lunar_eclipse' || appState.skyEvent === 'solar_eclipse' || appState.skyEvent === 'blue_moon') {
+        return appState.skyEvent;
+      }
+      if (elapsed < totalDuration * 0.45) return 'blue_moon';
+      if (elapsed < totalDuration * 0.8) return 'lunar_eclipse';
+      return 'solar_eclipse';
+    }
+
+    function crossfadeArenaScene() {
+      const realmEl = document.getElementById('realm-map');
+      const layerA = document.getElementById('scene-layer-a');
+      const layerB = document.getElementById('scene-layer-b');
+      if (!layerA || !layerB) return;
+
+      const sceneKey = resolveTargetSceneKey();
+      if (realmEl) {
+        realmEl.classList.toggle('lobby-mode', sceneKey === 'lobby');
+      }
+
+      const targetUrl = SCENE_MAP[sceneKey] || SCENE_MAP.lobby;
+      if (currentSceneSrc === targetUrl) return;
+      currentSceneSrc = targetUrl;
+
+      const incoming = activeLayerIndex === 0 ? layerB : layerA;
+      const outgoing = activeLayerIndex === 0 ? layerA : layerB;
+
+      const probe = new Image();
+      probe.onload = () => {
+        incoming.src = targetUrl;
+        incoming.classList.add('active');
+        outgoing.classList.remove('active');
+        activeLayerIndex = activeLayerIndex === 0 ? 1 : 0;
+      };
+      probe.onerror = () => {
+        incoming.src = SCENE_MAP.lobby;
+        incoming.classList.add('active');
+        outgoing.classList.remove('active');
+        activeLayerIndex = activeLayerIndex === 0 ? 1 : 0;
+      };
+      probe.src = targetUrl;
+    }
 
     // --- MERKEZ ÇEKİRDEK & RENKLİ SİMGELİ SÜREÇ KARTLARI (3X DPR) ---
     const canvasCore = document.getElementById('hd-core-canvas');
@@ -1700,16 +1820,21 @@
 
       ctxCore.clearRect(0, 0, w, h);
 
+      // Oyun başlamadığı sürece merkezde yalnızca lobideki sahne görseli tam görünür
+      if (!appState.gameStarted) {
+        return;
+      }
+
       const cx = w * 0.5;
       const cy = h * 0.51;
 
-      const ev = appState.skyEvent || 'blue_moon';
+      const ev = resolveTargetSceneKey();
       const skyCards = {
-        blue_moon: { label: 'MAVİ DOLUNAY', icon: '🌙', col: '#38bdf8', top: '#0c2444', bot: '#060c1a' },
-        lunar_eclipse: { label: 'AY TUTULMASI', icon: '🌘', col: '#f87171', top: '#360e18', bot: '#0a050f' },
-        solar_eclipse: { label: 'GÜNEŞ TUTULMASI', icon: '☀️', col: '#f5c451', top: '#332208', bot: '#08090f' },
-        dawn: { label: 'GÜN DOĞUMU', icon: '🌅', col: '#fb923c', top: '#331a0d', bot: '#0a0b14' },
-        dusk: { label: 'GÜN BATIMI', icon: '🌇', col: '#c084fc', top: '#28113d', bot: '#080712' }
+        blue_moon: { label: 'MAVİ DOLUNAY', icon: '🌙', col: '#38bdf8', top: 'rgba(12, 36, 68, 0.82)', bot: 'rgba(6, 12, 26, 0.88)' },
+        lunar_eclipse: { label: 'AY TUTULMASI', icon: '🌘', col: '#f87171', top: 'rgba(54, 14, 24, 0.82)', bot: 'rgba(10, 5, 15, 0.88)' },
+        solar_eclipse: { label: 'GÜNEŞ TUTULMASI', icon: '☀️', col: '#f5c451', top: 'rgba(51, 34, 8, 0.82)', bot: 'rgba(8, 9, 15, 0.88)' },
+        dawn: { label: 'GÜN DOĞUMU', icon: '🌅', col: '#fb923c', top: 'rgba(51, 26, 13, 0.82)', bot: 'rgba(10, 11, 20, 0.88)' },
+        dusk: { label: 'GÜN BATIMI', icon: '🌇', col: '#c084fc', top: 'rgba(40, 17, 61, 0.82)', bot: 'rgba(8, 7, 18, 0.88)' }
       };
       const sc = skyCards[ev] || skyCards.blue_moon;
 
@@ -1717,11 +1842,11 @@
       const sideH = Math.min(h * 0.42, 116);
       const floatY = Math.sin(nowSec * 2) * 2.5;
 
-      const lx = cx - sideW * 1.48;
+      const lx = Math.max(8, cx - sideW * 1.48);
       const ly = cy - sideH * 0.5 + floatY;
       ctxCore.save();
       roundRectPath(ctxCore, lx, ly, sideW, sideH, 10);
-      ctxCore.fillStyle = 'rgba(12, 21, 41, 0.92)';
+      ctxCore.fillStyle = 'rgba(12, 21, 41, 0.78)';
       ctxCore.fill();
       ctxCore.lineWidth = 1.6;
       ctxCore.strokeStyle = appState.isNight ? '#c084fc' : '#f5c451';
@@ -1737,11 +1862,11 @@
       ctxCore.fillText(`ŞAFAK ${appState.dawnCount || 1}/2`, lx + sideW * 0.5, ly + 74);
       ctxCore.restore();
 
-      const rx = cx + sideW * 0.48;
+      const rx = Math.min(w - sideW - 8, cx + sideW * 0.48);
       const ry = cy - sideH * 0.5 - floatY;
       ctxCore.save();
       roundRectPath(ctxCore, rx, ry, sideW, sideH, 10);
-      ctxCore.fillStyle = 'rgba(12, 21, 41, 0.92)';
+      ctxCore.fillStyle = 'rgba(12, 21, 41, 0.78)';
       ctxCore.fill();
       ctxCore.lineWidth = 1.6;
       ctxCore.strokeStyle = sc.col;
@@ -1983,32 +2108,35 @@
     }
 
     function applySkyTheme() {
-      const ev = appState.skyEvent || 'blue_moon';
+      const ev = resolveTargetSceneKey();
       const labels = {
+        lobby: '🏛️ Lobi Arenası',
         dawn: '🌅 Gün Doğumu',
         dusk: '🌇 Gün Batımı',
         blue_moon: '🌙 Mavi Dolunay',
         lunar_eclipse: '🌘 Ay Tutulması',
         solar_eclipse: '☀️ Güneş Tutulması'
       };
-      document.getElementById('sky-event-label').textContent = labels[ev] || labels.blue_moon;
+      document.getElementById('sky-event-label').textContent = labels[ev] || labels.lobby;
+      crossfadeArenaScene();
     }
 
     function onSkyEventClick() {
       if (!appState.gameStarted) {
-        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Süreç kartları ve soketler oyun başladığında aktif olur.', 'click');
+        showSubtitleAndSpeak('LOBİ ARENASI', 'Oyun başlamadığı sürece lobi sahnesi korunur; süreç geçişleri oyun başlayınca akar.', 'click');
         return;
       }
       const order = ['blue_moon', 'dawn', 'lunar_eclipse', 'dusk', 'solar_eclipse'];
       const next = order[(order.indexOf(appState.skyEvent || 'blue_moon') + 1) % order.length];
       appState.skyEvent = next;
+      appState.isNight = next === 'blue_moon' || next === 'lunar_eclipse';
       const label = next.replace('_', ' ').toUpperCase();
       appState.activeMechStage = `🃏 ${label}`;
       appState.lastActionSummary = `Süreç kartı ${label} olarak güncellendi • Tur #${appState.turn}`;
       setCoreSymbolicCard(`${label} KARTI`, 'GÖKYÜZÜ SÜRECİ', '🃏', '#38bdf8', false);
       grantXpToPlayer(currentUserId, 15, false);
       saveState();
-      showSubtitleAndSpeak('SÜREÇ KARTI', `Merkez çekirdekte ${label} kartı açıldı.`, 'magic');
+      showSubtitleAndSpeak('SÜREÇ KARTI', `Merkez çekirdekte ${label} sahnesi ve kartı açıldı.`, 'magic');
     }
 
     function renderLeftHero() {
@@ -2040,7 +2168,6 @@
       listEl.classList.toggle('inactive-state', !appState.gameStarted);
       listEl.style.setProperty('--socket-accent', hero.color || '#f5c451');
 
-      /* EN ÜSTTE BÜYÜK ULTI, ALTTA 2 GENEL YETENEK — KARAKTERE & YETENEĞE ÖZEL LOGOSAL ÇİZİM */
       listEl.innerHTML = `
         <div class="skill-item ulti-skill-row ${unlocked ? '' : 'ulti-locked'}" onclick="triggerRightPanelSocket('ulti')" title="${hero.ulti.name}">
           <div class="logo-socket-art">${renderCharacterSkillLogoSVG(hero.ulti.socketId, true, hero.color)}</div>
@@ -2084,17 +2211,18 @@
           const cosmicPool = ['blue_moon', 'lunar_eclipse', 'solar_eclipse'];
           const picked = cosmicPool[Math.floor(Math.random() * cosmicPool.length)];
           appState.skyEvent = picked;
+          appState.isNight = picked !== 'solar_eclipse';
           const names = {
             blue_moon: '🌙 Mavi Dolunay',
             lunar_eclipse: '🌘 Ay Tutulması',
             solar_eclipse: '☀️ Güneş Tutulması'
           };
           appState.activeMechStage = `⚡ ${names[picked]}`;
-          appState.lastActionSummary = `Tanrıça Sabrina Kozmik Ulti -> ${names[picked]} kartı merkezde belirdi!`;
+          appState.lastActionSummary = `Tanrıça Sabrina Kozmik Ulti -> ${names[picked]} sahnesi ve kartı aktif!`;
           setCoreSymbolicCard(`${names[picked]} KARTI`, 'SABRINA ULTİ KARTI', '🌌', charObj.color, true);
           grantXpToPlayer(currentUserId, 40, true);
           saveState();
-          showSubtitleAndSpeak(charObj.name, `Bilinmeyen kozmik ulti tetiklendi. ${names[picked]} kartı merkezde belirdi.`, 'ulti', charObj.gender);
+          showSubtitleAndSpeak(charObj.name, `Bilinmeyen kozmik ulti tetiklendi. ${names[picked]} sahnesi merkezde belirdi.`, 'ulti', charObj.gender);
           return;
         }
 
@@ -2293,6 +2421,7 @@
       appState.gameStarted = true;
       appState.turn = 1;
       appState.dawnCount = 1;
+      appState.timeLeft = 165;
       appState.isNight = appState.startPhase === 'night';
       appState.skyEvent = appState.isNight ? 'blue_moon' : 'dawn';
       appState.activeMechStage = '🃏 Çekirdek Kart Aktif';
@@ -2329,7 +2458,7 @@
 
       saveState();
       closeModal('lobby-modal');
-      showSubtitleAndSpeak('MINI LEGENDS', 'Oyun başladı. Sağ panelde ulti ve yetenek soketleri, merkezde süreç kartları aktif.', 'ulti');
+      showSubtitleAndSpeak('MINI LEGENDS', 'Oyun başladı. Merkez arenada faz sahneleri ve süreç kartları aktif.', 'ulti');
     }
 
     function renderLobbyModalContent() {
@@ -2389,6 +2518,18 @@
         if (appState.timeLeft > 0) {
           appState.timeLeft -= 1;
           localStorage.setItem(STATE_KEY, JSON.stringify(appState));
+          crossfadeArenaScene();
+          const evNow = resolveTargetSceneKey();
+          const evLabels = {
+            dawn: '🌅 Gün Doğumu',
+            dusk: '🌇 Gün Batımı',
+            blue_moon: '🌙 Mavi Dolunay',
+            lunar_eclipse: '🌘 Ay Tutulması',
+            solar_eclipse: '☀️ Güneş Tutulması'
+          };
+          if (evLabels[evNow]) {
+            document.getElementById('sky-event-label').textContent = evLabels[evNow];
+          }
         } else {
           advancePhase();
         }
@@ -2410,8 +2551,8 @@
       spotArt.innerHTML = `<img src="/heroes/${charObj.id}.jpg" alt="${charObj.name}" onerror="handleHeroImgError(this, '${charObj.id}', 'full')" />`;
       spotDetails.innerHTML = `
         <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
-          <h4 class="gold-foil-text" style="font-size:15px;">${charObj.name}</h4>
-          <span style="font-size:9.5px; padding:2px 8px; border-radius:999px; border:1px solid var(--gold); color:var(--gold-bright); background:rgba(245,196,81,0.12); font-weight:800;">${charObj.group} • ${charObj.badge}</span>
+          <h4 class="gold-foil-text" style="font-size:13.5px;">${charObj.name}</h4>
+          <span style="font-size:9px; padding:2px 8px; border-radius:999px; border:1px solid var(--gold); color:var(--gold-bright); background:rgba(245,196,81,0.12); font-weight:800;">${charObj.group} • ${charObj.badge}</span>
         </div>
         <div class="spotlight-meme-box gold-foil-quote">"${charObj.quote}"</div>
         <div class="shaped-power-row ulti-power">
@@ -2469,7 +2610,7 @@
             <div class="catalog-art-stage">
               ${renderHeroArtwork(c, 'catalog')}
             </div>
-            <h4 class="gold-foil-text">${c.name} <span style="font-size:8.5px; color:#fde68a;">(${c.group} • ${c.badge})</span></h4>
+            <h4 class="gold-foil-text">${c.name} <span style="font-size:8px; color:#fde68a;">(${c.group})</span></h4>
             <div class="catalog-meme-quote gold-foil-quote">"${c.quote}"</div>
             <div class="shaped-power-row ulti-power">
               <span class="catalog-socket-art">${renderCharacterSkillLogoSVG(c.ulti.socketId, true, c.color)}</span>
