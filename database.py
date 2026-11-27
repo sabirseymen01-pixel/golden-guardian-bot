@@ -45,6 +45,7 @@ DEFAULT_ML_GAME_STATE = {
     "timeLeft": 165,
     "activeMechStage": "🏝️ 3D Ada • Lvl 1",
     "lastActionSummary": "Level 1 • Lobby simgesinden katılabilir ve herkes hazır olduğunda başlatabilirsiniz.",
+    "anonItem": None,
     "lobbyMembers": [],
 }
 
@@ -226,6 +227,7 @@ def sync_ml_state(payload: dict) -> dict:
         "timeLeft",
         "activeMechStage",
         "lastActionSummary",
+        "anonItem",
         "lobbyMembers",
     ]
     updates = {k: payload[k] for k in allowed_keys if k in payload}
