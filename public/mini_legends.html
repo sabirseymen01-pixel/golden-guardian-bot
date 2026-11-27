@@ -716,7 +716,7 @@
       font-weight: 700;
     }
 
-    /* BÜYÜYEN ODAK KARTI (REFERANS GÖRSELDEKİ MERKEZ KART GİBİ) */
+    /* BÜYÜYEN ODAK KARTI — GÖRSEL TAM GÖRÜNÜR, ALT KISMI KAPANMAZ */
     .catalog-spotlight {
       display: grid;
       grid-template-columns: minmax(150px, 195px) 1fr;
@@ -736,18 +736,23 @@
     .spotlight-art-frame {
       width: 100%;
       aspect-ratio: 3 / 4;
-      max-height: 240px;
+      max-height: 250px;
       border-radius: 12px;
       border: 2px solid var(--gold-bright);
-      background: #060a14;
+      background: radial-gradient(circle at 50% 35%, rgba(245, 196, 81, 0.12), #060a14 88%);
+      padding: 4px;
       overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.75);
     }
     .spotlight-art-frame img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      object-position: top center;
+      object-fit: contain;
+      object-position: center;
+      border-radius: 8px;
       display: block;
     }
     .spotlight-details {
@@ -775,11 +780,12 @@
       }
     }
 
-    /* 15 KAHRAMAN KATALOĞU: TAM GÖRÜNEN GÖRSELLER & ALTINDA GOLD ÖZELLİK/MİM YAZILARI */
+    /* LEGENDS HERO KATALOĞU: GÖRSELLER TAM, SIKIŞMA YOK, ALTINDA GOLD ÖZELLİK/MİM YAZILARI */
     .grid-cards {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
-      gap: 11px;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 12px;
+      align-items: start;
     }
     .catalog-card {
       background: linear-gradient(180deg, rgba(20, 31, 56, 0.98) 0%, rgba(7, 11, 21, 0.99) 100%);
@@ -790,51 +796,55 @@
       transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s, box-shadow 0.24s;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 7px;
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.65);
     }
     .catalog-card:hover {
-      transform: translateY(-3px) scale(1.02);
+      transform: translateY(-2px) scale(1.015);
       border-color: var(--gold-bright);
       box-shadow: 0 0 18px rgba(245, 196, 81, 0.35);
     }
     .catalog-card.selected-hero {
-      transform: scale(1.03);
+      transform: scale(1.02);
       border: 2px solid var(--gold-bright);
       box-shadow: 0 0 22px rgba(253, 230, 138, 0.45);
     }
     .catalog-art-stage {
       width: 100%;
-      aspect-ratio: 4 / 5;
+      aspect-ratio: 3 / 4;
       border-radius: 10px;
       border: 1.5px solid rgba(245, 196, 81, 0.48);
-      background: radial-gradient(circle at 50% 25%, rgba(245, 196, 81, 0.14), rgba(6, 10, 22, 0.98) 85%);
+      background: radial-gradient(circle at 50% 35%, rgba(245, 196, 81, 0.12), #060a14 88%);
+      padding: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
       position: relative;
+      flex-shrink: 0;
     }
     .catalog-art-img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      object-position: top center;
+      object-fit: contain;
+      object-position: center;
+      border-radius: 7px;
       display: block;
-      transition: transform 0.3s ease;
+      transition: transform 0.28s ease;
     }
     .catalog-card:hover .catalog-art-img,
     .catalog-card.selected-hero .catalog-art-img {
-      transform: scale(1.06);
+      transform: scale(1.04);
     }
     .catalog-card h4 {
       font-size: 12px;
       letter-spacing: 0.2px;
+      line-height: 1.25;
     }
     .catalog-meme-quote {
       font-style: italic;
       font-size: 10px;
-      line-height: 1.3;
+      line-height: 1.32;
       background: rgba(245, 196, 81, 0.1);
       border-left: 2.5px solid var(--gold);
       padding: 5px 7px;
@@ -845,8 +855,8 @@
       align-items: flex-start;
       gap: 6px;
       font-size: 9.5px;
-      line-height: 1.25;
-      padding: 4.5px 6px;
+      line-height: 1.28;
+      padding: 5px 6px;
       border-radius: 8px;
       background: rgba(245, 196, 81, 0.06);
       border: 1px solid rgba(245, 196, 81, 0.24);
@@ -956,7 +966,7 @@
         <span class="lobby-badge">LOBBY</span>
       </div>
 
-      <div class="port-btn" onclick="openModal('roles-modal')" title="15 Kahraman Kataloğu">
+      <div class="port-btn" onclick="openModal('roles-modal')" title="Legends Hero">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
           <path d="M12 2L4 5V11C4 16.55 7.41 21.74 12 23C16.59 21.74 20 16.55 20 11V5L12 2Z" stroke="#f5c451" stroke-width="2" fill="rgba(245,196,81,0.16)"/>
           <path d="M14.5 7.5L9.5 16.5M9.5 7.5L14.5 16.5" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/>
@@ -1064,7 +1074,7 @@
   <!-- ALT NAVİGASYON BAR -->
   <footer class="bottom-hud">
     <button class="nav-tab active" onclick="switchTab(this)">🃏 ÇEKİRDEK KART</button>
-    <button class="nav-tab" onclick="openModal('roles-modal')">🎭 15 KAHRAMAN</button>
+    <button class="nav-tab" onclick="openModal('roles-modal')">🎭 Legends Hero</button>
     <button class="nav-tab" onclick="onCollectiveAction()">🗳️ OYLAMA / HAMLE</button>
     <button class="nav-tab" onclick="openModal('guide-modal')">📖 OYUN KILAVUZU</button>
     <button class="nav-tab" onclick="openModal('scoreboard-modal')">🏆 SONUÇ &amp; LEVEL</button>
@@ -1115,11 +1125,11 @@
     </div>
   </div>
 
-  <!-- 15 KAHRAMAN KATALOĞU MODALI -->
+  <!-- LEGENDS HERO KATALOĞU MODALI -->
   <div class="modal-backdrop" id="roles-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 class="gold-foil-text">🎭 Mini Legends — 15 Kahraman Kataloğu (Büyüyen Odak Kartı &amp; Gold Mim Replikleri)</h3>
+        <h3 class="gold-foil-text">🎭 Legends Hero — Kahraman Kataloğu</h3>
         <button class="close-btn" onclick="closeModal('roles-modal')">&times;</button>
       </div>
       <div class="modal-body">
@@ -1203,7 +1213,7 @@
   <script>
     const CHARACTERS = [
       {
-        id: 'galadriel', name: 'Muhafız Galadriel', group: 'Gündüz', emoji: '🛡️', color: '#f5c451', badge: 'ŞAFAK SİPERİ',
+        id: 'galadriel', name: 'Muhafız Galadriel', gender: 'female', group: 'Gündüz', emoji: '🛡️', color: '#f5c451', badge: 'ŞAFAK SİPERİ',
         quote: 'Işığım sönmeden bu kalenin tek bir taşına bile dokunamazsınız!',
         ulti: { name: 'Şafak Siperi (Ulti)', icon: '🛡️', shape: '◈', desc: '2. Şafak sonrası: Gündüz tarafının savunma ve oylama gücünü mühürler.', effectType: 'dawn_aegis' },
         passives: [
@@ -1212,7 +1222,7 @@
         ]
       },
       {
-        id: 'helen', name: 'Stratejist Helen', group: 'Gündüz', emoji: '👑', color: '#fbbf24', badge: 'ALTIN KONSEY',
+        id: 'helen', name: 'Stratejist Helen', gender: 'female', group: 'Gündüz', emoji: '👑', color: '#fbbf24', badge: 'ALTIN KONSEY',
         quote: 'Akıl ve zarafet kılıçtan keskindir; bu masanın kaderini ben çizerim.',
         ulti: { name: 'Altın Konsey (Ulti)', icon: '👑', shape: '◈', desc: '2. Şafak sonrası: Toplu hareketlerde oylama etkisini artırır.', effectType: 'council_boost' },
         passives: [
@@ -1221,7 +1231,7 @@
         ]
       },
       {
-        id: 'estes', name: 'Şifacı Estes', group: 'Gündüz', emoji: '🌿', color: '#34d399', badge: 'AY PINARI',
+        id: 'estes', name: 'Şifacı Estes', gender: 'male', group: 'Gündüz', emoji: '🌿', color: '#34d399', badge: 'AY PINARI',
         quote: 'Ay ışığının şefkati en derin yaraları bile yeniden hayata döndürür.',
         ulti: { name: 'Yaşam Pınarı (Ulti)', icon: '✨', shape: '◈', desc: '2. Şafak sonrası: Zayıflayan müttefiki yeniden güçlendirir.', effectType: 'spring_revive' },
         passives: [
@@ -1230,7 +1240,7 @@
         ]
       },
       {
-        id: 'light_warden', name: 'Işık Muhafızı', group: 'Gündüz', emoji: '☀️', color: '#fde047', badge: 'GÜNEŞ IŞIĞI',
+        id: 'light_warden', name: 'Işık Muhafızı', gender: 'male', group: 'Gündüz', emoji: '☀️', color: '#fde047', badge: 'GÜNEŞ IŞIĞI',
         quote: 'Şafak söktüğünde hiçbir gölge ayakta kalamaz!',
         ulti: { name: 'Güneş Patlaması (Ulti)', icon: '☀️', shape: '◈', desc: '2. Şafak sonrası: Gece etkisini dağıtıp gündüz üstünlüğü kurar.', effectType: 'solar_flare' },
         passives: [
@@ -1239,7 +1249,7 @@
         ]
       },
       {
-        id: 'time_bender', name: 'Zaman Büken', group: 'Gündüz', emoji: '🌀', color: '#2dd4bf', badge: 'KRONOS MÜHRÜ',
+        id: 'time_bender', name: 'Zaman Büken', gender: 'male', group: 'Gündüz', emoji: '🌀', color: '#2dd4bf', badge: 'KRONOS MÜHRÜ',
         quote: 'Saatler benim için işlemez; anı durdurur, hamleyi değiştiririm.',
         ulti: { name: 'Kronos Mührü (Ulti)', icon: '🌀', shape: '◈', desc: '2. Şafak sonrası: Turdaki hamle zamanlamasını dondurur.', effectType: 'chronos_seal' },
         passives: [
@@ -1248,7 +1258,7 @@
         ]
       },
       {
-        id: 'spirit_guide', name: 'Ruhlar Rehberi', group: 'Gündüz', emoji: '👻', color: '#a78bfa', badge: 'RUHANİ AYİN',
+        id: 'spirit_guide', name: 'Ruhlar Rehberi', gender: 'female', group: 'Gündüz', emoji: '👻', color: '#a78bfa', badge: 'RUHANİ AYİN',
         quote: 'Ölüler sessiz değildir; fısıltıları bize gerçeği gösterir.',
         ulti: { name: 'Diriliş Ayini (Ulti)', icon: '👻', shape: '◈', desc: '2. Şafak sonrası: Düşen bir stratejiyi/müttefiki geri çağırır.', effectType: 'spirit_resurrect' },
         passives: [
@@ -1257,7 +1267,7 @@
         ]
       },
       {
-        id: 'sabrina', name: 'Tanrıça Sabrina', group: 'Gece', emoji: '⏳', color: '#c084fc', badge: 'KOZMİK TUTULMA',
+        id: 'sabrina', name: 'Tanrıça Sabrina', gender: 'female', group: 'Gece', emoji: '⏳', color: '#c084fc', badge: 'KOZMİK TUTULMA',
         quote: 'Zaman benim emrimde akar; geçmişi siler, geleceği yeniden yazarım!',
         ulti: { name: 'Bilinmeyen Kozmik Tutulma (Ulti)', icon: '🌌', shape: '◈', desc: '2. Şafak sonrası: Mavi Dolunay, Ay Tutulması veya Güneş Tutulmasından rastgele birini tetikler.', effectType: 'sabrina_cosmic' },
         passives: [
@@ -1266,7 +1276,7 @@
         ]
       },
       {
-        id: 'eudora', name: 'Büyücü Eudora', group: 'Gece', emoji: '⚡', color: '#38bdf8', badge: 'FIRTINA KAHİNİ',
+        id: 'eudora', name: 'Büyücü Eudora', gender: 'female', group: 'Gece', emoji: '⚡', color: '#38bdf8', badge: 'FIRTINA KAHİNİ',
         quote: 'Gökyüzünün gazabı ve kadim yıldırım parmaklarımın ucunda!',
         ulti: { name: 'Fırtına Kırılımı (Ulti)', icon: '⛈️', shape: '◈', desc: '2. Şafak sonrası: Karşı tarafın yetenek zincirini bozar.', effectType: 'storm_shift' },
         passives: [
@@ -1275,7 +1285,7 @@
         ]
       },
       {
-        id: 'alkarisi', name: 'Alkarısı', group: 'Gece', emoji: '👹', color: '#fb7185', badge: 'KIZIL GÖLGE',
+        id: 'alkarisi', name: 'Alkarısı', gender: 'female', group: 'Gece', emoji: '👹', color: '#fb7185', badge: 'KIZIL GÖLGE',
         quote: 'Gecenin en derin gölgesinden geldim; nefesinizi kesmeye hazırım!',
         ulti: { name: 'Kabus Çöküşü (Ulti)', icon: '🌑', shape: '◈', desc: '2. Şafak sonrası: Gece baskısını artırır ve gündüz stratejisini sarsar.', effectType: 'nightmare_tide' },
         passives: [
@@ -1284,7 +1294,7 @@
         ]
       },
       {
-        id: 'shadow_hunter', name: 'Gölge Avcısı', group: 'Gece', emoji: '🏹', color: '#94a3b8', badge: 'GÜMÜŞ NİŞAN',
+        id: 'shadow_hunter', name: 'Gölge Avcısı', gender: 'male', group: 'Gece', emoji: '🏹', color: '#94a3b8', badge: 'GÜMÜŞ NİŞAN',
         quote: 'Karanlıkta saklanan hiçbir av oklarımdan kaçamaz.',
         ulti: { name: 'Gümüş Yağmuru (Ulti)', icon: '🏹', shape: '◈', desc: '2. Şafak sonrası: Savunma kalkanlarını delip gece hedefini kilitler.', effectType: 'silver_volley' },
         passives: [
@@ -1293,7 +1303,7 @@
         ]
       },
       {
-        id: 'executioner', name: 'İnfazcı', group: 'Gece', emoji: '🪓', color: '#f87171', badge: 'SON HÜKÜM',
+        id: 'executioner', name: 'İnfazcı', gender: 'male', group: 'Gece', emoji: '🪓', color: '#f87171', badge: 'SON HÜKÜM',
         quote: 'Hüküm verildiğinde baltam asla tereddüt etmez.',
         ulti: { name: 'Son Hüküm (Ulti)', icon: '🪓', shape: '◈', desc: '2. Şafak sonrası: Zayıflamış hedefi oy dengesiyle saf dışı bırakır.', effectType: 'final_judgment' },
         passives: [
@@ -1302,7 +1312,7 @@
         ]
       },
       {
-        id: 'doomsday', name: 'Kıyamet Süvarisi', group: 'Gece', emoji: '🐎', color: '#fb923c', badge: 'MAHŞER ALEVİ',
+        id: 'doomsday', name: 'Kıyamet Süvarisi', gender: 'male', group: 'Gece', emoji: '🐎', color: '#fb923c', badge: 'MAHŞER ALEVİ',
         quote: 'Nallarımın sesi duyulduğunda tüm dengeler yerle bir olur!',
         ulti: { name: 'Mahşer Fırtınası (Ulti)', icon: '🐎', shape: '◈', desc: '2. Şafak sonrası: Turdaki pasif dengeleri sıfırlayıp yeniden kurar.', effectType: 'apocalypse_reset' },
         passives: [
@@ -1311,7 +1321,7 @@
         ]
       },
       {
-        id: 'spy', name: 'Casus', group: 'Gece', emoji: '🕵️', color: '#60a5fa', badge: 'GİZLİ İFŞA',
+        id: 'spy', name: 'Casus', gender: 'male', group: 'Gece', emoji: '🕵️', color: '#60a5fa', badge: 'GİZLİ İFŞA',
         quote: 'Duvarların bile kulağı vardır, ama benim gözüm her sırrı görür.',
         ulti: { name: 'Büyük İfşa (Ulti)', icon: '🕵️', shape: '◈', desc: '2. Şafak sonrası: Gizli hamle kalıbını ortaya çıkarır.', effectType: 'grand_reveal' },
         passives: [
@@ -1320,7 +1330,7 @@
         ]
       },
       {
-        id: 'saboteur', name: 'Sabotajcı', group: 'Gece', emoji: '💣', color: '#facc15', badge: 'KIVILCIM KİLİDİ',
+        id: 'saboteur', name: 'Sabotajcı', gender: 'male', group: 'Gece', emoji: '💣', color: '#facc15', badge: 'KIVILCIM KİLİDİ',
         quote: 'En kusursuz planlar bile tek bir kıvılcımla küle döner.',
         ulti: { name: 'Tam Çöküş (Ulti)', icon: '💣', shape: '◈', desc: '2. Şafak sonrası: Karşı tarafın oylama/yetenek akışını 1 faz kilitler.', effectType: 'sabotage_lock' },
         passives: [
@@ -1329,7 +1339,7 @@
         ]
       },
       {
-        id: 'vampire', name: 'Kan Emici', group: 'Gece', emoji: '🧛', color: '#f43f5e', badge: 'KIZIL DOLUNAY',
+        id: 'vampire', name: 'Kan Emici', gender: 'male', group: 'Gece', emoji: '🧛', color: '#f43f5e', badge: 'KIZIL DOLUNAY',
         quote: 'Sizin yaşam enerjiniz benim ölümsüzlüğümün yakıtıdır.',
         ulti: { name: 'Kızıl Dolunay (Ulti)', icon: '🌕', shape: '◈', desc: '2. Şafak sonrası: İki hedeften enerji çekip gece takımını güçlendirir.', effectType: 'crimson_moon' },
         passives: [
@@ -1340,6 +1350,29 @@
     ];
 
     let selectedCatalogCharId = 'galadriel';
+    let cachedVoices = [];
+
+    function loadSpeechVoices() {
+      if (!('speechSynthesis' in window)) return;
+      cachedVoices = window.speechSynthesis.getVoices() || [];
+    }
+    loadSpeechVoices();
+    if ('speechSynthesis' in window && typeof window.speechSynthesis.addEventListener === 'function') {
+      window.speechSynthesis.addEventListener('voiceschanged', loadSpeechVoices);
+    }
+
+    function pickTurkishVoiceByGender(gender = 'female') {
+      if (!cachedVoices || cachedVoices.length === 0) loadSpeechVoices();
+      const trVoices = (cachedVoices || []).filter(v => (v.lang || '').toLowerCase().startsWith('tr'));
+      if (trVoices.length === 0) return null;
+
+      const femaleHints = ['yelda', 'emel', 'filiz', 'seda', 'zeynep', 'ayse', 'ayşe', 'female', 'woman', 'kadın'];
+      const maleHints = ['ahmet', 'cem', 'kerem', 'emre', 'burak', 'kaan', 'murat', 'male', 'man', 'erkek'];
+      const hints = gender === 'male' ? maleHints : femaleHints;
+
+      const matched = trVoices.find(v => hints.some(h => (v.name || '').toLowerCase().includes(h)));
+      return matched || trVoices[0];
+    }
 
     function fallbackBadgeHTML(charObj, size = 48) {
       const col = charObj.color || '#f5c451';
@@ -1829,15 +1862,31 @@
       } catch (e) {}
     }
 
-    function showSubtitleAndSpeak(speaker, text, tone = 'magic') {
+    function showSubtitleAndSpeak(speaker, text, tone = 'magic', gender = null) {
       document.getElementById('sub-speaker').textContent = `${speaker}:`;
       document.getElementById('sub-content').textContent = text;
       playGameTone(tone);
       if (appState.profile.soundEnabled && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(`${speaker}. ${text}`);
+        const charMatch = CHARACTERS.find(c => c.name === speaker);
+        const resolvedGender = gender || (charMatch && charMatch.gender) || 'female';
+        const cleanSpokenText = String(text || '').replace(/^"+|"+$/g, '').trim();
+        const utter = new SpeechSynthesisUtterance(cleanSpokenText);
         utter.lang = 'tr-TR';
-        utter.rate = 1.04;
+
+        const chosenVoice = pickTurkishVoiceByGender(resolvedGender);
+        if (chosenVoice) {
+          utter.voice = chosenVoice;
+        }
+
+        if (resolvedGender === 'male') {
+          utter.pitch = 0.78;
+          utter.rate = 0.96;
+        } else {
+          utter.pitch = 1.24;
+          utter.rate = 1.02;
+        }
+        utter.volume = 1.0;
         window.speechSynthesis.speak(utter);
       }
     }
@@ -1929,7 +1978,7 @@
 
       if (portKey === 'ulti') {
         if (!isUltiUnlocked()) {
-          showSubtitleAndSpeak(charObj.name, `Ulti soketi 2. Şafaktan sonra açılır (Şu an Şafak ${appState.dawnCount || 1}/2).`, 'click');
+          showSubtitleAndSpeak(charObj.name, `Ulti soketi 2. Şafaktan sonra açılır (Şu an Şafak ${appState.dawnCount || 1}/2).`, 'click', charObj.gender);
           return;
         }
 
@@ -1947,7 +1996,7 @@
           setCoreSymbolicCard(`${names[picked]} KARTI`, 'SABRINA ULTİ KARTI', '🌌', charObj.color, true);
           grantXpToPlayer(currentUserId, 40, true);
           saveState();
-          showSubtitleAndSpeak(charObj.name, `Bilinmeyen kozmik ulti tetiklendi: ${names[picked]} çekirdek kartta belirdi!`, 'ulti');
+          showSubtitleAndSpeak(charObj.name, `Bilinmeyen kozmik ulti tetiklendi: ${names[picked]} çekirdek kartta belirdi!`, 'ulti', charObj.gender);
           return;
         }
 
@@ -1965,7 +2014,7 @@
         setCoreSymbolicCard(charObj.ulti.name.toUpperCase(), charObj.name.toUpperCase(), charObj.ulti.icon, charObj.color, true);
         grantXpToPlayer(currentUserId, 35, true);
         saveState();
-        showSubtitleAndSpeak(charObj.name, `${charObj.ulti.name} tetiklendi! ${charObj.ulti.desc}`, 'ulti');
+        showSubtitleAndSpeak(charObj.name, `${charObj.ulti.name} tetiklendi! ${charObj.ulti.desc}`, 'ulti', charObj.gender);
         return;
       }
 
@@ -1977,7 +2026,7 @@
       setCoreSymbolicCard(passive.name.toUpperCase(), charObj.name.toUpperCase(), passive.icon, charObj.color, false);
       grantXpToPlayer(currentUserId, 20, false);
       saveState();
-      showSubtitleAndSpeak(charObj.name, `${passive.name}: ${passive.desc}`, 'magic');
+      showSubtitleAndSpeak(charObj.name, `${passive.name}: ${passive.desc}`, 'magic', charObj.gender);
     }
 
     function onArenaSkillOrVoice(side) {
@@ -1985,7 +2034,7 @@
       if (appState.gameStarted) {
         setCoreSymbolicCard(charObj.badge, charObj.name.toUpperCase(), charObj.emoji, charObj.color, false);
       }
-      showSubtitleAndSpeak(charObj.name, `"${charObj.quote}"`, 'magic');
+      showSubtitleAndSpeak(charObj.name, `"${charObj.quote}"`, 'magic', charObj.gender);
     }
 
     function onCollectiveAction() {
@@ -2307,7 +2356,7 @@
 
       renderAllRolesGrid();
       renderCatalogSpotlight(charObj, true);
-      showSubtitleAndSpeak(charObj.name, `"${charObj.quote}"`, 'magic');
+      showSubtitleAndSpeak(charObj.name, `"${charObj.quote}"`, 'magic', charObj.gender);
     }
 
     function renderAllRolesGrid() {
