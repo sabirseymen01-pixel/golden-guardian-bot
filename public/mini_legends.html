@@ -220,7 +220,7 @@
     .main-arena {
       flex: 1;
       display: grid;
-      grid-template-columns: minmax(176px, 214px) 1fr minmax(162px, 192px);
+      grid-template-columns: minmax(170px, 206px) 1fr minmax(176px, 212px);
       gap: 7px;
       padding: 4px calc(var(--safe-right) + var(--tg-right-pad)) 4px calc(var(--safe-left) + 14px);
       position: relative;
@@ -228,29 +228,21 @@
       min-height: 0;
     }
 
-    /* SOL DİKEY KAHRAMAN + SAĞINDA LOGOSAL SİMGE SOKETLERİ */
+    /* SOL DİKEY KAHRAMAN (SOKETSİZ, SADECE KAHRAMAN KARTI) */
     .left-hero-stage {
       background: linear-gradient(180deg, rgba(16, 26, 48, 0.97) 0%, rgba(7, 11, 20, 0.99) 100%);
       border: 1.5px solid var(--border-gold);
       border-radius: 14px;
       padding: 6px;
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       z-index: 10;
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.75), inset 0 0 0 1px rgba(245, 196, 81, 0.14);
       min-width: 0;
       min-height: 0;
-      overflow: hidden;
-    }
-
-    .left-hero-vertical {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-width: 0;
-      min-height: 0;
       gap: 4px;
+      overflow: hidden;
     }
 
     .char-header {
@@ -357,52 +349,6 @@
     }
     .mini-btn:hover { background: var(--gold); color: #070b14; }
 
-    /* SOL KAHRAMANIN SAĞINDAKİ LOGOSAL SİMGE SOKET ŞERİDİ */
-    .side-logo-sockets {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding-left: 3px;
-      border-left: 1px dashed rgba(245, 196, 81, 0.25);
-    }
-    .side-logo-sockets.inactive-state {
-      opacity: 0.45;
-    }
-    .logo-socket-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 25%, rgba(56, 189, 248, 0.3), rgba(9, 15, 30, 0.97) 72%);
-      border: 2px solid var(--blue-glow);
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.75);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-    }
-    .logo-socket-btn:hover {
-      transform: scale(1.07);
-      border-color: var(--gold);
-      box-shadow: 0 0 12px rgba(245, 196, 81, 0.4);
-    }
-    .logo-socket-btn.ulti-socket {
-      width: 42px;
-      height: 42px;
-      border: 2.5px solid var(--gold);
-      background: radial-gradient(circle at 30% 25%, rgba(245, 196, 81, 0.36), rgba(24, 15, 38, 0.97) 72%);
-    }
-    .logo-socket-btn.ulti-locked {
-      opacity: 0.48;
-      border-style: dashed;
-      border-color: #94a3b8;
-    }
-    .logo-socket-icon { font-size: 13px; line-height: 1; }
-    .logo-socket-key { font-size: 6.5px; font-weight: 900; color: var(--gold); margin-top: 1px; }
-
     /* MERKEZ ÇEKİRDEK & RENKLİ SİMGELİ SÜREÇ / EFEKT KARTLARI SAHNESİ */
     .realm-map {
       position: relative;
@@ -462,7 +408,7 @@
       z-index: 6;
     }
 
-    /* SAĞ PANEL */
+    /* SAĞ PANEL — YETENEK SOKETLERİ BURADA (EN ÜSTTE BÜYÜK ULTI, ALTTA 2 YETENEK) */
     .char-panel {
       background: linear-gradient(180deg, rgba(16, 26, 48, 0.97) 0%, rgba(7, 11, 20, 0.99) 100%);
       border: 1.5px solid var(--border-gold);
@@ -502,44 +448,66 @@
     }
 
     .skill-list {
+      --socket-accent: #f5c451;
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
       margin: 3px 0;
       overflow-y: auto;
       min-height: 0;
     }
+    .skill-list.inactive-state {
+      opacity: 0.68;
+    }
     .skill-item {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       background: rgba(255, 255, 255, 0.045);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      padding: 3px 5px;
-      border-radius: 8px;
+      border: 1px solid rgba(245, 196, 81, 0.25);
+      padding: 3.5px 6px;
+      border-radius: 9px;
       cursor: pointer;
-      transition: 0.15s;
+      transition: 0.16s ease;
     }
     .skill-item:hover {
-      border-color: var(--gold);
-      background: rgba(245, 196, 81, 0.14);
+      border-color: var(--gold-bright);
+      background: rgba(245, 196, 81, 0.15);
+    }
+    .skill-item.ulti-skill-row {
+      background: linear-gradient(90deg, rgba(245, 196, 81, 0.18), rgba(192, 132, 252, 0.14));
+      border: 1.5px solid var(--gold);
+      box-shadow: 0 0 12px color-mix(in srgb, var(--socket-accent) 35%, transparent);
+    }
+    .skill-item.ulti-locked {
+      border-style: dashed;
+      opacity: 0.65;
     }
     .skill-gem-mini {
-      width: 21px;
-      height: 21px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, rgba(245, 196, 81, 0.38), rgba(15, 23, 42, 0.96));
-      border: 1.5px solid var(--gold);
+      background: radial-gradient(circle at 35% 28%, rgba(253, 230, 138, 0.25), rgba(11, 18, 35, 0.97) 70%, #050811 100%);
+      border: 2px solid #d4af37;
+      box-shadow: inset 0 0 0 1px rgba(253, 230, 138, 0.4), 0 0 8px color-mix(in srgb, var(--socket-accent) 40%, transparent);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 9.5px;
-      font-weight: 900;
-      color: var(--gold);
+      font-size: 11px;
+      line-height: 1;
       flex-shrink: 0;
+    }
+    .skill-item.ulti-skill-row .skill-gem-mini {
+      width: 34px;
+      height: 34px;
+      border: 2.5px solid var(--gold-bright);
+      font-size: 15px;
+      background: radial-gradient(circle at 35% 25%, rgba(253, 230, 138, 0.34), color-mix(in srgb, var(--socket-accent) 28%, #120c24) 66%, #050711 100%);
+      box-shadow: inset 0 0 0 1.5px rgba(255, 243, 176, 0.65), 0 0 14px color-mix(in srgb, var(--socket-accent) 70%, rgba(245, 196, 81, 0.4));
     }
     .skill-meta { flex: 1; min-width: 0; }
     .skill-meta h5 { font-size: 9px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .skill-item.ulti-skill-row .skill-meta h5 { font-size: 9.8px; color: var(--gold-bright); font-weight: 900; }
     .skill-meta p { font-size: 7.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     /* SESLİ & ALTYAZILI ANLATIM BANDI */
@@ -852,11 +820,11 @@
     }
     .shaped-power-row {
       display: flex;
-      align-items: flex-start;
-      gap: 6px;
+      align-items: center;
+      gap: 7px;
       font-size: 9.5px;
       line-height: 1.28;
-      padding: 5px 6px;
+      padding: 4.5px 6px;
       border-radius: 8px;
       background: rgba(245, 196, 81, 0.06);
       border: 1px solid rgba(245, 196, 81, 0.24);
@@ -867,19 +835,24 @@
       font-weight: 700;
     }
     .shape-badge {
-      min-width: 22px;
-      height: 22px;
-      padding: 0 4px;
-      border-radius: 6px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
-      font-weight: 900;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid var(--gold);
-      color: var(--gold-bright);
+      font-size: 11px;
+      background: radial-gradient(circle at 35% 28%, rgba(253, 230, 138, 0.25), rgba(15, 23, 42, 0.96) 72%);
+      border: 1.8px solid var(--gold);
+      box-shadow: inset 0 0 0 1px rgba(253, 230, 138, 0.35), 0 0 6px rgba(245, 196, 81, 0.25);
       flex-shrink: 0;
+    }
+    .shaped-power-row.ulti-power .shape-badge {
+      width: 30px;
+      height: 30px;
+      font-size: 14px;
+      border: 2.2px solid var(--gold-bright);
+      box-shadow: inset 0 0 0 1px rgba(255, 243, 176, 0.6), 0 0 10px rgba(245, 196, 81, 0.45);
     }
 
     input, select {
@@ -985,41 +958,23 @@
 
   <!-- ANA ARENA -->
   <main class="main-arena">
-    <!-- SOL DİKEY KAHRAMAN KARİKATÜRÜ + SAĞINDA LOGOSAL SİMGE SOKETLERİ -->
+    <!-- SOL DİKEY KAHRAMAN KARİKATÜRÜ -->
     <section class="left-hero-stage" id="left-hero-stage">
-      <div class="left-hero-vertical">
-        <div class="char-header">
-          <div class="char-role-tag" id="left-tag">GÜNDÜZ • ŞAFAK SİPERİ</div>
-          <div class="char-name-row">
-            <h3 id="left-name">Muhafız Galadriel</h3>
-            <span class="status-pill" id="left-status">BEKLEME</span>
-          </div>
-        </div>
-
-        <div class="vertical-cartoon-card" id="left-vertical-cartoon"></div>
-
-        <div class="char-quote-preview" id="left-quote">"Işığım sönmeden bu kalenin tek bir taşına bile dokunamazsınız!"</div>
-
-        <div class="char-select-bar">
-          <button class="mini-btn" onclick="onArenaSkillOrVoice('left')">🔊 Mim Ses</button>
-          <button class="mini-btn" onclick="cycleSideHero('Gündüz')">🔄 Hero</button>
+      <div class="char-header">
+        <div class="char-role-tag" id="left-tag">GÜNDÜZ • ŞAFAK SİPERİ</div>
+        <div class="char-name-row">
+          <h3 id="left-name">Muhafız Galadriel</h3>
+          <span class="status-pill" id="left-status">BEKLEME</span>
         </div>
       </div>
 
-      <!-- SOL KAHRAMANIN SAĞINDAKİ LOGOSAL SİMGE SOKETLERİ -->
-      <div class="side-logo-sockets inactive-state" id="side-logo-sockets">
-        <button type="button" class="logo-socket-btn ulti-socket" id="socket-ulti-btn" onclick="triggerHeroSocket('ulti')" title="Ulti Soketi (2. Şafak Sonrası)">
-          <span class="logo-socket-icon" id="socket-ulti-icon">⚡</span>
-          <span class="logo-socket-key">ULTI</span>
-        </button>
-        <button type="button" class="logo-socket-btn" onclick="triggerHeroSocket('p1')" title="Genel Yetenek Soketi 1">
-          <span class="logo-socket-icon" id="socket-p1-icon">🔰</span>
-          <span class="logo-socket-key">S1</span>
-        </button>
-        <button type="button" class="logo-socket-btn" onclick="triggerHeroSocket('p2')" title="Genel Yetenek Soketi 2">
-          <span class="logo-socket-icon" id="socket-p2-icon">⚖️</span>
-          <span class="logo-socket-key">S2</span>
-        </button>
+      <div class="vertical-cartoon-card" id="left-vertical-cartoon"></div>
+
+      <div class="char-quote-preview" id="left-quote">"Işığım sönmeden bu kalenin tek bir taşına bile dokunamazsınız!"</div>
+
+      <div class="char-select-bar">
+        <button class="mini-btn" onclick="onArenaSkillOrVoice('left')">🔊 Mim Ses</button>
+        <button class="mini-btn" onclick="cycleSideHero('Gündüz')">🔄 Hero</button>
       </div>
     </section>
 
@@ -1046,7 +1001,7 @@
       </div>
     </section>
 
-    <!-- SAĞ PANEL (KARŞI KUŞAK KAHRAMAN & 3 YETENEK ÖZETİ) -->
+    <!-- SAĞ PANEL (YETENEK SOKETLERİ: EN ÜSTTE BÜYÜK ULTI, ALTTA 2 YETENEK) -->
     <section class="char-panel" id="right-char-panel">
       <div>
         <div class="char-header">
@@ -1062,7 +1017,7 @@
         </div>
       </div>
 
-      <div class="skill-list" id="right-skills"></div>
+      <div class="skill-list inactive-state" id="right-skills"></div>
 
       <div class="char-select-bar">
         <button class="mini-btn" onclick="onArenaSkillOrVoice('right')">🔊 Mim Ses</button>
@@ -1150,8 +1105,8 @@
         <button class="close-btn" onclick="closeModal('guide-modal')">&times;</button>
       </div>
       <div class="modal-body">
-        <h4 style="color:var(--gold);">1. Sol Dikey Kahraman &amp; Logosal Simge Soketleri</h4>
-        <p>Oyun başladığında sol dikey alanda kahramanınızın karikatürü ve sağında <strong>ULTI</strong> (2. Şafak sonrası aktif), <strong>S1</strong> ve <strong>S2</strong> logosal simge soketleri aktif olur.</p>
+        <h4 style="color:var(--gold);">1. Sağ Panel Yetenek Soketleri (En Üstte Büyük Ulti, Altta 2 Yetenek)</h4>
+        <p>Oyun başladığında sağ paneldeki soketlerde <strong>en üstte büyük ULTI</strong> (2. Şafak sonrası aktif) ve <strong>altında 2 genel yetenek</strong> soketi yer alır[cite: 7, 8, 9].</p>
         <h4 style="color:var(--blue-glow);">2. Merkez Çekirdek Renkli Simgeli Kart Süreci</h4>
         <p>Efekt yerine merkez çekirdekte gökyüzü evreleri ve tetiklenen yetenekler için <strong>renkli simgesel kart görselleri</strong> belirir ve oyun sürecini yansıtır.</p>
         <h4 style="color:var(--purple-glow);">3. Level 1 Başlangıç ve MongoDB Kaydı</h4>
@@ -1215,136 +1170,136 @@
       {
         id: 'galadriel', name: 'Muhafız Galadriel', gender: 'female', group: 'Gündüz', emoji: '🛡️', color: '#f5c451', badge: 'ŞAFAK SİPERİ',
         quote: 'Işığım sönmeden bu kalenin tek bir taşına bile dokunamazsınız!',
-        ulti: { name: 'Şafak Siperi (Ulti)', icon: '🛡️', shape: '◈', desc: '2. Şafak sonrası: Gündüz tarafının savunma ve oylama gücünü mühürler.', effectType: 'dawn_aegis' },
+        ulti: { name: 'Şafak Siperi (Ulti)', icon: '🌅', shape: '🌅', desc: '2. Şafak sonrası: Gündüz tarafının savunma ve oylama gücünü mühürler.', effectType: 'dawn_aegis' },
         passives: [
-          { name: 'Kutsal Kalkan', icon: '🔰', shape: '◆', desc: 'Seçilen müttefiki gece ilk darbeden korur.' },
-          { name: 'Adalet Mührü', icon: '⚖️', shape: '✦', desc: 'Gündüz oylamasında taraf dengesini güçlendirir.' }
+          { name: 'Kutsal Kalkan', icon: '🛡️', shape: '🛡️', desc: 'Seçilen müttefiki gece ilk darbeden korur.' },
+          { name: 'Adalet Mührü', icon: '⚖️', shape: '⚖️', desc: 'Gündüz oylamasında taraf dengesini güçlendirir.' }
         ]
       },
       {
         id: 'helen', name: 'Stratejist Helen', gender: 'female', group: 'Gündüz', emoji: '👑', color: '#fbbf24', badge: 'ALTIN KONSEY',
         quote: 'Akıl ve zarafet kılıçtan keskindir; bu masanın kaderini ben çizerim.',
-        ulti: { name: 'Altın Konsey (Ulti)', icon: '👑', shape: '◈', desc: '2. Şafak sonrası: Toplu hareketlerde oylama etkisini artırır.', effectType: 'council_boost' },
+        ulti: { name: 'Altın Konsey (Ulti)', icon: '👑', shape: '👑', desc: '2. Şafak sonrası: Toplu hareketlerde oylama etkisini artırır.', effectType: 'council_boost' },
         passives: [
-          { name: 'Stratejik Deha', icon: '📜', shape: '◆', desc: 'Toplu oylama ve hamle koordinasyonu sağlar.' },
-          { name: 'Diplomatik Hamle', icon: '🕊️', shape: '✦', desc: 'Bir oyuncunun elenme baskısını askıya alır.' }
+          { name: 'Stratejik Deha', icon: '♟️', shape: '♟️', desc: 'Toplu oylama ve hamle koordinasyonu sağlar.' },
+          { name: 'Diplomatik Hamle', icon: '📜', shape: '📜', desc: 'Bir oyuncunun elenme baskısını askıya alır.' }
         ]
       },
       {
         id: 'estes', name: 'Şifacı Estes', gender: 'male', group: 'Gündüz', emoji: '🌿', color: '#34d399', badge: 'AY PINARI',
         quote: 'Ay ışığının şefkati en derin yaraları bile yeniden hayata döndürür.',
-        ulti: { name: 'Yaşam Pınarı (Ulti)', icon: '✨', shape: '◈', desc: '2. Şafak sonrası: Zayıflayan müttefiki yeniden güçlendirir.', effectType: 'spring_revive' },
+        ulti: { name: 'Yaşam Pınarı (Ulti)', icon: '⛲', shape: '⛲', desc: '2. Şafak sonrası: Zayıflayan müttefiki yeniden güçlendirir.', effectType: 'spring_revive' },
         passives: [
-          { name: 'Işık Şifası', icon: '🌿', shape: '◆', desc: 'Saldırıya uğrayan hedefi iyileştirir.' },
-          { name: 'Kutsal Bağ', icon: '💠', shape: '✦', desc: 'İki oyuncunun dayanıklılığını dengeler.' }
+          { name: 'Işık Şifası', icon: '🌿', shape: '🌿', desc: 'Saldırıya uğrayan hedefi iyileştirir.' },
+          { name: 'Kutsal Bağ', icon: '✦', shape: '✦', desc: 'İki oyuncunun dayanıklılığını dengeler.' }
         ]
       },
       {
         id: 'light_warden', name: 'Işık Muhafızı', gender: 'male', group: 'Gündüz', emoji: '☀️', color: '#fde047', badge: 'GÜNEŞ IŞIĞI',
         quote: 'Şafak söktüğünde hiçbir gölge ayakta kalamaz!',
-        ulti: { name: 'Güneş Patlaması (Ulti)', icon: '☀️', shape: '◈', desc: '2. Şafak sonrası: Gece etkisini dağıtıp gündüz üstünlüğü kurar.', effectType: 'solar_flare' },
+        ulti: { name: 'Güneş Patlaması (Ulti)', icon: '☀️', shape: '☀️', desc: '2. Şafak sonrası: Gece etkisini dağıtıp gündüz üstünlüğü kurar.', effectType: 'solar_flare' },
         passives: [
-          { name: 'Şafak Kalkanı', icon: '🌞', shape: '◆', desc: 'Gündüz oylamasına karşı korur.' },
-          { name: 'Hakikat Işığı', icon: '🔦', shape: '✦', desc: 'Şüpheli hamleyi aydınlatır.' }
+          { name: 'Şafak Kalkanı', icon: '🛡️', shape: '🛡️', desc: 'Gündüz oylamasına karşı korur.' },
+          { name: 'Hakikat Işığı', icon: '👁️', shape: '👁️', desc: 'Şüpheli hamleyi aydınlatır.' }
         ]
       },
       {
         id: 'time_bender', name: 'Zaman Büken', gender: 'male', group: 'Gündüz', emoji: '🌀', color: '#2dd4bf', badge: 'KRONOS MÜHRÜ',
         quote: 'Saatler benim için işlemez; anı durdurur, hamleyi değiştiririm.',
-        ulti: { name: 'Kronos Mührü (Ulti)', icon: '🌀', shape: '◈', desc: '2. Şafak sonrası: Turdaki hamle zamanlamasını dondurur.', effectType: 'chronos_seal' },
+        ulti: { name: 'Kronos Mührü (Ulti)', icon: '🕰️', shape: '🕰️', desc: '2. Şafak sonrası: Turdaki hamle zamanlamasını dondurur.', effectType: 'chronos_seal' },
         passives: [
-          { name: 'Akış Kontrolü', icon: '⏱️', shape: '◆', desc: 'Tartışma süresini düzenler.' },
-          { name: 'Yankı Hamlesi', icon: '🔁', shape: '✦', desc: 'Önceki turun hamlesini tekrarlar.' }
+          { name: 'Akış Kontrolü', icon: '⏳', shape: '⏳', desc: 'Tartışma süresini düzenler.' },
+          { name: 'Yankı Hamlesi', icon: '⭕', shape: '⭕', desc: 'Önceki turun hamlesini tekrarlar.' }
         ]
       },
       {
         id: 'spirit_guide', name: 'Ruhlar Rehberi', gender: 'female', group: 'Gündüz', emoji: '👻', color: '#a78bfa', badge: 'RUHANİ AYİN',
         quote: 'Ölüler sessiz değildir; fısıltıları bize gerçeği gösterir.',
-        ulti: { name: 'Diriliş Ayini (Ulti)', icon: '👻', shape: '◈', desc: '2. Şafak sonrası: Düşen bir stratejiyi/müttefiki geri çağırır.', effectType: 'spirit_resurrect' },
+        ulti: { name: 'Diriliş Ayini (Ulti)', icon: '🔮', shape: '🔮', desc: '2. Şafak sonrası: Düşen bir stratejiyi/müttefiki geri çağırır.', effectType: 'spirit_resurrect' },
         passives: [
-          { name: 'Ruh İletişimi', icon: '🕯️', shape: '◆', desc: 'Elenen oyunculardan ipucu alır.' },
-          { name: 'Ruhani Kalkan', icon: '🔮', shape: '✦', desc: 'Ruhsal koruma sağlar.' }
+          { name: 'Ruh İletişimi', icon: '👻', shape: '👻', desc: 'Elenen oyunculardan ipucu alır.' },
+          { name: 'Ruhani Kalkan', icon: '💠', shape: '💠', desc: 'Ruhsal koruma sağlar.' }
         ]
       },
       {
         id: 'sabrina', name: 'Tanrıça Sabrina', gender: 'female', group: 'Gece', emoji: '⏳', color: '#c084fc', badge: 'KOZMİK TUTULMA',
         quote: 'Zaman benim emrimde akar; geçmişi siler, geleceği yeniden yazarım!',
-        ulti: { name: 'Bilinmeyen Kozmik Tutulma (Ulti)', icon: '🌌', shape: '◈', desc: '2. Şafak sonrası: Mavi Dolunay, Ay Tutulması veya Güneş Tutulmasından rastgele birini tetikler.', effectType: 'sabrina_cosmic' },
+        ulti: { name: 'Bilinmeyen Kozmik Tutulma (Ulti)', icon: '🌑', shape: '🌑', desc: '2. Şafak sonrası: Mavi Dolunay, Ay Tutulması veya Güneş Tutulmasından rastgele birini tetikler.', effectType: 'sabrina_cosmic' },
         passives: [
-          { name: 'Zamanı Bükme', icon: '⏳', shape: '◆', desc: 'Faz süresini ve tur akışını kaydırır.' },
-          { name: 'Kader Döngüsü', icon: '🌀', shape: '✦', desc: 'Son hamlenin etkisini ters yönde çevirir.' }
+          { name: 'Zamanı Bükme', icon: '⏳', shape: '⏳', desc: 'Faz süresini ve tur akışını kaydırır.' },
+          { name: 'Kader Döngüsü', icon: '🌀', shape: '🌀', desc: 'Son hamlenin etkisini ters yönde çevirir.' }
         ]
       },
       {
         id: 'eudora', name: 'Büyücü Eudora', gender: 'female', group: 'Gece', emoji: '⚡', color: '#38bdf8', badge: 'FIRTINA KAHİNİ',
         quote: 'Gökyüzünün gazabı ve kadim yıldırım parmaklarımın ucunda!',
-        ulti: { name: 'Fırtına Kırılımı (Ulti)', icon: '⛈️', shape: '◈', desc: '2. Şafak sonrası: Karşı tarafın yetenek zincirini bozar.', effectType: 'storm_shift' },
+        ulti: { name: 'Fırtına Kırılımı (Ulti)', icon: '🌪️', shape: '🌪️', desc: '2. Şafak sonrası: Karşı tarafın yetenek zincirini bozar.', effectType: 'storm_shift' },
         passives: [
-          { name: 'Arkane Patlaması', icon: '🔮', shape: '◆', desc: 'Hedefin büyü enerjisini tüketir.' },
-          { name: 'Yıldırım Zinciri', icon: '⚡', shape: '✦', desc: 'İki bölge arasında enerji akışı kurar.' }
+          { name: 'Arkane Patlaması', icon: '🔮', shape: '🔮', desc: 'Hedefin büyü enerjisini tüketir.' },
+          { name: 'Yıldırım Zinciri', icon: '⚡', shape: '⚡', desc: 'İki bölge arasında enerji akışı kurar.' }
         ]
       },
       {
         id: 'alkarisi', name: 'Alkarısı', gender: 'female', group: 'Gece', emoji: '👹', color: '#fb7185', badge: 'KIZIL GÖLGE',
         quote: 'Gecenin en derin gölgesinden geldim; nefesinizi kesmeye hazırım!',
-        ulti: { name: 'Kabus Çöküşü (Ulti)', icon: '🌑', shape: '◈', desc: '2. Şafak sonrası: Gece baskısını artırır ve gündüz stratejisini sarsar.', effectType: 'nightmare_tide' },
+        ulti: { name: 'Kabus Çöküşü (Ulti)', icon: '👹', shape: '👹', desc: '2. Şafak sonrası: Gece baskısını artırır ve gündüz stratejisini sarsar.', effectType: 'nightmare_tide' },
         passives: [
-          { name: 'Gece Karabasanı', icon: '👁️', shape: '◆', desc: 'Hedefin gece görüşünü ve hamlesini aksatır.' },
-          { name: 'Kızıl Fısıltı', icon: '🩸', shape: '✦', desc: 'Gündüz tartışmasında şaşırtıcı ipucu bırakır.' }
+          { name: 'Gece Karabasanı', icon: '🌑', shape: '🌑', desc: 'Hedefin gece görüşünü ve hamlesini aksatır.' },
+          { name: 'Kızıl Fısıltı', icon: '🔥', shape: '🔥', desc: 'Gündüz tartışmasında şaşırtıcı ipucu bırakır.' }
         ]
       },
       {
         id: 'shadow_hunter', name: 'Gölge Avcısı', gender: 'male', group: 'Gece', emoji: '🏹', color: '#94a3b8', badge: 'GÜMÜŞ NİŞAN',
         quote: 'Karanlıkta saklanan hiçbir av oklarımdan kaçamaz.',
-        ulti: { name: 'Gümüş Yağmuru (Ulti)', icon: '🏹', shape: '◈', desc: '2. Şafak sonrası: Savunma kalkanlarını delip gece hedefini kilitler.', effectType: 'silver_volley' },
+        ulti: { name: 'Gümüş Yağmuru (Ulti)', icon: '🏹', shape: '🏹', desc: '2. Şafak sonrası: Savunma kalkanlarını delip gece hedefini kilitler.', effectType: 'silver_volley' },
         passives: [
-          { name: 'Gölge Oku', icon: '🎯', shape: '◆', desc: 'Gece seçilen hedefi nişan alır.' },
-          { name: 'İz Sürücü', icon: '👣', shape: '✦', desc: 'Hedefin gece rotasını takip eder.' }
+          { name: 'Gölge Oku', icon: '🎯', shape: '🎯', desc: 'Gece seçilen hedefi nişan alır.' },
+          { name: 'İz Sürücü', icon: '⌖', shape: '⌖', desc: 'Hedefin gece rotasını takip eder.' }
         ]
       },
       {
         id: 'executioner', name: 'İnfazcı', gender: 'male', group: 'Gece', emoji: '🪓', color: '#f87171', badge: 'SON HÜKÜM',
         quote: 'Hüküm verildiğinde baltam asla tereddüt etmez.',
-        ulti: { name: 'Son Hüküm (Ulti)', icon: '🪓', shape: '◈', desc: '2. Şafak sonrası: Zayıflamış hedefi oy dengesiyle saf dışı bırakır.', effectType: 'final_judgment' },
+        ulti: { name: 'Son Hüküm (Ulti)', icon: '⚔️', shape: '⚔️', desc: '2. Şafak sonrası: Zayıflamış hedefi oy dengesiyle saf dışı bırakır.', effectType: 'final_judgment' },
         passives: [
-          { name: 'Kesin Hüküm', icon: '⚔️', shape: '◆', desc: 'Gece hedef belirleme gücünü artırır.' },
-          { name: 'Korku Aurası', icon: '🔥', shape: '✦', desc: 'Çevredeki kararsız oyları baskılar.' }
+          { name: 'Kesin Hüküm', icon: '👁️', shape: '👁️', desc: 'Gece hedef belirleme gücünü artırır.' },
+          { name: 'Korku Aurası', icon: '🖤', shape: '🖤', desc: 'Çevredeki kararsız oyları baskılar.' }
         ]
       },
       {
         id: 'doomsday', name: 'Kıyamet Süvarisi', gender: 'male', group: 'Gece', emoji: '🐎', color: '#fb923c', badge: 'MAHŞER ALEVİ',
         quote: 'Nallarımın sesi duyulduğunda tüm dengeler yerle bir olur!',
-        ulti: { name: 'Mahşer Fırtınası (Ulti)', icon: '🐎', shape: '◈', desc: '2. Şafak sonrası: Turdaki pasif dengeleri sıfırlayıp yeniden kurar.', effectType: 'apocalypse_reset' },
+        ulti: { name: 'Mahşer Fırtınası (Ulti)', icon: '🐎', shape: '🐎', desc: '2. Şafak sonrası: Turdaki pasif dengeleri sıfırlayıp yeniden kurar.', effectType: 'apocalypse_reset' },
         passives: [
-          { name: 'Kaos Dalgası', icon: '🌪️', shape: '◆', desc: 'Turdaki dengeleri sarsar.' },
-          { name: 'Alev İzi', icon: '🌋', shape: '✦', desc: 'Seçilen bölgeyi ateşe verir.' }
+          { name: 'Kaos Dalgası', icon: '🔥', shape: '🔥', desc: 'Turdaki dengeleri sarsar.' },
+          { name: 'Alev İzi', icon: '🌋', shape: '🌋', desc: 'Seçilen bölgeyi ateşe verir.' }
         ]
       },
       {
         id: 'spy', name: 'Casus', gender: 'male', group: 'Gece', emoji: '🕵️', color: '#60a5fa', badge: 'GİZLİ İFŞA',
         quote: 'Duvarların bile kulağı vardır, ama benim gözüm her sırrı görür.',
-        ulti: { name: 'Büyük İfşa (Ulti)', icon: '🕵️', shape: '◈', desc: '2. Şafak sonrası: Gizli hamle kalıbını ortaya çıkarır.', effectType: 'grand_reveal' },
+        ulti: { name: 'Büyük İfşa (Ulti)', icon: '👁️', shape: '👁️', desc: '2. Şafak sonrası: Gizli hamle kalıbını ortaya çıkarır.', effectType: 'grand_reveal' },
         passives: [
-          { name: 'Bilgi Sızdırma', icon: '🔍', shape: '◆', desc: 'Hedefin rol ipucunu toplar.' },
-          { name: 'Kimlik Gizleme', icon: '🎭', shape: '✦', desc: 'İncelemelerde kimliğini gizler.' }
+          { name: 'Bilgi Sızdırma', icon: '📖', shape: '📖', desc: 'Hedefin rol ipucunu toplar.' },
+          { name: 'Kimlik Gizleme', icon: '🎭', shape: '🎭', desc: 'İncelemelerde kimliğini gizler.' }
         ]
       },
       {
         id: 'saboteur', name: 'Sabotajcı', gender: 'male', group: 'Gece', emoji: '💣', color: '#facc15', badge: 'KIVILCIM KİLİDİ',
         quote: 'En kusursuz planlar bile tek bir kıvılcımla küle döner.',
-        ulti: { name: 'Tam Çöküş (Ulti)', icon: '💣', shape: '◈', desc: '2. Şafak sonrası: Karşı tarafın oylama/yetenek akışını 1 faz kilitler.', effectType: 'sabotage_lock' },
+        ulti: { name: 'Tam Çöküş (Ulti)', icon: '💥', shape: '💥', desc: '2. Şafak sonrası: Karşı tarafın oylama/yetenek akışını 1 faz kilitler.', effectType: 'sabotage_lock' },
         passives: [
-          { name: 'Mekanizma Kilidi', icon: '⚙️', shape: '◆', desc: 'Hedefin yeteneğini 1 tur aksatır.' },
-          { name: 'Tuzak Kurma', icon: '🪤', shape: '✦', desc: 'Saldıran hedefe tuzak kurar.' }
+          { name: 'Mekanizma Kilidi', icon: '⚙️', shape: '⚙️', desc: 'Hedefin yeteneğini 1 tur aksatır.' },
+          { name: 'Tuzak Kurma', icon: '🪤', shape: '🪤', desc: 'Saldıran hedefe tuzak kurar.' }
         ]
       },
       {
         id: 'vampire', name: 'Kan Emici', gender: 'male', group: 'Gece', emoji: '🧛', color: '#f43f5e', badge: 'KIZIL DOLUNAY',
         quote: 'Sizin yaşam enerjiniz benim ölümsüzlüğümün yakıtıdır.',
-        ulti: { name: 'Kızıl Dolunay (Ulti)', icon: '🌕', shape: '◈', desc: '2. Şafak sonrası: İki hedeften enerji çekip gece takımını güçlendirir.', effectType: 'crimson_moon' },
+        ulti: { name: 'Kızıl Dolunay (Ulti)', icon: '🌕', shape: '🌕', desc: '2. Şafak sonrası: İki hedeften enerji çekip gece takımını güçlendirir.', effectType: 'crimson_moon' },
         passives: [
-          { name: 'Yaşam Çekimi', icon: '🧛', shape: '◆', desc: 'Hedeften enerji çeker.' },
-          { name: 'Gece Pelerini', icon: '🦇', shape: '✦', desc: 'Gece saldırılarından sıyrılır.' }
+          { name: 'Yaşam Çekimi', icon: '🩸', shape: '🩸', desc: 'Hedeften enerji çeker.' },
+          { name: 'Gece Pelerini', icon: '🦇', shape: '🦇', desc: 'Gece saldırılarından sıyrılır.' }
         ]
       }
     ];
@@ -1920,7 +1875,7 @@
       showSubtitleAndSpeak('SÜREÇ KARTI', `Merkez çekirdekte ${label} kartı açıldı.`, 'magic');
     }
 
-    function renderLeftHeroAndSockets() {
+    function renderLeftHero() {
       const meMember = appState.lobbyMembers.find(m => m.id === currentUserId);
       const hero = appState.gameStarted && meMember
         ? (CHARACTERS.find(c => c.id === meMember.charId) || activeLeftChar)
@@ -1934,46 +1889,53 @@
       document.getElementById('left-status').textContent = appState.gameStarted ? 'SAHADA' : 'BEKLEME';
       cardEl.innerHTML = renderHeroArtwork(hero, 'full');
       document.getElementById('left-quote').textContent = `"${hero.quote}"`;
-
-      const socketBox = document.getElementById('side-logo-sockets');
-      socketBox.classList.toggle('inactive-state', !appState.gameStarted);
-
-      const unlocked = isUltiUnlocked();
-      document.getElementById('socket-ulti-btn').classList.toggle('ulti-locked', !unlocked);
-      document.getElementById('socket-ulti-icon').textContent = hero.ulti.icon || '⚡';
-      document.getElementById('socket-p1-icon').textContent = hero.passives[0].icon || '🔰';
-      document.getElementById('socket-p2-icon').textContent = hero.passives[1].icon || '⚖️';
     }
 
-    function renderRightPanelSummary() {
-      document.getElementById('right-tag').textContent = `${activeRightChar.group.toUpperCase()} • ${activeRightChar.badge}`;
-      document.getElementById('right-name').textContent = activeRightChar.name;
-      document.getElementById('right-cartoon').innerHTML = renderHeroArtwork(activeRightChar, 'thumb');
-      document.getElementById('right-quote').textContent = `"${activeRightChar.quote}"`;
+    function renderRightPanelAndSockets() {
+      const hero = activeRightChar;
+      const unlocked = isUltiUnlocked();
 
-      const rows = [
-        { shape: activeRightChar.ulti.shape, name: activeRightChar.ulti.name, desc: '2. Şafak sonrası aktif' },
-        { shape: activeRightChar.passives[0].shape, name: activeRightChar.passives[0].name, desc: activeRightChar.passives[0].desc },
-        { shape: activeRightChar.passives[1].shape, name: activeRightChar.passives[1].name, desc: activeRightChar.passives[1].desc }
-      ];
-      document.getElementById('right-skills').innerHTML = rows.map(r => `
-        <div class="skill-item" onclick="onArenaSkillOrVoice('right')">
-          <div class="skill-gem-mini">${r.shape}</div>
+      document.getElementById('right-tag').textContent = `${hero.group.toUpperCase()} • ${hero.badge}`;
+      document.getElementById('right-name').textContent = hero.name;
+      document.getElementById('right-cartoon').innerHTML = renderHeroArtwork(hero, 'thumb');
+      document.getElementById('right-quote').textContent = `"${hero.quote}"`;
+
+      const listEl = document.getElementById('right-skills');
+      listEl.classList.toggle('inactive-state', !appState.gameStarted);
+      listEl.style.setProperty('--socket-accent', hero.color || '#f5c451');
+
+      /* EN ÜSTTE BÜYÜK ULTI, ALTTA 2 GENEL YETENEK */
+      listEl.innerHTML = `
+        <div class="skill-item ulti-skill-row ${unlocked ? '' : 'ulti-locked'}" onclick="triggerRightPanelSocket('ulti')" title="${hero.ulti.name}">
+          <div class="skill-gem-mini">${hero.ulti.icon}</div>
           <div class="skill-meta">
-            <h5>${r.name}</h5>
-            <p>${r.desc}</p>
+            <h5>ULTI • ${hero.ulti.name.replace(' (Ulti)', '')}</h5>
+            <p>${unlocked ? 'Hazır • Tetiklemek için tıkla' : '2. Şafak sonrası aktif'}</p>
           </div>
         </div>
-      `).join('');
+        <div class="skill-item" onclick="triggerRightPanelSocket('p1')" title="${hero.passives[0].name}">
+          <div class="skill-gem-mini">${hero.passives[0].icon}</div>
+          <div class="skill-meta">
+            <h5>${hero.passives[0].name}</h5>
+            <p>${hero.passives[0].desc}</p>
+          </div>
+        </div>
+        <div class="skill-item" onclick="triggerRightPanelSocket('p2')" title="${hero.passives[1].name}">
+          <div class="skill-gem-mini">${hero.passives[1].icon}</div>
+          <div class="skill-meta">
+            <h5>${hero.passives[1].name}</h5>
+            <p>${hero.passives[1].desc}</p>
+          </div>
+        </div>
+      `;
     }
 
-    function triggerHeroSocket(portKey) {
+    function triggerRightPanelSocket(portKey) {
       if (!appState.gameStarted) {
-        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Logosal simge soketleri oyun başladığında aktif olur.', 'click');
+        showSubtitleAndSpeak('OYUN BAŞLAMADI', 'Yetenek soketleri oyun başladığında aktif olur.', 'click');
         return;
       }
-      const meMember = appState.lobbyMembers.find(m => m.id === currentUserId);
-      const charObj = CHARACTERS.find(c => c.id === (meMember && meMember.charId)) || activeLeftChar;
+      const charObj = activeRightChar;
       if (appState.mana >= 15) appState.mana -= 15;
 
       if (portKey === 'ulti') {
@@ -2060,8 +2022,8 @@
         const idx = pool.findIndex(c => c.id === activeRightChar.id);
         activeRightChar = pool[(idx + 1) % pool.length];
       }
-      renderLeftHeroAndSockets();
-      renderRightPanelSummary();
+      renderLeftHero();
+      renderRightPanelAndSockets();
       playGameTone('click');
     }
 
@@ -2231,7 +2193,7 @@
 
       saveState();
       closeModal('lobby-modal');
-      showSubtitleAndSpeak('MINI LEGENDS', 'Oyun başladı! Sol dikeyde kahraman kartınız, sağında logosal soketler ve merkezde süreç kartları aktif.', 'ulti');
+      showSubtitleAndSpeak('MINI LEGENDS', 'Oyun başladı! Sağ panelde Ulti ve yetenek soketleri, merkezde süreç kartları aktif.', 'ulti');
     }
 
     function renderLobbyModalContent() {
@@ -2317,16 +2279,16 @@
         </div>
         <div class="spotlight-meme-box gold-foil-quote">🔊 "${charObj.quote}"</div>
         <div class="shaped-power-row ulti-power">
-          <span class="shape-badge">${charObj.ulti.shape}</span>
-          <span class="gold-foil-quote">${charObj.ulti.icon} ULTİ [${unlocked ? 'AÇIK' : '2. ŞAFAK'}]: ${charObj.ulti.name} — ${charObj.ulti.desc}</span>
+          <span class="shape-badge">${charObj.ulti.icon}</span>
+          <span class="gold-foil-quote">ULTİ [${unlocked ? 'AÇIK' : '2. ŞAFAK'}]: ${charObj.ulti.name} — ${charObj.ulti.desc}</span>
         </div>
         <div class="shaped-power-row">
-          <span class="shape-badge">${charObj.passives[0].shape}</span>
-          <span class="gold-foil-quote">${charObj.passives[0].icon} Genel 1: ${charObj.passives[0].name} — ${charObj.passives[0].desc}</span>
+          <span class="shape-badge">${charObj.passives[0].icon}</span>
+          <span class="gold-foil-quote">Genel 1: ${charObj.passives[0].name} — ${charObj.passives[0].desc}</span>
         </div>
         <div class="shaped-power-row">
-          <span class="shape-badge">${charObj.passives[1].shape}</span>
-          <span class="gold-foil-quote">${charObj.passives[1].icon} Genel 2: ${charObj.passives[1].name} — ${charObj.passives[1].desc}</span>
+          <span class="shape-badge">${charObj.passives[1].icon}</span>
+          <span class="gold-foil-quote">Genel 2: ${charObj.passives[1].name} — ${charObj.passives[1].desc}</span>
         </div>
       `;
 
@@ -2344,10 +2306,10 @@
 
       if (charObj.group === 'Gündüz') {
         activeLeftChar = charObj;
-        renderLeftHeroAndSockets();
+        renderLeftHero();
       } else {
         activeRightChar = charObj;
-        renderRightPanelSummary();
+        renderRightPanelAndSockets();
       }
 
       if (appState.gameStarted) {
@@ -2374,16 +2336,16 @@
             <h4 class="gold-foil-text">${c.name} <span style="font-size:8.5px; color:#fde68a;">(${c.group} • ${c.badge})</span></h4>
             <div class="catalog-meme-quote gold-foil-quote">"${c.quote}"</div>
             <div class="shaped-power-row ulti-power">
-              <span class="shape-badge">${c.ulti.shape}</span>
-              <span class="gold-foil-quote">${c.ulti.icon} ULTİ [${unlocked ? 'AÇIK' : '2. ŞAFAK'}]: ${c.ulti.name}</span>
+              <span class="shape-badge">${c.ulti.icon}</span>
+              <span class="gold-foil-quote">ULTİ [${unlocked ? 'AÇIK' : '2. ŞAFAK'}]: ${c.ulti.name}</span>
             </div>
             <div class="shaped-power-row">
-              <span class="shape-badge">${c.passives[0].shape}</span>
-              <span class="gold-foil-quote">${c.passives[0].icon} Genel 1: ${c.passives[0].name}</span>
+              <span class="shape-badge">${c.passives[0].icon}</span>
+              <span class="gold-foil-quote">Genel 1: ${c.passives[0].name}</span>
             </div>
             <div class="shaped-power-row">
-              <span class="shape-badge">${c.passives[1].shape}</span>
-              <span class="gold-foil-quote">${c.passives[1].icon} Genel 2: ${c.passives[1].name}</span>
+              <span class="shape-badge">${c.passives[1].icon}</span>
+              <span class="gold-foil-quote">Genel 2: ${c.passives[1].name}</span>
             </div>
           </div>
         `;
@@ -2477,8 +2439,8 @@
       }).join('');
 
       applySkyTheme();
-      renderLeftHeroAndSockets();
-      renderRightPanelSummary();
+      renderLeftHero();
+      renderRightPanelAndSockets();
     }
 
     function openModal(id) {
