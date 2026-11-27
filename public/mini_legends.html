@@ -633,7 +633,7 @@
       border: 1.5px solid var(--gold);
       border-radius: 14px;
       width: 96%;
-      max-width: 920px;
+      max-width: 980px;
       max-height: calc(100dvh - 88px);
       display: flex;
       flex-direction: column;
@@ -667,7 +667,7 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       font-size: 11.5px;
     }
 
@@ -702,35 +702,113 @@
       background: rgba(52, 211, 153, 0.14);
     }
 
-    /* 15 KAHRAMAN KATALOĞU: KARİKATÜR GÖRSELİNİN ALTINDA ŞEKİLLİ GÜÇLER & MİM CÜMLELERİ */
-    .grid-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
-      gap: 10px;
+    /* ALTIN YALDIZLI YAZI STİLİ */
+    .gold-foil-text {
+      background: linear-gradient(135deg, #fff3b0 0%, #f5c451 45%, #d97706 78%, #fde68a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 12px rgba(245, 196, 81, 0.28);
+      font-weight: 800;
     }
-    .catalog-card {
-      background: linear-gradient(180deg, rgba(17, 28, 52, 0.97) 0%, rgba(7, 11, 21, 0.99) 100%);
-      border: 1.5px solid rgba(245, 196, 81, 0.45);
-      border-radius: 14px;
-      padding: 8px;
-      cursor: pointer;
-      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    .gold-foil-quote {
+      color: #fde68a;
+      text-shadow: 0 0 10px rgba(245, 196, 81, 0.35), 0 1px 2px rgba(0, 0, 0, 0.9);
+      font-weight: 700;
+    }
+
+    /* BÜYÜYEN ODAK KARTI (REFERANS GÖRSELDEKİ MERKEZ KART GİBİ) */
+    .catalog-spotlight {
+      display: grid;
+      grid-template-columns: minmax(150px, 195px) 1fr;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(245, 196, 81, 0.14), rgba(11, 18, 35, 0.98) 55%, rgba(28, 18, 46, 0.95));
+      border: 2px solid var(--gold);
+      box-shadow: 0 0 24px rgba(245, 196, 81, 0.28), inset 0 0 18px rgba(245, 196, 81, 0.1);
+      align-items: center;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
+    }
+    .catalog-spotlight.zoom-pulse {
+      transform: scale(1.015);
+      box-shadow: 0 0 32px rgba(253, 230, 138, 0.45), inset 0 0 22px rgba(245, 196, 81, 0.18);
+    }
+    .spotlight-art-frame {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      max-height: 240px;
+      border-radius: 12px;
+      border: 2px solid var(--gold-bright);
+      background: #060a14;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.75);
+    }
+    .spotlight-art-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+    .spotlight-details {
       display: flex;
       flex-direction: column;
       gap: 6px;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6);
+      min-width: 0;
+    }
+    .spotlight-meme-box {
+      padding: 7px 10px;
+      border-radius: 10px;
+      background: rgba(245, 196, 81, 0.1);
+      border: 1px solid rgba(245, 196, 81, 0.5);
+      font-style: italic;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    @media (max-width: 600px) {
+      .catalog-spotlight {
+        grid-template-columns: 1fr;
+      }
+      .spotlight-art-frame {
+        max-width: 165px;
+        margin: 0 auto;
+      }
+    }
+
+    /* 15 KAHRAMAN KATALOĞU: TAM GÖRÜNEN GÖRSELLER & ALTINDA GOLD ÖZELLİK/MİM YAZILARI */
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+      gap: 11px;
+    }
+    .catalog-card {
+      background: linear-gradient(180deg, rgba(20, 31, 56, 0.98) 0%, rgba(7, 11, 21, 0.99) 100%);
+      border: 1.5px solid rgba(245, 196, 81, 0.55);
+      border-radius: 14px;
+      padding: 8px;
+      cursor: pointer;
+      transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s, box-shadow 0.24s;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.65);
     }
     .catalog-card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-3px) scale(1.02);
       border-color: var(--gold-bright);
-      box-shadow: 0 0 15px rgba(245, 196, 81, 0.25);
+      box-shadow: 0 0 18px rgba(245, 196, 81, 0.35);
+    }
+    .catalog-card.selected-hero {
+      transform: scale(1.03);
+      border: 2px solid var(--gold-bright);
+      box-shadow: 0 0 22px rgba(253, 230, 138, 0.45);
     }
     .catalog-art-stage {
       width: 100%;
-      height: 118px;
+      aspect-ratio: 4 / 5;
       border-radius: 10px;
-      border: 1px solid rgba(245, 196, 81, 0.3);
-      background: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.14), rgba(6, 10, 22, 0.96) 80%);
+      border: 1.5px solid rgba(245, 196, 81, 0.48);
+      background: radial-gradient(circle at 50% 25%, rgba(245, 196, 81, 0.14), rgba(6, 10, 22, 0.98) 85%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -743,33 +821,40 @@
       object-fit: cover;
       object-position: top center;
       display: block;
+      transition: transform 0.3s ease;
     }
-    .catalog-card h4 { color: var(--gold); font-size: 11.5px; }
+    .catalog-card:hover .catalog-art-img,
+    .catalog-card.selected-hero .catalog-art-img {
+      transform: scale(1.06);
+    }
+    .catalog-card h4 {
+      font-size: 12px;
+      letter-spacing: 0.2px;
+    }
     .catalog-meme-quote {
       font-style: italic;
-      color: #fde68a;
-      font-size: 9.5px;
-      line-height: 1.25;
-      background: rgba(245, 196, 81, 0.08);
+      font-size: 10px;
+      line-height: 1.3;
+      background: rgba(245, 196, 81, 0.1);
       border-left: 2.5px solid var(--gold);
-      padding: 4px 6px;
-      border-radius: 0 6px 6px 0;
+      padding: 5px 7px;
+      border-radius: 0 7px 7px 0;
     }
     .shaped-power-row {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 6px;
       font-size: 9.5px;
-      padding: 4px 6px;
+      line-height: 1.25;
+      padding: 4.5px 6px;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.045);
-      border: 1px solid rgba(255, 255, 255, 0.09);
+      background: rgba(245, 196, 81, 0.06);
+      border: 1px solid rgba(245, 196, 81, 0.24);
     }
     .shaped-power-row.ulti-power {
-      background: rgba(192, 132, 252, 0.14);
-      border-color: rgba(192, 132, 252, 0.38);
+      background: linear-gradient(90deg, rgba(245, 196, 81, 0.18), rgba(192, 132, 252, 0.14));
+      border-color: rgba(253, 230, 138, 0.55);
       font-weight: 700;
-      color: #f3e8ff;
     }
     .shape-badge {
       min-width: 22px;
@@ -783,7 +868,7 @@
       font-weight: 900;
       background: rgba(15, 23, 42, 0.95);
       border: 1px solid var(--gold);
-      color: var(--gold);
+      color: var(--gold-bright);
       flex-shrink: 0;
     }
 
@@ -1034,11 +1119,14 @@
   <div class="modal-backdrop" id="roles-modal">
     <div class="modal-box">
       <div class="modal-header">
-        <h3>🎭 Mini Legends — 15 Kahraman Kataloğu (2 Genel Yetenek + 1 Ulti &amp; Mim Cümleleri)</h3>
+        <h3 class="gold-foil-text">🎭 Mini Legends — 15 Kahraman Kataloğu (Büyüyen Odak Kartı &amp; Gold Mim Replikleri)</h3>
         <button class="close-btn" onclick="closeModal('roles-modal')">&times;</button>
       </div>
       <div class="modal-body">
-        <p style="color:var(--text-muted); font-size:11px;">15 kahramanın karikatür görsellerinin altında şekilli güçleri ve mim replikleri yer alır. Kartlara tıklayarak sesli repliğini duyabilirsiniz.</p>
+        <div class="catalog-spotlight" id="catalog-spotlight">
+          <div class="spotlight-art-frame" id="spotlight-art"></div>
+          <div class="spotlight-details" id="spotlight-details"></div>
+        </div>
         <div class="grid-cards" id="all-roles-grid"></div>
       </div>
     </div>
@@ -1250,6 +1338,8 @@
         ]
       }
     ];
+
+    let selectedCatalogCharId = 'galadriel';
 
     function fallbackBadgeHTML(charObj, size = 48) {
       const col = charObj.color || '#f5c451';
@@ -2163,29 +2253,92 @@
 
     setInterval(() => syncWithBackend(false), 2500);
 
+    function renderCatalogSpotlight(charObj, pulse = false) {
+      const unlocked = isUltiUnlocked();
+      const spotArt = document.getElementById('spotlight-art');
+      const spotDetails = document.getElementById('spotlight-details');
+      const spotBox = document.getElementById('catalog-spotlight');
+      if (!spotArt || !spotDetails || !spotBox) return;
+
+      spotArt.innerHTML = `<img src="/heroes/${charObj.id}.jpg" alt="${charObj.name}" onerror="handleHeroImgError(this, '${charObj.id}', 'full')" />`;
+      spotDetails.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
+          <h4 class="gold-foil-text" style="font-size:15px;">${charObj.emoji} ${charObj.name}</h4>
+          <span style="font-size:9.5px; padding:2px 8px; border-radius:999px; border:1px solid var(--gold); color:var(--gold-bright); background:rgba(245,196,81,0.12); font-weight:800;">${charObj.group} • ${charObj.badge}</span>
+        </div>
+        <div class="spotlight-meme-box gold-foil-quote">🔊 "${charObj.quote}"</div>
+        <div class="shaped-power-row ulti-power">
+          <span class="shape-badge">${charObj.ulti.shape}</span>
+          <span class="gold-foil-quote">${charObj.ulti.icon} ULTİ [${unlocked ? 'AÇIK' : '2. ŞAFAK'}]: ${charObj.ulti.name} — ${charObj.ulti.desc}</span>
+        </div>
+        <div class="shaped-power-row">
+          <span class="shape-badge">${charObj.passives[0].shape}</span>
+          <span class="gold-foil-quote">${charObj.passives[0].icon} Genel 1: ${charObj.passives[0].name} — ${charObj.passives[0].desc}</span>
+        </div>
+        <div class="shaped-power-row">
+          <span class="shape-badge">${charObj.passives[1].shape}</span>
+          <span class="gold-foil-quote">${charObj.passives[1].icon} Genel 2: ${charObj.passives[1].name} — ${charObj.passives[1].desc}</span>
+        </div>
+      `;
+
+      if (pulse) {
+        spotBox.classList.remove('zoom-pulse');
+        void spotBox.offsetWidth;
+        spotBox.classList.add('zoom-pulse');
+      }
+    }
+
+    function selectAndSpeakCatalogHero(charId) {
+      const charObj = CHARACTERS.find(c => c.id === charId);
+      if (!charObj) return;
+      selectedCatalogCharId = charId;
+
+      if (charObj.group === 'Gündüz') {
+        activeLeftChar = charObj;
+        renderLeftHeroAndSockets();
+      } else {
+        activeRightChar = charObj;
+        renderRightPanelSummary();
+      }
+
+      if (appState.gameStarted) {
+        setCoreSymbolicCard(charObj.badge, charObj.name.toUpperCase(), charObj.emoji, charObj.color, true);
+      }
+
+      renderAllRolesGrid();
+      renderCatalogSpotlight(charObj, true);
+      showSubtitleAndSpeak(charObj.name, `"${charObj.quote}"`, 'magic');
+    }
+
     function renderAllRolesGrid() {
       const unlocked = isUltiUnlocked();
-      document.getElementById('all-roles-grid').innerHTML = CHARACTERS.map(c => `
-        <div class="catalog-card" style="border-color:${c.color}70;" onclick="onArenaSkillOrVoice('${c.group === 'Gündüz' ? 'left' : 'right'}')">
-          <div class="catalog-art-stage">
-            ${renderHeroArtwork(c, 'catalog')}
+      const activeChar = CHARACTERS.find(c => c.id === selectedCatalogCharId) || CHARACTERS[0];
+      renderCatalogSpotlight(activeChar, false);
+
+      document.getElementById('all-roles-grid').innerHTML = CHARACTERS.map(c => {
+        const isSelected = c.id === selectedCatalogCharId;
+        return `
+          <div class="catalog-card ${isSelected ? 'selected-hero' : ''}" style="border-color:${isSelected ? '#fde68a' : c.color + '85'};" onclick="selectAndSpeakCatalogHero('${c.id}')">
+            <div class="catalog-art-stage">
+              ${renderHeroArtwork(c, 'catalog')}
+            </div>
+            <h4 class="gold-foil-text">${c.name} <span style="font-size:8.5px; color:#fde68a;">(${c.group} • ${c.badge})</span></h4>
+            <div class="catalog-meme-quote gold-foil-quote">"${c.quote}"</div>
+            <div class="shaped-power-row ulti-power">
+              <span class="shape-badge">${c.ulti.shape}</span>
+              <span class="gold-foil-quote">${c.ulti.icon} ULTİ [${unlocked ? 'AÇIK' : '2. ŞAFAK'}]: ${c.ulti.name}</span>
+            </div>
+            <div class="shaped-power-row">
+              <span class="shape-badge">${c.passives[0].shape}</span>
+              <span class="gold-foil-quote">${c.passives[0].icon} Genel 1: ${c.passives[0].name}</span>
+            </div>
+            <div class="shaped-power-row">
+              <span class="shape-badge">${c.passives[1].shape}</span>
+              <span class="gold-foil-quote">${c.passives[1].icon} Genel 2: ${c.passives[1].name}</span>
+            </div>
           </div>
-          <h4>${c.name} <span style="font-size:8.5px; color:#94a3b8;">(${c.group} • ${c.badge})</span></h4>
-          <div class="catalog-meme-quote">"${c.quote}"</div>
-          <div class="shaped-power-row ulti-power">
-            <span class="shape-badge">${c.ulti.shape}</span>
-            <span>${c.ulti.icon} ULTİ [${unlocked ? 'AÇIK' : '2. ŞAFAK'}]: ${c.ulti.name}</span>
-          </div>
-          <div class="shaped-power-row">
-            <span class="shape-badge">${c.passives[0].shape}</span>
-            <span>${c.passives[0].icon} Genel 1: ${c.passives[0].name}</span>
-          </div>
-          <div class="shaped-power-row">
-            <span class="shape-badge">${c.passives[1].shape}</span>
-            <span>${c.passives[1].icon} Genel 2: ${c.passives[1].name}</span>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function isAuthorizedYt() {
