@@ -38,11 +38,12 @@ logger = logging.getLogger(__name__)
 
 BOT_TOKEN = (os.environ.get("BOT_TOKEN") or (config and getattr(config, "BOT_TOKEN", None)) or "").strip()
 FOUNDER_ID = (os.environ.get("FOUNDER_ID") or (config and getattr(config, "FOUNDER_ID", None)) or "8245373459").strip()
-GV_AUDIO_DIR = os.environ.get("GV_AUDIO_DIR", os.path.join("public", "gv_audio"))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PUBLIC_DIR = os.path.join(BASE_DIR, "public")
 HEROES_DIR = os.path.join(PUBLIC_DIR, "heroes")
+SCENES_DIR = os.path.join(PUBLIC_DIR, "scenes")
+GV_AUDIO_DIR = (os.environ.get("GV_AUDIO_DIR") or "/tmp/gv_audio").strip()
 
 scheduler = AsyncIOScheduler()
 tg_application = None
@@ -63,6 +64,22 @@ def _safe_audio_filename(raw_name: str) -> str:
     if not cleaned.lower().endswith(".mp3"):
         cleaned = f"{cleaned or 'song'}.mp3"
     return cleaned
+
+
+def _resolve_audio_file_path(filename: str) -> Optional[str]:
+    safe_name = _safe_audio_filename(filename)
+    candidate_dirs = [
+        GV_AUDIO_DIR,
+        os.path.join(BASE_DIR, "public", "gv_audio"),
+        os.path.join("public", "gv_audio"),
+        "/tmp/gv_audio",
+    ]
+    for d in candidate_dirs:
+        base_abs = os.path.abspath(d)
+        full_path = os.path.abspath(os.path.join(base_abs, safe_name))
+        if full_path.startswith(base_abs) and os.path.isfile(full_path):
+            return full_path
+    return None
 
 
 def _extract_reply_video_id(reply) -> Optional[str]:
@@ -195,6 +212,9 @@ if os.path.isdir(PUBLIC_DIR):
 
 if os.path.isdir(HEROES_DIR):
     app.mount("/heroes", StaticFiles(directory=HEROES_DIR), name="heroes")
+
+if os.path.isdir(SCENES_DIR):
+    app.mount("/scenes", StaticFiles(directory=SCENES_DIR), name="scenes")
 
 
 def _is_founder_id(user_id: int) -> bool:
@@ -407,20 +427,42 @@ async def api_gv_overview(season: Optional[int] = None, user_id: int = 0):
 
 
 @app.get("/api/goldenvision/audio/{filename}")
-async def api_gv_audio_stream(filename: str):
+async def api_gv_audio_stream(filename: str, request: Request):
     safe_name = _safe_audio_filename(filename)
-    base_abs = os.path.abspath(GV_AUDIO_DIR)
-    full_path = os.path.abspath(os.path.join(base_abs, safe_name))
-    if not full_path.startswith(base_abs) or not os.path.isfile(full_path):
+    full_path = _resolve_audio_file_path(safe_name)
+    if not full_path:
         return Response(status_code=404)
+
+    file_size = os.path.getsize(full_path)
+    range_header = request.headers.get("range")
+    headers = {
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "no-cache",
+    }
+
+    if range_header and range_header.startswith("bytes="):
+        try:
+            range_spec = range_header.replace("bytes=", "", 1).split(",")[0].strip()
+            start_str, end_str = range_spec.split("-", 1)
+            start = int(start_str) if start_str else 0
+            end = int(end_str) if end_str else file_size - 1
+            start = max(0, min(start, file_size - 1))
+            end = max(start, min(end, file_size - 1))
+            length = end - start + 1
+            with open(full_path, "rb") as f:
+                f.seek(start)
+                chunk = f.read(length)
+            headers["Content-Range"] = f"bytes {start}-{end}/{file_size}"
+            headers["Content-Length"] = str(len(chunk))
+            return Response(content=chunk, status_code=206, media_type="audio/mpeg", headers=headers)
+        except Exception:
+            pass
+
     return FileResponse(
         full_path,
         media_type="audio/mpeg",
         filename=safe_name,
-        headers={
-            "Accept-Ranges": "bytes",
-            "Cache-Control": "no-cache",
-        },
+        headers=headers,
     )
 
 
@@ -515,6 +557,8 @@ async def api_gv_studio_media(request: Request):
         clip_start_sec=start_sec,
         clip_duration_sec=dur_sec,
     )
+    if isinstance(media_doc, dict) and audio_url and not media_doc.get("audio_url"):
+        media_doc["audio_url"] = audio_url
     database.log_action(
         0,
         "GV_MEDIA_SAVE",
@@ -522,7 +566,7 @@ async def api_gv_studio_media(request: Request):
         "Host",
         f"Sezon {s} H{w} medya kaydı ({start_sec}sn başlangıç / {dur_sec}sn kesit).",
     )
-    return {"success": True, "media": media_doc}
+    return {"success": True, "media": media_doc, "audio_url": audio_url}
 
 
 @app.post("/api/goldenvision/studio/delete-song")
@@ -549,10 +593,8 @@ async def api_gv_studio_delete_song(request: Request):
         removed_audio = res.get("removed_audio_filename") or ""
         audio_deleted = False
         if removed_audio:
-            safe_name = _safe_audio_filename(removed_audio)
-            base_abs = os.path.abspath(GV_AUDIO_DIR)
-            full_path = os.path.abspath(os.path.join(base_abs, safe_name))
-            if full_path.startswith(base_abs) and os.path.isfile(full_path):
+            full_path = _resolve_audio_file_path(removed_audio)
+            if full_path and os.path.isfile(full_path):
                 try:
                     os.remove(full_path)
                     audio_deleted = True
@@ -600,10 +642,8 @@ async def api_gv_studio_clear_week_songs(request: Request):
     for fname in result.get("removed_files", []):
         if not fname:
             continue
-        safe_name = _safe_audio_filename(fname)
-        base_abs = os.path.abspath(GV_AUDIO_DIR)
-        full_path = os.path.abspath(os.path.join(base_abs, safe_name))
-        if full_path.startswith(base_abs) and os.path.exists(full_path):
+        full_path = _resolve_audio_file_path(fname)
+        if full_path and os.path.exists(full_path):
             try:
                 os.remove(full_path)
             except Exception:
@@ -1251,7 +1291,7 @@ async def is_user_admin(update: Update, context: ContextTypes.DEFAULT_TYPE, acti
         return False
 
     if action_type == "mute" and database.is_perm_explicitly_disabled_in_staff(user.id, chat_id, "can_mute"):
-        database.record_suspicious_ai_alert(user.id, chat_id, "BOT_MUTE", "Kapalı olan MUTE yetkisi ile komut denemesi", 90)
+        database.record_suspicious_ai_alert(user_id, chat_id, "BOT_MUTE", "Kapalı olan MUTE yetkisi ile komut denemesi", 90)
         await send_auto_delete_message(context, chat_id, "❌ Mute yetkiniz kapalı!", 4)
         return False
 
