@@ -312,6 +312,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: top center;
       border-radius: 8px;
       display: block;
     }
@@ -319,6 +320,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: top center;
       border-radius: 7px;
       display: block;
     }
@@ -1249,16 +1251,23 @@
       }
     ];
 
-    function fallbackBadgeSVG(charObj, size = 48) {
+    function fallbackBadgeHTML(charObj, size = 48) {
       const col = charObj.color || '#f5c451';
-      return `<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%, ${col}33, #070c18 85%);"><span style="font-size:${Math.max(18, Math.round(size * 0.52))}px;line-height:1;">${charObj.emoji}</span><span style="font-size:7px;font-weight:800;color:${col};margin-top:2px;">${charObj.name}</span></div>`;
+      return `<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%, ${col}33, #070c18 85%);padding:4px;text-align:center;"><span style="font-size:${Math.max(18, Math.round(size * 0.52))}px;line-height:1;">${charObj.emoji}</span><span style="font-size:7px;font-weight:800;color:${col};margin-top:2px;">${charObj.name}</span></div>`;
+    }
+
+    function handleHeroImgError(imgEl, charId, variant) {
+      const charObj = CHARACTERS.find(c => c.id === charId) || CHARACTERS[0];
+      const parent = imgEl && imgEl.parentElement;
+      if (parent) {
+        parent.innerHTML = fallbackBadgeHTML(charObj, variant === 'full' ? 64 : 36);
+      }
     }
 
     function renderHeroArtwork(charObj, variant = 'full') {
       const src = `/heroes/${charObj.id}.jpg`;
       const cls = variant === 'full' ? 'hero-artwork-img' : (variant === 'catalog' ? 'catalog-art-img' : 'hero-thumb-img');
-      const fallback = fallbackBadgeSVG(charObj, variant === 'full' ? 64 : 36).replace(/"/g, '&quot;');
-      return `<img src="${src}" alt="${charObj.name}" class="${cls}" loading="lazy" onerror="this.outerHTML=&quot;${fallback}&quot;;" />`;
+      return `<img src="${src}" alt="${charObj.name}" class="${cls}" onerror="handleHeroImgError(this, '${charObj.id}', '${variant}')" />`;
     }
 
     const STATE_KEY = 'mini_legends_state_v5';
