@@ -40,6 +40,10 @@ BOT_TOKEN = (os.environ.get("BOT_TOKEN") or (config and getattr(config, "BOT_TOK
 FOUNDER_ID = (os.environ.get("FOUNDER_ID") or (config and getattr(config, "FOUNDER_ID", None)) or "8245373459").strip()
 GV_AUDIO_DIR = os.environ.get("GV_AUDIO_DIR", os.path.join("public", "gv_audio"))
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PUBLIC_DIR = os.path.join(BASE_DIR, "public")
+HEROES_DIR = os.path.join(PUBLIC_DIR, "heroes")
+
 scheduler = AsyncIOScheduler()
 tg_application = None
 
@@ -186,8 +190,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-if os.path.exists("public"):
-    app.mount("/static", StaticFiles(directory="public"), name="static")
+if os.path.isdir(PUBLIC_DIR):
+    app.mount("/static", StaticFiles(directory=PUBLIC_DIR), name="static")
+
+if os.path.isdir(HEROES_DIR):
+    app.mount("/heroes", StaticFiles(directory=HEROES_DIR), name="heroes")
 
 
 def _is_founder_id(user_id: int) -> bool:
@@ -1180,8 +1187,7 @@ async def api_delete_template(request: Request):
 
 
 def _serve_html(filename: str):
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    paths_to_check = [os.path.join(base_dir, "public", filename), os.path.join(base_dir, filename)]
+    paths_to_check = [os.path.join(PUBLIC_DIR, filename), os.path.join(BASE_DIR, filename)]
     for path in paths_to_check:
         if os.path.exists(path):
             try:
