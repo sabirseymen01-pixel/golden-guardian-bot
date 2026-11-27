@@ -490,7 +490,7 @@
       margin-top: 5px;
       padding: 2.5px 8px;
       border-radius: 9px;
-      background: rgba(8, 18, 38, 0.88);
+      background: rgba(8, 18, 38, 0.9);
       border: 1px solid rgba(245, 196, 81, 0.38);
       box-shadow: inset 0 0 0 1px rgba(253, 230, 138, 0.1);
       font-size: 8px;
@@ -498,7 +498,7 @@
       pointer-events: auto;
     }
 
-    /* ANONİM YETENEK İTEM VİTRİNİ (HERKESİN GÖREBİLECEĞİ, KİMLİĞİ GİZLİ İTEMLER) */
+    /* ANONİM YETENEK İTEM VİTRİNİ */
     .anon-item-showcase {
       position: relative;
       display: none;
@@ -506,9 +506,9 @@
       gap: 8px;
       padding: 4px 10px;
       border-radius: 11px;
-      background: linear-gradient(135deg, rgba(13, 29, 58, 0.92), rgba(245, 196, 81, 0.16));
-      border: 1.2px solid rgba(253, 230, 138, 0.62);
-      box-shadow: 0 6px 18px rgba(4, 10, 24, 0.68), inset 0 0 0 1px rgba(245, 196, 81, 0.2);
+      background: linear-gradient(135deg, rgba(13, 29, 58, 0.94), rgba(245, 196, 81, 0.18));
+      border: 1.2px solid rgba(253, 230, 138, 0.65);
+      box-shadow: 0 6px 18px rgba(4, 10, 24, 0.72), inset 0 0 0 1px rgba(245, 196, 81, 0.22);
       max-width: 94%;
       z-index: 7;
       pointer-events: none;
@@ -600,7 +600,7 @@
       min-height: 0;
     }
     .skill-list.inactive-state {
-      opacity: 0.76;
+      opacity: 0.78;
     }
     .skill-item {
       display: flex;
@@ -628,7 +628,7 @@
     }
     .skill-item.ulti-locked {
       border-style: dashed;
-      opacity: 0.7;
+      opacity: 0.72;
     }
 
     .logo-socket-art {
@@ -685,14 +685,15 @@
       position: relative;
       width: 97%;
       max-width: 660px;
-      background: linear-gradient(90deg, rgba(7, 16, 36, 0.95), rgba(14, 30, 62, 0.96), rgba(7, 16, 36, 0.95));
+      min-height: 24px;
+      background: linear-gradient(90deg, rgba(7, 16, 36, 0.96), rgba(14, 30, 62, 0.97), rgba(7, 16, 36, 0.96));
       border: 1.25px solid var(--gold);
-      box-shadow: inset 0 0 0 1px rgba(253, 230, 138, 0.16), 0 4px 14px rgba(3, 8, 20, 0.65);
+      box-shadow: inset 0 0 0 1px rgba(253, 230, 138, 0.18), 0 4px 14px rgba(3, 8, 20, 0.68);
       border-radius: 10px;
-      padding: 3.5px 10px;
+      padding: 4px 10px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 7px;
       z-index: 30;
     }
     .voice-wave {
@@ -716,16 +717,15 @@
       50% { height: 10px; }
     }
     .subtitle-text {
-      font-size: 9.2px;
-      line-height: 1.25;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 9px;
+      line-height: 1.28;
+      white-space: normal;
+      word-break: break-word;
       min-width: 0;
       flex: 1;
     }
     .subtitle-speaker {
-      margin-right: 5px;
+      margin-right: 4px;
       letter-spacing: 0.2px;
     }
 
@@ -1243,8 +1243,8 @@
       <div class="subtitle-banner" id="subtitle-banner">
         <div class="voice-wave"><span></span><span></span><span></span></div>
         <div class="subtitle-text">
-          <span class="subtitle-speaker gold-lettering" id="sub-speaker">OYUN YÖNLENDİRME:</span>
-          <span class="gold-foil-quote" id="sub-content">Lobiye katılıp Hazır vererek oyunu başlatın; faz ve mod yönlendirmesi burada akacak.</span>
+          <span class="subtitle-speaker gold-lettering" id="sub-speaker">YÖNLENDİRME:</span>
+          <span class="gold-foil-quote" id="sub-content">Adım 1: Üstteki LOBBY butonuna tıkla • Adım 2: Katıl ve Hazır ver • Adım 3: START ile oyunu başlat.</span>
         </div>
       </div>
     </section>
@@ -1833,7 +1833,7 @@
         mana: 780,
         gem: 4,
         activeMechStage: '🏛️ Lobi Arenası',
-        lastActionSummary: 'Lobiye katılıp Hazır vererek oyunu başlatın.',
+        lastActionSummary: 'Adım 1: LOBBY butonuna tıkla • Adım 2: Katıl ve Hazır ver • Adım 3: START ile başla.',
         anonItem: null,
         lobbyMembers: []
       };
@@ -1920,26 +1920,16 @@
       }
 
       const targetUrl = SCENE_MAP[sceneKey] || SCENE_MAP.lobby;
-      if (currentSceneSrc === targetUrl) return;
-      currentSceneSrc = targetUrl;
-
       const incoming = activeLayerIndex === 0 ? layerB : layerA;
       const outgoing = activeLayerIndex === 0 ? layerA : layerB;
 
-      const probe = new Image();
-      probe.onload = () => {
+      if (currentSceneSrc !== targetUrl) {
+        currentSceneSrc = targetUrl;
         incoming.src = targetUrl;
-        incoming.classList.add('active');
-        outgoing.classList.remove('active');
-        activeLayerIndex = activeLayerIndex === 0 ? 1 : 0;
-      };
-      probe.onerror = () => {
-        incoming.src = SCENE_MAP.lobby;
-        incoming.classList.add('active');
-        outgoing.classList.remove('active');
-        activeLayerIndex = activeLayerIndex === 0 ? 1 : 0;
-      };
-      probe.src = targetUrl;
+      }
+      incoming.classList.add('active');
+      outgoing.classList.remove('active');
+      activeLayerIndex = activeLayerIndex === 0 ? 1 : 0;
     }
 
     // --- MERKEZ ÇEKİRDEK & ANONİM YETENEK İTEM KARTI (3X DPR) ---
@@ -1993,7 +1983,6 @@
 
       ctxCore.clearRect(0, 0, w, h);
 
-      // Oyun başlamadığı sürece merkezde yalnızca lobi sahne görseli tam görünür
       if (!appState.gameStarted) {
         return;
       }
@@ -2133,20 +2122,20 @@
         const activeCount = appState.lobbyMembers.filter(m => m.status !== 'left').length;
         const readyCount = appState.lobbyMembers.filter(m => m.status !== 'left' && m.ready).length;
         if (activeCount === 0) {
-          return `Genel: ${modeName} lobisi bekliyor • Sana Özel: Üstteki LOBBY portuna dokunup oyuna katıl.`;
+          return `Genel: ${modeName} lobisi açılmayı bekliyor • Sana Özel: Üstteki LOBBY butonuna basıp katıl.`;
         }
         if (readyCount < activeCount) {
-          return `Genel: ${activeCount} oyuncudan ${readyCount} kişi hazır • Sana Özel: Hazır vererek lobi kilidini tamamla.`;
+          return `Genel: ${activeCount} oyuncudan ${readyCount} kişi hazır • Sana Özel: Hazır vererek START kilidini aç.`;
         }
-        return `Genel: Tüm oyuncular hazır (${readyCount}/${activeCount}) • Sana Özel: START butonuyla ${modeName} modunu başlat.`;
+        return `Genel: Herkes hazır (${readyCount}/${activeCount}) • Sana Özel: START butonuna basıp ${modeName} modunu başlat.`;
       }
 
       const phaseStr = appState.isNight ? `Gece (Tur ${appState.turn})` : `Şafak ${appState.dawnCount} (Tur ${appState.turn})`;
       const personalTip = unlocked
-        ? `Ulti soketi açık! ${prefSide} hattın için büyük Ulti itemini mühürle.`
+        ? `Ulti itemi aktif! ${prefSide} hattın için büyük Ulti soketine bas.`
         : (appState.isNight
-            ? `${prefSide} odakla gece yetenek itemini bas ve 2. Şafak için zamanı koru.`
-            : `Şafak oylamasında ${prefSide} dengesini güçlendir ve 2. Şafak ultisine hazırlan.`);
+            ? `${prefSide} odağınla sağdaki anonim yetenek itemlerinden birini tetikle.`
+            : `Şafak oylama/hamle adımını yap ve 2. Şafak ultisi için hazırlan.`);
 
       if (appState.anonItem && appState.anonItem.itemName) {
         return `[${modeName} • ${phaseStr}] Anonim İtem: ${appState.anonItem.itemName} • Sana Özel: ${personalTip}`;
@@ -2227,16 +2216,22 @@
           if (res.ok) {
             const remote = await res.json();
             if (remote && Array.isArray(remote.lobbyMembers)) {
+              const prevStarted = appState.gameStarted;
+              const nextStarted = Boolean(remote.gameStarted);
+              const nextTime = typeof remote.timeLeft === 'number'
+                ? (prevStarted && nextStarted ? Math.min(appState.timeLeft, remote.timeLeft) : remote.timeLeft)
+                : appState.timeLeft;
+
               appState = {
                 ...appState,
-                gameStarted: Boolean(remote.gameStarted),
+                gameStarted: nextStarted,
                 mode: remote.mode || appState.mode,
                 startPhase: remote.startPhase || appState.startPhase,
                 isNight: typeof remote.isNight === 'boolean' ? remote.isNight : appState.isNight,
                 dawnCount: remote.dawnCount || appState.dawnCount,
                 skyEvent: remote.skyEvent || appState.skyEvent,
                 turn: remote.turn || appState.turn,
-                timeLeft: typeof remote.timeLeft === 'number' ? remote.timeLeft : appState.timeLeft,
+                timeLeft: nextTime,
                 activeMechStage: remote.activeMechStage || appState.activeMechStage,
                 lastActionSummary: remote.lastActionSummary || appState.lastActionSummary,
                 anonItem: remote.anonItem || appState.anonItem || null,
@@ -2354,7 +2349,7 @@
 
     function onSkyEventClick() {
       if (!appState.gameStarted) {
-        showSubtitleAndSpeak('LOBİ YÖNLENDİRME', buildAutoGuidanceText('Genel: Lobi sahnesi korunuyor • Sana Özel: Katıl ve Hazır vererek oyuna gir.'), 'click');
+        showSubtitleAndSpeak('YÖNLENDİRME', buildAutoGuidanceText('Genel: Lobi sahnesi hazır • Sana Özel: LOBBY butonuna tıkla, Katıl ve Hazır ver.'), 'click');
         return;
       }
       const order = ['blue_moon', 'dawn', 'lunar_eclipse', 'dusk', 'solar_eclipse'];
@@ -2374,7 +2369,7 @@
       setCoreSymbolicCard(appState.anonItem.itemName.toUpperCase(), 'ANONİM İTEM', '🃏', '#38bdf8', false);
       grantXpToPlayer(currentUserId, 15, false);
       saveState();
-      showSubtitleAndSpeak('OTO-YÖNLENDİRME', `${label} evresi merkezde açıldı. Anonim item herkesle paylaşıldı.`, 'magic');
+      showSubtitleAndSpeak('YÖNLENDİRME', `${label} evresi merkezde açıldı. Anonim item herkesle paylaşıldı.`, 'magic');
     }
 
     function renderLeftHero() {
@@ -2433,7 +2428,7 @@
 
     function triggerRightPanelSocket(portKey) {
       if (!appState.gameStarted) {
-        showSubtitleAndSpeak('OYUN YÖNLENDİRME', buildAutoGuidanceText('Genel: Oyun henüz başlamadı • Sana Özel: LOBBY portundan katılıp Hazır ver.'), 'click');
+        showSubtitleAndSpeak('YÖNLENDİRME', buildAutoGuidanceText('Genel: Oyun henüz başlamadı • Sana Özel: LOBBY butonuna tıkla, Katıl ve Hazır ver.'), 'click');
         return;
       }
       const charObj = activeRightChar;
@@ -2442,7 +2437,7 @@
 
       if (portKey === 'ulti') {
         if (!isUltiUnlocked()) {
-          showSubtitleAndSpeak('OTO-YÖNLENDİRME', `Ulti itemi 2. Şafak sonrası aktif olur (Şu an Şafak ${appState.dawnCount || 1}/2). Alttaki anonim yetenek itemlerini kullanabilirsin.`, 'click');
+          showSubtitleAndSpeak('YÖNLENDİRME', `Ulti itemi 2. Şafak sonrası açılır (Şu an Şafak ${appState.dawnCount || 1}/2). Alttaki anonim yetenek itemlerinden birine basabilirsin.`, 'click');
           return;
         }
 
@@ -2468,7 +2463,7 @@
           setCoreSymbolicCard(charObj.ulti.itemName.toUpperCase(), 'ANONİM ULTİ İTEMİ', '🌌', charObj.color, true);
           grantXpToPlayer(currentUserId, 40, true);
           saveState();
-          showSubtitleAndSpeak('ANONİM ULTİ İTEMİ', `${charObj.ulti.itemName} arenaya yansıdı; ${names[picked]} sahnesi aktif. Kimlik gizli tutuldu.`, 'ulti');
+          showSubtitleAndSpeak('ANONİM İTEM', `${charObj.ulti.itemName} arenaya yansıdı; ${names[picked]} sahnesi aktif. Kimlik gizli tutuldu.`, 'ulti');
           return;
         }
 
@@ -2493,7 +2488,7 @@
         setCoreSymbolicCard(charObj.ulti.itemName.toUpperCase(), 'ANONİM ULTİ İTEMİ', '⚡', charObj.color, true);
         grantXpToPlayer(currentUserId, 35, true);
         saveState();
-        showSubtitleAndSpeak('ANONİM ULTİ İTEMİ', `${charObj.ulti.itemName} tetiklendi ve +35 Altın sağlandı. Kullanan kahraman anonim kaldı.`, 'ulti');
+        showSubtitleAndSpeak('ANONİM İTEM', `${charObj.ulti.itemName} tetiklendi ve +35 Altın sağlandı. Kullanan kahraman anonim kaldı.`, 'ulti');
         return;
       }
 
@@ -2512,7 +2507,7 @@
       setCoreSymbolicCard(passive.itemName.toUpperCase(), 'ANONİM YETENEK İTEMİ', '💎', charObj.color, false);
       grantXpToPlayer(currentUserId, 20, false);
       saveState();
-      showSubtitleAndSpeak('ANONİM YETENEK İTEMİ', `${passive.itemName} herkesin ekranına yansıdı. ${passive.desc}`, 'magic');
+      showSubtitleAndSpeak('ANONİM İTEM', `${passive.itemName} herkesin ekranına yansıdı. ${passive.desc}`, 'magic');
     }
 
     function onArenaSkillOrVoice(side) {
@@ -2535,7 +2530,7 @@
 
     function onCollectiveAction() {
       if (!appState.gameStarted) {
-        showSubtitleAndSpeak('OYUN YÖNLENDİRME', buildAutoGuidanceText('Genel: Lobi bekleniyor • Sana Özel: Katıl ve Hazır vererek oylama modunu aç.'), 'click');
+        showSubtitleAndSpeak('YÖNLENDİRME', buildAutoGuidanceText('Genel: Lobi bekleniyor • Sana Özel: LOBBY butonuna tıkla, Katıl ve Hazır ver.'), 'click');
         return;
       }
       const pool = CHARACTERS;
@@ -2553,7 +2548,7 @@
       setCoreSymbolicCard(pickItem.itemName.toUpperCase(), 'ANONİM TOPLU İTEM', '🗳️', pickChar.color, false);
       grantXpToPlayer(currentUserId, 25, true);
       saveState();
-      showSubtitleAndSpeak('OTO-YÖNLENDİRME', `Toplu hamle işlendi. Anonim item "${pickItem.itemName}" arenada belirdi.`, 'magic');
+      showSubtitleAndSpeak('YÖNLENDİRME', `Toplu hamle işlendi. Anonim item "${pickItem.itemName}" arenada belirdi.`, 'magic');
     }
 
     function cycleSideHero(side) {
@@ -2740,7 +2735,7 @@
 
       saveState();
       closeModal('lobby-modal');
-      showSubtitleAndSpeak('OTO-YÖNLENDİRME', buildAutoGuidanceText(), 'ulti');
+      showSubtitleAndSpeak('YÖNLENDİRME', buildAutoGuidanceText(), 'ulti');
     }
 
     function renderLobbyModalContent() {
@@ -2792,7 +2787,7 @@
       appState.lastActionSummary = buildAutoGuidanceText();
       setCoreSymbolicCard(appState.isNight ? 'GECE FAZ İTEMİ' : `ŞAFAK ${appState.dawnCount} İTEMİ`, `TUR ${appState.turn}`, appState.isNight ? '🌙' : '☀️', appState.isNight ? '#c084fc' : '#f5c451', false);
       saveState();
-      showSubtitleAndSpeak('OTO-YÖNLENDİRME', buildAutoGuidanceText(), 'magic');
+      showSubtitleAndSpeak('YÖNLENDİRME', buildAutoGuidanceText(), 'magic');
     }
 
     setInterval(() => {
@@ -2823,7 +2818,7 @@
       document.getElementById('phase-timer').textContent = `${mins}:${secs}`;
     }, 1000);
 
-    setInterval(() => syncWithBackend(false), 2500);
+    setInterval(() => syncWithBackend(false), 4500);
 
     function renderCatalogSpotlight(charObj, pulse = false) {
       const unlocked = isUltiUnlocked();
